@@ -7,3 +7,4 @@ coverage
 Sphinx
 Click
 pytest
+python-dotenv
