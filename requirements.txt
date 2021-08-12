@@ -1,0 +1,12 @@
+bump2version
+wheel
+watchdog
+flake8
+tox
+coverage
+Click
+pytest
+pandas
+fhir.resources
+requests
+pendulum
