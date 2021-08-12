@@ -24,7 +24,7 @@ class FhirResourceGenerator:
         self.resource_type = resource_type
         self.resources = resources
 
-    def generate(self, upload: bool = False, out_dir: str = None):u
+    def generate(self, upload: bool = False, out_dir: str = None):
         bundle = self.make_bundle()
         if upload:
             self.upload_resource_or_bundle(bundle=bundle)
