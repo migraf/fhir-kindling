@@ -1,0 +1,12 @@
+n_patients: 1000
+min_age: 18
+max_age: 101
+output:
+    path: bundle.json
+    base_url:
+    auth: basic
+
+Resources:
+    Observation:
+        n_per_patient: 10
+
