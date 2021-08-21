@@ -11,3 +11,4 @@ fhir.resources
 requests
 pendulum
 PyYAML
+tqdm

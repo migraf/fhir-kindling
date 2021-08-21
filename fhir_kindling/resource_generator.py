@@ -7,6 +7,7 @@ from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 import os
 import pendulum
 from requests.auth import HTTPBasicAuth
+from uuid import uuid4
 
 
 class FhirResourceGenerator:
@@ -15,6 +16,7 @@ class FhirResourceGenerator:
                  resource_type: DomainResource = None,
                  fhir_server: str = None, fhir_user: str = None, fhir_pw: str = None, fhir_token: str = None,
                  fhir_server_type: str = None):
+        self._bundle = None
         self.fhir_token = fhir_token if fhir_token else os.getenv("FHIR_TOKEN")
         self.fhir_pw = fhir_pw if fhir_pw else os.getenv("FHIR_PW")
         self.fhir_user = fhir_user if fhir_user else os.getenv("FHIR_USER")
@@ -107,6 +109,10 @@ class FhirResourceGenerator:
         # TODO request token from id provider if configured
         elif self.fhir_token:
             return BearerAuth(token=self.fhir_token)
+
+    @staticmethod
+    def generate_id():
+        return str(uuid4())
 
 
 class BearerAuth(requests.auth.AuthBase):

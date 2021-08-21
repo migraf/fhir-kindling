@@ -6,8 +6,7 @@ import pytest
 
 from click.testing import CliRunner
 
-from fhir_kindling import fhir_kindling
-from fhir_kindling import cli
+import cli
 
 
 @pytest.fixture

@@ -1,5 +1,5 @@
 from dotenv import load_dotenv, find_dotenv
-from resource_generator import FhirResourceGenerator
+from fhir_kindling.resource_generator import FhirResourceGenerator
 from typing import Union, Tuple, List
 from fhir.resources.patient import Patient
 from fhir.resources.humanname import HumanName
@@ -7,14 +7,17 @@ from pendulum import DateTime
 import pendulum
 import pandas as pd
 import random
+from tqdm import tqdm
 
 
 class PatientGenerator(FhirResourceGenerator):
 
+    age_range: Union[tuple[DateTime, DateTime], tuple[int, int], None]
+
     def __init__(self,
                  n: int,
                  fhir_server: str = None, fhir_user: str = None, fhir_pw: str = None, fhir_token: str = None,
-                 age_range: Tuple[DateTime, DateTime] = None,
+                 age_range: Union[Tuple[DateTime, DateTime], Tuple[int, int]] = None,
                  gender_distribution: Tuple[float, float, float, float] = None):
         super().__init__(n, fhir_server=fhir_server, fhir_user=fhir_user, fhir_pw=fhir_pw, fhir_token=fhir_token,
                          resource_type=Patient)
@@ -25,7 +28,7 @@ class PatientGenerator(FhirResourceGenerator):
     def generate(self, upload: bool = False) -> List[Patient]:
         patients = []
         names = self._generate_patient_names(self.n)
-        for i in range(self.n):
+        for i in tqdm(range(self.n), desc=f"Generating {self.n} patients..."):
             patient = self._generate_patient_data(name=names[i])
             patients.append(patient)
         self.resources = patients
@@ -65,8 +68,18 @@ class PatientGenerator(FhirResourceGenerator):
     def _generate_birthdate(self):
         if not self.birthdate_range:
             if self.age_range:
-                youngest = self.age_range[0].to_date_string()
-                oldest = self.age_range[1].to_date_string()
+                if isinstance(self.age_range[0], int):
+                    # generate age range from 18-101 years old
+                    now = pendulum.now()
+                    youngest = pd.to_datetime((now - pendulum.duration(years=self.age_range[0])).to_date_string())
+                    oldest = pd.to_datetime((now - pendulum.duration(years=self.age_range[1])).to_date_string())
+
+                elif isinstance(self.age_range[0], DateTime):
+                    youngest = self.age_range[0].to_date_string()
+                    oldest = self.age_range[1].to_date_string()
+                else:
+                    raise ValueError(f"Unsupported type ({type(self.age_range[0])}) for generating patient ages."
+                                     f"Only integers and datetime are supported.")
             else:
                 # generate age range from 18-101 years old
                 now = pendulum.now()
