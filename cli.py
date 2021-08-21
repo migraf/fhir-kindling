@@ -7,6 +7,7 @@ from fhir_kindling.patient import PatientGenerator
 
 @click.group()
 def cli():
+    """Command line interface for generating FHIR resources"""
     pass
 
 
@@ -17,7 +18,7 @@ def cli():
               type=click.Tuple([int, int]))
 @click.option("-o", "--output", default=None, help="Path where the generated resource bundle should be stored.")
 def generate(file, n_patients, age_range, output):
-    """Generate new resource bundles"""
+    """Generate FHIR resource bundles"""
     if file:
         click.echo(f"Generating FHIR resources defined in:\n{file}")
         with open(file, "r") as f:
@@ -34,11 +35,18 @@ def generate(file, n_patients, age_range, output):
             age_range = (min_age, max_age)
         patients = PatientGenerator(n_patients, age_range=age_range).generate()
 
-    if not output:
-        if click.confirm("Exit without saving generated resources?"):
-            pass
+        if click.confirm("Generate additional resources for patients?"):
+            patient_resource = click.prompt("Select resource:", type=click.Choice(["Observation", "Condition"]))
         else:
-            path = click.prompt("Enter the path or filename under which the bundle should be stored")
+            pass
+
+    if not output:
+        if click.confirm("No storage location given. Exit without saving generated resources?"):
+            return 0
+        else:
+            output = click.prompt("Enter the path or filename under which the bundle should be stored")
+
+    click.echo(f"Storing resources in {output}")
 
     return 0
 

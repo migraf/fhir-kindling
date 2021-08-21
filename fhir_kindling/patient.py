@@ -28,7 +28,7 @@ class PatientGenerator(FhirResourceGenerator):
     def generate(self, upload: bool = False) -> List[Patient]:
         patients = []
         names = self._generate_patient_names(self.n)
-        for i in tqdm(range(self.n), desc=f"Generating {self.n} patients..."):
+        for i in tqdm(range(self.n), desc=f"Generating {self.n} patients"):
             patient = self._generate_patient_data(name=names[i])
             patients.append(patient)
         self.resources = patients
