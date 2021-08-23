@@ -2,7 +2,7 @@ import random
 from typing import List, Tuple
 
 from fhir.resources.observation import Observation, ObservationComponent, ObservationReferenceRange
-from fhir_kindling.resource_generator import FhirResourceGenerator
+from resource_generator import FhirResourceGenerator
 from fhir.resources.patient import Patient
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
@@ -15,7 +15,7 @@ class ObservationGenerator(FhirResourceGenerator):
                  patients: List[Patient] = None,
                  coding_system: str = None,
                  codes: List[str] = None,
-                 code_probabilities=List[float],
+                 code_probabilities: List[float] = None,
                  units: List[str] = None,
                  value_ranges: List[Tuple[float, float]] = None
                  ):
@@ -47,21 +47,23 @@ class ObservationGenerator(FhirResourceGenerator):
             observations = self._generate_observations(self.n)
         elif self.patients:
             observations = self._generate_observations_for_patients()
-        super().generate(upload, out_dir)
+        # super().generate(upload, out_dir)
 
         return observations
 
     def _generate_observations(self, n: int) -> List[Observation]:
 
         observations = []
+        # todo add different status
         for i in range(n):
             observation = Observation(
                 **{
-                    "code": self._generate_code()
+                    "code": self._generate_code(),
+                    "status": "final"
                 }
             )
             observations.append(observation)
-
+        print(observations)
         return observations
 
     def _generate_observations_for_patients(self):
@@ -84,7 +86,7 @@ class ObservationGenerator(FhirResourceGenerator):
         code = CodeableConcept(
             **{
                 "coding": [coding],
-                "text": ""
+                "text": "loinc-code"
             }
         )
 
@@ -92,4 +94,7 @@ class ObservationGenerator(FhirResourceGenerator):
 
 
 if __name__ == '__main__':
-    pass
+    code_system = "http://loinc.org"
+    observation_codes = ["6598-7", "10839-9", "48425-3", "6597-9", "6598-7", "67151-1", "42757-5", "10839-9", "49563-0"]
+    obs_generator = ObservationGenerator(n=100, coding_system=code_system, codes=observation_codes)
+    obs_generator.generate()
