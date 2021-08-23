@@ -1,9 +1,10 @@
 """Console script for fhir_kindling."""
+import os
 import sys
 import click
 import yaml
 from fhir_kindling.patient import PatientGenerator
-import json
+from pathlib import Path
 
 
 @click.group()
@@ -57,6 +58,10 @@ def generate(file, n_patients, age_range, output, url, upload):
         else:
             output = click.prompt("Enter the path or filename under which the bundle should be stored",
                                        default="bundle.json")
+            if Path(output).exists():
+                overwrite = click.confirm(f"File already exists. Overwrite {output}?")
+                if not overwrite:
+                    output = click.prompt("Enter new filepath")
             with open(output, "w") as output_file:
                 bundle = patient_generator.make_bundle()
                 output_file.write(bundle.json(indent=2))
