@@ -3,11 +3,12 @@ import sys
 import click
 import yaml
 from fhir_kindling.patient import PatientGenerator
+import json
 
 
 @click.group()
 def cli():
-    """Command line interface for generating FHIR resources"""
+    """Command line interface for generating synthetic FHIR resources and uploading them to a FHIR server."""
     pass
 
 
@@ -17,7 +18,9 @@ def cli():
 @click.option("-a", "--age-range", default=None, help="Space separated min/max age of patients.",
               type=click.Tuple([int, int]))
 @click.option("-o", "--output", default=None, help="Path where the generated resource bundle should be stored.")
-def generate(file, n_patients, age_range, output):
+@click.option("--upload", is_flag=True)
+@click.option("--url", default=None, help="url of the FHIR api endpoint to upload the bundle to.")
+def generate(file, n_patients, age_range, output, url, upload):
     """Generate FHIR resource bundles"""
     if file:
         click.echo(f"Generating FHIR resources defined in:\n{file}")
@@ -27,25 +30,36 @@ def generate(file, n_patients, age_range, output):
     else:
         if not n_patients:
             n_patients = click.prompt("Enter the number of patients you want to create", default=100)
+
+        # Prompt for age range if not given
         if not age_range:
             min_age = click.prompt("Enter the min age patients", default=18, type=int)
             max_age = click.prompt("Enter the max age patients", default=101, type=int)
-            click.echo(f"Min: {min_age}, max: {max_age}")
-
             age_range = (min_age, max_age)
-        patients = PatientGenerator(n_patients, age_range=age_range).generate()
 
+        # Generate the patients
+        patient_generator = PatientGenerator(n_patients, age_range=age_range)
+        patients = patient_generator.generate()
+
+        # TODO if FHIR server is given upload the resources to get server generated ids
         if click.confirm("Generate additional resources for patients?"):
             patient_resource = click.prompt("Select resource:", type=click.Choice(["Observation", "Condition"]))
         else:
             pass
 
+    if upload:
+        if not url:
+            click.prompt("Enter your FHIR server`s API url")
+
     if not output:
         if click.confirm("No storage location given. Exit without saving generated resources?"):
             return 0
         else:
-            output = click.prompt("Enter the path or filename under which the bundle should be stored")
-
+            output = click.prompt("Enter the path or filename under which the bundle should be stored",
+                                       default="bundle.json")
+            with open(output, "w") as output_file:
+                bundle = patient_generator.make_bundle()
+                output_file.write(bundle.json(indent=2))
     click.echo(f"Storing resources in {output}")
 
     return 0
