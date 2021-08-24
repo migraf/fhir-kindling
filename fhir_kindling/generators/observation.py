@@ -2,7 +2,7 @@ import random
 from typing import List, Tuple, Union
 
 from fhir.resources.observation import Observation, ObservationComponent, ObservationReferenceRange
-from resource_generator import FhirResourceGenerator
+from fhir_kindling.generators import FhirResourceGenerator
 from fhir.resources.patient import Patient
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
@@ -10,16 +10,14 @@ from fhir.resources.quantity import Quantity
 
 
 class ObservationGenerator(FhirResourceGenerator):
-    def __init__(self,
-                 n: int = None,
-                 n_per_patient: int = None,
-                 patients: List[Patient] = None,
-                 coding_system: str = None,
-                 codes: List[str] = None,
-                 code_probabilities: List[float] = None,
+
+    def __init__(self, n: int = None, n_per_patient: int = None, patients: List[Patient] = None,
+                 coding_system: str = None, codes: List[str] = None, code_probabilities: List[float] = None,
                  units: Union[List[str], str] = None,
-                 value_ranges: Union[List[Tuple[float, float]], Tuple[float, float]] = None
-                 ):
+                 value_ranges: Union[List[Tuple[float, float]], Tuple[float, float]] = None):
+
+        super().__init__(n, resource_type=Observation)
+
         if n and n_per_patient:
             raise ValueError(
                 "Both n and n_patients set. Observations can be generated either associated with patients or by "
@@ -47,14 +45,12 @@ class ObservationGenerator(FhirResourceGenerator):
         self.units = units
         self.value_ranges = value_ranges
 
-    def generate(self, upload: bool = False, out_dir: str = None):
-
+    def _generate(self):
         if self.n:
             observations = self._generate_observations(self.n)
         elif self.patients:
             observations = self._generate_observations_for_patients()
-        # super().generate(upload, out_dir)
-        print(observations)
+
         return observations
 
     def _generate_observations(self, n: int) -> List[Observation]:
@@ -122,5 +118,6 @@ if __name__ == '__main__':
     observation_codes = ["6598-7", "10839-9", "48425-3", "6597-9", "6598-7", "67151-1", "42757-5", "10839-9", "49563-0"]
     unit = "ng/ml"
     value_range = (0.5, 8.9)
-    obs_generator = ObservationGenerator(n=100, coding_system=code_system, codes=observation_codes, units=unit, value_ranges=value_range)
+    obs_generator = ObservationGenerator(n=100, coding_system=code_system, codes=observation_codes, units=unit,
+                                         value_ranges=value_range)
     res = obs_generator.generate()

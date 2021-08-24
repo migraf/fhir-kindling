@@ -1,5 +1,5 @@
 from dotenv import load_dotenv, find_dotenv
-from fhir_kindling.resource_generator import FhirResourceGenerator
+from fhir_kindling.generators import FhirResourceGenerator
 from typing import Union, Tuple, List
 from fhir.resources.patient import Patient
 from fhir.resources.humanname import HumanName
@@ -11,7 +11,6 @@ from tqdm import tqdm
 
 
 class PatientGenerator(FhirResourceGenerator):
-
     age_range: Union[tuple[DateTime, DateTime], tuple[int, int], None]
 
     def __init__(self,
@@ -19,20 +18,17 @@ class PatientGenerator(FhirResourceGenerator):
                  fhir_server: str = None, fhir_user: str = None, fhir_pw: str = None, fhir_token: str = None,
                  age_range: Union[Tuple[DateTime, DateTime], Tuple[int, int]] = None,
                  gender_distribution: Tuple[float, float, float, float] = None):
-        super().__init__(n, fhir_server=fhir_server, fhir_user=fhir_user, fhir_pw=fhir_pw, fhir_token=fhir_token,
-                         resource_type=Patient)
+        super().__init__(n, resource_type=Patient)
         self.age_range = age_range
         self.gender_distribution = gender_distribution
         self.birthdate_range = None
 
-    def generate(self, upload: bool = False) -> List[Patient]:
+    def _generate(self):
         patients = []
         names = self._generate_patient_names(self.n)
         for i in tqdm(range(self.n), desc=f"Generating {self.n} patients"):
             patient = self._generate_patient_data(name=names[i])
             patients.append(patient)
-        self.resources = patients
-        super().generate(upload)
         return patients
 
     def _generate_patient_data(self, name: Tuple[str, str]) -> Patient:

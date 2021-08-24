@@ -3,17 +3,17 @@ import os
 import sys
 import click
 import yaml
-from fhir_kindling.patient import PatientGenerator
+from fhir_kindling.generators import PatientGenerator
 from pathlib import Path
 
 
 @click.group()
-def cli():
+def main():
     """Command line interface for generating synthetic FHIR resources and uploading them to a FHIR server."""
     pass
 
 
-@cli.command()
+@main.command()
 @click.option("-f", "--file", default=None, help="Path to a .yml file defining the generation specs.")
 @click.option("-n", "--n-patients", default=None, help="How many patients to generate", type=int)
 @click.option("-a", "--age-range", default=None, help="Space separated min/max age of patients.",
@@ -70,7 +70,7 @@ def generate(file, n_patients, age_range, output, url, upload):
     return 0
 
 
-@cli.command()
+@main.command()
 @click.argument("bundle")
 @click.option("--url", help="url of the FHIR api endpoint to upload the bundle to.")
 @click.option("-u", "--username", help="Password to get when authenticating against basic auth.")
@@ -82,4 +82,4 @@ def upload(bundle, url, username, password, token):
 
 
 if __name__ == "__main__":
-    sys.exit(cli())  # pragma: no cover
+    sys.exit(main())  # pragma: no cover
