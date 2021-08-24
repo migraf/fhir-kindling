@@ -1,0 +1,2545 @@
+{
+    "entry": [
+        {
+            "fullUrl": "Patient/AY842786",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/AY842786"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "AY842786",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1969-09-26",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/AY842786",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/AY842786"
+            },
+            "resource": {
+                "id": "AY842786",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/AY842786"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-HM---GPGRVLYTTG---GITGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/AY842808",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/AY842808"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "AY842808",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1990-08-01",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/AY842808",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/AY842808"
+            },
+            "resource": {
+                "id": "AY842808",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/AY842808"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-PI---GPGRAMYATG---DIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/AY842824",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/AY842824"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "AY842824",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1956-08-05",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/AY842824",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/AY842824"
+            },
+            "resource": {
+                "id": "AY842824",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/AY842824"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CIRPNNN-TRKS-I-NI---GPGRAMYATE---QITGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/D34590",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/D34590"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "D34590",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1961-04-10",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/D34590",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/D34590"
+            },
+            "resource": {
+                "id": "D34590",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/D34590"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5 CXCR4"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-TI---GSGRAFHAIE---KIIGNIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002026",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002026"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ002026",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1992-06-05",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002026",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002026"
+            },
+            "resource": {
+                "id": "DQ002026",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002026"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CIRPHNN-TRKS-I-PI---GPGRAFYTTG---EIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002058",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002058"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ002058",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1994-06-04",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002058",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002058"
+            },
+            "resource": {
+                "id": "DQ002058",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002058"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CIRPNNN-TRKS-I-HI---GPGRAFYTTG---DIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002074",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002074"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ002074",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1952-10-10",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002074",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002074"
+            },
+            "resource": {
+                "id": "DQ002074",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002074"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNS-TRKS-I-HI---GPGRAFYATG---EIIGNIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002106",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002106"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ002106",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1942-10-09",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002106",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002106"
+            },
+            "resource": {
+                "id": "DQ002106",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002106"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-TI---GPGRAFYATG---DIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002122",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002122"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ002122",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1986-05-03",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002122",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002122"
+            },
+            "resource": {
+                "id": "DQ002122",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002122"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-HI---GPGRAFYATG---DIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002138",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002138"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ002138",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "2020-08-27",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002138",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002138"
+            },
+            "resource": {
+                "id": "DQ002138",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002138"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPGNN-TRRG-I-HI---GPGRAFYTTG---EIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002154",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002154"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ002154",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "2004-02-11",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002154",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002154"
+            },
+            "resource": {
+                "id": "DQ002154",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002154"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-PM---GPGRAFYATG---AIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002170",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002170"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ002170",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1996-11-09",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002170",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002170"
+            },
+            "resource": {
+                "id": "DQ002170",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002170"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRRS-I-TI---GPGGAFYAT----DIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002186",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002186"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ002186",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1985-07-02",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002186",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002186"
+            },
+            "resource": {
+                "id": "DQ002186",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002186"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPGNN-TRKS-I-HI---GPGRAFYAT----DIIGDLRQAYC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002202",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002202"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ002202",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1998-05-06",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002202",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002202"
+            },
+            "resource": {
+                "id": "DQ002202",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002202"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-PI---GPGRAFYATG---EIIGDIRQAYC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002218",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002218"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ002218",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "2020-01-09",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002218",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002218"
+            },
+            "resource": {
+                "id": "DQ002218",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002218"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPSNN-TRKS-I-TI---GPGRAFYATG---EIIGDIRKAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002234",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002234"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ002234",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1959-03-19",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002234",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002234"
+            },
+            "resource": {
+                "id": "DQ002234",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002234"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-HI---APGRAFYATG---EIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002250",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002250"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ002250",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1940-01-07",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002250",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002250"
+            },
+            "resource": {
+                "id": "DQ002250",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002250"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-PI---GPGRAFYTTG---EIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002266",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002266"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ002266",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "2020-04-15",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002266",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002266"
+            },
+            "resource": {
+                "id": "DQ002266",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002266"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TKRS-V-NI---VPGRAIYTT----DIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002282",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002282"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ002282",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1986-10-14",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002282",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002282"
+            },
+            "resource": {
+                "id": "DQ002282",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002282"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CIRPNNN-TRKS-I-NI---GPGRAFYATR---DIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002298",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002298"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ002298",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "2009-06-09",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002298",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002298"
+            },
+            "resource": {
+                "id": "DQ002298",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002298"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-NI---GPGRAWYTTG---DIIGDIRKAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002314",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002314"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ002314",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1971-09-12",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002314",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002314"
+            },
+            "resource": {
+                "id": "DQ002314",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002314"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-HM---GPGRAFYTTG---EIIGDIRQAYC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ002330",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ002330"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ002330",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1974-04-18",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ002330",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ002330"
+            },
+            "resource": {
+                "id": "DQ002330",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ002330"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-HI---APGRAFYATG---DIIGNIRQAYC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ061397",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ061397"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ061397",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1954-09-07",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ061397",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ061397"
+            },
+            "resource": {
+                "id": "DQ061397",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ061397"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-HI---GPGRAFYTTG---EIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ061445",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ061445"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ061445",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1969-04-08",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ061445",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ061445"
+            },
+            "resource": {
+                "id": "DQ061445",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ061445"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-HI---GPGRAFYTTG---EIIGDIRKAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ061478",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ061478"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ061478",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1989-06-08",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ061478",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ061478"
+            },
+            "resource": {
+                "id": "DQ061478",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ061478"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TGKS-I-SI---GPGRAFYTTG---EIIGEIRQAYC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ061511",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ061511"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ061511",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1970-05-04",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ061511",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ061511"
+            },
+            "resource": {
+                "id": "DQ061511",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ061511"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRRS-I-HI---APGSAFYATG---EIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ061553",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ061553"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ061553",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1943-11-09",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ061553",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ061553"
+            },
+            "resource": {
+                "id": "DQ061553",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ061553"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CMRPNNN-TRKS-I-TI---GPGRAFYTTG---EIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ061644",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ061644"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ061644",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "2015-08-19",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ061644",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ061644"
+            },
+            "resource": {
+                "id": "DQ061644",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ061644"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5 CXCR4"
+                    }
+                ],
+                "observedSeq": "CTRPGTK-TRRL-I-HI---GPGRAFYTT----DRIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ061676",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ061676"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ061676",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1984-04-10",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ061676",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ061676"
+            },
+            "resource": {
+                "id": "DQ061676",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ061676"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CIRPNNN-TRKG-I-HL---GPGGALYATG---GIIGDIRQAYC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ061728",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ061728"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ061728",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1990-09-05",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ061728",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ061728"
+            },
+            "resource": {
+                "id": "DQ061728",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ061728"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRRS-I-NL---GPGRAYYATG---DIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ061760",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ061760"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ061760",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1945-04-28",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ061760",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ061760"
+            },
+            "resource": {
+                "id": "DQ061760",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ061760"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPSNN-TRKG-I-HI---GPGRAFYATG---EIIGNIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ061811",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ061811"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ061811",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1995-06-25",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ061811",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ061811"
+            },
+            "resource": {
+                "id": "DQ061811",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ061811"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKG-I-HM---GPGKVFYATG---QIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ109994",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ109994"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ109994",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1964-11-13",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ109994",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ109994"
+            },
+            "resource": {
+                "id": "DQ109994",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ109994"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-NI---GPGRAWYTTG---QIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ109997",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ109997"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ109997",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "2011-04-20",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ109997",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ109997"
+            },
+            "resource": {
+                "id": "DQ109997",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ109997"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TR-S-I-HI----PGRAFY-TG---KIIG-IRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ110002",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ110002"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ110002",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1979-03-17",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ110002",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ110002"
+            },
+            "resource": {
+                "id": "DQ110002",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ110002"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CIRPNNN-TRKS-I-PM---GPGRAFYATG---DIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ177188",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ177188"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ177188",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1954-03-20",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ177188",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ177188"
+            },
+            "resource": {
+                "id": "DQ177188",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ177188"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKG-I-HI---GPGRAFYTTG---DIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ177190",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ177190"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ177190",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1973-06-14",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ177190",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ177190"
+            },
+            "resource": {
+                "id": "DQ177190",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ177190"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRRS-I-NI---GPGRAFYATG---EIIGDIRQAYC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ177191",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ177191"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ177191",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "2017-01-24",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ177191",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ177191"
+            },
+            "resource": {
+                "id": "DQ177191",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ177191"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-HI---APGRAFHATG---DIIGNIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ177192",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ177192"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ177192",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1986-04-07",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ177192",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ177192"
+            },
+            "resource": {
+                "id": "DQ177192",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ177192"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-TI---GPGRAFYTTG---EIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ177195",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ177195"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ177195",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "2012-05-19",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ177195",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ177195"
+            },
+            "resource": {
+                "id": "DQ177195",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ177195"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPGNN-TRKS-I-HI---GPGRAFYTTG---SIIGDIRKAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ177198",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ177198"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ177198",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1995-05-02",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ177198",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ177198"
+            },
+            "resource": {
+                "id": "DQ177198",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ177198"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-NI---GPGRAFYSTG---AIIGNIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ177199",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ177199"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ177199",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "2010-05-03",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ177199",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ177199"
+            },
+            "resource": {
+                "id": "DQ177199",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ177199"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CIRPNNN-TRRS-I-PI---GPGRAFYATG---GIIGDIRKAYC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ177200",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ177200"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ177200",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "2019-06-18",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ177200",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ177200"
+            },
+            "resource": {
+                "id": "DQ177200",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ177200"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKG-I-HM---GPGRAYYATG---DIIGNIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ177201",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ177201"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ177201",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1968-01-13",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ177201",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ177201"
+            },
+            "resource": {
+                "id": "DQ177201",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ177201"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-PM---GPGKAFYATG---EIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ177202",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ177202"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ177202",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1952-02-19",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ177202",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ177202"
+            },
+            "resource": {
+                "id": "DQ177202",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ177202"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CXCR4"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKG-I-RI---GPGRAFIATD---KIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ177203",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ177203"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ177203",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1961-04-18",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ177203",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ177203"
+            },
+            "resource": {
+                "id": "DQ177203",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ177203"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5 CXCR4"
+                    }
+                ],
+                "observedSeq": "CIRPNNN-TRKR-V-TM---GPGRVYYTTG---DIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ177207",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ177207"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ177207",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1944-03-17",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ177207",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ177207"
+            },
+            "resource": {
+                "id": "DQ177207",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ177207"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRKS-I-TL---TPGRAFYATG---DIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ177208",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ177208"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ177208",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1996-09-05",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ177208",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ177208"
+            },
+            "resource": {
+                "id": "DQ177208",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ177208"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRLNNN-TRKS-I-PM---GPGRAFYATG---DIIGDIRKAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ177210",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ177210"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ177210",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1997-09-11",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ177210",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ177210"
+            },
+            "resource": {
+                "id": "DQ177210",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ177210"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRRS-I-TI---GPGRAFYATG---DIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ177211",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ177211"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ177211",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "2015-01-26",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ177211",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ177211"
+            },
+            "resource": {
+                "id": "DQ177211",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ177211"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5 CXCR4"
+                    }
+                ],
+                "observedSeq": "CIRPNNN-TRKR-I-YI---GPGRAVYTTR---AIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ178989",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ178989"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ178989",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1942-02-02",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ178989",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ178989"
+            },
+            "resource": {
+                "id": "DQ178989",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ178989"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TRRS-I-PI---GPGRAFYATG---DIIGDIRKAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ222211",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ222211"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ222211",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1955-02-19",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ222211",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ222211"
+            },
+            "resource": {
+                "id": "DQ222211",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ222211"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CCR5"
+                    }
+                ],
+                "observedSeq": "CTRPNNN-TSKS-I-PL---GPGRAFHTTG---RIIGDIRQAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ286957",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ286957"
+            },
+            "resource": {
+                "gender": "female",
+                "id": "DQ286957",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "2015-06-19",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ286957",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ286957"
+            },
+            "resource": {
+                "id": "DQ286957",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ286957"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CXCR4"
+                    }
+                ],
+                "observedSeq": "CQRPNNH-TRKR-I-TM---SPGRVVYTTG---EVIGDIRRAHC"
+            }
+        },
+        {
+            "fullUrl": "Patient/DQ286958",
+            "request": {
+                "method": "PUT",
+                "url": "Patient/DQ286958"
+            },
+            "resource": {
+                "gender": "male",
+                "id": "DQ286958",
+                "meta": {
+                    "profile": [
+                        "https://www.medizininformatik-initiative.de/fhir/core/StructureDefinition/Patient"
+                    ]
+                },
+                "resourceType": "Patient",
+                "birthDate": "1985-03-12",
+                "link": [
+                    {
+                        "other": {
+                            "reference": "HIVdemo"
+                        },
+                        "type": "refer"
+                    }
+                ]
+            }
+        },
+        {
+            "fullUrl": "MolecularSequence/DQ286958",
+            "request": {
+                "method": "PUT",
+                "url": "MolecularSequence/DQ286958"
+            },
+            "resource": {
+                "id": "DQ286958",
+                "resourceType": "MolecularSequence",
+                "coordinateSystem": 0,
+                "patient": {
+                    "reference": "Patient/DQ286958"
+                },
+                "variant": [
+                    {
+                        "observedAllele": "CXCR4"
+                    }
+                ],
+                "observedSeq": "CTRPDNNIKRRI-I-HI---GPGRAFHATK-----TGDIRQAYC"
+            }
+        }
+    ],
+    "id": "bd949b89fadf",
+    "resourceType": "Bundle",
+    "type": "transaction"
+}

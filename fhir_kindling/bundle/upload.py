@@ -35,6 +35,7 @@ def _load_bundle(bundle_path: Union[Path, str]) -> Bundle:
 def _upload_bundle(bundle: Bundle, api_url: str, auth: requests.auth.AuthBase, fhir_server_type: str):
     headers = _generate_bundle_headers(fhir_server_type)
     r = requests.post(api_url, auth=auth, data=bundle.json(), headers=headers)
+    print(r.text)
     r.raise_for_status()
     return r.json()
 

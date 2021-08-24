@@ -4,13 +4,15 @@ import sys
 import click
 import yaml
 from fhir_kindling.generators import PatientGenerator
+from fhir_kindling.bundle import upload_bundle
 from pathlib import Path
+from dotenv import load_dotenv,find_dotenv
 
 
 @click.group()
 def main():
     """Command line interface for generating synthetic FHIR resources and uploading them to a FHIR server."""
-    pass
+    load_dotenv(find_dotenv())
 
 
 @main.command()
@@ -21,7 +23,10 @@ def main():
 @click.option("-o", "--output", default=None, help="Path where the generated resource bundle should be stored.")
 @click.option("--upload", is_flag=True)
 @click.option("--url", default=None, help="url of the FHIR api endpoint to upload the bundle to.")
-def generate(file, n_patients, age_range, output, url, upload):
+@click.option("--username", default=None, help="username for basic auth")
+@click.option("--password", default=None, help="password for basic auth")
+@click.option("--token", default=None, help="token for bearer token auth")
+def generate(file, n_patients, age_range, output, url, upload, username, password, token):
     """Generate FHIR resource bundles"""
     if file:
         click.echo(f"Generating FHIR resources defined in:\n{file}")
@@ -73,12 +78,19 @@ def generate(file, n_patients, age_range, output, url, upload):
 @main.command()
 @click.argument("bundle")
 @click.option("--url", help="url of the FHIR api endpoint to upload the bundle to.")
-@click.option("-u", "--username", help="Password to get when authenticating against basic auth.")
-@click.option("-p", "--password", help="Username to use when authenticating with basic auth.")
-@click.option("--token", help="Token to use with bearer token auth.")
+@click.option("-u", "--username", default=None, help="Password to get when authenticating against basic auth.")
+@click.option("-p", "--password", default=None, help="Username to use when authenticating with basic auth.")
+@click.option("--token", default=None, help="Token to use with bearer token auth.")
 def upload(bundle, url, username, password, token):
     """Upload a bundle to a fhir server"""
-    pass
+
+    # Get the url
+
+    if not username or password or token:
+        click.confirm("Attempt upload without adding authentication?")
+    upload_bundle(bundle, fhir_api_url=url, username=username, password=password, token=token)
+
+    return 0
 
 
 if __name__ == "__main__":

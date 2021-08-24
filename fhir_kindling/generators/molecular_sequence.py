@@ -1,36 +1,62 @@
-from typing import List
+from typing import List, Union
 
 from fhir.resources.bundle import Bundle
 from fhir.resources.domainresource import DomainResource
-from fhir.resources.molecularsequence import MolecularSequence
+from fhir.resources.molecularsequence import MolecularSequence, MolecularSequenceVariant
 
-from .resource_generator import FhirResourceGenerator
+from fhir_kindling.generators import FhirResourceGenerator
 
 
 class MolecularSequenceGenerator(FhirResourceGenerator):
-    def __init__(self, n: int, resources: List[DomainResource] = None, resource_type: DomainResource = None,
-                 fhir_server: str = None, fhir_user: str = None, fhir_pw: str = None, fhir_token: str = None,
-                 fhir_server_type: str = None,
-                 sequence_file: str = None,
-                 ):
-        super().__init__(n, resources, resource_type, fhir_server, fhir_user, fhir_pw, fhir_token, fhir_server_type)
+    def __init__(self, n: int = None, resources: List[DomainResource] = None,
+                 sequence_file: Union[str, List[str]] = None):
+        super().__init__(n, resource_type=MolecularSequence)
         self.sequence_file = sequence_file
 
-
-    def generate(self, upload: bool = False, out_dir: str = None):
-        super().generate(upload, out_dir)
-        self.resources = self._generate()
-
     def _generate(self):
-        pass
+        sequences = self._load_sequence_file(self.sequence_file)
+        molecular_sequences = []
+        for sequence_def in sequences:
+            mol_seq = self._generate_molecular_sequence(sequence_def[1], sequence_def[2:])
+            molecular_sequences.append(mol_seq)
+        print(molecular_sequences)
+        print(len(molecular_sequences))
+        return molecular_sequences
+
+    def _generate_molecular_sequence(self, sequence: str, variant: List[str]):
+        molecular_sequence = MolecularSequence(
+            **{
+                "coordinateSystem": 0,
+                "observedSeq": sequence,
+                "variant": self._make_variant_resources(variant)
+
+            }
+        )
+        return molecular_sequence
+
+    def _make_variant_resources(self, variant: List[str]) -> List[MolecularSequenceVariant]:
+        variants = []
+        for var in variant:
+            variant_resource = MolecularSequenceVariant(
+                **{
+                    "observedAllele": var
+                }
+            )
+            variants.append(variant_resource)
+        return variants
 
     def _load_sequence_file(self, path: str):
-        pass
+        with open(path, "r") as sf:
+            sequences = [line.split() for line in sf.readlines()]
+
+        return sequences
+
 
     def make_bundle(self) -> Bundle:
         return super().make_bundle()
 
 
 if __name__ == '__main__':
-    sequence_file = "../examples/hiv_sequences/sequences_1.txt"
-    ms_generator = MolecularSequenceGenerator()
+    sequence_file_1 = "../../examples/hiv_sequences/sequences_1.txt"
+    ms_generator = MolecularSequenceGenerator(sequence_file=sequence_file_1)
+    ms_generator.generate()

@@ -29,7 +29,7 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
     ],
-    description="Generates FHIR synthetic fhir resources.",
+    description="Generates synthetic FHIR resources.",
     entry_points={
         'console_scripts': [
             'fhir_kindling=fhir_kindling.cli:main',
@@ -44,7 +44,7 @@ setup(
     packages=find_packages(include=['fhir_kindling', 'fhir_kindling.*']),
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/migraf/fhir_kindling',
+    url='https://gitlab.com/PersonalHealthTrain/implementations/germanmii/difuture/incubating/fhir_kindling.git',
     version='0.1.0',
     zip_safe=False,
 )
