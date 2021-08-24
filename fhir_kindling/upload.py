@@ -14,7 +14,8 @@ def upload_bundle(bundle: Union[Bundle, Path, str],
                   password: str = None,
                   token: str = None,
                   auth_method: str = "basic",
-                  fhir_server_type: str = "hapi"):
+                  fhir_server_type: str = "hapi",
+                  references: bool = False):
     auth = _generate_auth(username=username, password=password, token=token)
 
     if not isinstance(bundle, Bundle):
@@ -22,6 +23,17 @@ def upload_bundle(bundle: Union[Bundle, Path, str],
 
     response = _upload_bundle(bundle, api_url=fhir_api_url, auth=auth, fhir_server_type=fhir_server_type)
     print(response)
+    if references:
+        return _get_references_from_bundle_response(response), response
+
+
+
+def upload_resource():
+    pass
+
+def _get_references_from_bundle_response(response):
+    print(response)
+    return response["entry"]
 
 
 def _load_bundle(bundle_path: Union[Path, str]) -> Bundle:

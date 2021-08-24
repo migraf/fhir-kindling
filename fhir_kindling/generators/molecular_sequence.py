@@ -16,12 +16,12 @@ class MolecularSequenceGenerator(FhirResourceGenerator):
                  sequence_file: Union[str, List[str]] = None):
         super().__init__(n, resource_type=MolecularSequence)
         self.sequence_file = sequence_file
+        if self.sequence_file:
+            self.sequences = self._load_sequence_file(self.sequence_file)
 
     def _generate(self):
-        sequences = self._load_sequence_file(self.sequence_file)
-        self.n = len(sequences)
         molecular_sequences = []
-        for sequence_def in sequences:
+        for sequence_def in self.sequences:
             mol_seq = self._generate_molecular_sequence(sequence_def[1], sequence_def[2:])
             molecular_sequences.append(mol_seq)
         return molecular_sequences
@@ -51,7 +51,7 @@ class MolecularSequenceGenerator(FhirResourceGenerator):
     def _load_sequence_file(self, path: str):
         with open(path, "r") as sf:
             sequences = [line.split() for line in sf.readlines()]
-
+        self.n = len(sequences)
         return sequences
 
 

@@ -1,8 +1,16 @@
+import math
+from abc import ABC
+
 from dotenv import load_dotenv, find_dotenv
+from fhir.resources.domainresource import DomainResource
+from fhir.resources.reference import Reference
+
 from fhir_kindling.generators import FhirResourceGenerator
+from fhir_kindling import upload_resource
 from typing import Union, Tuple, List
 from fhir.resources.patient import Patient
 from fhir.resources.humanname import HumanName
+from fhir.resources.organization import Organization
 from pendulum import DateTime
 import pendulum
 import pandas as pd
@@ -15,13 +23,14 @@ class PatientGenerator(FhirResourceGenerator):
 
     def __init__(self,
                  n: int,
-                 fhir_server: str = None, fhir_user: str = None, fhir_pw: str = None, fhir_token: str = None,
                  age_range: Union[Tuple[DateTime, DateTime], Tuple[int, int]] = None,
-                 gender_distribution: Tuple[float, float, float, float] = None):
+                 gender_distribution: Tuple[float, float, float, float] = None,
+                 organisation: str = None):
         super().__init__(n, resource_type=Patient)
         self.age_range = age_range
         self.gender_distribution = gender_distribution
         self.birthdate_range = None
+        self.organisation = organisation
 
     def _generate(self):
         patients = []
@@ -39,20 +48,28 @@ class PatientGenerator(FhirResourceGenerator):
         name = HumanName(**{"family": name[1], "given": [name[0]]})
 
         birthdate = self._generate_birthdate()
+
         patient_dict = {
             "gender": gender,
             "name": [name],
             "birthDate": birthdate
         }
+        if self.organisation:
+            org = Organization(
+                **{
+                    "name": self.organisation
+                }
+            )
 
+            patient_dict["managingOrganization"] = org
         return Patient(**patient_dict)
 
     @staticmethod
     def _generate_patient_names(n: int):
-        with open("data/first_names.txt", "rb") as fnf:
+        with open("../data/first_names.txt", "rb") as fnf:
             first_name_list = [fn.decode().strip().capitalize() for fn in fnf.readlines()]
 
-        with open("data/last_names.txt", "rb") as lnf:
+        with open("../data/last_names.txt", "rb") as lnf:
             last_name_list = [ln.decode().strip().capitalize() for ln in lnf.readlines()]
 
         first_names = random.choices(first_name_list, k=n)
@@ -88,8 +105,53 @@ class PatientGenerator(FhirResourceGenerator):
         return birthdate
 
 
+class PatientResourceGenerator:
+
+    def __init__(self, resource_generator: FhirResourceGenerator = None,
+                 patients: Union[List[Patient], List[str], bool] = None,
+                 n_per_patient: int = 1):
+        self.patients = patients
+        self.n_per_patients = n_per_patient
+        self.resource_generator = resource_generator
+        self.n = self.resource_generator.n
+        self.resources = None
+
+    def generate(self, patients=None, out_dir: str = None, filename: str = None, generate_ids: bool = False):
+        if patients is None and self.patients is None:
+            raise ValueError("No patients given to generate Resources for.")
+        else:
+            self.patients = patients
+            # TODO create references from patients
+            self.resources = self.resource_generator.generate()
+            self.update_with_patient_ids()
+
+        return
+
+    def generate_patients(self, bundle=True):
+        n_patients = math.ceil(float(self.n) / self.n_per_patients)
+        patient_generator = PatientGenerator(n=n_patients)
+        patients = patient_generator.generate()
+        if bundle:
+            return patient_generator.make_bundle()
+        else:
+            return patients
+
+    def update_with_patient_ids(self):
+        old_res = self.resources.copy()
+        # Step with n per patient
+        for index in range(0, len(self.resources), self.n_per_patients):
+            patient_resources = self.resources[index: index + self.n_per_patients]
+            for resource in patient_resources:
+                resource.patient = {
+                    "reference": self.patients[int(index/self.n_per_patients)],
+                    "type": "Patient"
+                }
+
+        assert self.resources != old_res
+
 if __name__ == '__main__':
     # pprint(Patient.schema()["properties"])
     load_dotenv(find_dotenv())
-    pg = PatientGenerator(n=100)
-    patients = pg.generate(upload=True)
+    pg = PatientGenerator(n=100, organisation="hiv demo")
+    gen_patients = pg.generate()
+    print(gen_patients)
