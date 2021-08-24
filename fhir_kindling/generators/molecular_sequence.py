@@ -1,3 +1,4 @@
+import os
 from typing import List, Union
 
 from fhir.resources.bundle import Bundle
@@ -5,7 +6,9 @@ from fhir.resources.domainresource import DomainResource
 from fhir.resources.molecularsequence import MolecularSequence, MolecularSequenceVariant
 
 from fhir_kindling.generators import FhirResourceGenerator
-from fhir_kindling.bundle import upload_bundle
+from fhir_kindling import upload_bundle
+
+from dotenv import load_dotenv, find_dotenv
 
 
 class MolecularSequenceGenerator(FhirResourceGenerator):
@@ -16,6 +19,7 @@ class MolecularSequenceGenerator(FhirResourceGenerator):
 
     def _generate(self):
         sequences = self._load_sequence_file(self.sequence_file)
+        self.n = len(sequences)
         molecular_sequences = []
         for sequence_def in sequences:
             mol_seq = self._generate_molecular_sequence(sequence_def[1], sequence_def[2:])
@@ -52,9 +56,12 @@ class MolecularSequenceGenerator(FhirResourceGenerator):
 
 
 if __name__ == '__main__':
+    load_dotenv(find_dotenv())
     sequence_file_1 = "../../examples/hiv_sequences/sequences_1.txt"
     ms_generator = MolecularSequenceGenerator(sequence_file=sequence_file_1)
     resources = ms_generator.generate(generate_ids=True)
-    print(resources)
-
-
+    # print(resources)
+    bundle = ms_generator.make_bundle()
+    print()
+    upload_bundle(bundle=bundle, fhir_api_url=os.getenv("FHIR_API_URL"), username=os.getenv("FHIR_USER"),
+                  password=os.getenv("FHIR_PW"))

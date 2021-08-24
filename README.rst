@@ -16,17 +16,33 @@ fhir-kindling
 
 
 
-Generates FHIR synthetic fhir resources.
+Generates FHIR synthetic fhir resources and data sets using a command line interface or predefined :code:`.yml`
 
 
 * Free software: MIT license
 * Documentation: https://fhir-kindling.readthedocs.io.
 
 
+Installation
+------------
+Clone the repository and install using pip
+..code-block:: bash
+
+    cd fhir kindling
+    pip install .
+
+
+the :code:`fhir_kindling` command should now be available in you shell. Run :code:`fhir_kindling --help` to test it.
+
 Features
 --------
 
-* TODO
+* Generate data sets using a step by step command line interface
+.. code-block:: bash
+    fhir_kindling generate
+
+* Load and save generation options as `.yaml` files
+* Upload and manage data sets on a FHIR server using the REST API
 
 Credits
 -------

@@ -4,7 +4,7 @@ import sys
 import click
 import yaml
 from fhir_kindling.generators import PatientGenerator
-from fhir_kindling.bundle import upload_bundle
+from fhir_kindling import upload_bundle
 from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
 
@@ -58,7 +58,7 @@ def generate(file, n_patients, age_range, output, url, upload, username, passwor
             click.prompt("Enter your FHIR server`s API url")
 
     if not output:
-        if click.confirm("No storage location given. Exit without saving generated resources?"):
+        if click.confirm("No storage location given. Exit without saving generated resources to disk?"):
             return 0
         else:
             output = click.prompt("Enter the path or filename under which the bundle should be stored",
