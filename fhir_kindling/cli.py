@@ -102,6 +102,7 @@ def upload(bundle, url, username, password, token):
 
 @main.command()
 @click.option("-q", "--query", default=None, help="FHIR API query string whose results will be deleted.")
+@click.option("-r", "--resource", default=None, help="Identifier of the resource to delete e.g. Patient")
 @click.option("--url", help="url of the FHIR api endpoint to upload the bundle to.")
 @click.option("-u", "--username", default=None, help="Password to get when authenticating against basic auth.")
 @click.option("-p", "--password", default=None, help="Username to use when authenticating with basic auth.")

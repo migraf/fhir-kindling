@@ -1,5 +1,7 @@
+import os
 from typing import Union
 
+import click
 import requests
 from fhir.resources.bundle import Bundle
 from pathlib import Path
@@ -16,7 +18,7 @@ def upload_bundle(bundle: Union[Bundle, Path, str],
                   auth_method: str = "basic",
                   fhir_server_type: str = "hapi",
                   references: bool = False):
-    auth = _generate_auth(username=username, password=password, token=token)
+    auth = generate_auth(username=username, password=password, token=token)
 
     if not isinstance(bundle, Bundle):
         bundle = _load_bundle(bundle)
@@ -71,19 +73,30 @@ def _generate_bundle_headers(fhir_server_type: str):
     return headers
 
 
-def _generate_auth(username, password, token) -> requests.auth.AuthBase:
+def generate_auth(username, password, token) -> requests.auth.AuthBase:
     """
     Generate authoriation for the request to be sent to server. Either based on a given bearer token or using basic
     auth with username and password.
 
     :return: Auth object to pass to a requests call.
     """
+    if (not username and not password) and not token:
+        click.echo("No authentication given. Attempting authentication via environment variables")
+        username = os.getenv("FHIR_USER", None)
+        password = os.getenv("FHIR_PW", None)
+        token = os.getenv("FHIR_TOKEN", None)
+
+    if (username and password) and token:
+        raise ValueError("Conflicting authentication information both token and username:password set.")
 
     if username and password:
         return HTTPBasicAuth(username=username, password=password)
     # TODO request token from id provider if configured
     elif token:
         return BearerAuth(token=token)
+
+    else:
+        raise ValueError("No authentication info given.")
 
 
 class BearerAuth(requests.auth.AuthBase):
