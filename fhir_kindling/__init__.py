@@ -6,3 +6,4 @@ __version__ = '0.1.0'
 
 from .upload import upload_bundle
 from .delete import delete_resources
+from .generate import generate_resource, generate_data_set
