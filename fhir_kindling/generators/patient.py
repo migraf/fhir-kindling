@@ -1,4 +1,5 @@
 import math
+import os
 from abc import ABC
 
 from dotenv import load_dotenv, find_dotenv
@@ -6,7 +7,7 @@ from fhir.resources.domainresource import DomainResource
 from fhir.resources.reference import Reference
 
 from fhir_kindling.generators import FhirResourceGenerator
-from fhir_kindling import upload_resource
+from fhir_kindling import upload_resource, upload_bundle
 from typing import Union, Tuple, List
 from fhir.resources.patient import Patient
 from fhir.resources.humanname import HumanName
@@ -143,15 +144,19 @@ class PatientResourceGenerator:
             patient_resources = self.resources[index: index + self.n_per_patients]
             for resource in patient_resources:
                 resource.patient = {
-                    "reference": self.patients[int(index/self.n_per_patients)],
+                    "reference": self.patients[int(index / self.n_per_patients)],
                     "type": "Patient"
                 }
 
         assert self.resources != old_res
 
+
 if __name__ == '__main__':
     # pprint(Patient.schema()["properties"])
     load_dotenv(find_dotenv())
-    pg = PatientGenerator(n=100, organisation="hiv demo")
+    pg = PatientGenerator(n=100)
     gen_patients = pg.generate()
-    print(gen_patients)
+    response, references = upload_bundle(pg.make_bundle(), fhir_api_url=os.getenv("FHIR_API_URL"),
+                                         username=os.getenv("FHIR_USER"), password=os.getenv("FHIR_PW"),
+                                         references=True)
+    print(references)

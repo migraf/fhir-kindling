@@ -22,18 +22,25 @@ def upload_bundle(bundle: Union[Bundle, Path, str],
         bundle = _load_bundle(bundle)
 
     response = _upload_bundle(bundle, api_url=fhir_api_url, auth=auth, fhir_server_type=fhir_server_type)
-    print(response)
     if references:
-        return _get_references_from_bundle_response(response), response
-
+        resource_references = _get_references_from_bundle_response(response)
+        return response, resource_references
+    else:
+        return response
 
 
 def upload_resource():
     pass
 
+
 def _get_references_from_bundle_response(response):
-    print(response)
-    return response["entry"]
+    references = []
+    for entry in response["entry"]:
+        location = entry["response"]["location"]
+        reference = "/".join(location.split("/")[:2])
+
+        references.append(reference)
+    return references
 
 
 def _load_bundle(bundle_path: Union[Path, str]) -> Bundle:
