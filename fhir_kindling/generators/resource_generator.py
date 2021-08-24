@@ -16,9 +16,13 @@ class FhirResourceGenerator:
         self.resource_type = resource_type
         self.resources = None
 
-    def generate(self, out_dir: str = None, filename: str = None):
+    def generate(self, out_dir: str = None, filename: str = None, generate_ids: bool = False):
 
         self.resources = self._generate()
+        if generate_ids:
+            for resource in self.resources:
+                resource.id = self.generate_id()
+
         if out_dir:
             bundle = self.make_bundle()
             if filename:
@@ -27,6 +31,7 @@ class FhirResourceGenerator:
                 path = os.path.join(out_dir, f"bundle-{pendulum.now().isoformat()}.json")
             with open(path, "w") as bundle_file:
                 bundle_file.write(bundle.json())
+        return self.resources
 
     @abstractmethod
     def _generate(self):

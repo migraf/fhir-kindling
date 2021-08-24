@@ -5,6 +5,7 @@ from fhir.resources.domainresource import DomainResource
 from fhir.resources.molecularsequence import MolecularSequence, MolecularSequenceVariant
 
 from fhir_kindling.generators import FhirResourceGenerator
+from fhir_kindling.bundle import upload_bundle
 
 
 class MolecularSequenceGenerator(FhirResourceGenerator):
@@ -19,8 +20,6 @@ class MolecularSequenceGenerator(FhirResourceGenerator):
         for sequence_def in sequences:
             mol_seq = self._generate_molecular_sequence(sequence_def[1], sequence_def[2:])
             molecular_sequences.append(mol_seq)
-        print(molecular_sequences)
-        print(len(molecular_sequences))
         return molecular_sequences
 
     def _generate_molecular_sequence(self, sequence: str, variant: List[str]):
@@ -52,11 +51,10 @@ class MolecularSequenceGenerator(FhirResourceGenerator):
         return sequences
 
 
-    def make_bundle(self) -> Bundle:
-        return super().make_bundle()
-
-
 if __name__ == '__main__':
     sequence_file_1 = "../../examples/hiv_sequences/sequences_1.txt"
     ms_generator = MolecularSequenceGenerator(sequence_file=sequence_file_1)
-    ms_generator.generate()
+    resources = ms_generator.generate(generate_ids=True)
+    print(resources)
+
+

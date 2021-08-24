@@ -6,7 +6,7 @@ import yaml
 from fhir_kindling.generators import PatientGenerator
 from fhir_kindling.bundle import upload_bundle
 from pathlib import Path
-from dotenv import load_dotenv,find_dotenv
+from dotenv import load_dotenv, find_dotenv
 
 
 @click.group()
@@ -27,7 +27,7 @@ def main():
 @click.option("--password", default=None, help="password for basic auth")
 @click.option("--token", default=None, help="token for bearer token auth")
 def generate(file, n_patients, age_range, output, url, upload, username, password, token):
-    """Generate FHIR resource bundles"""
+    """Generate FHIR resource bundles and synthetic data sets"""
     if file:
         click.echo(f"Generating FHIR resources defined in:\n{file}")
         with open(file, "r") as f:
@@ -62,7 +62,7 @@ def generate(file, n_patients, age_range, output, url, upload, username, passwor
             return 0
         else:
             output = click.prompt("Enter the path or filename under which the bundle should be stored",
-                                       default="bundle.json")
+                                  default="bundle.json")
             if Path(output).exists():
                 overwrite = click.confirm(f"File already exists. Overwrite {output}?")
                 if not overwrite:
@@ -86,11 +86,29 @@ def upload(bundle, url, username, password, token):
 
     # Get the url
 
-    if not username or password or token:
-        click.confirm("Attempt upload without adding authentication?")
+    if not username and not password and not token:
+        click.confirm("Upload without authentication?")
+
+    if (username or password) and token:
+        raise ValueError("Only one of basic or token auth can be used.")
+
+    if username and not password:
+        password = click.prompt(f"Enter your password ({username}):", hide_input=True)
+
     upload_bundle(bundle, fhir_api_url=url, username=username, password=password, token=token)
 
     return 0
+
+
+@main.command()
+@click.option("-q", "--query", default=None, help="FHIR API query string whose results will be deleted.")
+@click.option("--url", help="url of the FHIR api endpoint to upload the bundle to.")
+@click.option("-u", "--username", default=None, help="Password to get when authenticating against basic auth.")
+@click.option("-p", "--password", default=None, help="Username to use when authenticating with basic auth.")
+@click.option("--token", default=None, help="Token to use with bearer token auth.")
+def delete(query, url, username, password, token):
+    """Delete resources from a fhir server"""
+
 
 
 if __name__ == "__main__":
