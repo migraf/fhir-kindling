@@ -1,13 +1,12 @@
-import os
 from typing import Union
-
-import click
 import requests
 from fhir.resources.bundle import Bundle
+from fhir.resources.reference import Reference
 from pathlib import Path
 import json
+from requests.auth import AuthBase
 
-from requests.auth import HTTPBasicAuth
+from fhir_kindling.auth import generate_auth
 
 
 def upload_bundle(bundle: Union[Bundle, Path, str],
@@ -31,8 +30,29 @@ def upload_bundle(bundle: Union[Bundle, Path, str],
         return response
 
 
-def upload_resource():
-    pass
+def upload_resource(resource,
+                    fhir_api_url: str,
+                    username: str = None,
+                    password: str = None,
+                    token: str = None,
+                    auth_method: str = "basic",
+                    fhir_server_type: str = "hapi",
+                    reference: bool = True):
+    auth = generate_auth(username=username, password=password, token=token)
+    url = fhir_api_url + f"/{resource.resource_type}"
+
+    r = requests.post(url=url, json=resource.dict(), headers=_generate_fhir_headers(fhir_server_type), auth=auth)
+    print(r.text)
+    r.raise_for_status()
+    response = r.json()
+    if reference:
+        resource_reference = Reference(
+            **{"reference": f"{response['resourceType']}/{response['id']}",
+               "type": response['resourceType']}
+        )
+        return response, resource_reference
+
+    return response
 
 
 def _get_references_from_bundle_response(response):
@@ -53,15 +73,15 @@ def _load_bundle(bundle_path: Union[Path, str]) -> Bundle:
     return bundle
 
 
-def _upload_bundle(bundle: Bundle, api_url: str, auth: requests.auth.AuthBase, fhir_server_type: str):
-    headers = _generate_bundle_headers(fhir_server_type)
+def _upload_bundle(bundle: Bundle, api_url: str, auth: AuthBase, fhir_server_type: str):
+    headers = _generate_fhir_headers(fhir_server_type)
     r = requests.post(api_url, auth=auth, data=bundle.json(), headers=headers)
     print(r.text)
     r.raise_for_status()
     return r.json()
 
 
-def _generate_bundle_headers(fhir_server_type: str):
+def _generate_fhir_headers(fhir_server_type: str):
     headers = {}
     if fhir_server_type == "blaze":
         headers["Content-Type"] = "application/fhir+json"
@@ -71,38 +91,3 @@ def _generate_bundle_headers(fhir_server_type: str):
         headers["Content-Type"] = "application/fhir+json"
 
     return headers
-
-
-def generate_auth(username, password, token) -> requests.auth.AuthBase:
-    """
-    Generate authoriation for the request to be sent to server. Either based on a given bearer token or using basic
-    auth with username and password.
-
-    :return: Auth object to pass to a requests call.
-    """
-    if (not username and not password) and not token:
-        click.echo("No authentication given. Attempting authentication via environment variables")
-        username = os.getenv("FHIR_USER", None)
-        password = os.getenv("FHIR_PW", None)
-        token = os.getenv("FHIR_TOKEN", None)
-
-    if (username and password) and token:
-        raise ValueError("Conflicting authentication information both token and username:password set.")
-
-    if username and password:
-        return HTTPBasicAuth(username=username, password=password)
-    # TODO request token from id provider if configured
-    elif token:
-        return BearerAuth(token=token)
-
-    else:
-        raise ValueError("No authentication info given.")
-
-
-class BearerAuth(requests.auth.AuthBase):
-    def __init__(self, token):
-        self.token = token
-
-    def __call__(self, r):
-        r.headers["authorization"] = "Bearer " + self.token
-        return r

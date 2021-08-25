@@ -48,9 +48,22 @@ class MolecularSequenceGenerator(FhirResourceGenerator):
             variants.append(variant_resource)
         return variants
 
-    def _load_sequence_file(self, path: str):
-        with open(path, "r") as sf:
-            sequences = [line.split() for line in sf.readlines()]
+    def _load_sequence_file(self, path: Union[str, List[str]]):
+
+        if isinstance(path, str):
+            with open(path, "r") as sf:
+                sequences = [line.split() for line in sf.readlines()]
+
+        elif isinstance(path, list):
+            sequences = []
+            for p in path:
+                with open(p, "r") as sf:
+                    partial_sequences = [line.split() for line in sf.readlines()]
+                    sequences.extend(partial_sequences)
+
+        else:
+            raise ValueError("Invalid input arguments needs to be str or list of str")
+
         self.n = len(sequences)
         return sequences
 
@@ -58,10 +71,12 @@ class MolecularSequenceGenerator(FhirResourceGenerator):
 if __name__ == '__main__':
     load_dotenv(find_dotenv())
     sequence_file_1 = "../../examples/hiv_sequences/sequences_1.txt"
-    ms_generator = MolecularSequenceGenerator(sequence_file=sequence_file_1)
-    resources = ms_generator.generate(generate_ids=True)
+    sequence_file_2 = "../../examples/hiv_sequences/sequences_3.txt"
+    ms_generator = MolecularSequenceGenerator(sequence_file=[sequence_file_1, sequence_file_2])
+    resources = ms_generator.generate()
+    print(len(resources))
     # print(resources)
-    bundle = ms_generator.make_bundle()
-    print()
-    upload_bundle(bundle=bundle, fhir_api_url=os.getenv("FHIR_API_URL"), username=os.getenv("FHIR_USER"),
-                  password=os.getenv("FHIR_PW"))
+    # bundle = ms_generator.make_bundle()
+    # print()
+    # upload_bundle(bundle=bundle, fhir_api_url=os.getenv("FHIR_API_URL"), username=os.getenv("FHIR_USER"),
+    #               password=os.getenv("FHIR_PW"))

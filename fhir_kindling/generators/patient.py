@@ -1,5 +1,6 @@
 import math
 import os
+import sys
 from abc import ABC
 
 from dotenv import load_dotenv, find_dotenv
@@ -17,6 +18,7 @@ import pendulum
 import pandas as pd
 import random
 from tqdm import tqdm
+from pathlib import Path
 
 
 class PatientGenerator(FhirResourceGenerator):
@@ -26,7 +28,7 @@ class PatientGenerator(FhirResourceGenerator):
                  n: int,
                  age_range: Union[Tuple[DateTime, DateTime], Tuple[int, int]] = None,
                  gender_distribution: Tuple[float, float, float, float] = None,
-                 organisation: str = None):
+                 organisation: Reference = None):
         super().__init__(n, resource_type=Patient)
         self.age_range = age_range
         self.gender_distribution = gender_distribution
@@ -56,21 +58,18 @@ class PatientGenerator(FhirResourceGenerator):
             "birthDate": birthdate
         }
         if self.organisation:
-            org = Organization(
-                **{
-                    "name": self.organisation
-                }
-            )
+            patient_dict["managingOrganization"] = self.organisation
 
-            patient_dict["managingOrganization"] = org
         return Patient(**patient_dict)
 
     @staticmethod
     def _generate_patient_names(n: int):
-        with open("../data/first_names.txt", "rb") as fnf:
-            first_name_list = [fn.decode().strip().capitalize() for fn in fnf.readlines()]
 
-        with open("../data/last_names.txt", "rb") as lnf:
+        p = Path(__file__).parent.joinpath("data").joinpath("first_names.txt")
+        with open(p, "rb") as fnf:
+            first_name_list = [fn.decode().strip().capitalize() for fn in fnf.readlines()]
+        p = Path(__file__).parent.joinpath("data").joinpath("last_names.txt")
+        with open(p, "rb") as lnf:
             last_name_list = [ln.decode().strip().capitalize() for ln in lnf.readlines()]
 
         first_names = random.choices(first_name_list, k=n)
@@ -122,11 +121,19 @@ class PatientResourceGenerator:
             raise ValueError("No patients given to generate Resources for.")
         else:
             self.patients = patients
-            # TODO create references from patients
-            self.resources = self.resource_generator.generate()
+            # TODO use self patients and serialize newly generated patients to list
+            self.resources = self.resource_generator.generate(generate_ids=generate_ids)
             self.update_with_patient_ids()
+            if filename:
+                if out_dir:
+                    output_path = os.path.join(out_dir, filename)
+                else:
+                    output_path = filename
+                with open(output_path, "w") as outputbundle:
+                    bundle = self.resource_generator.make_bundle()
+                    outputbundle.write(bundle.json(indent=2))
 
-        return
+        return self.resources, self.resource_generator.make_bundle()
 
     def generate_patients(self, bundle=True):
         n_patients = math.ceil(float(self.n) / self.n_per_patients)
@@ -148,7 +155,10 @@ class PatientResourceGenerator:
                     "type": "Patient"
                 }
 
-        assert self.resources != old_res
+        print(self.resources)
+
+
+
 
 
 if __name__ == '__main__':

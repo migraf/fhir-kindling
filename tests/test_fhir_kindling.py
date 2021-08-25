@@ -6,7 +6,7 @@ import pytest
 
 from click.testing import CliRunner
 
-import cli
+import fhir_kindling
 
 
 @pytest.fixture
@@ -28,9 +28,9 @@ def test_content(response):
 def test_command_line_interface():
     """Test the CLI."""
     runner = CliRunner()
-    result = runner.invoke(cli.main)
+    result = runner.invoke(fhir_kindling.cli.main)
     assert result.exit_code == 0
     assert 'fhir_kindling.cli.main' in result.output
-    help_result = runner.invoke(cli.main, ['--help'])
+    help_result = runner.invoke(fhir_kindling.main, ['--help'])
     assert help_result.exit_code == 0
     assert '--help  Show this message and exit.' in help_result.output
