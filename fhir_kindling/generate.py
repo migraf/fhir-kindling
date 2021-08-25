@@ -69,9 +69,9 @@ if __name__ == '__main__':
     #                                        filename="sequence_bundle.json")
     #
     # upload_bundle(bundle=bundle, fhir_api_url=os.getenv("FHIR_API_URL"))
-    sequence_file_1 = "../examples/hiv_sequences/sequences_1.txt"
-    sequence_file_2 = "../examples/hiv_sequences/sequences_3.txt"
+    sequence_file_1 = "../examples/hiv_sequences/sequences_2.txt"
+    sequence_file_2 = "../examples/hiv_sequences/sequences_4.txt"
     ms_generator = MolecularSequenceGenerator(sequence_file=[sequence_file_1, sequence_file_2])
 
-    dataset = generate_data_set(name="test_hiv_two_files", generators=[ms_generator],
+    dataset = generate_data_set(name="DEMO_HIV", generators=[ms_generator],
                                 fhir_api_url=os.getenv("FHIR_API_URL"))
