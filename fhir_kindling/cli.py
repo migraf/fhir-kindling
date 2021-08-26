@@ -9,6 +9,7 @@ from fhir_kindling.auth import load_environment_auth_vars
 from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
 import click_spinner
+import pendulum
 
 
 @click.group()
@@ -83,6 +84,7 @@ def generate(file, n_patients, age_range, output, url, upload, username, passwor
 @click.option("-u", "--username", default=None, help="Password to get when authenticating against basic auth.")
 @click.option("-p", "--password", default=None, help="Username to use when authenticating with basic auth.")
 @click.option("--token", default=None, help="Token to use with bearer token auth.")
+@click.option("-s", "--summary", is_flag=True, help="Print summary information about the upload.")
 def upload(bundle, url, username, password, token):
     """Upload a bundle to a fhir server"""
 
@@ -120,6 +122,7 @@ def upload(bundle, url, username, password, token):
 @click.option("--token", default=None, help="Token to use with bearer token auth.")
 def delete(query, url, username, password, token):
     """Delete resources from a fhir server"""
+    pass
 
 
 if __name__ == "__main__":

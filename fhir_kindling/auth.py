@@ -5,7 +5,6 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 
-
 def load_environment_auth_vars():
     """
     Attempts to load authentication information from environment variables if none is given
@@ -17,7 +16,6 @@ def load_environment_auth_vars():
     token = os.getenv("FHIR_TOKEN", None)
 
     return username, password, token
-
 
 
 def generate_auth(username, password, token) -> requests.auth.AuthBase:

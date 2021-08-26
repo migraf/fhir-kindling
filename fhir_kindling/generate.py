@@ -4,6 +4,7 @@ from typing import List, Union
 
 from fhir.resources.bundle import Bundle
 from fhir.resources.organization import Organization
+from fhir.resources.reference import Reference
 
 from fhir_kindling.generators import FhirResourceGenerator, PatientResourceGenerator, MolecularSequenceGenerator, \
     PatientGenerator
@@ -18,24 +19,44 @@ def generate_data_set(name: str, generators: List[FhirResourceGenerator] = None,
                       username: str = None,
                       password: str = None,
                       token: str = None,
-                      auth_method: str = "basic",
                       fhir_server_type: str = "hapi",
                       out_dir: Union[str, Path] = None, filename: str = None):
+    if not (generators or bundle):
+        raise ValueError("Either bundle or generators need to be given to generate a data set.")
+
     # create organisation to group generated patients under
     organisation = create_organisation_for_data_set(name)
     # register it with the server and get the reference
-    r, organisation_reference = upload_resource(
-        organisation,
-        fhir_api_url=fhir_api_url if fhir_api_url else os.getenv("FHIR_API_URL"),
-        username=username,
-        password=password,
-        token=token,
-        fhir_server_type=fhir_server_type
-    )
+    r, organisation_reference = upload_resource(organisation,
+                                                fhir_api_url=fhir_api_url,
+                                                username=username,
+                                                password=password,
+                                                token=token,
+                                                fhir_server_type=fhir_server_type
+                                                )
+    if generators:
+        exit_code = _make_data_set_with_generators(generators=generators, organisation_reference=organisation_reference,
+                                                   fhir_api_url=fhir_api_url, username=username, password=password,
+                                                   token=token, fhir_server_type=fhir_server_type)
 
+        return exit_code
+
+    elif bundle:
+        pass
+
+    return 0
+
+
+def _make_data_set_with_generators(generators: List[FhirResourceGenerator],
+                                   organisation_reference: Reference,
+                                   fhir_api_url: str = None,
+                                   username: str = None,
+                                   password: str = None,
+                                   token: str = None,
+                                   fhir_server_type: str = "hapi"
+                                   ):
     num_patients = max([gen.num_patients for gen in generators])
     print(f"Generating {num_patients} for the defined resources.")
-
     # Generate patients and upload bundle to get server assigned ids
     patient_generator = PatientGenerator(n=num_patients, organisation=organisation_reference)
     patients = patient_generator.generate()
@@ -47,6 +68,7 @@ def generate_data_set(name: str, generators: List[FhirResourceGenerator] = None,
         resources = gen.generate(patient_references=patient_references)
         response = upload_bundle(gen.make_bundle(), fhir_api_url=fhir_api_url, username=username, password=password,
                                  token=token, fhir_server_type=fhir_server_type)
+
     return 0
 
 
