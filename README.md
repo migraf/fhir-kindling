@@ -23,6 +23,12 @@ The `fhir kindling` command should now be available in your shell test it with `
 
 
 ## Usage
+With the virtual environment activated you can use the cli directly from the command line directly
+
+## Uploading a bundle to a server
+```shell
+fhir_kindling <path-to-bundle.json> --url <base-url-fhir-api> -u <username> -p <password> --token <token>
+```
 
 
 ## Credits

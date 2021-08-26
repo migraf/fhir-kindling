@@ -5,8 +5,10 @@ import click
 import yaml
 from fhir_kindling.generators import PatientGenerator
 from fhir_kindling import upload_bundle
+from fhir_kindling.auth import load_environment_auth_vars
 from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
+import click_spinner
 
 
 @click.group()
@@ -85,9 +87,14 @@ def upload(bundle, url, username, password, token):
     """Upload a bundle to a fhir server"""
 
     # Get the url
+    if not url:
+        url = click.prompt("Enter the API endpoint of the fhir server you want to upload to.")
 
     if not username and not password and not token:
-        click.confirm("Upload without authentication?")
+        click.echo("Attempting to load auth from environment.")
+        username, password, token = load_environment_auth_vars()
+    if not username and not password and not token:
+        click.confirm("No auth information found. Upload without authentication?")
 
     if (username or password) and token:
         raise ValueError("Only one of basic or token auth can be used.")
@@ -95,7 +102,11 @@ def upload(bundle, url, username, password, token):
     if username and not password:
         password = click.prompt(f"Enter your password ({username}):", hide_input=True)
 
-    upload_bundle(bundle, fhir_api_url=url, username=username, password=password, token=token)
+    click.echo("Uploading bundle...", nl=False)
+    with click_spinner.spinner():
+
+        upload_bundle(bundle, fhir_api_url=url, username=username, password=password, token=token)
+    click.echo("Resources uploaded successfully")
 
     return 0
 
@@ -109,7 +120,6 @@ def upload(bundle, url, username, password, token):
 @click.option("--token", default=None, help="Token to use with bearer token auth.")
 def delete(query, url, username, password, token):
     """Delete resources from a fhir server"""
-
 
 
 if __name__ == "__main__":

@@ -5,6 +5,21 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 
+
+def load_environment_auth_vars():
+    """
+    Attempts to load authentication information from environment variables if none is given
+
+    :return:
+    """
+    username = os.getenv("FHIR_USER", None)
+    password = os.getenv("FHIR_PW", None)
+    token = os.getenv("FHIR_TOKEN", None)
+
+    return username, password, token
+
+
+
 def generate_auth(username, password, token) -> requests.auth.AuthBase:
     """
     Generate authoriation for the request to be sent to server. Either based on a given bearer token or using basic

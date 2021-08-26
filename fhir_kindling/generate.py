@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 from typing import List, Union
+
+from fhir.resources.bundle import Bundle
 from fhir.resources.organization import Organization
 
 from fhir_kindling.generators import FhirResourceGenerator, PatientResourceGenerator, MolecularSequenceGenerator, \
@@ -11,7 +13,8 @@ from dotenv import load_dotenv, find_dotenv
 
 # TODO clean up authentication flow
 
-def generate_data_set(name: str, generators: List[FhirResourceGenerator], fhir_api_url: str = None,
+def generate_data_set(name: str, generators: List[FhirResourceGenerator] = None, bundle: Union[Bundle, str] = None,
+                      fhir_api_url: str = None,
                       username: str = None,
                       password: str = None,
                       token: str = None,
