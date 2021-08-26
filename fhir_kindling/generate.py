@@ -5,6 +5,7 @@ from typing import List, Union
 from fhir.resources.bundle import Bundle
 from fhir.resources.organization import Organization
 from fhir.resources.reference import Reference
+from fhir.resources.identifier import Identifier
 
 from fhir_kindling.generators import FhirResourceGenerator, PatientResourceGenerator, MolecularSequenceGenerator, \
     PatientGenerator
@@ -34,6 +35,7 @@ def generate_data_set(name: str, generators: List[FhirResourceGenerator] = None,
                                                 token=token,
                                                 fhir_server_type=fhir_server_type
                                                 )
+
     if generators:
         exit_code = _make_data_set_with_generators(generators=generators, organisation_reference=organisation_reference,
                                                    fhir_api_url=fhir_api_url, username=username, password=password,

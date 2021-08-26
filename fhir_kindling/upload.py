@@ -1,31 +1,64 @@
-import os
-from typing import Union
+import pathlib
+from typing import Union, Tuple
 import requests
 from fhir.resources.bundle import Bundle, BundleEntry
 from fhir.resources.reference import Reference
 from pathlib import Path
 import json
 from requests.auth import AuthBase
+from pprint import pprint
 
 from fhir_kindling.auth import generate_auth
-from pprint import pprint
+from fhir_kindling.serde import validate_bundle, load_bundle
 from dotenv import load_dotenv, find_dotenv
 
 
 def upload_bundle(bundle: Union[Bundle, Path, str],
                   fhir_api_url: str,
+                  validate: bool = True,
                   username: str = None,
                   password: str = None,
                   token: str = None,
-                  auth_method: str = "basic",
                   fhir_server_type: str = "hapi",
-                  references: bool = False):
+                  references: bool = False) -> Union[dict, Tuple[dict, list]]:
+    """
+    Upload a bundle to a FHIR server.
+
+
+    :param bundle: Either a bundle object, the path to json file containing a bundle or to a directory containing multiple
+    bundle json files
+
+    :param fhir_api_url: base url of the FHIR servers api
+    :param validate: flag indicating whether to validate bundles loaded from file
+    :param username: username for basic auth authentication
+    :param password: password for basic auth
+    :param token: token for bearer token authentication
+    :param fhir_server_type: FHIR server implementation defaults to HAPI
+    :param references: indicates whether to return references to the generated resources
+    :return: The fhir server's response(s) and references to the uploaded resources if the flag is set.
+    """
     auth = generate_auth(username=username, password=password, token=token)
 
-    if not isinstance(bundle, Bundle):
-        bundle = _load_bundle(bundle)
+    if isinstance(bundle, str) or isinstance(bundle, Path):
 
-    response = _upload_bundle(bundle, api_url=fhir_api_url, auth=auth, fhir_server_type=fhir_server_type, )
+        if pathlib.Path.is_dir(Path(bundle)):
+            p = pathlib.Path(bundle).glob("**/*")
+            files = [x for x in p if x.is_file()]
+            response_dict = {}
+            for file in files:
+                bundle_file = load_bundle(file)
+                bundle_response = _upload_bundle(bundle_file, api_url=fhir_api_url, auth=auth,
+                                                 fhir_server_type=fhir_server_type)
+                response_dict[str(file)] = bundle_response
+
+            response = response_dict
+        else:
+            loaded_bundle = load_bundle(bundle)
+            response = _upload_bundle(loaded_bundle, api_url=fhir_api_url, auth=auth, fhir_server_type=fhir_server_type)
+
+    else:
+
+        response = _upload_bundle(bundle, api_url=fhir_api_url, auth=auth, fhir_server_type=fhir_server_type)
     if references:
         resource_references = _get_references_from_bundle_response(response)
         return response, resource_references
@@ -82,27 +115,7 @@ def _get_references_from_bundle_response(response):
     return references
 
 
-def _load_bundle(bundle_path: Union[Path, str]) -> Bundle:
-    with open(bundle_path, "r") as f:
-        bundle_json = json.load(f)
 
-    # todo dirty hack fix this
-    for entry in bundle_json["entry"]:
-        try:
-            bundle_entry = BundleEntry(**entry)
-        except Exception as e:
-            entry["resource"]["code"] = entry["resource"]["category"][0]
-            bundle_entry = BundleEntry(**entry)
-    bundle = Bundle(**bundle_json)
-    return bundle
-
-
-def _parse_bundle(bundle):
-    pass
-
-
-def _cleanup_references(bundle):
-    pass
 
 
 def _upload_bundle(bundle: Bundle, api_url: str, auth: AuthBase, fhir_server_type: str):
@@ -131,12 +144,13 @@ def _generate_fhir_headers(fhir_server_type: str):
 
 if __name__ == '__main__':
     load_dotenv(find_dotenv())
-    bundle_path = "../examples/polar/bundles/POLAR_Testdaten_UKB.json"
-    bundle = _load_bundle(bundle_path)
-    print(bundle)
+    bundle_path = "../examples/gecco/bundles/GECCO_bundle_patient_1ae266f0-6af2-4d43-8fa9-c2d504460af9.json"
+    bundle = load_bundle(bundle_path)
+    # print(bundle)
     # hapi upload
-    response = upload_bundle(bundle=bundle, fhir_api_url=os.getenv("FHIR_API_URL"), username=os.getenv("FHIR_USER"),
-                             password=os.getenv("FHIR_PW"), fhir_server_type=os.getenv("FHIR_SERVER_TYPE"))
+    # gecco_path = "../examples/gecco/bundles"
+    # response = upload_bundle(bundle=gecco_path, fhir_api_url=os.getenv("FHIR_API_URL"), username=os.getenv("FHIR_USER"),
+    #                          password=os.getenv("FHIR_PW"), fhir_server_type=os.getenv("FHIR_SERVER_TYPE"))
     # blaze upload
     # response = upload_bundle(bundle=bundle, fhir_api_url=os.getenv("BLAZE_API_URL"), token=os.getenv("FHIR_TOKEN"),
     #                          fhir_server_type=os.getenv("FHIR_SERVER_TYPE"))

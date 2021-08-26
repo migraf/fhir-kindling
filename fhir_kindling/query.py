@@ -29,6 +29,9 @@ def query_resource(resource: Union[DomainResource, str],
     print(r.text)
 
 
+def resolve_relations():
+    pass
+
 if __name__ == '__main__':
     load_dotenv(find_dotenv())
     query_resource(Observation.get_resource_type())
