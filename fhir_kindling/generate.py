@@ -8,15 +8,27 @@ from fhir_kindling.generators import FhirResourceGenerator, PatientResourceGener
 from fhir_kindling.upload import upload_bundle, upload_resource
 from dotenv import load_dotenv, find_dotenv
 
+
 # TODO clean up authentication flow
 
 def generate_data_set(name: str, generators: List[FhirResourceGenerator], fhir_api_url: str = None,
+                      username: str = None,
+                      password: str = None,
+                      token: str = None,
+                      auth_method: str = "basic",
+                      fhir_server_type: str = "hapi",
                       out_dir: Union[str, Path] = None, filename: str = None):
     # create organisation to group generated patients under
     organisation = create_organisation_for_data_set(name)
     # register it with the server and get the reference
-    r, organisation_reference = upload_resource(organisation,
-                                   fhir_api_url=fhir_api_url if fhir_api_url else os.getenv("FHIR_API_URL"))
+    r, organisation_reference = upload_resource(
+        organisation,
+        fhir_api_url=fhir_api_url if fhir_api_url else os.getenv("FHIR_API_URL"),
+        username=username,
+        password=password,
+        token=token,
+        fhir_server_type=fhir_server_type
+    )
 
     num_patients = max([gen.num_patients for gen in generators])
     print(f"Generating {num_patients} for the defined resources.")
@@ -24,13 +36,14 @@ def generate_data_set(name: str, generators: List[FhirResourceGenerator], fhir_a
     # Generate patients and upload bundle to get server assigned ids
     patient_generator = PatientGenerator(n=num_patients, organisation=organisation_reference)
     patients = patient_generator.generate()
-    response, patient_references = upload_bundle(bundle=patient_generator.make_bundle(), fhir_api_url=fhir_api_url, references=True)
-    print(patient_references)
+    response, patient_references = upload_bundle(bundle=patient_generator.make_bundle(), fhir_api_url=fhir_api_url,
+                                                 username=username, password=password, token=token,
+                                                 fhir_server_type=fhir_server_type,
+                                                 references=True)
     for gen in generators:
         resources = gen.generate(patient_references=patient_references)
-        response = upload_bundle(gen.make_bundle(), fhir_api_url=fhir_api_url)
-        print(response)
-
+        response = upload_bundle(gen.make_bundle(), fhir_api_url=fhir_api_url, username=username, password=password,
+                                 token=token, fhir_server_type=fhir_server_type)
     return 0
 
 
@@ -69,9 +82,8 @@ if __name__ == '__main__':
     #                                        filename="sequence_bundle.json")
     #
     # upload_bundle(bundle=bundle, fhir_api_url=os.getenv("FHIR_API_URL"))
-    sequence_file_1 = "../examples/hiv_sequences/sequences_2.txt"
-    sequence_file_2 = "../examples/hiv_sequences/sequences_4.txt"
-    ms_generator = MolecularSequenceGenerator(sequence_file=[sequence_file_1, sequence_file_2])
+    sequence_file_1 = "../examples/hiv_sequences/sequences_5.txt"
+    ms_generator = MolecularSequenceGenerator(sequence_file=[sequence_file_1])
 
-    dataset = generate_data_set(name="DEMO_HIV", generators=[ms_generator],
-                                fhir_api_url=os.getenv("FHIR_API_URL"))
+    dataset = generate_data_set(name="conformance_test", generators=[ms_generator],
+                                fhir_api_url=os.getenv("FHIR_API_URL"), fhir_server_type="ibm")

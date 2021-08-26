@@ -12,3 +12,4 @@ requests
 pendulum
 PyYAML
 tqdm
+click-spinner
