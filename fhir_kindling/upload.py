@@ -115,9 +115,6 @@ def _get_references_from_bundle_response(response):
     return references
 
 
-
-
-
 def _upload_bundle(bundle: Bundle, api_url: str, auth: AuthBase, fhir_server_type: str):
     headers = _generate_fhir_headers(fhir_server_type)
     r = requests.post(api_url, auth=auth, data=bundle.json(), headers=headers)
@@ -144,7 +141,7 @@ def _generate_fhir_headers(fhir_server_type: str):
 
 if __name__ == '__main__':
     load_dotenv(find_dotenv())
-    bundle_path = "../examples/gecco/bundles/GECCO_bundle_patient_1ae266f0-6af2-4d43-8fa9-c2d504460af9.json"
+    bundle_path = "../examples/polar/bundles/POLAR_Testdaten_UKB.json"
     bundle = load_bundle(bundle_path)
     # print(bundle)
     # hapi upload
