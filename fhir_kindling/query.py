@@ -111,8 +111,10 @@ def _resolve_response_pagination(response, auth, headers):
 
 if __name__ == '__main__':
     load_dotenv(find_dotenv())
-    entries, references = query(resource="MolecularSequence", fhir_server_url=os.getenv("FHIR_API_URL"),
-                                token=os.getenv("FHIR_TOKEN"), fhir_server_type="blaze", references=True)
+    entries, references = query(
+        query_string="/MolecularSequence?patient.organization.name=DEMO_HIV&_format=json&_limit=1000",
+        fhir_server_url=os.getenv("FHIR_API_URL"),
+        token=os.getenv("FHIR_TOKEN"), fhir_server_type="blaze", references=True)
 
     print(entries)
     print(len(entries))
