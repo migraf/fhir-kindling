@@ -10,6 +10,7 @@ from fhir.resources.fhirtypes import DomainResourceType
 
 from fhir_kindling.auth import generate_auth, load_environment_auth_vars
 from fhir_kindling.serde import flatten_bundle
+from fhir_kindling.upload import generate_fhir_headers
 from dotenv import load_dotenv, find_dotenv
 
 
@@ -31,7 +32,7 @@ def query(query_string: str = None,
 
     # Create authentication and headers for the requests
     auth = generate_auth(username, password, token)
-    headers = _generate_fhir_headers(fhir_server_type)
+    headers = generate_fhir_headers(fhir_server_type)
 
     # If a resource type or identifier string is given query this resource
     if resource:
