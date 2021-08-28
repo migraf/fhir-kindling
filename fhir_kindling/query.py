@@ -64,8 +64,8 @@ def query(query_string: str = None,
     return response
 
 
-def query_resource(resource: Union[DomainResource, str], fhir_server_url: str, auth: AuthBase, headers: dict,
-                   fhir_server_type: str = None):
+def query_resource(resource: Union[DomainResource, DomainResourceType, str], fhir_server_url: str, auth: AuthBase,
+                   headers: dict, fhir_server_type: str = None):
     if isinstance(resource, DomainResource):
         url = fhir_server_url + "/" + resource.get_resource_type() + "?"
     else:
@@ -139,10 +139,9 @@ def _resolve_response_pagination(response, auth, headers):
 if __name__ == '__main__':
     load_dotenv(find_dotenv())
     response = query(
-        # query_string="/MolecularSequence?patient.organization.name=DEMO_HIV&_format=json&_limit=1000",
-        resource="Observation",
+        query_string="/MolecularSequence?patient.organization.name=DEMO_HIV&_format=json&_limit=1000",
+        # resource="Observation",
         fhir_server_url=os.getenv("BLAZE_API_URL"),
         out_path="test.csv",
         out_format="csv",
         token=os.getenv("FHIR_TOKEN"), fhir_server_type="blaze", references=False)
-

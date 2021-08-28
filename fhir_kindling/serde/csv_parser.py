@@ -36,9 +36,8 @@ def flatten_bundle(bundle_json: Union[dict, str, Path]) -> pd.DataFrame:
     return df
 
 
-def _parse_resource(result, resource: dict):
+def _parse_resource(result, resource: dict, parent_key: str = None, item_index: int = None):
     # todo cleanup recursion to directly return results
-    # todo check third level of recursion and if keys need to be passed along
     for key, item in resource.items():
         if isinstance(item, list):
 
@@ -58,12 +57,14 @@ def _parse_resource(result, resource: dict):
                         result["keys"].append(composite_key)
 
             elif isinstance(item[0], dict):
-                for sub_item in item:
-                    _parse_resource(result, sub_item)
+                print("list of dicts")
+                for i, sub_item in enumerate(item):
+                    _parse_resource(result, sub_item, key, i)
 
         elif isinstance(item, dict):
             for sub_key, sub_item in item.items():
                 if isinstance(sub_item, dict):
+                    print("subitem dict")
                     _parse_resource(result, item)
                 elif isinstance(sub_item, list):
                     pass
@@ -72,8 +73,15 @@ def _parse_resource(result, resource: dict):
                     result["keys"].append(composite_key)
                     result["column_vals"][composite_key] = sub_item
         else:
-            result["keys"].append(key)
-            result["column_vals"][key] = item
+            print(f"pure item {item}")
+            if parent_key:
+                new_key = f"{parent_key}_{item_index}.{key}"
+                result["keys"].append(new_key)
+                result["column_vals"][new_key] = item
+            else:
+
+                result["keys"].append(key)
+                result["column_vals"][key] = item
 
 
 if __name__ == '__main__':
