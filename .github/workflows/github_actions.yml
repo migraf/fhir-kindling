@@ -38,4 +38,5 @@ jobs:
         pytest
     - name: Build docs and pages
       run: |
+        git pull origin gh-pages
         mkdocs gh-deploy
