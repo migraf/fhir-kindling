@@ -20,7 +20,7 @@ The `fhir_kindling` command should now be available in your shell (with the venv
 `fhir_kindling --help`
 
 ## Usage
-With the virtual environment activated you can use the cli directly from the command line directly
+With the virtual environment activated you can use the CLI directly in the terminal directly
 
 ### CLI - Uploading a bundle to a server
 ```shell
