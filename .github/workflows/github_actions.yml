@@ -36,3 +36,8 @@ jobs:
       run: |
         pip install .
         pytest
+    - name: Build docs and pages
+      run: |
+        pip install .
+        pip install -r requirements_dev.tx
+        mkdocs gh-deploy
