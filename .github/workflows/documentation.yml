@@ -23,6 +23,8 @@ jobs:
 
       - name: Install requirements
         run: python3 -m pip install -r requirements_dev.txt
+      - name: install package
+        run: python3 -m pip install .
 
       - name: Deploy 🚀
         run: python3 -m mkdocs gh-deploy --force
