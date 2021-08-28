@@ -40,4 +40,5 @@ jobs:
       run: |
         git branch -D gh-pages
         git checkout -t $GITHUB_REPOSITORY/gh-pages
+        git checkout master
         mkdocs gh-deploy
