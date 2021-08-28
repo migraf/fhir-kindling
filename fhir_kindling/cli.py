@@ -1,5 +1,4 @@
 """Console script for fhir_kindling."""
-import os
 import sys
 import click
 import yaml
@@ -10,7 +9,6 @@ from fhir_kindling.auth import load_environment_auth_vars
 from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
 import click_spinner
-import pendulum
 
 
 @click.group()
@@ -31,22 +29,7 @@ def main():
 @click.option("--password", default=None, help="password for basic auth")
 @click.option("--token", default=None, help="token for bearer token auth")
 def generate(file, n_patients, age_range, output, url, upload, username, password, token):
-    """Generate FHIR resource bundles and synthetic data sets
-
-    Args:
-      file:
-      n_patients:
-      age_range:
-      output:
-      url:
-      upload:
-      username:
-      password:
-      token:
-
-    Returns:
-
-    """
+    """Generate FHIR resource bundles and synthetic data sets"""
     if file:
         click.echo(f"Generating FHIR resources defined in:\n{file}")
         with open(file, "r") as f:
@@ -101,19 +84,8 @@ def generate(file, n_patients, age_range, output, url, upload, username, passwor
 @click.option("-p", "--password", default=None, help="Username to use when authenticating with basic auth.")
 @click.option("-t", "--token", default=None, help="Token to use with bearer token auth.")
 @click.option("-s", "--summary", is_flag=True, help="Print summary information about the upload.")
-def upload(bundle, url, username, password, token):
-    """Upload a bundle to a fhir server
-
-    Args:
-      bundle:
-      url:
-      username:
-      password:
-      token:
-
-    Returns:
-
-    """
+def upload(bundle, url, username, password, token, summary):
+    """Upload a bundle to a fhir server"""
 
     # Get the url
     if not url:

@@ -85,12 +85,12 @@ def _parse_resource(result, resource: dict, parent_key: str = None, item_index: 
 
         elif isinstance(item, dict):
             for sub_key, sub_item in item.items():
+                composite_key = key + "." + sub_key
                 if isinstance(sub_item, dict):
-                    _parse_resource(result, item)
+                    _parse_resource(result, item, composite_key)
                 elif isinstance(sub_item, list):
                     pass
                 else:
-                    composite_key = key + "." + sub_key
                     result["keys"].append(composite_key)
                     result["column_vals"][composite_key] = sub_item
         else:
