@@ -39,8 +39,5 @@ jobs:
     - name: Build docs and pages
       run: |
         git branch -D gh-pages
-        git checkout gh-pages
-        git pull --rebase
-        git checkout master
-        mkdocs build --clean
+        git checkout -t $GITHUB_REPOSITORY/gh-pages
         mkdocs gh-deploy
