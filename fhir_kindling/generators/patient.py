@@ -22,8 +22,6 @@ from pathlib import Path
 
 
 class PatientGenerator(FhirResourceGenerator):
-    age_range: Union[tuple[DateTime, DateTime], tuple[int, int], None]
-
     def __init__(self,
                  n: int,
                  age_range: Union[Tuple[DateTime, DateTime], Tuple[int, int]] = None,
