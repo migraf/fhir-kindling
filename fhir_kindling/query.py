@@ -71,7 +71,7 @@ def query_resource(resource: Union[DomainResource, str], fhir_server_url: str, a
     else:
         url = fhir_server_url + "/" + resource + "?"
 
-    print(url)
+    url += "&_count=2000"
     response = _execute_query(url, auth, headers)
 
     return response
@@ -85,6 +85,8 @@ def query_with_string(query_string: str, fhir_server_url: str, auth: AuthBase, h
         url = fhir_server_url + "/" + query_string
     else:
         url = fhir_server_url + query_string
+
+    url += "&_count=2000"
 
     reponse = _execute_query(url, auth, headers)
 
