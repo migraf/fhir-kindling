@@ -31,7 +31,22 @@ be set.
 
 
 ## API docs
+Docs for interacting with the upload functionality programmatically.
 
-::: fhir_kindling.upload
+::: fhir_kindling.upload_bundle
+    rendering:
+      heading_level: 3
+      show_root_heading: True
+      show_root_full_path: False
+
+::: fhir_kindling.upload_resource
+    rendering:
+      heading_level: 3
+      show_root_heading: True
+      show_root_full_path: False
+
+
+
+
 
 

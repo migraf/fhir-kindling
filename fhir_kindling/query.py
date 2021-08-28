@@ -9,7 +9,6 @@ from fhir.resources.domainresource import DomainResource
 from fhir.resources.fhirtypes import DomainResourceType
 
 from fhir_kindling.auth import generate_auth, load_environment_auth_vars
-from fhir_kindling.upload import _generate_fhir_headers
 from fhir_kindling.serde import flatten_bundle
 from dotenv import load_dotenv, find_dotenv
 
@@ -19,7 +18,7 @@ from dotenv import load_dotenv, find_dotenv
 def query(query_string: str = None,
           resource: Union[DomainResource, DomainResourceType, str] = None,
           out_path: Union[str, Path] = None,
-          out_format: Union[str, Path] = "json",
+          out_format: str = "json",
           references: bool = True,
           fhir_server_url: str = None, username: str = None, password: str = None, token: str = None,
           fhir_server_type: str = None) -> Union[List[dict], Tuple[List[dict], List[str]]]:
@@ -139,8 +138,8 @@ def _resolve_response_pagination(response, auth, headers):
 if __name__ == '__main__':
     load_dotenv(find_dotenv())
     response = query(
-        query_string="/MolecularSequence?patient.organization.name=DEMO_HIV&_format=json&_limit=1000",
-        # resource="Observation",
+        # query_string="/MolecularSequence?patient.organization.name=DEMO_HIV&_format=json&_limit=1000",
+        resource="Observation",
         fhir_server_url=os.getenv("BLAZE_API_URL"),
         out_path="test.csv",
         out_format="csv",

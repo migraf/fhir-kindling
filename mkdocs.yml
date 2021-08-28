@@ -10,6 +10,8 @@ site_dir: public
 nav:
   - Home: index.md
   - Upload: upload.md
+  - Query: query.md
+  - Serde: serde.md
 
 
 markdown_extensions:

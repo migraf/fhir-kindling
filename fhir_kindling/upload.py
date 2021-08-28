@@ -2,6 +2,7 @@ import pathlib
 from typing import Union, Tuple
 import requests
 from fhir.resources.bundle import Bundle, BundleEntry
+from fhir.resources.fhirtypes import DomainResourceType
 from fhir.resources.reference import Reference
 from pathlib import Path
 import json
@@ -66,18 +67,32 @@ def upload_bundle(bundle: Union[Bundle, Path, str],
         return response
 
 
-def upload_resource(resource,
+def upload_resource(resource: DomainResourceType,
                     fhir_api_url: str,
                     username: str = None,
                     password: str = None,
                     token: str = None,
-                    auth_method: str = "basic",
                     fhir_server_type: str = "hapi",
                     reference: bool = True):
+    """
+    Upload a single resource to the server
+
+    Args:
+        resource: Resource to uplaod
+        fhir_api_url: base url of the fhir rest api to use
+        username: username for basic auth
+        password: password for basic auth
+        token: token to use for bearer auth
+        fhir_server_type: type of the fhir server one of [ibm, hapi, blaze]
+        reference: whether to return the resource reference separately
+
+    Returns:
+        the response to from the server or if reference is set (response, reference)
+    """
     auth = generate_auth(username=username, password=password, token=token)
     url = fhir_api_url + f"/{resource.resource_type}"
 
-    r = requests.post(url=url, json=resource.dict(), headers=_generate_fhir_headers(fhir_server_type), auth=auth)
+    r = requests.post(url=url, json=resource.dict(), headers=generate_fhir_headers(fhir_server_type), auth=auth)
     print(r.text)
 
     if fhir_server_type == "ibm":
@@ -116,7 +131,7 @@ def _get_references_from_bundle_response(response):
 
 
 def _upload_bundle(bundle: Bundle, api_url: str, auth: AuthBase, fhir_server_type: str):
-    headers = _generate_fhir_headers(fhir_server_type)
+    headers = generate_fhir_headers(fhir_server_type)
     r = requests.post(api_url, auth=auth, data=bundle.json(), headers=headers)
     if fhir_server_type == "ibm":
         print(r.headers)
@@ -127,13 +142,12 @@ def _upload_bundle(bundle: Bundle, api_url: str, auth: AuthBase, fhir_server_typ
     return r.json()
 
 
-def _generate_fhir_headers(fhir_server_type: str):
+def generate_fhir_headers(fhir_server_type: str):
     headers = {}
     if fhir_server_type == "blaze":
         headers["Content-Type"] = "application/fhir+json"
 
     else:
-        # todo figure out if other servers require custom headers for bundle upload
         headers["Content-Type"] = "application/fhir+json"
 
     return headers

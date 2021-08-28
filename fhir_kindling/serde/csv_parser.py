@@ -5,6 +5,16 @@ import json
 
 
 def flatten_bundle(bundle_json: Union[dict, str, Path]) -> pd.DataFrame:
+    """
+    Flatten a bundle given either as a dictionary or a path into a pandas dataframe
+
+    Args:
+        bundle_json: dictionary containing the bundle or path to the json file containing the bundle
+
+    Returns:
+        pandas dataframe with the flattened representation of the json bundle
+    """
+
     if not isinstance(bundle_json, dict):
         with open(bundle_json, "r") as bundle_file:
             bundle_json = json.load(bundle_file)
@@ -37,10 +47,23 @@ def flatten_bundle(bundle_json: Union[dict, str, Path]) -> pd.DataFrame:
 
 
 def _parse_resource(result, resource: dict, parent_key: str = None, item_index: int = None):
+    """
+    Recursively parse a dictionary containing a FHIR resource and return a flattened dictionary with composed keys
+    to process into a dataframe.
+    Stores the found keys and the flattened object in the results dictionary passed to it
+
+    Args:
+        result: dictionary in which to store the results with result = { "keys": [], column_vals: {} }
+        resource: the dictionary representation of the resource to parse.
+        parent_key:
+        item_index:
+
+    Returns:
+
+    """
     # todo cleanup recursion to directly return results
     for key, item in resource.items():
         if isinstance(item, list):
-
             # parse list of strings
             if isinstance(item[0], str):
                 if len(item) == 1:
@@ -57,14 +80,12 @@ def _parse_resource(result, resource: dict, parent_key: str = None, item_index: 
                         result["keys"].append(composite_key)
 
             elif isinstance(item[0], dict):
-                print("list of dicts")
                 for i, sub_item in enumerate(item):
                     _parse_resource(result, sub_item, key, i)
 
         elif isinstance(item, dict):
             for sub_key, sub_item in item.items():
                 if isinstance(sub_item, dict):
-                    print("subitem dict")
                     _parse_resource(result, item)
                 elif isinstance(sub_item, list):
                     pass
@@ -73,7 +94,6 @@ def _parse_resource(result, resource: dict, parent_key: str = None, item_index: 
                     result["keys"].append(composite_key)
                     result["column_vals"][composite_key] = sub_item
         else:
-            print(f"pure item {item}")
             if parent_key:
                 new_key = f"{parent_key}_{item_index}.{key}"
                 result["keys"].append(new_key)

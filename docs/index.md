@@ -1,6 +1,10 @@
 # FHIR Kindling
 Synthetic FHIR resource generator and FHIR server data management tool.
 
+!!!warning
+    Under construction. This documentation is not complete.
+
+
 ## Features
 - CLI for step by step data set/FHIR resource creation
 - Bundle creation, validation and data management on a FHIR server via the REST API
@@ -26,4 +30,7 @@ fhir_kindling <path-to-bundle.json> --url <base-url-fhir-api> -u <username> -p <
 ```
 
 ## Credits
-This package was created with Cookiecutter and the [audreyr/cookiecutter-pypackage](https://github.com/audreyr/cookiecutter) project template.
+All the FHIR resource validation is done via the [fhir.resources](https://github.com/nazrulworld/fhir.resources) package.
+The CLI was built using [click](https://click.palletsprojects.com/en/8.0.x/).
+This package was created with Cookiecutter and the
+[audreyr/cookiecutter-pypackage](https://github.com/audreyr/cookiecutter) project template.

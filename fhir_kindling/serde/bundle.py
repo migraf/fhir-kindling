@@ -14,8 +14,6 @@ def load_bundle(bundle_path: Union[Path, str], validate: bool = True) -> Bundle:
     Args:
       bundle_path: path to the bundle file
       validate: boolean on whether to validate individual resources
-      bundle_path: Union[Path, str]:
-      validate: bool:  (Default value = True)
 
     Returns:
       a bundle object based on the given file
@@ -43,30 +41,36 @@ def validate_bundle(bundle_json: dict, show_invalid_resources: bool = True) -> U
       show_invalid_resources: bool:  (Default value = True)
 
     Returns:
-
+        either a Bundle object if the validation succeeded or None if it failed.
     """
 
     # validate entries
     errors = 0
+
+    # attempt to load each entry in the bundle as Bundle Entry resource
     for index, entry in enumerate(bundle_json["entry"]):
         try:
             bundle_entry = BundleEntry(**entry)
+
+        # Catch and display validation errors and display them with their index
         except ValidationError as e:
             click.echo(f"Bundle entry with index {index} could not be validated", err=True)
             click.echo(f"\n {e} \n", err=True)
             if show_invalid_resources:
                 click.echo(json.dumps(entry, indent=2), err=True)
             errors += 1
+
     if errors == 0:
+        # Try to validate the full bundle
         try:
             bundle = Bundle(**bundle_json)
             return bundle
 
         except ValidationError as e:
             click.echo("Bundle could not be validated", err=True)
-            click.echo(e, err=True)
+            if show_invalid_resources:
+                click.echo(e, err=True)
             return None
 
-
-def _cleanup_references(bundle):
-    pass
+    else:
+        return None
