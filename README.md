@@ -44,7 +44,7 @@ This example uses the `-q` option to execute a predefined url query string again
 as csv in a file called `query_results.csv`
 
 ```shell
-fhir_kindling queryy -q "/MolecularSequence?patient.organization.name=DEMO_HIV&_format=json" --url <base-url-fhir-api> -u <username> -p <password> --token <token> -f "query_results.csv" -o csv
+fhir_kindling query -q "/MolecularSequence?patient.organization.name=DEMO_HIV&_format=json" --url <base-url-fhir-api> -u <username> -p <password> --token <token> -f "query_results.csv" -o csv
 ```
 
 
