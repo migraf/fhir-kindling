@@ -4,7 +4,7 @@ from pathlib import Path
 import json
 
 
-def flatten_bundle(bundle_json: Union[dict, str, Path], output_path: Union[str, Path] = None):
+def flatten_bundle(bundle_json: Union[dict, str, Path]) -> pd.DataFrame:
     if not isinstance(bundle_json, dict):
         with open(bundle_json, "r") as bundle_file:
             bundle_json = json.load(bundle_file)
@@ -12,19 +12,16 @@ def flatten_bundle(bundle_json: Union[dict, str, Path], output_path: Union[str, 
     total_column_names = set()
     resource_column_values = []
 
-
     for entry in bundle_json["entry"]:
         entry_resource = entry["resource"]
         parse_result = {
             "keys": [],
             "column_vals": {}
         }
-        _parse_resource(parse_result, entry)
+        _parse_resource(parse_result, entry_resource)
 
         total_column_names.update(set(parse_result["keys"]))
         resource_column_values.append(parse_result["column_vals"])
-
-    print(total_column_names)
 
     df_dict_list = []
     for value_dict in resource_column_values:
@@ -36,8 +33,7 @@ def flatten_bundle(bundle_json: Union[dict, str, Path], output_path: Union[str, 
 
     df = pd.DataFrame(df_dict_list)
 
-    df.to_csv("bundle.csv")
-    print(df.info())
+    return df
 
 
 def _parse_resource(result, resource: dict):

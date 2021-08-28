@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 from typing import Union, List, Tuple
@@ -9,6 +10,7 @@ from fhir.resources.fhirtypes import DomainResourceType
 
 from fhir_kindling.auth import generate_auth, load_environment_auth_vars
 from fhir_kindling.upload import _generate_fhir_headers
+from fhir_kindling.serde import flatten_bundle
 from dotenv import load_dotenv, find_dotenv
 
 
@@ -17,7 +19,7 @@ from dotenv import load_dotenv, find_dotenv
 def query(query_string: str = None,
           resource: Union[DomainResource, DomainResourceType, str] = None,
           out_path: Union[str, Path] = None,
-          out_format: Union[str, Path] = None,
+          out_format: Union[str, Path] = "json",
           references: bool = True,
           fhir_server_url: str = None, username: str = None, password: str = None, token: str = None,
           fhir_server_type: str = None) -> Union[List[dict], Tuple[List[dict], List[str]]]:
@@ -41,6 +43,17 @@ def query(query_string: str = None,
 
     else:
         raise ValueError("No query information given.")
+
+    if out_path:
+        if out_format == "json":
+            with open(out_path, "w") as out_file:
+                json.dump(response, out_file)
+        elif out_format == "csv":
+            df = flatten_bundle(bundle_json=response)
+            df.to_csv(out_path)
+        else:
+            raise NotImplementedError("Only csv and json currently supported.")
+
     # todo fix reference parsing
     if response and references:
         references = _extract_references_from_query_response(entries=response.get("entry"),
@@ -57,6 +70,8 @@ def query_resource(resource: Union[DomainResource, str], fhir_server_url: str, a
         url = fhir_server_url + "/" + resource.get_resource_type() + "?"
     else:
         url = fhir_server_url + "/" + resource + "?"
+
+    print(url)
     response = _execute_query(url, auth, headers)
 
     return response
@@ -90,6 +105,8 @@ def _extract_references_from_query_response(entries: List[dict], fhir_server_typ
     else:
         raise ValueError(f"Unsupported FHIR server: {fhir_server_type}")
 
+    return references
+
 
 def _execute_query(url: str, auth: AuthBase = None, headers: dict = None) -> List[dict]:
     r = requests.get(url=url, auth=auth, headers=headers)
@@ -103,7 +120,7 @@ def _execute_query(url: str, auth: AuthBase = None, headers: dict = None) -> Lis
 
 def _resolve_response_pagination(response, auth, headers):
     entries = []
-    entries.append(response["entry"])
+    entries.extend(response["entry"])
     while response.get("link", None):
         next_page = next((link for link in response["link"] if link.get("relation", None) == "next"), None)
         if next_page:
@@ -111,8 +128,6 @@ def _resolve_response_pagination(response, auth, headers):
             entries.extend(response["entry"])
         else:
             break
-    else:
-        entries = response["entry"]
 
     response["entry"] = entries
 
@@ -122,9 +137,10 @@ def _resolve_response_pagination(response, auth, headers):
 if __name__ == '__main__':
     load_dotenv(find_dotenv())
     response = query(
-        query_string="/MolecularSequence?patient.organization.name=DEMO_HIV&_format=json&_limit=1000",
-        fhir_server_url=os.getenv("FHIR_API_URL"),
+        # query_string="/MolecularSequence?patient.organization.name=DEMO_HIV&_format=json&_limit=1000",
+        resource="Observation",
+        fhir_server_url=os.getenv("BLAZE_API_URL"),
+        out_path="test.csv",
+        out_format="csv",
         token=os.getenv("FHIR_TOKEN"), fhir_server_type="blaze", references=False)
 
-    print(response)
-    print(len(response["entry"]))

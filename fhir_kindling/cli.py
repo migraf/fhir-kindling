@@ -5,6 +5,7 @@ import click
 import yaml
 from fhir_kindling.generators import PatientGenerator
 from fhir_kindling import upload_bundle
+from fhir_kindling import query as execute_query
 from fhir_kindling.auth import load_environment_auth_vars
 from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
@@ -33,15 +34,15 @@ def generate(file, n_patients, age_range, output, url, upload, username, passwor
     """Generate FHIR resource bundles and synthetic data sets
 
     Args:
-      file: 
-      n_patients: 
-      age_range: 
-      output: 
-      url: 
-      upload: 
-      username: 
-      password: 
-      token: 
+      file:
+      n_patients:
+      age_range:
+      output:
+      url:
+      upload:
+      username:
+      password:
+      token:
 
     Returns:
 
@@ -104,11 +105,11 @@ def upload(bundle, url, username, password, token):
     """Upload a bundle to a fhir server
 
     Args:
-      bundle: 
-      url: 
-      username: 
-      password: 
-      token: 
+      bundle:
+      url:
+      username:
+      password:
+      token:
 
     Returns:
 
@@ -143,23 +144,25 @@ def upload(bundle, url, username, password, token):
 @click.option("-q", "--query", default=None, help="FHIR API query string whose results will be deleted.")
 @click.option("-r", "--resource", default=None, help="Identifier of the resource to delete e.g. Patient")
 @click.option("--url", help="url of the FHIR api endpoint to upload the bundle to.")
+@click.option("-f", "--file", default=None, help="File in which to save the query results")
+@click.option("-o", "--output_format", default="json", help="Format in which to store the results.")
 @click.option("-u", "--username", default=None, help="Password to get when authenticating against basic auth.")
 @click.option("-p", "--password", default=None, help="Username to use when authenticating with basic auth.")
 @click.option("--token", default=None, help="Token to use with bearer token auth.")
-def delete(query, url, username, password, token):
-    """Delete resources from a fhir server
+def query(query, resource, url, file, output_format, username, password, token):
+    """Query resources from a fhir server and optionally store them to file."""
 
-    Args:
-      query: 
-      url: 
-      username: 
-      password: 
-      token: 
+    if not (username and password) or token:
+        click.echo("Attempting to find authentication in environment variables.")
+        username, password, token = load_environment_auth_vars()
+    if query:
+        # todo fix fhir server type and solve this in a nicer a way
+        response = execute_query(query_string=query, out_path=file, out_format=output_format, fhir_server_type="hapi",
+                                 username=username, password=password, fhir_server_url=url, token=token)
 
-    Returns:
-
-    """
-    pass
+    if resource:
+        response = execute_query(resource=resource, out_path=file, out_format=output_format, fhir_server_type="hapi",
+                                 username=username, password=password, fhir_server_url=url, token=token)
 
 
 if __name__ == "__main__":

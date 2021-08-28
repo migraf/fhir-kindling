@@ -7,3 +7,4 @@ __version__ = '0.2.0'
 from .upload import upload_bundle, upload_resource
 from .delete import delete_resources
 from .generate import generate_resources, generate_data_set
+from .query import query
