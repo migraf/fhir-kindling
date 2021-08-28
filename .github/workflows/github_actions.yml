@@ -38,5 +38,9 @@ jobs:
         pytest
     - name: Build docs and pages
       run: |
-        git pull origin gh-pages --rebase
+        git branch -D gh-pages
+        git checkout gh-pages
+        git pull --rebase
+        git checkout master
+        mkdocs build --clean
         mkdocs gh-deploy
