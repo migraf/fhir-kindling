@@ -9,3 +9,7 @@ Click
 pytest
 python-dotenv
 twine
+mkdocs
+mkdocs-material
+mkdocstrings
+pytkdocs[numpy-style]

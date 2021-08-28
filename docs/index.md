@@ -1,6 +1,3 @@
-[![PyPI version shields.io](https://img.shields.io/pypi/v/ansicolortags.svg)](https://pypi.python.org/pypi/fhir_kindling)
-[![Documentation Status](https://readthedocs.org/projects/ansicolortags/badge/?version=latest)](https://fhir-kindling.readthedocs.io/en/latest/?version=latest)
-
 # FHIR Kindling
 Synthetic FHIR resource generator and FHIR server data management tool.
 
@@ -30,8 +27,3 @@ fhir_kindling <path-to-bundle.json> --url <base-url-fhir-api> -u <username> -p <
 
 ## Credits
 This package was created with Cookiecutter and the [audreyr/cookiecutter-pypackage](https://github.com/audreyr/cookiecutter) project template.
-
-
-
-
-

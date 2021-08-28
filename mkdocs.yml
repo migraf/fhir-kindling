@@ -1,0 +1,22 @@
+site_name: FHIR kindling
+theme:
+  name: material
+  features:
+    - navigation.tracking
+    - navigation.expand
+
+site_dir: public
+
+nav:
+  - Home: index.md
+  - Upload: upload.md
+
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+plugins:
+  - mkdocstrings
+  - search

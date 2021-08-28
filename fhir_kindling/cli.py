@@ -83,7 +83,7 @@ def generate(file, n_patients, age_range, output, url, upload, username, passwor
 @click.option("--url", help="url of the FHIR api endpoint to upload the bundle to.")
 @click.option("-u", "--username", default=None, help="Password to get when authenticating against basic auth.")
 @click.option("-p", "--password", default=None, help="Username to use when authenticating with basic auth.")
-@click.option("--token", default=None, help="Token to use with bearer token auth.")
+@click.option("-t", "--token", default=None, help="Token to use with bearer token auth.")
 @click.option("-s", "--summary", is_flag=True, help="Print summary information about the upload.")
 def upload(bundle, url, username, password, token):
     """Upload a bundle to a fhir server"""
