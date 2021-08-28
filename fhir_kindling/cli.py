@@ -153,8 +153,14 @@ def query(query, resource, url, file, output_format, username, password, token):
     """Query resources from a fhir server"""
 
     if not (username and password) or token:
-        click.echo("Attempting to find authentication in environment variables.", err=True)
+        click.echo("Attempting to find authentication in environment variables...", err=True, nl=False)
         username, password, token = load_environment_auth_vars()
+
+        if (username and password) or token:
+            click.echo("Success")
+        else:
+            click.echo()
+            click.confirm("Continue without authentication?")
 
     click.echo("Executing query...", nl=False)
     with click_spinner.spinner():
