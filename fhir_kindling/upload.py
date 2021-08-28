@@ -21,21 +21,21 @@ def upload_bundle(bundle: Union[Bundle, Path, str],
                   token: str = None,
                   fhir_server_type: str = "hapi",
                   references: bool = False) -> Union[dict, Tuple[dict, list]]:
-    """
-    Upload a bundle to a FHIR server.
+    """Upload a bundle to a FHIR server.
 
+    Args:
+      bundle: Either a bundle object, the path to json file containing a bundle or to a directory containing multiple bundle json files
+      fhir_api_url: base url of the FHIR servers api
+      validate: flag indicating whether to validate bundles loaded from file
+      username: username for basic auth authentication
+      password: password for basic auth
+      token: token for bearer token authentication
+      fhir_server_type: FHIR server implementation defaults to HAPI
+      references: indicates whether to return references to the generated resources
 
-    :param bundle: Either a bundle object, the path to json file containing a bundle or to a directory containing multiple
-    bundle json files
+    Returns:
+      The fhir server's response(s) and references to the uploaded resources if the flag is set.
 
-    :param fhir_api_url: base url of the FHIR servers api
-    :param validate: flag indicating whether to validate bundles loaded from file
-    :param username: username for basic auth authentication
-    :param password: password for basic auth
-    :param token: token for bearer token authentication
-    :param fhir_server_type: FHIR server implementation defaults to HAPI
-    :param references: indicates whether to return references to the generated resources
-    :return: The fhir server's response(s) and references to the uploaded resources if the flag is set.
     """
     auth = generate_auth(username=username, password=password, token=token)
 
