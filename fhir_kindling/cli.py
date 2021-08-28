@@ -141,29 +141,38 @@ def upload(bundle, url, username, password, token):
 
 
 @main.command()
-@click.option("-q", "--query", default=None, help="FHIR API query string whose results will be deleted.")
-@click.option("-r", "--resource", default=None, help="Identifier of the resource to delete e.g. Patient")
-@click.option("--url", help="url of the FHIR api endpoint to upload the bundle to.")
+@click.option("-q", "--query", default=None, help="FHIR API query string, appended to api url.")
+@click.option("-r", "--resource", default=None, help="Identifier of the resource to query e.g. Patient")
+@click.option("--url", help="url of the FHIR api endpoint to query against.")
 @click.option("-f", "--file", default=None, help="File in which to save the query results")
 @click.option("-o", "--output_format", default="json", help="Format in which to store the results.")
-@click.option("-u", "--username", default=None, help="Password to get when authenticating against basic auth.")
-@click.option("-p", "--password", default=None, help="Username to use when authenticating with basic auth.")
+@click.option("-u", "--username", default=None, help="Username to get when authenticating with basic auth.")
+@click.option("-p", "--password", default=None, help="Password to use when authenticating with basic auth.")
 @click.option("--token", default=None, help="Token to use with bearer token auth.")
 def query(query, resource, url, file, output_format, username, password, token):
-    """Query resources from a fhir server and optionally store them to file."""
+    """Query resources from a fhir server"""
 
     if not (username and password) or token:
-        click.echo("Attempting to find authentication in environment variables.")
+        click.echo("Attempting to find authentication in environment variables.", err=True)
         username, password, token = load_environment_auth_vars()
-    if query:
-        # todo fix fhir server type and solve this in a nicer a way
-        response = execute_query(query_string=query, out_path=file, out_format=output_format, fhir_server_type="hapi",
-                                 username=username, password=password, fhir_server_url=url, token=token)
 
-    if resource:
-        response = execute_query(resource=resource, out_path=file, out_format=output_format, fhir_server_type="hapi",
-                                 username=username, password=password, fhir_server_url=url, token=token)
-
+    click.echo("Executing query...", nl=False)
+    with click_spinner.spinner():
+        if query:
+            # todo fix fhir server type and solve this in a nicer a way
+            response = execute_query(query_string=query, out_path=file, out_format=output_format,
+                                     fhir_server_type="hapi",
+                                     username=username, password=password, fhir_server_url=url, token=token)
+        if resource:
+            response = execute_query(resource=resource, out_path=file, out_format=output_format,
+                                     fhir_server_type="hapi",
+                                     username=username, password=password, fhir_server_url=url, token=token)
+    if not file:
+        click.echo()
+        click.echo_via_pager(response)
+    else:
+        click.echo()
+        click.echo(f"Stored results at {file}")
 
 if __name__ == "__main__":
     sys.exit(main())  # pragma: no cover
