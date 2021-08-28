@@ -20,7 +20,7 @@ The `fhir_kindling` command should now be available in your shell (with the venv
 `fhir_kindling --help`
 
 ## Usage
-With the virtual environment activated you can use the cli directly from the command line directly
+With the virtual environment activated you can use the CLI directly in the terminal directly
 
 ### CLI - Uploading a bundle to a server
 ```shell
@@ -44,7 +44,7 @@ This example uses the `-q` option to execute a predefined url query string again
 as csv in a file called `query_results.csv`
 
 ```shell
-fhir_kindling queryy -q "/MolecularSequence?patient.organization.name=DEMO_HIV&_format=json" --url <base-url-fhir-api> -u <username> -p <password> --token <token> -f "query_results.csv" -o csv
+fhir_kindling query -q "/MolecularSequence?patient.organization.name=DEMO_HIV&_format=json" --url <base-url-fhir-api> -u <username> -p <password> --token <token> -f "query_results.csv" -o csv
 ```
 
 
