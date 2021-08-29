@@ -43,7 +43,7 @@ jobs:
 
       - name: Generate coverage report
         run: |
-          coverage -m pytest
+          coverage run -m pytest
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
