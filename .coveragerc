@@ -1,0 +1,13 @@
+[run]
+source =
+    fhir_kindling
+    tests
+
+[paths]
+source =
+    fhir_kindling
+    tests
+
+[report]
+show_missing = true
+precision = 2

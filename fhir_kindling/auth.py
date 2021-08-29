@@ -5,14 +5,12 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 
-def load_environment_auth_vars():
-    """Attempts to load authentication information from environment variables if none is given
-    
-    :return:
-
-    Args:
+def load_environment_auth_vars() -> tuple:
+    """Attempts to load authentication information from environment variables if none is given, looks for a username
+    under "FHIR_USER", password under "FHIR_PW" and the token under "FHIR_TOKEN"
 
     Returns:
+        Tuple containing username, password and token if they were found or None if they are not present in the env vars
 
     """
     username = os.getenv("FHIR_USER", None)
@@ -23,18 +21,16 @@ def load_environment_auth_vars():
 
 
 def generate_auth(username, password, token) -> requests.auth.AuthBase:
-    """Generate authoriation for the request to be sent to server. Either based on a given bearer token or using basic
+    """Generate authentication for the request to be sent to server. Either based on a given bearer token or using basic
     auth with username and password.
-    
-    :return: Auth object to pass to a requests call.
 
     Args:
-      username: 
-      password: 
-      token: 
+      username: username for basic auth
+      password: password for basic auth
+      token: token to be used for bearer auth
 
     Returns:
-
+        requests auth object to use in an API call
     """
     if (not username and not password) and not token:
         click.echo("No authentication given. Attempting authentication via environment variables")

@@ -19,20 +19,27 @@ def flatten_bundle(bundle_json: Union[dict, str, Path]) -> pd.DataFrame:
         with open(bundle_json, "r") as bundle_file:
             bundle_json = json.load(bundle_file)
 
+    # keep track of all unique column names in a set
     total_column_names = set()
+    # store list of flat dicts containing values of flattened resources
     resource_column_values = []
 
     for entry in bundle_json["entry"]:
+        # get resource from bundle entry and create results dict
         entry_resource = entry["resource"]
         parse_result = {
             "keys": [],
             "column_vals": {}
         }
+        # recursively parse the resource dict and update the results with keys and values
         _parse_resource(parse_result, entry_resource)
 
+        # todo needs to be improved for very large bundles
+        # update the set of column names and stored values
         total_column_names.update(set(parse_result["keys"]))
         resource_column_values.append(parse_result["column_vals"])
 
+    # Create list of dicts containing all keys present in the bundle and fill the ones they dont have with none values
     df_dict_list = []
     for value_dict in resource_column_values:
         all_keys_dict = dict()
@@ -75,10 +82,9 @@ def _parse_resource(result, resource: dict, parent_key: str = None, item_index: 
                             composite_key = f"{key}_{i}"
                         else:
                             composite_key = key
-
                         result["column_vals"][composite_key] = sub_item
                         result["keys"].append(composite_key)
-
+            # if the items in the string are dictionaries recurse while passing parent information
             elif isinstance(item[0], dict):
                 for i, sub_item in enumerate(item):
                     _parse_resource(result, sub_item, key, i)
@@ -90,11 +96,12 @@ def _parse_resource(result, resource: dict, parent_key: str = None, item_index: 
                     _parse_resource(result, item, composite_key)
                 elif isinstance(sub_item, list):
                     pass
+                # todo
                 else:
                     result["keys"].append(composite_key)
                     result["column_vals"][composite_key] = sub_item
         else:
-            if parent_key:
+            if parent_key and item_index:
                 new_key = f"{parent_key}_{item_index}.{key}"
                 result["keys"].append(new_key)
                 result["column_vals"][new_key] = item
