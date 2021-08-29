@@ -18,6 +18,7 @@ from dotenv import load_dotenv, find_dotenv
 
 def query(query_string: str = None,
           resource: Union[DomainResource, DomainResourceType, str] = None,
+          limit: int = 1000,
           out_path: Union[str, Path] = None,
           out_format: str = "json",
           references: bool = True,
@@ -36,10 +37,10 @@ def query(query_string: str = None,
 
     # If a resource type or identifier string is given query this resource
     if resource:
-        response = query_resource(resource, fhir_server_url, auth, headers)
+        response = query_resource(resource, fhir_server_url, auth, headers, limit=limit)
 
     elif query_string:
-        response = query_with_string(query_string, fhir_server_url, auth, headers)
+        response = query_with_string(query_string, fhir_server_url, auth, headers, limit=limit)
 
     else:
         raise ValueError("No query information given.")
@@ -160,5 +161,6 @@ if __name__ == '__main__':
 
     response = query_resource("Procedure", fhir_server_url="http://hapi.fhir.org/baseR4",
                               auth=HTTPBasicAuth(username="bogus", password="auth"),
-                              headers=generate_fhir_headers("hapi"), limit=100)
+                              headers=generate_fhir_headers("hapi"), limit=2500)
     print(response)
+    print(len(response["entry"]))
