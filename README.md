@@ -1,6 +1,7 @@
 [![PyPI version shields.io](https://img.shields.io/pypi/v/ansicolortags.svg)](https://pypi.python.org/pypi/fhir_kindling)
 [![Documentation Status](https://readthedocs.org/projects/ansicolortags/badge/?version=latest)](https://fhir-kindling.readthedocs.io/en/latest/?version=latest)
 [![codecov](https://codecov.io/gh/migraf/fhir-kindling/branch/master/graph/badge.svg?token=FKQENFXACB)](https://codecov.io/gh/migraf/fhir-kindling)
+[![fhir_kindling_ci](https://github.com/migraf/fhir-kindling/actions/workflows/github_actions.yml/badge.svg)](https://github.com/migraf/fhir-kindling/actions/workflows/github_actions.yml)
 # FHIR Kindling
 Synthetic FHIR resource generator and FHIR server data management tool.
 
