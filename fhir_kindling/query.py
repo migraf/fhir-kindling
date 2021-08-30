@@ -1,17 +1,16 @@
 import json
-import os
 from pathlib import Path
+from pprint import pprint
 from typing import Union, List, Tuple
 
 import requests
-from requests.auth import AuthBase, HTTPBasicAuth
+from requests.auth import AuthBase
 from fhir.resources.domainresource import DomainResource
 from fhir.resources.fhirtypes import DomainResourceType
 
 from fhir_kindling.auth import generate_auth, load_environment_auth_vars
 from fhir_kindling.serde import flatten_bundle
 from fhir_kindling.upload import generate_fhir_headers
-from dotenv import load_dotenv, find_dotenv
 
 
 # todo clean up authentication flow
@@ -23,7 +22,7 @@ def query(query_string: str = None,
           out_format: str = "json",
           references: bool = True,
           fhir_server_url: str = None, username: str = None, password: str = None, token: str = None,
-          fhir_server_type: str = None) -> Union[List[dict], Tuple[List[dict], List[str]]]:
+          fhir_server_type: str = None) -> Union[dict, Tuple[dict, list]]:
     # Attempt to load environment authentication variables if nothing is given
     if not (username and password) and not token:
         username, password, token = load_environment_auth_vars()
@@ -35,7 +34,7 @@ def query(query_string: str = None,
     auth = generate_auth(username, password, token)
     headers = generate_fhir_headers(fhir_server_type)
 
-    # If a resource type or identifier string is given query this resource
+    # If a resource type or identifier string is given query this resource or query by given url string
     if resource:
         response = query_resource(resource, fhir_server_url, auth, headers, limit=limit)
 
@@ -59,7 +58,7 @@ def query(query_string: str = None,
     if response and references:
         references = _extract_references_from_query_response(entries=response.get("entry"),
                                                              fhir_server_type=fhir_server_type)
-
+        print(references)
         return response, references
 
     return response
@@ -79,7 +78,7 @@ def query_resource(resource: Union[DomainResource, DomainResourceType, str], fhi
 
 
 def query_with_string(query_string: str, fhir_server_url: str, auth: AuthBase, headers: dict, count: int = 2000,
-                      limit: int = 0):
+                      limit: int = 0) -> dict:
     # stitch together the query string with the api url
     if fhir_server_url[-1] == "/" and query_string[0] == "/":
         url = fhir_server_url[:-1] + query_string
@@ -93,12 +92,12 @@ def query_with_string(query_string: str, fhir_server_url: str, auth: AuthBase, h
         limit_count = limit if count > limit != 0 else count
         url += f"&_count={limit_count}"
 
-    reponse = _execute_query(url, auth, headers, limit)
+    response = _execute_query(url, auth, headers, limit)
 
-    return reponse
+    return response
 
 
-def _execute_query(url: str, auth: AuthBase = None, headers: dict = None, limit: int = 0) -> List[dict]:
+def _execute_query(url: str, auth: AuthBase = None, headers: dict = None, limit: int = 0) -> dict:
     r = requests.get(url=url, auth=auth, headers=headers)
     r.raise_for_status()
     response = r.json()
@@ -108,7 +107,7 @@ def _execute_query(url: str, auth: AuthBase = None, headers: dict = None, limit:
     return response
 
 
-def _resolve_response_pagination(response: dict, auth: AuthBase, headers: dict, limit: int):
+def _resolve_response_pagination(response: dict, auth: AuthBase, headers: dict, limit: int) -> dict:
     entries = []
     entries.extend(response["entry"])
     if len(entries) >= limit != 0:
@@ -134,8 +133,14 @@ def _resolve_response_pagination(response: dict, auth: AuthBase, headers: dict, 
 
 def _extract_references_from_query_response(entries: List[dict], fhir_server_type: str):
     references = []
+    pprint(entries)
     if fhir_server_type == "hapi":
-        pass
+        for entry in entries:
+            subject = entry.get("subject")
+            if subject:
+                references.append(subject["reference"])
+            else:
+                references.append(None)
 
     elif fhir_server_type == "blaze":
         for entry in entries:
@@ -147,20 +152,3 @@ def _extract_references_from_query_response(entries: List[dict], fhir_server_typ
         raise ValueError(f"Unsupported FHIR server: {fhir_server_type}")
 
     return references
-
-
-if __name__ == '__main__':
-    load_dotenv(find_dotenv())
-    # response = query(
-    #     # query_string="/MolecularSequence?patient.organization.name=DEMO_HIV&_format=json&_limit=1000",
-    #     resource="Observation",
-    #     fhir_server_url=os.getenv("BLAZE_API_URL"),
-    #     out_path="test.csv",
-    #     out_format="csv",
-    #     token=os.getenv("FHIR_TOKEN"), fhir_server_type="blaze", references=False)
-
-    response = query_resource("Procedure", fhir_server_url="http://hapi.fhir.org/baseR4",
-                              auth=HTTPBasicAuth(username="bogus", password="auth"),
-                              headers=generate_fhir_headers("hapi"), limit=2500)
-    print(response)
-    print(len(response["entry"]))

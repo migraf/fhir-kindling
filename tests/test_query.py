@@ -1,11 +1,16 @@
+import json
+
 import pytest
 import requests
 from requests.auth import HTTPBasicAuth
+import os
+from unittest import mock
 
 from fhir_kindling.query import query, query_resource, query_with_string
 from fhir.resources.procedure import Procedure
 from fhir_kindling.upload import generate_fhir_headers
 from fhir_kindling.auth import generate_auth
+import pandas as pd
 
 
 @pytest.fixture
@@ -15,6 +20,7 @@ def api_url():
 
     """
     return "http://hapi.fhir.org/baseR4"
+
 
 @pytest.fixture
 def bogus_auth():
@@ -26,6 +32,7 @@ def bogus_auth():
     """
 
     return HTTPBasicAuth(username="bogus", password="auth")
+
 
 @pytest.fixture
 def fhir_headers():
@@ -41,7 +48,6 @@ def test_api_connection(api_url):
 
 
 def test_query_resource(api_url, bogus_auth, fhir_headers):
-
     limit = 100
     response = query_resource("Procedure", fhir_server_url=api_url, auth=bogus_auth, headers=fhir_headers, limit=limit)
     assert response
@@ -72,15 +78,73 @@ def test_query_with_string(api_url, bogus_auth, fhir_headers):
     assert response_2
 
 
-def test_query(api_url, bogus_auth, fhir_headers):
+def test_query(api_url, fhir_headers):
     query_string = "/Observation?patient.birthdate=gt1990"
 
     response = query(query_string=query_string, limit=100, username="test", password="password",
-                     fhir_server_url=api_url, fhir_server_type="hapi")
+                     fhir_server_url=api_url, fhir_server_type="hapi", references=False)
 
     assert response
 
+    response = query(resource="Observation", limit=100, username="test", password="password",
+                     fhir_server_url=api_url, fhir_server_type="hapi", references=False)
+
+    assert response
+
+    with pytest.raises(ValueError):
+        response = query(limit=100, username="test", password="password", fhir_server_url=api_url,
+                         fhir_server_type="hapi", references=False)
+
+    with pytest.raises(ValueError):
+        response = query(query_string=query_string, limit=100,
+                         fhir_server_url=api_url, fhir_server_type="hapi", references=False)
+    with pytest.raises(ValueError):
+        response = query(query_string=query_string, limit=100, username="test", password="pw", token="hello",
+                         fhir_server_url=api_url, fhir_server_type="hapi", references=False)
 
 
+@mock.patch.dict(os.environ, {"FHIR_USER": "test", "FHIR_PW": "password"})
+def test_query_with_env(api_url, fhir_headers):
+    query_string = "/Observation?patient.birthdate=gt1990"
+    response = query(query_string=query_string, limit=100, fhir_server_url=api_url, fhir_server_type="hapi",
+                     references=False)
+    assert response
 
 
+def test_query_output(api_url, tmp_path):
+    query_string = "/Observation?patient.birthdate=gt1990"
+
+    json_path = tmp_path / "query_results.json"
+    csv_path = tmp_path / "query_results.csv"
+
+    response = query(query_string=query_string, limit=100, fhir_server_url=api_url, fhir_server_type="hapi",
+                     token="hello",
+                     out_path=json_path, out_format="json", references=False)
+
+    loaded_response = json.loads(json_path.read_bytes())
+
+    assert loaded_response
+    assert len(loaded_response["entry"]) == len(response["entry"])
+
+    # test serialization to csv
+    response = query(query_string=query_string, limit=100, fhir_server_url=api_url, fhir_server_type="hapi",
+                     token="hello",
+                     out_path=csv_path, out_format="csv", references=False)
+
+    df = pd.read_csv(csv_path)
+
+    assert len(df) == len(response["entry"])
+
+    with pytest.raises(NotImplementedError):
+        response = query(query_string=query_string, limit=100, fhir_server_url=api_url, fhir_server_type="hapi",
+                         token="hello",
+                         out_path=csv_path, out_format="hdf", references=False)
+
+
+def test_query_references(api_url):
+    query_string = "/Observation?patient.birthdate=gt1990"
+
+    response, references = query(query_string=query_string, limit=100, fhir_server_url=api_url, fhir_server_type="hapi",
+                                 token="hello", references=True)
+
+    assert len(response["entry"]) == len(references)
