@@ -27,6 +27,7 @@ def generate_data_set(name: str, generators: List[FhirResourceGenerator] = None,
 
     # create organisation to group generated patients under
     organisation = create_organisation_for_data_set(name)
+
     # register it with the server and get the reference
     r, organisation_reference = upload_resource(organisation,
                                                 fhir_api_url=fhir_api_url,
@@ -34,6 +35,7 @@ def generate_data_set(name: str, generators: List[FhirResourceGenerator] = None,
                                                 password=password,
                                                 token=token,
                                                 fhir_server_type=fhir_server_type
+
                                                 )
 
     if generators:
@@ -58,7 +60,7 @@ def _make_data_set_with_generators(generators: List[FhirResourceGenerator],
                                    fhir_server_type: str = "hapi"
                                    ):
     num_patients = max([gen.num_patients for gen in generators])
-    print(f"Generating {num_patients} for the defined resources.")
+    print(f"Generating {num_patients} Patients for the defined resources.")
     # Generate patients and upload bundle to get server assigned ids
     patient_generator = PatientGenerator(n=num_patients, organisation=organisation_reference)
     patients = patient_generator.generate()
@@ -112,5 +114,5 @@ if __name__ == '__main__':
     sequence_file_1 = "../examples/hiv_sequences/sequences_5.txt"
     ms_generator = MolecularSequenceGenerator(sequence_file=[sequence_file_1])
 
-    dataset = generate_data_set(name="conformance_test", generators=[ms_generator],
-                                fhir_api_url=os.getenv("FHIR_API_URL"), fhir_server_type="ibm")
+    dataset = generate_data_set(name="HIV_DEMO", generators=[ms_generator],
+                                fhir_api_url="https://ibm-fhir.personalhealthtrain.de/fhir-server/api/v4/", fhir_server_type="ibm")

@@ -20,9 +20,30 @@ def query(query_string: str = None,
           limit: int = 1000,
           out_path: Union[str, Path] = None,
           out_format: str = "json",
-          references: bool = True,
+          references: bool = False,
           fhir_server_url: str = None, username: str = None, password: str = None, token: str = None,
           fhir_server_type: str = None) -> Union[dict, Tuple[dict, list]]:
+    """
+    Execute a query against a server, either query all instances of a fhir resource or execute a given query string.
+    Optionally store the results in a file either in csv format or as a raw fhir bundle json
+
+    Args:
+        query_string: Prebuilt query string to execute against the server's REST api
+        resource: either string identifier of a resource
+        limit: maximum number of resources to return, 0 returns all resources
+        out_path: path under which to store the results
+        out_format: format in which to store the results either csv or json
+        references: whether to return a list of references to the resources
+        fhir_server_url: url of the fhir server api endpoint
+        username: username for basic auth
+        password: password for basic auth
+        token: token for bearer token auth
+        fhir_server_type: type of the fhir server one of [hapi, blaze, ibm]
+
+    Returns:
+        dictionary containing the json response from the server, if references is True returns a tuple
+        (bundle, references)
+    """
     # Attempt to load environment authentication variables if nothing is given
     if not (username and password) and not token:
         username, password, token = load_environment_auth_vars()
@@ -66,6 +87,22 @@ def query(query_string: str = None,
 
 def query_resource(resource: Union[DomainResource, DomainResourceType, str], fhir_server_url: str, auth: AuthBase,
                    headers: dict, fhir_server_type: str = None, count: int = 2000, limit: int = 0):
+    """
+    Query all instances up to limit from the server.
+
+    Args:
+        resource: Either string identifier of a resource or a FHIR resource type or instances
+        fhir_server_url: api endpoint to execute the query against
+        auth: authentication object for the request
+        headers: headers to add to the request
+        fhir_server_type: type of the fhir server
+        count: maximum resources per page returned by the fhir server
+        limit: maximum number of resources to return, all if 0
+
+    Returns:
+        bundle containing all instances of the resource on the server
+
+    """
     if isinstance(resource, str):
         url = fhir_server_url + "/" + resource + "?"
     else:
@@ -79,6 +116,20 @@ def query_resource(resource: Union[DomainResource, DomainResourceType, str], fhi
 
 def query_with_string(query_string: str, fhir_server_url: str, auth: AuthBase, headers: dict, count: int = 2000,
                       limit: int = 0) -> dict:
+    """
+    Execute the given query string using the given fhir api endpoint and return the results
+
+    Args:
+        query_string: prebuilt query string to append to the api url and query
+        fhir_server_url: api endpoint of the fhir server
+        auth: authentication object for the fhir server
+        headers: headers to add to the request
+        count: maximum number of resources per page
+        limit: maximum number of resources to return, all if 0
+
+    Returns:
+        bundle containing resources matching the query
+    """
     # stitch together the query string with the api url
     if fhir_server_url[-1] == "/" and query_string[0] == "/":
         url = fhir_server_url[:-1] + query_string

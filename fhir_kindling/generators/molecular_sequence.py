@@ -70,11 +70,12 @@ class MolecularSequenceGenerator(FhirResourceGenerator):
 
 if __name__ == '__main__':
     load_dotenv(find_dotenv())
-    sequence_file_1 = "../../examples/hiv_sequences/sequences_1.txt"
-    sequence_file_2 = "../../examples/hiv_sequences/sequences_3.txt"
-    ms_generator = MolecularSequenceGenerator(sequence_file=[sequence_file_1, sequence_file_2])
+    sequence_file_1 = "../../examples/hiv_sequences/sequences_5.txt"
+    ms_generator = MolecularSequenceGenerator(sequence_file=[sequence_file_1])
     resources = ms_generator.generate()
     print(len(resources))
+
+
     # print(resources)
     # bundle = ms_generator.make_bundle()
     # print()

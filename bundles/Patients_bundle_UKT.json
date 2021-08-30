@@ -10,7 +10,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/A04321",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/A04321"},
@@ -21,7 +21,7 @@
                                             "variant":[{
                                                 "observedAllele":"CXCR4"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-RIQ-RGPGRAFVTI----GKIGNMRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-RIQ-RGPGRAFVTI----GKIGNMRQAHC"}},
                                 {"fullUrl": "Patient/AB553911",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AB553911"},
@@ -34,7 +34,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AB553911",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AB553911"},
@@ -45,7 +45,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CERPNNN-TRRS-I-QI---GPGRAWFEAE---DIIGDIRKAHC"}},                                      
+                                            "observedSeq":"CERPNNN-TRRS-I-QI---GPGRAWFEAE---DIIGDIRKAHC"}},
                                 {"fullUrl": "Patient/AB553912",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AB553912"},
@@ -58,7 +58,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AB553912",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AB553912"},
@@ -69,7 +69,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNDN-TRKS-I-NI---APGRAFYATG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNDN-TRKS-I-NI---APGRAFYATG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AB553913",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AB553913"},
@@ -82,7 +82,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AB553913",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AB553913"},
@@ -93,7 +93,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKG-I-HM---GPGRAIYTT----DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKG-I-HM---GPGRAIYTT----DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AB553914",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AB553914"},
@@ -106,7 +106,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AB553914",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AB553914"},
@@ -117,7 +117,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKG-I-HF---GPGQALYTTG---AIIGDIREAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKG-I-HF---GPGQALYTTG---AIIGDIREAHC"}},
                                 {"fullUrl": "Patient/AF021477",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF021477"},
@@ -130,7 +130,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF021477",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF021477"},
@@ -141,7 +141,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYTTG---QIIGDIRQAYC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYTTG---QIIGDIRQAYC"}},
                                 {"fullUrl": "Patient/AF022257",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF022257"},
@@ -154,7 +154,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF022257",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF022257"},
@@ -165,7 +165,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-SI---GPGRAFYTTG---EIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-SI---GPGRAFYTTG---EIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF034375",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF034375"},
@@ -178,7 +178,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF034375",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF034375"},
@@ -189,7 +189,7 @@
                                             "variant":[{
                                                 "observedAllele":"CXCR4"
                                             }],
-                                            "observedSeq":"CTRPNNY-KRKR-I-TT---GPGKVLYTTG---QIIGDIRRAHC"}},                                      
+                                            "observedSeq":"CTRPNNY-KRKR-I-TT---GPGKVLYTTG---QIIGDIRRAHC"}},
                                 {"fullUrl": "Patient/AF035532",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF035532"},
@@ -202,7 +202,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF035532",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF035532"},
@@ -213,7 +213,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5 CXCR4"
                                             }],
-                                            "observedSeq":"CTRPNNN-IRKR-I-HI---GPGRAFYTTG---QIIGNIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-IRKR-I-HI---GPGRAFYTTG---QIIGNIRQAHC"}},
                                 {"fullUrl": "Patient/AF075720",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF075720"},
@@ -226,7 +226,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF075720",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF075720"},
@@ -237,7 +237,7 @@
                                             "variant":[{
                                                 "observedAllele":"CXCR4"
                                             }],
-                                            "observedSeq":"CTRPNYN-KRKR-I-HI---GPGRAFYTTK---NIKGTIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNYN-KRKR-I-HI---GPGRAFYTTK---NIKGTIRQAHC"}},
                                 {"fullUrl": "Patient/AF082353",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF082353"},
@@ -250,7 +250,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF082353",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF082353"},
@@ -261,7 +261,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5 CXCR4"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYTTG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYTTG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF082354",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF082354"},
@@ -274,7 +274,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF082354",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF082354"},
@@ -285,7 +285,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRRS-I-NI---GPGRAFYTTG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRRS-I-NI---GPGRAFYTTG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF082360",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF082360"},
@@ -298,7 +298,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF082360",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF082360"},
@@ -309,7 +309,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYTTG---DIVGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYTTG---DIVGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF082361",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF082361"},
@@ -322,7 +322,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF082361",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF082361"},
@@ -333,7 +333,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CIRPNNN-TRKS-I-HI---GPGRAFYAAG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CIRPNNN-TRKS-I-HI---GPGRAFYAAG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF082371",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF082371"},
@@ -346,7 +346,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF082371",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF082371"},
@@ -357,7 +357,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5 CXCR4"
                                             }],
-                                            "observedSeq":"CTRPKNN-TRRS-I-HI---GPGGAFYTTG---DIIGAIRQAYC"}},                                      
+                                            "observedSeq":"CTRPKNN-TRRS-I-HI---GPGGAFYTTG---DIIGAIRQAYC"}},
                                 {"fullUrl": "Patient/AF082379",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF082379"},
@@ -370,7 +370,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF082379",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF082379"},
@@ -381,7 +381,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-PM---GPGRAFYATG---QIIGDIRQAYC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-PM---GPGRAFYATG---QIIGDIRQAYC"}},
                                 {"fullUrl": "Patient/AF082381",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF082381"},
@@ -394,7 +394,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF082381",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF082381"},
@@ -405,7 +405,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKG-I-HI---GPGRAFYAT----DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKG-I-HI---GPGRAFYAT----DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF082382",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF082382"},
@@ -418,7 +418,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF082382",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF082382"},
@@ -429,7 +429,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---APGRAFYATG---EIIGNIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---APGRAFYATG---EIIGNIRQAHC"}},
                                 {"fullUrl": "Patient/AF082384",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF082384"},
@@ -442,7 +442,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF082384",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF082384"},
@@ -453,7 +453,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRLNNY-TKEV-V-SM---GPGRAFFTTG---DIIGAIRRAHC"}},                                      
+                                            "observedSeq":"CTRLNNY-TKEV-V-SM---GPGRAFFTTG---DIIGAIRRAHC"}},
                                 {"fullUrl": "Patient/AF082390",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF082390"},
@@ -466,7 +466,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF082390",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF082390"},
@@ -477,7 +477,7 @@
                                             "variant":[{
                                                 "observedAllele":"CXCR4"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGGAFYATG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGGAFYATG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF082837",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF082837"},
@@ -490,7 +490,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF082837",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF082837"},
@@ -501,7 +501,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYATG---DNIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYATG---DNIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF082840",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF082840"},
@@ -514,7 +514,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF082840",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF082840"},
@@ -525,7 +525,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGKAFYATG---DVIGDIRKAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGKAFYATG---DVIGDIRKAHC"}},
                                 {"fullUrl": "Patient/AF112542",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF112542"},
@@ -538,7 +538,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF112542",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF112542"},
@@ -549,7 +549,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-PM---GPGKAFYATG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-PM---GPGKAFYATG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF112548",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF112548"},
@@ -562,7 +562,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF112548",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF112548"},
@@ -573,7 +573,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKG-I-HI---GPGRTFYTTG---EIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKG-I-HI---GPGRTFYTTG---EIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF112563",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF112563"},
@@ -586,7 +586,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF112563",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF112563"},
@@ -597,7 +597,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPTNN-TRKS-I-HI---APGSAFYATG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPTNN-TRKS-I-HI---APGSAFYATG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF146728",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF146728"},
@@ -610,7 +610,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF146728",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF146728"},
@@ -621,7 +621,7 @@
                                             "variant":[{
                                                 "observedAllele":"CXCR4"
                                             }],
-                                            "observedSeq":"CMRPNNN-TRKG-I-YV---GPGRHIYATE---KIVGDIRQAHC"}},                                      
+                                            "observedSeq":"CMRPNNN-TRKG-I-YV---GPGRHIYATE---KIVGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF194975",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF194975"},
@@ -634,7 +634,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF194975",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF194975"},
@@ -645,7 +645,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRRS-I-NI---GPGRAFYATG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRRS-I-NI---GPGRAFYATG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF194976",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF194976"},
@@ -658,7 +658,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF194976",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF194976"},
@@ -669,7 +669,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRRS-I-SI---GPGRAFYATG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRRS-I-SI---GPGRAFYATG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF194978",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF194978"},
@@ -682,7 +682,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF194978",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF194978"},
@@ -693,7 +693,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRRS-I-HI---GPGKAFY-TG---EIIRNIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRRS-I-HI---GPGKAFY-TG---EIIRNIRQAHC"}},
                                 {"fullUrl": "Patient/AF194979",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF194979"},
@@ -706,7 +706,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF194979",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF194979"},
@@ -717,7 +717,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRRS-I-HI---GPGKAFY-TG---RNNRNIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRRS-I-HI---GPGKAFY-TG---RNNRNIRQAHC"}},
                                 {"fullUrl": "Patient/AF199032",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF199032"},
@@ -730,7 +730,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF199032",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF199032"},
@@ -741,7 +741,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-PI---GPGRAFYTTG---QIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-PI---GPGRAFYTTG---QIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF199034",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF199034"},
@@ -754,7 +754,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF199034",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF199034"},
@@ -765,7 +765,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYTTG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYTTG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF199036",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF199036"},
@@ -778,7 +778,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF199036",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF199036"},
@@ -789,7 +789,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRALYATG---DIVGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRALYATG---DIVGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF199038",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF199038"},
@@ -802,7 +802,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF199038",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF199038"},
@@ -813,7 +813,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CIRPNNN-TRQG-I-HI---GPGKALYTT----KIIGNIRQAHC"}},                                      
+                                            "observedSeq":"CIRPNNN-TRQG-I-HI---GPGKALYTT----KIIGNIRQAHC"}},
                                 {"fullUrl": "Patient/AF199040",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF199040"},
@@ -826,7 +826,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF199040",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF199040"},
@@ -837,7 +837,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-NM---GPGRAWYTTG---QIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-NM---GPGRAWYTTG---QIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF254779",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF254779"},
@@ -850,7 +850,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF254779",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF254779"},
@@ -861,7 +861,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPGNN-TRKS-I-SM---GPGRAFYATG---DIIGDIRQAYC"}},                                      
+                                            "observedSeq":"CTRPGNN-TRKS-I-SM---GPGRAFYATG---DIIGDIRQAYC"}},
                                 {"fullUrl": "Patient/AF254781",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF254781"},
@@ -874,7 +874,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF254781",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF254781"},
@@ -885,7 +885,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-PI---GPGRAFYTTG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-PI---GPGRAFYTTG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF258957",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF258957"},
@@ -898,7 +898,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF258957",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF258957"},
@@ -909,7 +909,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HL---GPGRAFFTTG---EIIGNIRQAYC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HL---GPGRAFFTTG---EIIGNIRQAYC"}},
                                 {"fullUrl": "Patient/AF259011",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF259011"},
@@ -922,7 +922,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF259011",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF259011"},
@@ -933,7 +933,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPGNN-TRKS-I-HI---GPGRAFYTTG---QIIGNIRQAHC"}},                                      
+                                            "observedSeq":"CTRPGNN-TRKS-I-HI---GPGRAFYTTG---QIIGNIRQAHC"}},
                                 {"fullUrl": "Patient/AF286365",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF286365"},
@@ -946,7 +946,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF286365",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF286365"},
@@ -957,7 +957,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5 CXCR4"
                                             }],
-                                            "observedSeq":"CTRPGNK-IRRR-I-HI---GPGRAFYT-----DRVGDIRQAYC"}},                                      
+                                            "observedSeq":"CTRPGNK-IRRR-I-HI---GPGRAFYT-----DRVGDIRQAYC"}},
                                 {"fullUrl": "Patient/AF310108",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF310108"},
@@ -970,7 +970,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF310108",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF310108"},
@@ -981,7 +981,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---EAGKALY-TG---EIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---EAGKALY-TG---EIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF310123",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF310123"},
@@ -994,7 +994,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF310123",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF310123"},
@@ -1005,7 +1005,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HL---GAGRALY-TG---EIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HL---GAGRALY-TG---EIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF355630",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF355630"},
@@ -1018,7 +1018,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF355630",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF355630"},
@@ -1029,7 +1029,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5 CXCR4"
                                             }],
-                                            "observedSeq":"CTRPSNN-TRKS-I-NI---GPGRAWYATG---EIIGDIRKAHC"}},                                      
+                                            "observedSeq":"CTRPSNN-TRKS-I-NI---GPGRAWYATG---EIIGDIRKAHC"}},
                                 {"fullUrl": "Patient/AF355726",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF355726"},
@@ -1042,7 +1042,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF355726",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF355726"},
@@ -1053,7 +1053,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPSNN-TRKS-I-HL---GPGRAFYATG---DIIGNIRKAHC"}},                                      
+                                            "observedSeq":"CTRPSNN-TRKS-I-HL---GPGRAFYATG---DIIGNIRKAHC"}},
                                 {"fullUrl": "Patient/AF384245",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384245"},
@@ -1066,7 +1066,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384245",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384245"},
@@ -1077,7 +1077,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---APGRAYYATG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---APGRAYYATG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF384248",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384248"},
@@ -1090,7 +1090,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384248",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384248"},
@@ -1101,7 +1101,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKG-I-HI---GPGRAFYTTG---EIIGDIRKAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKG-I-HI---GPGRAFYTTG---EIIGDIRKAHC"}},
                                 {"fullUrl": "Patient/AF384254",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384254"},
@@ -1114,7 +1114,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384254",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384254"},
@@ -1125,7 +1125,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPSNN-TRKS-I-HM---GPGRAWYATG---SITGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPSNN-TRKS-I-HM---GPGRAWYATG---SITGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF384259",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384259"},
@@ -1138,7 +1138,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384259",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384259"},
@@ -1149,7 +1149,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYTTG---EIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYTTG---EIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF384261",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384261"},
@@ -1162,7 +1162,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384261",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384261"},
@@ -1173,7 +1173,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKG-I-HI---GPGRAFYATG---EIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKG-I-HI---GPGRAFYATG---EIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF384265",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384265"},
@@ -1186,7 +1186,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384265",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384265"},
@@ -1197,7 +1197,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-NI---GPGRAFFATG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-NI---GPGRAFFATG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF384269",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384269"},
@@ -1210,7 +1210,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384269",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384269"},
@@ -1221,7 +1221,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPGNN-TRRS-I-HI---APGRAFYATG---DIIGDIRKAHC"}},                                      
+                                            "observedSeq":"CTRPGNN-TRRS-I-HI---APGRAFYATG---DIIGDIRKAHC"}},
                                 {"fullUrl": "Patient/AF384272",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384272"},
@@ -1234,7 +1234,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384272",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384272"},
@@ -1245,7 +1245,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HM---GPGGSFYATG---DIIGNIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HM---GPGGSFYATG---DIIGNIRQAHC"}},
                                 {"fullUrl": "Patient/AF384278",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384278"},
@@ -1258,7 +1258,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384278",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384278"},
@@ -1269,7 +1269,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CIRPNNN-TRTS-M-PM---GPGRAFYAMG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CIRPNNN-TRTS-M-PM---GPGRAFYAMG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF384282",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384282"},
@@ -1282,7 +1282,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384282",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384282"},
@@ -1293,7 +1293,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYTTG---QIVGDIRKAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYTTG---QIVGDIRKAHC"}},
                                 {"fullUrl": "Patient/AF384286",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384286"},
@@ -1306,7 +1306,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384286",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384286"},
@@ -1317,7 +1317,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYARG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYARG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF384291",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384291"},
@@ -1330,7 +1330,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384291",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384291"},
@@ -1341,7 +1341,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-PI---GPGRAFYARG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-PI---GPGRAFYARG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF384294",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384294"},
@@ -1354,7 +1354,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384294",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384294"},
@@ -1365,7 +1365,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAVYATG---QIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAVYATG---QIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF384299",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384299"},
@@ -1378,7 +1378,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384299",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384299"},
@@ -1389,7 +1389,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAVYATG---QIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAVYATG---QIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF384303",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384303"},
@@ -1402,7 +1402,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384303",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384303"},
@@ -1413,7 +1413,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-PI---GPGRAVYATG---QMIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-PI---GPGRAVYATG---QMIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF384305",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384305"},
@@ -1426,7 +1426,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384305",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384305"},
@@ -1437,7 +1437,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYATG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYATG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF384317",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384317"},
@@ -1450,7 +1450,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384317",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384317"},
@@ -1461,7 +1461,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKG-I-HI---GPGGAIYATG---AITGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKG-I-HI---GPGGAIYATG---AITGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF384322",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384322"},
@@ -1474,7 +1474,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384322",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384322"},
@@ -1485,7 +1485,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKG-I-HI---GPGGAIYATG---AITGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKG-I-HI---GPGGAIYATG---AITGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF384326",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384326"},
@@ -1498,7 +1498,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384326",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384326"},
@@ -1509,7 +1509,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-SI---GPGRAFYAHG---DIVGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-SI---GPGRAFYAHG---DIVGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF384327",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384327"},
@@ -1522,7 +1522,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384327",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384327"},
@@ -1533,7 +1533,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKG-I-AI---GPGRAVYATE---KIVGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKG-I-AI---GPGRAVYATE---KIVGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF384330",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384330"},
@@ -1546,7 +1546,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384330",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384330"},
@@ -1557,7 +1557,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CIRPNNN-TRKG-I-HI---GPGRTFYATG---EIIGNIRQAHC"}},                                      
+                                            "observedSeq":"CIRPNNN-TRKG-I-HI---GPGRTFYATG---EIIGNIRQAHC"}},
                                 {"fullUrl": "Patient/AF384333",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF384333"},
@@ -1570,7 +1570,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF384333",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF384333"},
@@ -1581,7 +1581,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-PL---GAGRAWYATG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-PL---GAGRAWYATG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF491737",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF491737"},
@@ -1594,7 +1594,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF491737",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF491737"},
@@ -1605,7 +1605,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HM---GPGKAFYTT----GVIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HM---GPGKAFYTT----GVIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF491740",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF491740"},
@@ -1618,7 +1618,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF491740",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF491740"},
@@ -1629,7 +1629,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-PM---GPGKAFYATG---DIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-PM---GPGKAFYATG---DIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AF540994",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AF540994"},
@@ -1642,7 +1642,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AF540994",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AF540994"},
@@ -1653,7 +1653,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-PI---GPGRALYATG---EIIGQIRRAYC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-PI---GPGRALYATG---EIIGQIRRAYC"}},
                                 {"fullUrl": "Patient/AJ418478",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AJ418478"},
@@ -1666,7 +1666,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AJ418478",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AJ418478"},
@@ -1677,7 +1677,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-PI---GPGRALYATG---DIIGEIRQAFC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-PI---GPGRALYATG---DIIGEIRQAFC"}},
                                 {"fullUrl": "Patient/AJ418495",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AJ418495"},
@@ -1690,7 +1690,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AJ418495",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AJ418495"},
@@ -1701,7 +1701,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRLNNN-TRKS-I-HM---GPGRAFFATG---EIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRLNNN-TRKS-I-HM---GPGRAFFATG---EIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AJ418514",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AJ418514"},
@@ -1714,7 +1714,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AJ418514",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AJ418514"},
@@ -1725,7 +1725,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYTTG---GIIGNIRQAHC"}},                                      
+                                            "observedSeq":"CTRPNNN-TRKS-I-HI---GPGRAFYTTG---GIIGNIRQAHC"}},
                                 {"fullUrl": "Patient/AJ418521",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AJ418521"},
@@ -1738,7 +1738,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AJ418521",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AJ418521"},
@@ -1749,7 +1749,7 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPSNN-TRKS-I-PI---GPGRAFYTTG---EIIGDIRQAHC"}},                                      
+                                            "observedSeq":"CTRPSNN-TRKS-I-PI---GPGRAFYTTG---EIIGDIRQAHC"}},
                                 {"fullUrl": "Patient/AJ418531",
                                         "request":{"method":"PUT",
                                             "url": "Patient/AJ418531"},
@@ -1762,7 +1762,7 @@
                                                 "other": {
                                                     "reference": "HIVdemo" },
                                                     "type": "refer"}]}},
-                                    
+
                                     {"fullUrl": "MolecularSequence/AJ418531",
                                         "request":{"method":"PUT",
                                             "url": "MolecularSequence/AJ418531"},
@@ -1773,6 +1773,6 @@
                                             "variant":[{
                                                 "observedAllele":"CCR5"
                                             }],
-                                            "observedSeq":"CTRPHNN-TRKS-I-HI---GPGRAFYATG---EIIGDIRQAHC"}},                                      
-                            ], 
+                                            "observedSeq":"CTRPHNN-TRKS-I-HI---GPGRAFYATG---EIIGDIRQAHC"}}
+                            ],
  "id": "31d3977d39ed" ,"resourceType":"Bundle","type":"transaction"}
