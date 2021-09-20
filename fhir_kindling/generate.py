@@ -34,8 +34,8 @@ def generate_data_set(name: str, generators: List[FhirResourceGenerator] = None,
                                                 username=username,
                                                 password=password,
                                                 token=token,
-                                                fhir_server_type=fhir_server_type
-
+                                                fhir_server_type=fhir_server_type,
+                                                reference=True
                                                 )
 
     if generators:
@@ -46,6 +46,7 @@ def generate_data_set(name: str, generators: List[FhirResourceGenerator] = None,
         return exit_code
 
     elif bundle:
+        # TODO upload bundle as data set
         pass
 
     return 0
@@ -68,6 +69,7 @@ def _make_data_set_with_generators(generators: List[FhirResourceGenerator],
                                                  username=username, password=password, token=token,
                                                  fhir_server_type=fhir_server_type,
                                                  references=True)
+
     for gen in generators:
         resources = gen.generate(patient_references=patient_references)
         response = upload_bundle(gen.make_bundle(), fhir_api_url=fhir_api_url, username=username, password=password,
@@ -111,8 +113,11 @@ if __name__ == '__main__':
     #                                        filename="sequence_bundle.json")
     #
     # upload_bundle(bundle=bundle, fhir_api_url=os.getenv("FHIR_API_URL"))
-    sequence_file_1 = "../examples/hiv_sequences/sequences_5.txt"
-    ms_generator = MolecularSequenceGenerator(sequence_file=[sequence_file_1])
+    sequence_file_5 = "../examples/hiv_sequences/sequences_5.txt"
+    sequence_file_4 = "../examples/hiv_sequences/sequences_4.txt"
+    sequence_file_3 = "../examples/hiv_sequences/sequences_3.txt"
+    ms_generator = MolecularSequenceGenerator(sequence_file=[sequence_file_3, sequence_file_4])
 
-    dataset = generate_data_set(name="HIV_DEMO", generators=[ms_generator],
-                                fhir_api_url="https://ibm-fhir.personalhealthtrain.de/fhir-server/api/v4/", fhir_server_type="ibm")
+    dataset = generate_data_set(name="Test 2", generators=[ms_generator],
+                                fhir_api_url="https://ibm-fhir.personalhealthtrain.de/fhir-server/api/v4",
+                                fhir_server_type="ibm")
