@@ -1,35 +1,76 @@
-from typing import List
+import os
+from typing import List, Union
 
+import requests
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
+from fhir.resources.organization import Organization
+
 from fhir_kindling.auth import generate_auth
+from fhir.resources import FHIRAbstractModel
+from fhir_kindling.query import query
+from fhir_kindling.upload import generate_fhir_headers
+from dotenv import load_dotenv, find_dotenv
 
 
-def delete_resources(query: str = None, resource: str = None, cascade: bool = False,
+def delete_resources(query: str = None, resource: Union[str, FHIRAbstractModel] = None, cascade: bool = False,
                      fhir_api_url: str = None, username: str = None, password: str = None, token: str = None,
                      fhir_server_type: str = "hapi"):
     pass
 
 
-def delete_resource_by_type():
-    pass
+def delete_resource_by_type(resource: Union[str, FHIRAbstractModel],
+                            fhir_api_url: str = None, username: str = None, password: str = None, token: str = None,
+                            fhir_server_type: str = "hapi"
+                            ):
+    headers = generate_fhir_headers(fhir_server_type)
+    auth = generate_auth(username, password, token)
+    response, references = query(resource=resource, fhir_server_url=fhir_api_url, username=username, password=password,
+                                 token=token, references=True, fhir_server_type=fhir_server_type)
+
+    transaction = make_delete_transaction(references, resource_type=resource)
+
+    delete_response = requests.post(fhir_api_url, json=transaction, headers=headers, auth=auth)
+
+    print(delete_response.text)
 
 
-def make_delete_transaction(urls: List[str]) -> Bundle:
+def make_delete_transaction(urls: List[str], resource_type: Union[str, FHIRAbstractModel]) -> dict:
     bundle_requests = []
+    print(urls)
+
+    if isinstance(resource_type, str):
+        string_resource_type = resource_type
+    else:
+        string_resource_type = resource_type.get_resource_type()
+
     for url in urls:
-        request = BundleEntryRequest(
+        entry_request = BundleEntryRequest(
             **{
                 "method": "DELETE",
                 "url": url
             }
         )
-        bundle_requests.append(request)
 
-    bundle = Bundle(
-        **{
-            "type": "transaction",
-            "entry": bundle_requests
-        }
-    )
+        entry = BundleEntry(
+            request=entry_request
+        )
+        bundle_requests.append(entry)
 
+    # bundle = Bundle(
+    #     **{
+    #         "type": "transaction",
+    #         "entry": BundleEntry(resource_type=bundle_requests)
+    #     }
+    # )
+    bundle = {
+        "type": "transaction",
+        "resourceType": "Bundle",
+        "entry": [entry.dict() for entry in bundle_requests]
+    }
     return bundle
+
+
+if __name__ == '__main__':
+    load_dotenv(find_dotenv())
+    delete_resource_by_type(resource="MolecularSequence", fhir_api_url=os.getenv("IBM_API_URL"),
+                            username=os.getenv("FHIR_USER"), password=os.getenv("FHIR_PW"), fhir_server_type="ibm")

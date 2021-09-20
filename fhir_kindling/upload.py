@@ -62,7 +62,6 @@ def upload_bundle(bundle: Union[Bundle, Path, str],
 
         response = _upload_bundle(bundle, api_url=fhir_api_url, auth=auth, fhir_server_type=fhir_server_type)
     if references:
-        # TODO fix references for ibm fhir server
         resource_references = _get_references_from_bundle_response(response)
         return response, resource_references
     else:
@@ -95,7 +94,6 @@ def upload_resource(resource: FHIRAbstractModel,
     url = fhir_api_url + f"/{resource.resource_type}"
 
     r = requests.post(url=url, json=resource.dict(), headers=generate_fhir_headers(fhir_server_type), auth=auth)
-    print(r.text)
 
     if fhir_server_type == "ibm":
         if reference:
@@ -124,7 +122,6 @@ def upload_resource(resource: FHIRAbstractModel,
 
 def _get_references_from_bundle_response(response):
     references = []
-    print(response)
     for entry in response["entry"]:
         location = entry["response"]["location"]
         reference = "/".join(location.split("/")[:2])
@@ -137,7 +134,6 @@ def _upload_bundle(bundle: Bundle, api_url: str, auth: AuthBase, fhir_server_typ
     headers = generate_fhir_headers(fhir_server_type)
     r = requests.post(api_url, auth=auth, data=bundle.json(), headers=headers)
 
-    print(r.text)
     r.raise_for_status()
 
     return r.json()

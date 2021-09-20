@@ -7,6 +7,7 @@ import requests
 from requests.auth import AuthBase
 from fhir.resources.domainresource import DomainResource
 from fhir.resources.fhirtypes import DomainResourceType
+from fhir.resources import FHIRAbstractModel
 
 from fhir_kindling.auth import generate_auth, load_environment_auth_vars
 from fhir_kindling.serde import flatten_bundle
@@ -16,7 +17,7 @@ from fhir_kindling.upload import generate_fhir_headers
 # todo clean up authentication flow
 
 def query(query_string: str = None,
-          resource: Union[DomainResource, DomainResourceType, str] = None,
+          resource: Union[FHIRAbstractModel, DomainResourceType, str] = None,
           limit: int = 1000,
           out_path: Union[str, Path] = None,
           out_format: str = "json",
@@ -79,7 +80,6 @@ def query(query_string: str = None,
     if response and references:
         references = _extract_references_from_query_response(entries=response.get("entry"),
                                                              fhir_server_type=fhir_server_type)
-        print(references)
         return response, references
 
     return response
@@ -184,7 +184,7 @@ def _resolve_response_pagination(response: dict, auth: AuthBase, headers: dict, 
 
 def _extract_references_from_query_response(entries: List[dict], fhir_server_type: str):
     references = []
-    pprint(entries)
+    # TODO fix this
     if fhir_server_type == "hapi":
         for entry in entries:
             subject = entry.get("subject")
@@ -193,12 +193,10 @@ def _extract_references_from_query_response(entries: List[dict], fhir_server_typ
             else:
                 references.append(None)
 
-    elif fhir_server_type == "blaze":
+    elif fhir_server_type in ["blaze", "ibm"]:
         for entry in entries:
             resource_reference = "/".join(entry["fullUrl"].split("/")[-2:])
             references.append(resource_reference)
-    elif fhir_server_type == "ibm":
-        pass
     else:
         raise ValueError(f"Unsupported FHIR server: {fhir_server_type}")
 
