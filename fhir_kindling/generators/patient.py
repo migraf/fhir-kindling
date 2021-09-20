@@ -164,7 +164,7 @@ if __name__ == '__main__':
     load_dotenv(find_dotenv())
     pg = PatientGenerator(n=100)
     gen_patients = pg.generate()
-    response, references = upload_bundle(pg.make_bundle(), fhir_api_url=os.getenv("FHIR_API_URL"),
+    response, references = upload_bundle(pg.make_bundle(), fhir_api_url=os.getenv("IBM_API_URL"),
                                          username=os.getenv("FHIR_USER"), password=os.getenv("FHIR_PW"),
                                          references=True)
     print(references)
