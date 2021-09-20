@@ -3,7 +3,6 @@ from typing import List, Union
 
 import requests
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
-from fhir.resources.organization import Organization
 
 from fhir_kindling.auth import generate_auth
 from fhir.resources import FHIRAbstractModel
@@ -27,22 +26,15 @@ def delete_resource_by_type(resource: Union[str, FHIRAbstractModel],
     response, references = query(resource=resource, fhir_server_url=fhir_api_url, username=username, password=password,
                                  token=token, references=True, fhir_server_type=fhir_server_type)
 
-    transaction = make_delete_transaction(references, resource_type=resource)
+    transaction = _make_delete_transaction(references)
 
     delete_response = requests.post(fhir_api_url, json=transaction, headers=headers, auth=auth)
 
-    print(delete_response.text)
+    return delete_response
 
 
-def make_delete_transaction(urls: List[str], resource_type: Union[str, FHIRAbstractModel]) -> dict:
+def _make_delete_transaction(urls: List[str]) -> dict:
     bundle_requests = []
-    print(urls)
-
-    if isinstance(resource_type, str):
-        string_resource_type = resource_type
-    else:
-        string_resource_type = resource_type.get_resource_type()
-
     for url in urls:
         entry_request = BundleEntryRequest(
             **{
@@ -56,12 +48,6 @@ def make_delete_transaction(urls: List[str], resource_type: Union[str, FHIRAbstr
         )
         bundle_requests.append(entry)
 
-    # bundle = Bundle(
-    #     **{
-    #         "type": "transaction",
-    #         "entry": BundleEntry(resource_type=bundle_requests)
-    #     }
-    # )
     bundle = {
         "type": "transaction",
         "resourceType": "Bundle",

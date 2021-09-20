@@ -118,6 +118,6 @@ if __name__ == '__main__':
     sequence_file_3 = "../examples/hiv_sequences/sequences_3.txt"
     ms_generator = MolecularSequenceGenerator(sequence_file=[sequence_file_3, sequence_file_4])
 
-    dataset = generate_data_set(name="Test4", generators=[ms_generator],
+    dataset = generate_data_set(name="HIV_DEMO", generators=[ms_generator],
                                 fhir_api_url="https://ibm-fhir.personalhealthtrain.de/fhir-server/api/v4",
                                 fhir_server_type="ibm")
