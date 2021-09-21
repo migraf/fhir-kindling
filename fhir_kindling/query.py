@@ -184,7 +184,6 @@ def _resolve_response_pagination(response: dict, auth: AuthBase, headers: dict, 
 
 def _extract_references_from_query_response(entries: List[dict], fhir_server_type: str):
     references = []
-    # TODO fix this
     if fhir_server_type == "hapi":
         for entry in entries:
             subject = entry.get("subject")
