@@ -13,6 +13,7 @@ from pprint import pprint
 from fhir_kindling.auth import generate_auth
 from fhir_kindling.serde import validate_bundle, load_bundle
 from dotenv import load_dotenv, find_dotenv
+import os
 
 
 def upload_bundle(bundle: Union[Bundle, Path, str],
@@ -130,10 +131,14 @@ def _get_references_from_bundle_response(response):
     return references
 
 
-def _upload_bundle(bundle: Bundle, api_url: str, auth: AuthBase, fhir_server_type: str):
+def _upload_bundle(bundle: Union[Bundle, dict], api_url: str, auth: AuthBase, fhir_server_type: str):
     headers = generate_fhir_headers(fhir_server_type)
-    r = requests.post(api_url, auth=auth, data=bundle.json(), headers=headers)
 
+    if isinstance(bundle, Bundle):
+
+        r = requests.post(api_url, auth=auth, data=bundle.json(), headers=headers)
+    else:
+        r = requests.post(api_url, auth=auth, data=bundle, headers=headers)
     r.raise_for_status()
 
     return r.json()
@@ -160,5 +165,5 @@ if __name__ == '__main__':
     # response = upload_bundle(bundle=gecco_path, fhir_api_url=os.getenv("FHIR_API_URL"), username=os.getenv("FHIR_USER"),
     #                          password=os.getenv("FHIR_PW"), fhir_server_type=os.getenv("FHIR_SERVER_TYPE"))
     # blaze upload
-    # response = upload_bundle(bundle=bundle, fhir_api_url=os.getenv("BLAZE_API_URL"), token=os.getenv("FHIR_TOKEN"),
-    #                          fhir_server_type=os.getenv("FHIR_SERVER_TYPE"))
+    response = upload_bundle(bundle=bundle, fhir_api_url=os.getenv("BLAZE_API_URL"), token=os.getenv("FHIR_TOKEN"),
+                             fhir_server_type=os.getenv("FHIR_SERVER_TYPE"))

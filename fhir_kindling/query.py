@@ -148,6 +148,10 @@ def query_with_string(query_string: str, fhir_server_url: str, auth: AuthBase, h
     return response
 
 
+def get_fhir_server_summary():
+    pass
+
+
 def _execute_query(url: str, auth: AuthBase = None, headers: dict = None, limit: int = 0) -> dict:
     r = requests.get(url=url, auth=auth, headers=headers)
     r.raise_for_status()

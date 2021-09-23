@@ -1,5 +1,5 @@
 import json
-from typing import Union
+from typing import Union, List
 
 import click
 from fhir.resources.bundle import BundleEntry, Bundle
@@ -7,7 +7,7 @@ from pydantic.error_wrappers import ValidationError
 from pathlib import Path
 
 
-def load_bundle(bundle_path: Union[Path, str], validate: bool = True) -> Bundle:
+def load_bundle(bundle_path: Union[Path, str], validate: bool = True) -> Union[Bundle, dict]:
     """Loads a FHIR bundle stored as a json file from file and returns a bundle object. When validate is selected
     all resource entries in the bundle are individually validated. The full bundle is validated by default.
 
@@ -27,50 +27,87 @@ def load_bundle(bundle_path: Union[Path, str], validate: bool = True) -> Bundle:
     if validate:
         bundle = validate_bundle(bundle_json)
         if not bundle:
-            raise ValidationError()
-    else:
-        bundle = Bundle(**bundle_json)
-    return bundle
+            raise ValueError("Invalid bundle format")
+        return bundle
+    return bundle_json
 
 
-def validate_bundle(bundle_json: dict, show_invalid_resources: bool = True) -> Union[None, Bundle]:
+def validate_bundle(
+    bundle_json: dict,
+    show_invalid_entries: bool = True,
+    drop_invalid_entries: bool = False) -> Union[None, Bundle, List[int]]:
     """Validate the all the resources in the bundle and display validation errors.
 
     Args:
+      drop_invalid_resources:
       bundle_json: dictionary based on a loaded json bundle
       show_invalid_resources: bool:  (Default value = True)
 
     Returns:
         either a Bundle object if the validation succeeded or None if it failed.
     """
-
-    # validate entries
-    errors = 0
-
-    # attempt to load each entry in the bundle as Bundle Entry resource
-    for index, entry in enumerate(bundle_json["entry"]):
-        try:
-            bundle_entry = BundleEntry(**entry)
-
-        # Catch and display validation errors and display them with their index
-        except ValidationError as e:
-            click.echo(f"Bundle entry with index {index} could not be validated", err=True)
-            click.echo(f"\n {e} \n", err=True)
-            if show_invalid_resources:
-                click.echo(json.dumps(entry, indent=2), err=True)
-            errors += 1
-
-    if errors == 0:
-        # Try to validate the full bundle
+    if drop_invalid_entries:
+        valid_entries = _validate_bundle_entries(
+            bundle_json["entry"],
+            show_invalid_entries=show_invalid_entries,
+            drop_invalid_entries=drop_invalid_entries)
+        bundle_json["entry"] = valid_entries
         try:
             bundle = Bundle(**bundle_json)
             return bundle
 
         except ValidationError as e:
             click.echo("Bundle could not be validated", err=True)
-            if show_invalid_resources:
+            if show_invalid_entries:
                 click.echo(e, err=True)
             return None
 
     else:
-        return None
+        errors, error_indices = _validate_bundle_entries(
+            bundle_json["entry"],
+            show_invalid_entries=show_invalid_entries,
+            drop_invalid_entries=drop_invalid_entries
+        )
+
+        if errors == 0:
+            # Try to validate the full bundle
+            try:
+                bundle = Bundle(**bundle_json)
+                return bundle
+
+            except ValidationError as e:
+                click.echo("Bundle could not be validated", err=True)
+                if show_invalid_entries:
+                    click.echo(e, err=True)
+                return None
+        else:
+            return error_indices
+
+
+def _validate_bundle_entries(entries: List[dict],
+                             show_invalid_entries: bool = True,
+                             drop_invalid_entries: bool = False):
+    errors = 0
+    error_indices = []
+
+    valid_bundle_entries = []
+
+    for index, entry in enumerate(entries):
+        try:
+            bundle_entry = BundleEntry(**entry)
+            valid_bundle_entries.append(bundle_entry)
+        # Catch and display validation errors and display them with their index
+        except ValidationError as e:
+            if show_invalid_entries:
+                click.echo(f"Bundle entry with index {index} could not be validated", err=True)
+                click.echo(f"\n {e} \n", err=True)
+                click.echo(json.dumps(entry, indent=2), err=True)
+            errors += 1
+            error_indices.append(index)
+
+    # drop invalid is set return only the validated entries
+    if drop_invalid_entries:
+        print(len(valid_bundle_entries))
+        return valid_bundle_entries
+
+    return errors, error_indices
