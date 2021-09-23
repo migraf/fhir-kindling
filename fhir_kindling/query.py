@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from pprint import pprint
 from typing import Union, List, Tuple
+import pandas as pd
 
 import requests
 from requests.auth import AuthBase
@@ -23,7 +24,7 @@ def query(query_string: str = None,
           out_format: str = "json",
           references: bool = False,
           fhir_server_url: str = None, username: str = None, password: str = None, token: str = None,
-          fhir_server_type: str = None) -> Union[dict, Tuple[dict, list]]:
+          fhir_server_type: str = None) -> Union[dict, Tuple[dict, list], pd.DataFrame]:
     """
     Execute a query against a server, either query all instances of a fhir resource or execute a given query string.
     Optionally store the results in a file either in csv format or as a raw fhir bundle json
@@ -73,10 +74,14 @@ def query(query_string: str = None,
         elif out_format == "csv":
             df = flatten_bundle(bundle_json=response)
             df.to_csv(out_path)
+
         else:
             raise NotImplementedError("Only csv and json currently supported.")
 
-    # todo fix reference parsing
+    if out_format == "df":
+        df = flatten_bundle(bundle_json=response)
+        return df
+
     if response and references:
         references = _extract_references_from_query_response(entries=response.get("entry"),
                                                              fhir_server_type=fhir_server_type)

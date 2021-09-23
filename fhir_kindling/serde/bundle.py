@@ -32,16 +32,17 @@ def load_bundle(bundle_path: Union[Path, str], validate: bool = True) -> Union[B
     return bundle_json
 
 
-def validate_bundle(
-    bundle_json: dict,
-    show_invalid_entries: bool = True,
-    drop_invalid_entries: bool = False) -> Union[None, Bundle, List[int]]:
+def validate_bundle(bundle_json: dict,
+                    show_invalid_entries: bool = True,
+                    drop_invalid_entries: bool = False) -> Union[None, Bundle, List[int]]:
     """Validate the all the resources in the bundle and display validation errors.
+    If drop
 
     Args:
-      drop_invalid_resources:
+      drop_invalid_entries: if True drops all entries in the bundle detected as invalid from the bundle entries
+        and attempts tp make a new bundle with only valid entries
       bundle_json: dictionary based on a loaded json bundle
-      show_invalid_resources: bool:  (Default value = True)
+      show_invalid_entries: if True show the entries detected as invalid and the validation errors
 
     Returns:
         either a Bundle object if the validation succeeded or None if it failed.
@@ -107,7 +108,6 @@ def _validate_bundle_entries(entries: List[dict],
 
     # drop invalid is set return only the validated entries
     if drop_invalid_entries:
-        print(len(valid_bundle_entries))
         return valid_bundle_entries
 
     return errors, error_indices
