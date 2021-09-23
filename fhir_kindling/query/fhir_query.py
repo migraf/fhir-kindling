@@ -1,0 +1,3 @@
+
+class FHIRQuery:
+    pass
