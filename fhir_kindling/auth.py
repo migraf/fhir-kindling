@@ -38,9 +38,7 @@ def generate_auth(username: str = None, password: str = None, token: str = None,
 
         if load_env:
             click.echo("No authentication given. Attempting authentication via environment variables")
-            username = os.getenv("FHIR_USER", None)
-            password = os.getenv("FHIR_PW", None)
-            token = os.getenv("FHIR_TOKEN", None)
+            username, password, token = load_environment_auth_vars()
 
         if (not username and not password) and not token:
             raise ValueError("No authentication information given.")

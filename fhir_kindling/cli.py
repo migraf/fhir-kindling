@@ -4,7 +4,7 @@ import click
 import yaml
 from fhir_kindling.generators import PatientGenerator
 from fhir_kindling import upload_bundle
-from fhir_kindling import query as execute_query
+from fhir_kindling import query_server as execute_query
 from fhir_kindling.auth import load_environment_auth_vars
 from pathlib import Path
 from dotenv import load_dotenv, find_dotenv

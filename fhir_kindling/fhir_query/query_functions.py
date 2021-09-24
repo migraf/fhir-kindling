@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-from pprint import pprint
 from typing import Union, List, Tuple
 import pandas as pd
 
@@ -12,19 +11,18 @@ from fhir.resources import FHIRAbstractModel
 
 from fhir_kindling.auth import generate_auth, load_environment_auth_vars
 from fhir_kindling.serde import flatten_bundle
-from fhir_kindling.upload import generate_fhir_headers
 
 
 # todo clean up authentication flow
 
-def query(query_string: str = None,
-          resource: Union[FHIRAbstractModel, DomainResourceType, str] = None,
-          limit: int = 1000,
-          out_path: Union[str, Path] = None,
-          out_format: str = "json",
-          references: bool = False,
-          fhir_server_url: str = None, username: str = None, password: str = None, token: str = None,
-          fhir_server_type: str = None) -> Union[dict, Tuple[dict, list], pd.DataFrame]:
+def query_server(query_string: str = None,
+                 resource: Union[FHIRAbstractModel, DomainResourceType, str] = None,
+                 limit: int = 1000,
+                 out_path: Union[str, Path] = None,
+                 out_format: str = "json",
+                 references: bool = False,
+                 fhir_server_url: str = None, username: str = None, password: str = None, token: str = None,
+                 fhir_server_type: str = None) -> Union[dict, Tuple[dict, list], pd.DataFrame]:
     """
     Execute a query against a server, either query all instances of a fhir resource or execute a given query string.
     Optionally store the results in a file either in csv format or as a raw fhir bundle json
@@ -55,7 +53,7 @@ def query(query_string: str = None,
 
     # Create authentication and headers for the requests
     auth = generate_auth(username, password, token)
-    headers = generate_fhir_headers(fhir_server_type)
+    headers = {"Content-Type": "application/fhir+json"}
 
     # If a resource type or identifier string is given query this resource or query by given url string
     if resource:

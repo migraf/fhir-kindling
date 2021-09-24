@@ -2,11 +2,11 @@ import os
 from typing import List, Union
 
 import requests
-from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
+from fhir.resources.bundle import BundleEntry, BundleEntryRequest
 
 from fhir_kindling.auth import generate_auth
 from fhir.resources import FHIRAbstractModel
-from fhir_kindling.query import query
+from fhir_kindling.fhir_query import query_server
 from fhir_kindling.upload import generate_fhir_headers
 from dotenv import load_dotenv, find_dotenv
 
@@ -23,8 +23,8 @@ def delete_resource_by_type(resource: Union[str, FHIRAbstractModel],
                             ):
     headers = generate_fhir_headers(fhir_server_type)
     auth = generate_auth(username, password, token)
-    response, references = query(resource=resource, fhir_server_url=fhir_api_url, username=username, password=password,
-                                 token=token, references=True, fhir_server_type=fhir_server_type)
+    response, references = query_server(resource=resource, fhir_server_url=fhir_api_url, username=username, password=password,
+                                        token=token, references=True, fhir_server_type=fhir_server_type)
 
     transaction = _make_delete_transaction(references)
 

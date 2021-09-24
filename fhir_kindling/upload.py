@@ -2,16 +2,13 @@ import pathlib
 from typing import Union, Tuple
 import requests
 from fhir.resources import FHIRAbstractModel
-from fhir.resources.bundle import Bundle, BundleEntry
-from fhir.resources.fhirtypes import DomainResourceType
+from fhir.resources.bundle import Bundle
 from fhir.resources.reference import Reference
 from pathlib import Path
-import json
 from requests.auth import AuthBase
-from pprint import pprint
 
 from fhir_kindling.auth import generate_auth
-from fhir_kindling.serde import validate_bundle, load_bundle
+from fhir_kindling.serde import load_bundle
 from dotenv import load_dotenv, find_dotenv
 import os
 

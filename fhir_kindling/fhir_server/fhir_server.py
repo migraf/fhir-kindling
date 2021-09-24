@@ -1,5 +1,5 @@
 from fhir.resources import FHIRAbstractModel
-from ..query import FHIRQuery
+from fhir_kindling.fhir_query import FHIRQuery
 
 
 class FhirServer:
@@ -15,3 +15,10 @@ class FhirServer:
 
     def health_check(self):
         pass
+
+    def meta_data(self):
+        pass
+
+    @staticmethod
+    def _headers():
+        return {"Content-Type": "application/fhir+json"}
