@@ -3,6 +3,7 @@ from typing import List, Union
 import requests
 from fhir.resources import FHIRAbstractModel
 from fhir.resources.bundle import Bundle
+from fhir.resources.capabilitystatement import CapabilityStatement
 
 from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling.auth import generate_auth
@@ -10,6 +11,7 @@ import re
 
 
 class FhirServer:
+    capabilities: CapabilityStatement
 
     def __init__(self, api_address: str, username: str = None, password: str = None, token: str = None,
                  fhir_server_type: str = "hapi"):
@@ -25,12 +27,16 @@ class FhirServer:
     def health_check(self):
         pass
 
-    def meta_data(self):
-        url = self.api_address + ""
+    def meta_data(self) -> CapabilityStatement:
+        url = self.api_address + "/metadata"
         r = requests.get(url, auth=self._auth, headers=self._headers)
         r.raise_for_status()
         response = r.json()
-        return response
+
+        capabilities = CapabilityStatement(**response)
+        self.capabilities = capabilities
+
+        return capabilities
 
     def add(self, resource: FHIRAbstractModel):
         # todo

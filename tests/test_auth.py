@@ -50,3 +50,5 @@ def test_env_var_basic():
     bearer_auth = generate_auth(load_env=True)
     assert isinstance(bearer_auth, BearerAuth)
 
+
+
