@@ -3,12 +3,7 @@ import inspect
 import os
 from pathlib import Path
 
-"""
-todo re-export all fhir resources under a single module and apply some transformation on them
-"""
-
-
-
+# TODO re-export all fhir resources under a single module and apply some transformation on them
 
 
 if __name__ == '__main__':
@@ -20,4 +15,3 @@ if __name__ == '__main__':
         module = importlib.import_module(f"fhir.resources.{mod.split('.')[0]}")
         members = inspect.getmembers(module)
         print(members)
-
