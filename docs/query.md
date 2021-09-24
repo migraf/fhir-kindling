@@ -20,19 +20,19 @@ fhir_kindling query -q "/MolecularSequence?patient.organization.name=DEMO_HIV&_f
 
 ## Query API
 
-::: fhir_kindling.query.query
+::: fhir_kindling.fhir_query.query_server
     rendering:
       heading_level: 3
       show_root_heading: True
       show_root_full_path: False
 
-::: fhir_kindling.query.query_resource
+::: fhir_kindling.fhir_query.query_resource
     rendering:
       heading_level: 3
       show_root_heading: True
       show_root_full_path: False
 
-::: fhir_kindling.query.query_with_string
+::: fhir_kindling.fhir_query.query_with_string
     rendering:
       heading_level: 3
       show_root_heading: True
