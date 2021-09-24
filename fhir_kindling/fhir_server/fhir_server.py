@@ -1,3 +1,4 @@
+import json
 from typing import List, Union
 
 import requests
@@ -7,6 +8,7 @@ from fhir.resources.capabilitystatement import CapabilityStatement
 
 from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling.auth import generate_auth
+
 import re
 
 
@@ -46,7 +48,13 @@ class FhirServer:
         pass
 
     def add_bundle(self, bundle: Union[Bundle, dict, str]):
-        pass
+        if isinstance(bundle, dict):
+            bundle = Bundle(**bundle)
+
+        elif isinstance(bundle, str):
+            bundle = Bundle(**json.loads(bundle))
+
+
 
     @property
     def _auth(self):
