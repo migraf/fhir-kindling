@@ -118,7 +118,7 @@ def query_resource(resource: Union[DomainResource, DomainResourceType, str], fhi
 
 
 def query_with_string(query_string: str, fhir_server_url: str, auth: AuthBase, headers: dict, count: int = 2000,
-                      limit: int = 0) -> dict:
+                      limit: int = None) -> dict:
     """
     Execute the given query string using the given fhir api endpoint and return the results
 
@@ -143,21 +143,20 @@ def query_with_string(query_string: str, fhir_server_url: str, auth: AuthBase, h
 
     if "_count" not in query_string:
         # Set the count to the limit if limit is given
-        limit_count = limit if count > limit != 0 else count
-        url += f"&_count={limit_count}"
-
-    response = _execute_query(url, auth, headers, limit)
+        if limit:
+            limit_count = limit if count > limit != 0 else count
+            url += f"&_count={limit_count}"
+            response = _execute_query(url, auth, headers, limit)
+        else:
+            response = _execute_query(url, auth, headers, count)
 
     return response
 
 
-def get_fhir_server_summary():
-    pass
-
-
-def _execute_query(url: str, auth: AuthBase = None, headers: dict = None, limit: int = 0) -> dict:
+def _execute_query(url: str, auth: AuthBase = None, headers: dict = None, limit: int = None) -> dict:
     r = requests.get(url=url, auth=auth, headers=headers)
     r.raise_for_status()
+
     response = r.json()
     # Query additional pages contained in the response and append all returned lists into a list of entries
     response = _resolve_response_pagination(response, auth, headers, limit)
@@ -165,11 +164,13 @@ def _execute_query(url: str, auth: AuthBase = None, headers: dict = None, limit:
     return response
 
 
-def _resolve_response_pagination(response: dict, auth: AuthBase, headers: dict, limit: int) -> dict:
+def _resolve_response_pagination(response: dict, auth: AuthBase, headers: dict, limit: int = None) -> dict:
     entries = []
     entries.extend(response["entry"])
-    if len(entries) >= limit != 0:
-        return response
+
+    if limit:
+        if len(entries) >= limit:
+            return response
 
     while response.get("link", None):
 
@@ -184,7 +185,7 @@ def _resolve_response_pagination(response: dict, auth: AuthBase, headers: dict, 
         else:
             break
 
-    response["entry"] = entries[:limit]
+    response["entry"] = entries[:limit] if limit else entries
 
     return response
 

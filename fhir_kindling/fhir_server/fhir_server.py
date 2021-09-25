@@ -1,6 +1,7 @@
 import json
 from typing import List, Union
 
+import pandas as pd
 import requests
 from fhir.resources import FHIRAbstractModel
 from fhir.resources.bundle import Bundle
@@ -8,6 +9,9 @@ from fhir.resources.capabilitystatement import CapabilityStatement
 
 from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling.auth import generate_auth
+from fhir_kindling.fhir_query.query_functions import query_with_string
+from fhir_kindling.serde import flatten_bundle
+from fhir_kindling.upload import upload_bundle
 
 import re
 
@@ -23,12 +27,22 @@ class FhirServer:
         self.password = password
         self.token = token
 
-    def query(self, resource: FHIRAbstractModel = None, query_string: str = None) -> FHIRQuery:
+    def query(self, resource: FHIRAbstractModel = None) -> FHIRQuery:
         pass
+
+    def raw_query(self, query_string: str, output_format: str = "json", limit: int = None, count: int = 2000):
+        print(query_string)
+        valid_query_string = self._validate_query_string(query_string)
+
+        response = query_with_string(valid_query_string, fhir_server_url=self.api_address,
+                                     auth=self._auth, headers=self._headers, limit=limit, count=count)
+
+        return self._format_output(response, output_format)
 
     def health_check(self):
         pass
 
+    # todo make private and load capabilities at initialization
     def meta_data(self) -> CapabilityStatement:
         url = self.api_address + "/metadata"
         r = requests.get(url, auth=self._auth, headers=self._headers)
@@ -45,16 +59,24 @@ class FhirServer:
         pass
 
     def add_all(self, resources: List[FHIRAbstractModel]):
+        # todo
         pass
 
     def add_bundle(self, bundle: Union[Bundle, dict, str]):
+        # todo
         if isinstance(bundle, dict):
             bundle = Bundle(**bundle)
 
         elif isinstance(bundle, str):
             bundle = Bundle(**json.loads(bundle))
 
-
+    def _format_output(self, bundle_response: dict, output_format: str) -> Union[dict, pd.DataFrame, Bundle]:
+        if output_format in {"json", "raw"}:
+            return bundle_response
+        elif output_format == "parsed":
+            return Bundle(**bundle_response)
+        elif output_format == "df":
+            return flatten_bundle(bundle_response)
 
     @property
     def _auth(self):
@@ -63,6 +85,13 @@ class FhirServer:
     @property
     def _headers(self):
         return {"Content-Type": "application/fhir+json"}
+
+    def _validate_query_string(self, query_string_input: str) -> str:
+        if query_string_input[0] != "/":
+            valid_query = "/" + query_string_input
+        else:
+            valid_query = query_string_input
+        return valid_query
 
     @staticmethod
     def _validate_api_address(api_address: str) -> str:

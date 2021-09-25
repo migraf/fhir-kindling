@@ -1,0 +1,19 @@
+version: '3.8'
+
+volumes:
+  blaze-data:
+  hapi-data:
+  ibm-data:
+
+services:
+  blaze:
+    image: "samply/blaze:0.11.0"
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx2g"
+      OPENID_PROVIDER_URL: "https://keycloak-pht.tada5hi.net/auth/realms/blaze"
+    ports:
+      - "8080:8080"
+    volumes:
+      - "blaze-data:/app/data"
+
+
