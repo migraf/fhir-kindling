@@ -11,6 +11,7 @@ class FHIRQuery:
         self.query_string = query_string
 
     def where(self):
+
         # todo evaluate arbitrary number of expressions based on fields of the resource and query values
         pass
 

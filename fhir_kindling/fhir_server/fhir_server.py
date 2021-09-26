@@ -3,7 +3,7 @@ from typing import List, Union
 
 import pandas as pd
 import requests
-from fhir.resources import FHIRAbstractModel
+from fhir.resources.resource import Resource
 from fhir.resources.bundle import Bundle
 from fhir.resources.capabilitystatement import CapabilityStatement
 
@@ -17,7 +17,6 @@ import re
 
 
 class FhirServer:
-    capabilities: CapabilityStatement
 
     def __init__(self, api_address: str, username: str = None, password: str = None, token: str = None,
                  fhir_server_type: str = "hapi"):
@@ -26,12 +25,12 @@ class FhirServer:
         self.username = username
         self.password = password
         self.token = token
+        self._meta_data = None
 
-    def query(self, resource: FHIRAbstractModel = None) -> FHIRQuery:
+    def query(self, resource: Resource = None) -> FHIRQuery:
         pass
 
     def raw_query(self, query_string: str, output_format: str = "json", limit: int = None, count: int = 2000):
-        print(query_string)
         valid_query_string = self._validate_query_string(query_string)
 
         response = query_with_string(valid_query_string, fhir_server_url=self.api_address,
@@ -39,26 +38,11 @@ class FhirServer:
 
         return self._format_output(response, output_format)
 
-    def health_check(self):
-        pass
-
-    # todo make private and load capabilities at initialization
-    def meta_data(self) -> CapabilityStatement:
-        url = self.api_address + "/metadata"
-        r = requests.get(url, auth=self._auth, headers=self._headers)
-        r.raise_for_status()
-        response = r.json()
-
-        capabilities = CapabilityStatement(**response)
-        self.capabilities = capabilities
-
-        return capabilities
-
-    def add(self, resource: FHIRAbstractModel):
+    def add(self, resource: Resource):
         # todo
         pass
 
-    def add_all(self, resources: List[FHIRAbstractModel]):
+    def add_all(self, resources: List[Resource]):
         # todo
         pass
 
@@ -77,6 +61,19 @@ class FhirServer:
             return Bundle(**bundle_response)
         elif output_format == "df":
             return flatten_bundle(bundle_response)
+
+    def _get_meta_data(self):
+        url = self.api_address + "/metadata"
+        r = requests.get(url, auth=self._auth, headers=self._headers)
+        r.raise_for_status()
+        response = r.json()
+        self._meta_data = response
+
+    @property
+    def capabilities(self) -> CapabilityStatement:
+        if not self._meta_data:
+            self._get_meta_data()
+        return CapabilityStatement(**self._meta_data)
 
     @property
     def _auth(self):

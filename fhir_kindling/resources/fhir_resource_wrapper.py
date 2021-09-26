@@ -12,6 +12,8 @@ if __name__ == '__main__':
 
     resource_module_path = Path(resources.__file__).parent
     for mod in list(os.listdir(resource_module_path)):
-        module = importlib.import_module(f"fhir.resources.{mod.split('.')[0]}")
-        members = inspect.getmembers(module)
-        print(members)
+        print(mod)
+        if mod.split(".")[-1] == "py":
+            module = importlib.import_module(f"fhir.resources.{mod.split('.')[0]}")
+            members = inspect.getmembers(module)
+
