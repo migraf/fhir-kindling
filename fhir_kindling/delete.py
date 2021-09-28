@@ -4,7 +4,7 @@ from typing import List, Union
 import requests
 from fhir.resources.bundle import BundleEntry, BundleEntryRequest
 
-from fhir_kindling.auth import generate_auth
+from fhir_kindling.fhir_server.auth import generate_auth
 from fhir.resources import FHIRAbstractModel
 from fhir_kindling.fhir_query import query_server
 from fhir_kindling.upload import generate_fhir_headers

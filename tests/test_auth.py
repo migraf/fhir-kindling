@@ -1,5 +1,5 @@
 import pytest
-from fhir_kindling.auth import generate_auth, load_environment_auth_vars, BearerAuth
+from fhir_kindling.fhir_server.auth import generate_auth, load_environment_auth_vars, BearerAuth
 from requests.auth import HTTPBasicAuth
 from unittest import mock
 import os

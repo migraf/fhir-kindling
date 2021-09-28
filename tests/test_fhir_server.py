@@ -27,5 +27,5 @@ def test_server_api_url_validation(api_url):
 
 def test_server_capabilities(api_url):
     server = FhirServer(api_url, username="test", password="test")
-    capabilities = server.meta_data()
+    capabilities = server.capabilities
 

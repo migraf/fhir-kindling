@@ -13,3 +13,4 @@ pendulum
 PyYAML
 tqdm
 click-spinner
+orjson

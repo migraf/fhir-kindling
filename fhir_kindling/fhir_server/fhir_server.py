@@ -8,10 +8,9 @@ from fhir.resources.bundle import Bundle
 from fhir.resources.capabilitystatement import CapabilityStatement
 
 from fhir_kindling.fhir_query import FHIRQuery
-from fhir_kindling.auth import generate_auth
+from fhir_kindling.fhir_server.auth import generate_auth
 from fhir_kindling.fhir_query.query_functions import query_with_string
 from fhir_kindling.serde import flatten_bundle
-from fhir_kindling.upload import upload_bundle
 
 import re
 

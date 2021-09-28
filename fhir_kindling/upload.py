@@ -7,7 +7,7 @@ from fhir.resources.reference import Reference
 from pathlib import Path
 from requests.auth import AuthBase
 
-from fhir_kindling.auth import generate_auth
+from fhir_kindling.fhir_server.auth import generate_auth
 from fhir_kindling.serde import load_bundle
 from dotenv import load_dotenv, find_dotenv
 import os

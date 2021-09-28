@@ -9,7 +9,7 @@ from unittest import mock
 from fhir_kindling.fhir_query import query_server, query_resource, query_with_string
 from fhir.resources.procedure import Procedure
 from fhir_kindling.upload import generate_fhir_headers
-from fhir_kindling.auth import generate_auth
+from fhir_kindling.fhir_server.auth import generate_auth
 import pandas as pd
 
 
