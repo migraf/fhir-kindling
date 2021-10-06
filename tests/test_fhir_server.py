@@ -29,3 +29,4 @@ def test_server_capabilities(api_url):
     server = FhirServer(api_url, username="test", password="test")
     capabilities = server.capabilities
 
+

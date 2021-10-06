@@ -11,12 +11,10 @@ class FHIRQuery:
         self.query_string = query_string
 
     def where(self):
-
         # todo evaluate arbitrary number of expressions based on fields of the resource and query values
         pass
 
     def all(self):
-
         # todo execute the pre built query string and return all resources that match the query
         pass
 
@@ -27,3 +25,5 @@ class FHIRQuery:
     def first(self):
         # todo return the first resources that fits the query
         pass
+
+

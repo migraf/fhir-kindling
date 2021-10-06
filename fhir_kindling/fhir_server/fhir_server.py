@@ -26,8 +26,11 @@ class FhirServer:
         self.token = token
         self._meta_data = None
 
-    def query(self, resource: Resource = None) -> FHIRQuery:
-        pass
+    def query(self, resource: Resource) -> FHIRQuery:
+        return FHIRQuery(
+            base_url=self.api_address,
+            resource=resource
+        )
 
     def raw_query(self, query_string: str, output_format: str = "json", limit: int = None, count: int = 2000):
         valid_query_string = self._validate_query_string(query_string)
@@ -37,21 +40,31 @@ class FhirServer:
 
         return self._format_output(response, output_format)
 
-    def add(self, resource: Resource):
-        # todo
-        pass
+    def add(self, resource: Resource) -> dict:
+
+        url = self.api_address + "/" + resource.get_resource_type()
+        r = requests.post(url, auth=self._auth, headers=self._headers, json=resource.dict())
+        r.raise_for_status()
+        return r.json()
 
     def add_all(self, resources: List[Resource]):
-        # todo
+        # todo make bundle from list of resource
         pass
 
     def add_bundle(self, bundle: Union[Bundle, dict, str]):
-        # todo
+        # todo check this
         if isinstance(bundle, dict):
             bundle = Bundle(**bundle)
 
         elif isinstance(bundle, str):
             bundle = Bundle(**json.loads(bundle))
+
+        url = self.api_address
+        r = requests.post(url, headers=self._headers, auth=self._auth, json=bundle.dict())
+
+        r.raise_for_status()
+
+        return r.json()
 
     def _format_output(self, bundle_response: dict, output_format: str) -> Union[dict, pd.DataFrame, Bundle]:
         if output_format in {"json", "raw"}:
@@ -82,7 +95,8 @@ class FhirServer:
     def _headers(self):
         return {"Content-Type": "application/fhir+json"}
 
-    def _validate_query_string(self, query_string_input: str) -> str:
+    @staticmethod
+    def _validate_query_string(query_string_input: str) -> str:
         if query_string_input[0] != "/":
             valid_query = "/" + query_string_input
         else:

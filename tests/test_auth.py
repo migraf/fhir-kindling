@@ -39,6 +39,7 @@ def test_env_var_conflicts():
     with pytest.raises(ValueError):
         auth = generate_auth(load_env=True)
 
+
 @mock.patch.dict(os.environ, {"FHIR_USER": "test", "FHIR_PW": "password"})
 def test_env_var_basic():
     basic_auth = generate_auth(load_env=True)
@@ -49,6 +50,3 @@ def test_env_var_basic():
 def test_env_var_basic():
     bearer_auth = generate_auth(load_env=True)
     assert isinstance(bearer_auth, BearerAuth)
-
-
-
