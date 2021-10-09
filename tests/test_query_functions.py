@@ -2,6 +2,7 @@ import json
 
 import pytest
 import requests
+from fhir.resources.patient import Patient
 from requests.auth import HTTPBasicAuth
 import os
 from unittest import mock
@@ -49,16 +50,16 @@ def test_api_connection(api_url):
 
 def test_query_resource(api_url, bogus_auth, fhir_headers):
     limit = 100
-    response = query_resource("Procedure", fhir_server_url=api_url, auth=bogus_auth, headers=fhir_headers, limit=limit)
+    response = query_resource("Patient", fhir_server_url=api_url, auth=bogus_auth, headers=fhir_headers, limit=limit)
     assert response
     assert len(response["entry"]) == limit
 
     token_auth = generate_auth(token="test_token")
-    response2 = query_resource(Procedure, fhir_server_url=api_url, auth=token_auth, headers=fhir_headers, limit=limit)
+    response2 = query_resource(Patient, fhir_server_url=api_url, auth=token_auth, headers=fhir_headers, limit=limit)
     assert response == response2
 
     # test paginated responses
-    response3 = query_resource("Procedure", fhir_server_url=api_url, auth=bogus_auth, headers=fhir_headers, limit=2500)
+    response3 = query_resource("Patient", fhir_server_url=api_url, auth=bogus_auth, headers=fhir_headers, limit=2500)
     assert len(response3["entry"]) == 2500
 
 

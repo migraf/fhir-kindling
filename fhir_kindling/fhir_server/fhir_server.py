@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 from typing import List, Union
@@ -17,6 +18,7 @@ from fhir_kindling.fhir_query.query_functions import query_with_string
 from fhir_kindling.serde import flatten_bundle
 from oauthlib.oauth2 import BackendApplicationClient
 from dotenv import load_dotenv, find_dotenv
+import pendulum
 
 import re
 
@@ -35,6 +37,7 @@ class FhirServer:
         self.client_secret = client_secret
         self.oidc_provider_url = oidc_provider_url
         self._meta_data = None
+        self.token_expiration = None
 
     def query(self, resource: Resource = None) -> FHIRQuery:
         return FHIRQuery(self.api_address, resource, auth=self.auth)
@@ -115,6 +118,17 @@ class FhirServer:
     def auth(self) -> Union[requests.auth.AuthBase]:
         # OIDC authentication
         if self.client_id:
+
+            token = self._get_oidc_token()
+            print(token)
+            return generate_auth(token=token)
+        else:
+            return generate_auth(self.username, self.password, self.token)
+
+    def _get_oidc_token(self):
+
+        if (self.token_expiration and pendulum.now() > self.token_expiration) or not self.token:
+            print("Requesting new token")
             client = BackendApplicationClient(client_id=self.client_id)
             oauth = OAuth2Session(client=client)
             token = oauth.fetch_token(
@@ -122,9 +136,10 @@ class FhirServer:
                 client_secret=self.client_secret,
                 client_id=self.client_id
             )
-            return generate_auth(token=token["access_token"])
-        else:
-            return generate_auth(self.username, self.password, self.token)
+            self.token = token["access_token"]
+            self.token_expiration = pendulum.now() + pendulum.duration(seconds=token["expires_in"])
+
+        return self.token
 
     @property
     def _headers(self):
@@ -176,6 +191,5 @@ if __name__ == '__main__':
         client_secret=os.getenv("CLIENT_SECRET"),
         oidc_provider_url=os.getenv("OIDC_PROVIDER_URL")
     )
-
     print(server.auth)
     print(server.raw_query("/Patient"))
