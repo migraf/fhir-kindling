@@ -14,3 +14,4 @@ PyYAML
 tqdm
 click-spinner
 orjson
+requests_oauthlib
