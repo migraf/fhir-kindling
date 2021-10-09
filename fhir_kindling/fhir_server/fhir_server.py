@@ -1,4 +1,3 @@
-import datetime
 import json
 import os
 from typing import List, Union
@@ -118,15 +117,16 @@ class FhirServer:
     def auth(self) -> Union[requests.auth.AuthBase]:
         # OIDC authentication
         if self.client_id:
-
             token = self._get_oidc_token()
-            print(token)
             return generate_auth(token=token)
+
+        # basic or static token authentication
         else:
             return generate_auth(self.username, self.password, self.token)
 
     def _get_oidc_token(self):
 
+        # get a new token if it is expired or not yet set
         if (self.token_expiration and pendulum.now() > self.token_expiration) or not self.token:
             print("Requesting new token")
             client = BackendApplicationClient(client_id=self.client_id)

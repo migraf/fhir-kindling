@@ -1,22 +1,26 @@
 from typing import Union
 
 from fhir.resources.resource import Resource
+import fhir.resources
 import requests
+import requests.auth
 
 
 class FHIRQuery:
 
-    def __init__(self, base_url: str, resource: Union[Resource, str] = None,
+    def __init__(self,
+                 base_url: str,
+                 resource: Union[Resource, str] = None,
                  auth: requests.auth.AuthBase = None):
-        self.base_url = base_url
-        self.resource = resource
-        self.auth = auth
 
+        self.base_url = base_url
+        self.auth = auth
         self.session = requests.Session()
 
         if isinstance(resource, str):
-            # todo load pydantic model class
-            pass
+            self.resource = fhir.resources.get_fhir_model_class(resource)
+        else:
+            self.resource = resource
 
     def where(self):
         # todo evaluate arbitrary number of expressions based on fields of the resource and query values
