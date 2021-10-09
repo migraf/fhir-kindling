@@ -80,9 +80,6 @@ class FhirServer:
 
         return r.json()
 
-    def _format_output(self, bundle_response: dict, output_format: str) -> Union[dict, pd.DataFrame, Bundle]:
-        pass
-
     def _upload_resource(self, resource: Resource) -> Response:
         url = self.api_address + "/" + resource.get_resource_type()
         r = requests.post(url=url, headers=self._headers, auth=self.auth, json=resource.dict())
@@ -193,3 +190,15 @@ if __name__ == '__main__':
     )
     print(server.auth)
     print(server.raw_query("/Patient"))
+
+    from fhir.resources.organization import Organization
+    from fhir.resources.address import Address
+
+    org = Organization.construct()
+    org.name = "Test Create Org"
+    address = Address.construct()
+    address.country = "Germany"
+    org.address = [address]
+
+    server.add(org)
+

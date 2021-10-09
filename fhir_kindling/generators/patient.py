@@ -13,6 +13,7 @@ from typing import Union, Tuple, List
 from fhir.resources.patient import Patient
 from fhir.resources.humanname import HumanName
 from fhir.resources.organization import Organization
+from fhir.resources.address import Address
 from pendulum import DateTime
 import pendulum
 import pandas as pd
@@ -167,4 +168,6 @@ if __name__ == '__main__':
     response, references = upload_bundle(pg.make_bundle(), fhir_api_url=os.getenv("IBM_API_URL"),
                                          username=os.getenv("FHIR_USER"), password=os.getenv("FHIR_PW"),
                                          references=True)
+
+    patient = Patient.construct()
     print(references)

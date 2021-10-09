@@ -22,7 +22,7 @@ class FHIRQuery:
         else:
             self.resource = resource
 
-    def where(self):
+    def where(self, ):
         # todo evaluate arbitrary number of expressions based on fields of the resource and query values
         pass
 
