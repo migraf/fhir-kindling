@@ -60,17 +60,25 @@ class FhirServer:
         return response.json()
 
     def add_all(self, resources: List[Resource]):
-        # todo
+        # todo make bundle from list of resource
         pass
 
     def add_bundle(self, bundle: Union[Bundle, dict, str]):
-        # todo
+        # todo check this
         if isinstance(bundle, dict):
             bundle = Bundle(**bundle)
 
         elif isinstance(bundle, str):
             bundle = Bundle(**json.loads(bundle))
 
+        url = self.api_address
+        r = requests.post(url, headers=self._headers, auth=self._auth, json=bundle.dict())
+
+        r.raise_for_status()
+
+        return r.json()
+
+    def _format_output(self, bundle_response: dict, output_format: str) -> Union[dict, pd.DataFrame, Bundle]:
     def _upload_resource(self, resource: Resource) -> Response:
         url = self.api_address + "/" + resource.get_resource_type()
         r = requests.post(url=url, headers=self._headers, auth=self.auth, json=resource.dict())
