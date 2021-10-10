@@ -10,10 +10,13 @@ from fhir.resources.resource import Resource
 from fhir.resources.bundle import Bundle
 from fhir.resources.capabilitystatement import CapabilityStatement
 from requests_oauthlib import OAuth2Session
+import fhir.resources
+
 
 from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling.fhir_server.auth import generate_auth
 from fhir_kindling.fhir_query.query_functions import query_with_string
+from fhir_kindling.fhir_server.response import CreateResponse
 from fhir_kindling.serde import flatten_bundle
 from oauthlib.oauth2 import BackendApplicationClient
 from dotenv import load_dotenv, find_dotenv
@@ -37,9 +40,12 @@ class FhirServer:
         self.oidc_provider_url = oidc_provider_url
         self._meta_data = None
         self.token_expiration = None
+        self.session = requests.Session()
 
-    def query(self, resource: Resource = None) -> FHIRQuery:
-        return FHIRQuery(self.api_address, resource, auth=self.auth)
+    def query(self,
+              resource: Union[Resource, fhir.resources.FHIRAbstractModel] = None
+              ) -> FHIRQuery:
+        return FHIRQuery(self.api_address, resource, auth=self.auth, session=self.session)
 
     def raw_query(self, query_string: str, output_format: str = "json", limit: int = None, count: int = 2000):
         valid_query_string = self._validate_query_string(query_string)
@@ -49,19 +55,19 @@ class FhirServer:
 
         return self._format_output(response, output_format)
 
-    def add(self, resource: Union[Resource, dict]) -> dict:
+    def add(self, resource: Union[Resource, dict]) -> CreateResponse:
 
         if isinstance(resource, dict):
-            # todo load resource based on dict
-            pass
+            resource_type = resource.get("resourceType")
+            if not resource_type:
+                raise ValueError("No resource type defined in resource dictionary")
+            resource = fhir.resources.construct_fhir_element(resource_type, resource)
         response = self._upload_resource(resource)
-        print(response.headers)
-        print(response.text)
         response.raise_for_status()
 
-        return response.json()
+        return CreateResponse(server_response=response, resource=resource)
 
-    def add_all(self, resources: List[Resource]):
+    def add_all(self, resources: List[Union[Resource, dict]]):
         # todo make bundle from list of resource
         pass
 
@@ -201,4 +207,3 @@ if __name__ == '__main__':
     org.address = [address]
 
     server.add(org)
-

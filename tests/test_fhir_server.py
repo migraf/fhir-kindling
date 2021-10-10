@@ -4,6 +4,8 @@ import pytest
 
 from fhir_kindling import FhirServer
 from dotenv import load_dotenv, find_dotenv
+from fhir.resources.organization import Organization
+from fhir.resources.address import Address
 
 
 @pytest.fixture
@@ -14,6 +16,17 @@ def api_url():
     load_dotenv(find_dotenv())
 
     return os.getenv("FHIR_API_URL", "http://hapi.fhir.org/baseR4")
+
+
+@pytest.fixture
+def oidc_server(api_url):
+    server = FhirServer(
+        api_address=api_url,
+        client_id=os.getenv("CLIENT_ID"),
+        client_secret=os.getenv("CLIENT_SECRET"),
+        oidc_provider_url=os.getenv("OIDC_PROVIDER_URL")
+    )
+    return server
 
 
 def test_server_api_url_validation(api_url):
@@ -37,10 +50,31 @@ def test_oidc_auth_server(api_url):
         oidc_provider_url=os.getenv("OIDC_PROVIDER_URL")
     )
 
-    assert server.capabilities
+    assert server.auth
 
 
+def test_server_capabilities(oidc_server):
+    capabilities = oidc_server.capabilities
+    assert capabilities
 
-def test_server_capabilities(api_url):
-    server = FhirServer(api_url, username="test", password="test")
-    capabilities = server.capabilities
+
+def test_upload_single_resource(oidc_server: FhirServer):
+    from fhir.resources.organization import Organization
+    from fhir.resources.address import Address
+
+    org = Organization.construct()
+    org.name = "Test Create Org"
+    address = Address.construct()
+    address.country = "Germany"
+    org.address = [address]
+
+    response = oidc_server.add(org)
+
+    print(response.resource)
+
+    assert response
+
+
+def test_query_all(oidc_server: FhirServer):
+    response = oidc_server.query(Organization).all()
+    print(response)
