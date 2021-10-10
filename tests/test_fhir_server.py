@@ -77,4 +77,13 @@ def test_upload_single_resource(oidc_server: FhirServer):
 
 def test_query_all(oidc_server: FhirServer):
     response = oidc_server.query(Organization).all()
-    print(response)
+
+    assert response["entry"]
+
+
+def test_query_with_limit(oidc_server: FhirServer):
+    response = oidc_server.query(Organization).limit(2)
+
+    assert response["entry"]
+
+    assert len(response["entry"]) == 2

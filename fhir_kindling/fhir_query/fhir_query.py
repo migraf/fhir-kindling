@@ -112,12 +112,12 @@ class FHIRQuery:
         return results
 
     def limit(self, n: int):
-        # todo return the first n resources that fit the query
-        pass
+        self._limit = n
+        return self._query_server()
 
     def first(self):
-        # todo return the first resources that fits the query
-        pass
+        self._limit = 1
+        return self._query_server()
 
     @property
     def query_url(self):
@@ -169,7 +169,6 @@ class FHIRQuery:
             pass
 
         # todo include and has
-
         if self._limit:
             query_string += f"_count={self._limit}"
         else:
