@@ -1,9 +1,10 @@
 import json
 import os
-from typing import List, Union
+from typing import List, Union, Tuple
 
 import pandas as pd
 import requests
+from fhir.resources import FHIRAbstractModel
 from requests import Response
 import requests.auth
 from fhir.resources.resource import Resource
@@ -63,7 +64,7 @@ class FhirServer:
         """
         return FHIRQuery(self.api_address, resource, auth=self.auth, session=self.session)
 
-    def raw_query(self, query_string: str, output_format: str = "json", limit: int = None, count: int = 2000):
+    def raw_query(self, query_string: str) -> FHIRQuery:
         """
         Execute a raw query string against the server
 
@@ -76,12 +77,11 @@ class FhirServer:
         Returns:
 
         """
-        valid_query_string = self._validate_query_string(query_string)
+        valid_query_string, resource = self._validate_query_string_and_parse_resource(query_string)
 
-        response = query_with_string(valid_query_string, fhir_server_url=self.api_address,
-                                     auth=self.auth, headers=self._headers, limit=limit, count=count)
-
-        return self._format_output(response, output_format)
+        query = FHIRQuery(self.api_address, resource, session=self.session)
+        query.set_query_string(valid_query_string)
+        return query
 
     def add(self, resource: Union[Resource, dict]) -> CreateResponse:
         """
@@ -139,7 +139,7 @@ class FhirServer:
 
     def _get_meta_data(self):
         url = self.api_address + "/metadata"
-        r = requests.get(url, auth=self.auth, headers=self._headers)
+        r = self.session.get(url)
         r.raise_for_status()
         response = r.json()
         self._meta_data = response
@@ -157,8 +157,8 @@ class FhirServer:
     def auth(self) -> Union[requests.auth.AuthBase]:
         # OIDC authentication
         if self.client_id:
-            token = self._get_oidc_token()
-            return generate_auth(token=token)
+            self._get_oidc_token()
+            return generate_auth(token=self.token)
 
         # basic or static token authentication
         else:
@@ -179,19 +179,20 @@ class FhirServer:
             self.token = token["access_token"]
             self.token_expiration = pendulum.now() + pendulum.duration(seconds=token["expires_in"])
 
-        return self.token
-
     @property
     def _headers(self):
         return {"Content-Type": "application/fhir+json"}
 
     @staticmethod
-    def _validate_query_string(query_string_input: str) -> str:
+    def _validate_query_string_and_parse_resource(query_string_input: str) -> Tuple[str, FHIRAbstractModel]:
         if query_string_input[0] != "/":
             valid_query = "/" + query_string_input
         else:
             valid_query = query_string_input
-        return valid_query
+
+        resource_string = valid_query.split("/")[1].split("?")[0]
+        resource = fhir.resources.get_fhir_model_class(resource_string).construct()
+        return valid_query, resource
 
     @staticmethod
     def _validate_api_address(api_address: str) -> str:

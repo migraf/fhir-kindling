@@ -101,3 +101,14 @@ def test_query_with_limit(oidc_server: FhirServer):
     assert response["entry"]
 
     assert len(response["entry"]) == 2
+
+
+def test_query_raw_string(oidc_server: FhirServer):
+    query_string = "/Patient?"
+    query = oidc_server.raw_query(query_string=query_string)
+
+    assert isinstance(query, FHIRQuery)
+
+    assert query.resource.get_resource_type() == "Patient"
+
+    assert query.all()["entry"]

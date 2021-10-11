@@ -63,7 +63,7 @@ class FHIRQuery:
 
     def __init__(self,
                  base_url: str,
-                 resource: Union[Resource, str] = None,
+                 resource: Union[Resource, FHIRAbstractModel, str] = None,
                  auth: requests.auth.AuthBase = None,
                  session: requests.Session = None):
 
@@ -81,7 +81,7 @@ class FHIRQuery:
             self.resource = fhir.resources.get_fhir_model_class(resource)
         else:
             self.resource = resource
-        assert issubclass(self.resource, FHIRAbstractModel)
+        print(type(self.resource))
 
         self.resource = self.resource.construct()
 
@@ -122,6 +122,9 @@ class FHIRQuery:
     def first(self):
         self._limit = 1
         return self._query_server()
+
+    def set_query_string(self, query_string: str):
+        self._query_string = query_string
 
     @property
     def query_url(self):
