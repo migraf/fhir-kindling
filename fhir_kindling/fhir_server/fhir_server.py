@@ -12,7 +12,6 @@ from fhir.resources.capabilitystatement import CapabilityStatement
 from requests_oauthlib import OAuth2Session
 import fhir.resources
 
-
 from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling.fhir_server.auth import generate_auth
 from fhir_kindling.fhir_query.query_functions import query_with_string
@@ -30,24 +29,53 @@ class FhirServer:
     def __init__(self, api_address: str, username: str = None, password: str = None, token: str = None,
                  client_id: str = None, client_secret: str = None, oidc_provider_url: str = None,
                  fhir_server_type: str = "hapi"):
+
+        # server definition values
         self.fhir_server_type = fhir_server_type
         self.api_address = self._validate_api_address(api_address)
+        self._meta_data = None
+
+        # possible basic auth class vars
         self.username = username
         self.password = password
+
+        # token oidc auth class vars
         self.token = token
         self.client_id = client_id
         self.client_secret = client_secret
         self.oidc_provider_url = oidc_provider_url
-        self._meta_data = None
         self.token_expiration = None
-        self.session = requests.Session()
 
-    def query(self,
-              resource: Union[Resource, fhir.resources.FHIRAbstractModel] = None
-              ) -> FHIRQuery:
+        # setup the session
+        self.session = requests.Session()
+        self.session.auth = self.auth
+        self.session.headers.update(self._headers)
+
+    def query(self, resource: Union[Resource, fhir.resources.FHIRAbstractModel] = None) -> FHIRQuery:
+        """
+        Initialize a FHIR query against the server with the given resource
+
+        Args:
+            resource: the FHIR resource to query from the server
+
+        Returns: a FHIRQuery object that can be further modified with filters and conditions before being executed
+        against the server
+        """
         return FHIRQuery(self.api_address, resource, auth=self.auth, session=self.session)
 
     def raw_query(self, query_string: str, output_format: str = "json", limit: int = None, count: int = 2000):
+        """
+        Execute a raw query string against the server
+
+        Args:
+            query_string:
+            output_format:
+            limit:
+            count:
+
+        Returns:
+
+        """
         valid_query_string = self._validate_query_string(query_string)
 
         response = query_with_string(valid_query_string, fhir_server_url=self.api_address,
@@ -56,7 +84,16 @@ class FhirServer:
         return self._format_output(response, output_format)
 
     def add(self, resource: Union[Resource, dict]) -> CreateResponse:
+        """
+        Upload a resource to the server
 
+        Args:
+            resource: dictionary containing the resource or FHIR resource object to be uploaded to the server
+
+        Returns:
+
+        """
+        # parse the resource given as dictionary into a fhir resource model
         if isinstance(resource, dict):
             resource_type = resource.get("resourceType")
             if not resource_type:

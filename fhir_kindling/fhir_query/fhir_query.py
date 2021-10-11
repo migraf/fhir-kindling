@@ -3,6 +3,7 @@ import inspect
 from typing import Union
 
 from fhir.resources.resource import Resource
+from fhir.resources import FHIRAbstractModel
 import fhir.resources
 import requests
 import requests.auth
@@ -70,30 +71,33 @@ class FHIRQuery:
 
         # Set up the requests session with auth and headers
         self.auth = auth
-        self.session = session if session else requests.Session()
-        self._setup_session()
+        if session:
+            self.session = session
+        else:
+            self._setup_session()
 
         # initialize the resource
         if isinstance(resource, str):
             self.resource = fhir.resources.get_fhir_model_class(resource)
         else:
             self.resource = resource
+        assert issubclass(self.resource, FHIRAbstractModel)
+
         self.resource = self.resource.construct()
 
         self._query_string = None
         self.conditions = None
         self._limit = None
 
-    # @showargs_decorator
     def where(self, *filter_args):
         # todo evaluate arbitrary number of expressions based on fields of the resource and query values
-
         conditions = self._evaluate_conditions(filter_args)
         return self
 
     def _setup_session(self):
+        self.session = requests.Session()
         self.session.auth = self.auth
-        self.session.headers = {"Content-Type": "application/fhir+json"}
+        self.session.headers.update({"Content-Type": "application/fhir+json"})
 
     def _evaluate_conditions(self, filter_args):
         outer_frames = inspect.getouterframes(inspect.currentframe())
@@ -173,6 +177,8 @@ class FHIRQuery:
             query_string += f"_count={self._limit}"
         else:
             query_string += f"_count=5000"
+
+        query_string += "&_format=json"
 
         print(query_string)
         self._query_string = query_string

@@ -1,8 +1,9 @@
 import os
 
 import pytest
+from fhir.resources import FHIRAbstractModel
 
-from fhir_kindling import FhirServer
+from fhir_kindling import FhirServer, FHIRQuery
 from dotenv import load_dotenv, find_dotenv
 from fhir.resources.organization import Organization
 from fhir.resources.address import Address
@@ -68,6 +69,8 @@ def test_upload_single_resource(oidc_server: FhirServer):
     address.country = "Germany"
     org.address = [address]
 
+    Organization.element_properties()
+
     response = oidc_server.add(org)
 
     print(response.resource)
@@ -79,6 +82,17 @@ def test_query_all(oidc_server: FhirServer):
     response = oidc_server.query(Organization).all()
 
     assert response["entry"]
+
+
+def test_query_with_string_resource(oidc_server: FhirServer):
+    auth = oidc_server.auth
+    query = FHIRQuery(oidc_server.api_address, "Patient", auth=auth)
+
+    response = query.all()
+
+    assert isinstance(query.resource, FHIRAbstractModel)
+
+    assert response
 
 
 def test_query_with_limit(oidc_server: FhirServer):
