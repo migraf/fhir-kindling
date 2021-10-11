@@ -16,7 +16,7 @@ import fhir.resources
 from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling.fhir_server.auth import generate_auth
 from fhir_kindling.fhir_query.query_functions import query_with_string
-from fhir_kindling.fhir_server.response import CreateResponse
+from fhir_kindling.fhir_server.response import ResourceCreateResponse
 from fhir_kindling.serde import flatten_bundle
 from oauthlib.oauth2 import BackendApplicationClient
 from dotenv import load_dotenv, find_dotenv
@@ -83,7 +83,7 @@ class FhirServer:
         query.set_query_string(valid_query_string)
         return query
 
-    def add(self, resource: Union[Resource, dict]) -> CreateResponse:
+    def add(self, resource: Union[Resource, dict]) -> ResourceCreateResponse:
         """
         Upload a resource to the server
 
@@ -102,7 +102,7 @@ class FhirServer:
         response = self._upload_resource(resource)
         response.raise_for_status()
 
-        return CreateResponse(server_response=response, resource=resource)
+        return ResourceCreateResponse(server_response=response, resource=resource)
 
     def add_all(self, resources: List[Union[Resource, dict]]):
         # todo make bundle from list of resource

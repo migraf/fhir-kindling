@@ -2,7 +2,7 @@ from requests import Response
 from fhir.resources.resource import Resource
 
 
-class CreateResponse:
+class ResourceCreateResponse:
     location: str = None
     resource: Resource = None
     version: int = None
