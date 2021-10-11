@@ -8,7 +8,7 @@ from fhir.resources import FHIRAbstractModel
 from requests import Response
 import requests.auth
 from fhir.resources.resource import Resource
-from fhir.resources.bundle import Bundle, BundleEntry
+from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.capabilitystatement import CapabilityStatement
 from requests_oauthlib import OAuth2Session
 import fhir.resources
@@ -49,8 +49,7 @@ class FhirServer:
 
         # setup the session
         self.session = requests.Session()
-        self.session.auth = self.auth
-        self.session.headers.update(self._headers)
+        self._setup()
 
     def query(self, resource: Union[Resource, fhir.resources.FHIRAbstractModel] = None) -> FHIRQuery:
         """
@@ -120,7 +119,7 @@ class FhirServer:
         response = self._upload_bundle(bundle)
         return response.json()
 
-    def _make_bundle_from_resource_list(self, resources: List[Union[Resource, dict]]) -> Bundle:
+    def _make_bundle_from_resource_list(self, resources: List[Union[FHIRAbstractModel, dict]]) -> Bundle:
         upload_bundle = Bundle.construct()
         upload_bundle.type = "transaction"
         upload_bundle.entry = []
@@ -133,16 +132,24 @@ class FhirServer:
                 for resource in resources
             ]
         for resource in resources:
-            upload_bundle.entry.append(
-                BundleEntry(
-                    **{
-                        "request": "POST",
-                        "resource": resource.dict()
-                    }
-                )
-            )
+            entry = self._make_bundle_request_entry(resource)
+            upload_bundle.entry.append(entry)
 
         return upload_bundle
+
+    @staticmethod
+    def _make_bundle_request_entry(resource: FHIRAbstractModel) -> BundleEntry:
+        entry = BundleEntry().construct()
+        entry.request = BundleEntry(
+            **{
+                "method": "POST",
+                "url": resource.get_resource_type()
+            }
+        )
+        entry.resource = resource
+
+        return entry
+
 
     def _upload_bundle(self, bundle: Bundle) -> Response:
         r = self.session.post(self.api_address, json=bundle.dict())
@@ -172,7 +179,8 @@ class FhirServer:
         self._meta_data = response
 
     def _setup(self):
-        pass
+        self.session.auth = self.auth
+        self.session.headers.update(self._headers)
 
     @property
     def capabilities(self) -> CapabilityStatement:
@@ -241,11 +249,12 @@ class FhirServer:
             the validated api address
 
         """
+
         regex = re.compile(
             r'^(?:http|ftp)s?://'  # http:// or https://
             r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
             r'localhost|'  # localhost...
-            r'[A-Za-z0-9-]*|'  # single word with hyphen or for docker
+            r'[A-Za-z0-9_-]*|'  # single word with hyphen/underscore for docker
             r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
             r'(?::\d+)?'  # optional port
             r'(?:/?|[/?]\S+)$', re.IGNORECASE)

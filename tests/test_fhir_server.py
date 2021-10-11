@@ -7,7 +7,7 @@ from fhir_kindling import FhirServer, FHIRQuery
 from dotenv import load_dotenv, find_dotenv
 from fhir.resources.organization import Organization
 from fhir.resources.address import Address
-from fhir.resources.bundle import Bundle, BundleEntry
+from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 
 
 @pytest.fixture
@@ -32,7 +32,7 @@ def oidc_server(api_url):
 
 
 @pytest.fixture
-def org_bundle():
+def org_bundle(api_url):
     bundle = Bundle.construct()
     bundle.type = "transaction"
 
@@ -44,10 +44,18 @@ def org_bundle():
         address = Address.construct()
         address.country = "Germany"
         org.address = [address]
-        entries.append(BundleEntry(**{
-            "request": "POST",
-            "resource": org.dict()
-        }))
+
+        entry = BundleEntry.construct()
+
+        entry.request = BundleEntryRequest(
+            **{
+                "method": "POST",
+                "url": org.get_resource_type()
+            }
+        )
+
+        entry.resource = org.dict()
+        entries.append(entry)
 
     bundle.entry = entries
     return bundle
@@ -69,14 +77,14 @@ def test_server_api_url_validation(api_url):
     server = FhirServer(api_address="http://blaze:8080/fhir")
     assert server
 
+    server = FhirServer(api_address="http://bla_ze:8080/fhir")
+    assert server
+
     server = FhirServer(api_address="http://bla-ze:8080/fhir")
     assert server
 
     with pytest.raises(ValueError):
         server = FhirServer(api_address="http://bla ze:8080/fhir")
-
-    with pytest.raises(ValueError):
-        server = FhirServer(api_address="http://bla_ze:8080/fhir")
 
     with pytest.raises(ValueError):
         server = FhirServer(api_address="http://bla_ze:8080/ fhir")
@@ -157,4 +165,5 @@ def test_query_raw_string(oidc_server: FhirServer):
 
 
 def test_add_bundle(oidc_server: FhirServer, org_bundle):
-    response = oidc_server.add_bundle()
+    response = oidc_server.add_bundle(org_bundle)
+    assert response
