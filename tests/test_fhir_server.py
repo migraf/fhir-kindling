@@ -7,6 +7,7 @@ from fhir_kindling import FhirServer, FHIRQuery
 from dotenv import load_dotenv, find_dotenv
 from fhir.resources.organization import Organization
 from fhir.resources.address import Address
+from fhir.resources.bundle import Bundle, BundleEntry
 
 
 @pytest.fixture
@@ -30,9 +31,32 @@ def oidc_server(api_url):
     return server
 
 
+@pytest.fixture
+def org_bundle():
+    bundle = Bundle.construct()
+    bundle.type = "transaction"
+
+    entries = []
+
+    for i in range(10):
+        org = Organization.construct()
+        org.name = f"Test Create Org No. {i}"
+        address = Address.construct()
+        address.country = "Germany"
+        org.address = [address]
+        entries.append(BundleEntry(**{
+            "request": "POST",
+            "resource": org.dict()
+        }))
+
+    bundle.entry = entries
+    return bundle
+
+
 def test_server_api_url_validation(api_url):
     server = FhirServer(api_address=api_url)
 
+    assert server
     malformed_url_1 = "hello-world"
 
     with pytest.raises(ValueError):
@@ -41,6 +65,24 @@ def test_server_api_url_validation(api_url):
     malformed_url_2 = "htp://hapi.fhir.org/baseR4"
     with pytest.raises(ValueError):
         server = FhirServer(api_address=malformed_url_2)
+
+    server = FhirServer(api_address="http://blaze:8080/fhir")
+    assert server
+
+    server = FhirServer(api_address="http://bla-ze:8080/fhir")
+    assert server
+
+    with pytest.raises(ValueError):
+        server = FhirServer(api_address="http://bla ze:8080/fhir")
+
+    with pytest.raises(ValueError):
+        server = FhirServer(api_address="http://bla_ze:8080/fhir")
+
+    with pytest.raises(ValueError):
+        server = FhirServer(api_address="http://bla_ze:8080/ fhir")
+
+    with pytest.raises(ValueError):
+        server = FhirServer(api_address="http://bla_ze:8x80/fhir")
 
 
 def test_oidc_auth_server(api_url):
@@ -112,3 +154,7 @@ def test_query_raw_string(oidc_server: FhirServer):
     assert query.resource.get_resource_type() == "Patient"
 
     assert query.all()["entry"]
+
+
+def test_add_bundle(oidc_server: FhirServer, org_bundle):
+    response = oidc_server.add_bundle()

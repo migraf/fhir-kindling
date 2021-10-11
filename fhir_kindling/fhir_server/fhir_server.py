@@ -8,7 +8,7 @@ from fhir.resources import FHIRAbstractModel
 from requests import Response
 import requests.auth
 from fhir.resources.resource import Resource
-from fhir.resources.bundle import Bundle
+from fhir.resources.bundle import Bundle, BundleEntry
 from fhir.resources.capabilitystatement import CapabilityStatement
 from requests_oauthlib import OAuth2Session
 import fhir.resources
@@ -105,8 +105,9 @@ class FhirServer:
         return ResourceCreateResponse(server_response=response, resource=resource)
 
     def add_all(self, resources: List[Union[Resource, dict]]):
-        # todo make bundle from list of resource
-        pass
+        bundle = self._make_bundle_from_resource_list(resources)
+        response = self._upload_bundle(bundle)
+        return response.json()
 
     def add_bundle(self, bundle: Union[Bundle, dict, str]):
         # todo check this
@@ -116,12 +117,38 @@ class FhirServer:
         elif isinstance(bundle, str):
             bundle = Bundle(**json.loads(bundle))
 
-        url = self.api_address
-        r = requests.post(url, headers=self._headers, auth=self._auth, json=bundle.dict())
+        response = self._upload_bundle(bundle)
+        return response.json()
 
+    def _make_bundle_from_resource_list(self, resources: List[Union[Resource, dict]]) -> Bundle:
+        upload_bundle = Bundle.construct()
+        upload_bundle.type = "transaction"
+        upload_bundle.entry = []
+
+        if isinstance(resources[0], dict):
+            resources = [fhir.resources.construct_fhir_element(
+                resource.get("resourceType"),
+                resource
+            )
+                for resource in resources
+            ]
+        for resource in resources:
+            upload_bundle.entry.append(
+                BundleEntry(
+                    **{
+                        "request": "POST",
+                        "resource": resource.dict()
+                    }
+                )
+            )
+
+        return upload_bundle
+
+    def _upload_bundle(self, bundle: Bundle) -> Response:
+        r = self.session.post(self.api_address, json=bundle.dict())
         r.raise_for_status()
 
-        return r.json()
+        return r
 
     def _upload_resource(self, resource: Resource) -> Response:
         url = self.api_address + "/" + resource.get_resource_type()
@@ -154,15 +181,22 @@ class FhirServer:
         return CapabilityStatement(**self._meta_data)
 
     @property
-    def auth(self) -> Union[requests.auth.AuthBase]:
+    def auth(self) -> Union[requests.auth.AuthBase, None]:
+        # todo more info about auth status and validation
         # OIDC authentication
         if self.client_id:
             self._get_oidc_token()
             return generate_auth(token=self.token)
-
         # basic or static token authentication
+        elif self.username and self.password:
+
+            return generate_auth(self.username, self.password)
+
+        elif self.token:
+            return generate_auth(token=self.token)
         else:
-            return generate_auth(self.username, self.password, self.token)
+            print("No authentication given")
+            return None
 
     def _get_oidc_token(self):
 
@@ -211,6 +245,7 @@ class FhirServer:
             r'^(?:http|ftp)s?://'  # http:// or https://
             r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
             r'localhost|'  # localhost...
+            r'[A-Za-z0-9-]*|'  # single word with hyphen or for docker
             r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
             r'(?::\d+)?'  # optional port
             r'(?:/?|[/?]\S+)$', re.IGNORECASE)
@@ -222,26 +257,3 @@ class FhirServer:
 
         else:
             raise ValueError(f"Malformed API URL: {api_address}")
-
-
-if __name__ == '__main__':
-    load_dotenv(find_dotenv())
-    server = FhirServer(
-        api_address=os.getenv("LOCAL_BLAZE"),
-        client_id=os.getenv("CLIENT_ID"),
-        client_secret=os.getenv("CLIENT_SECRET"),
-        oidc_provider_url=os.getenv("OIDC_PROVIDER_URL")
-    )
-    print(server.auth)
-    print(server.raw_query("/Patient"))
-
-    from fhir.resources.organization import Organization
-    from fhir.resources.address import Address
-
-    org = Organization.construct()
-    org.name = "Test Create Org"
-    address = Address.construct()
-    address.country = "Germany"
-    org.address = [address]
-
-    server.add(org)

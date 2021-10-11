@@ -58,7 +58,7 @@ def generate_auth(username: str = None, password: str = None, token: str = None,
         return BearerAuth(token=token)
 
     else:
-        raise ValueError("No authentication info given.")
+        raise ValueError("No authentication information given")
 
 
 class BearerAuth(requests.auth.AuthBase):
