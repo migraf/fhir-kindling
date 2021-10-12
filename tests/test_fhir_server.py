@@ -167,3 +167,4 @@ def test_query_raw_string(oidc_server: FhirServer):
 def test_add_bundle(oidc_server: FhirServer, org_bundle):
     response = oidc_server.add_bundle(org_bundle)
     assert response
+    print(response)

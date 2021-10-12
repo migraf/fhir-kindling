@@ -15,11 +15,9 @@ import fhir.resources
 
 from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling.fhir_server.auth import generate_auth
-from fhir_kindling.fhir_query.query_functions import query_with_string
 from fhir_kindling.fhir_server.response import ResourceCreateResponse
 from fhir_kindling.serde import flatten_bundle
 from oauthlib.oauth2 import BackendApplicationClient
-from dotenv import load_dotenv, find_dotenv
 import pendulum
 
 import re
@@ -98,6 +96,8 @@ class FhirServer:
             if not resource_type:
                 raise ValueError("No resource type defined in resource dictionary")
             resource = fhir.resources.construct_fhir_element(resource_type, resource)
+        else:
+            resource = resource.validate(resource)
         response = self._upload_resource(resource)
         response.raise_for_status()
 
@@ -108,13 +108,21 @@ class FhirServer:
         response = self._upload_bundle(bundle)
         return response.json()
 
-    def add_bundle(self, bundle: Union[Bundle, dict, str]):
+    def add_bundle(self, bundle: Union[Bundle, dict, str], validate_entries: bool = True):
         # todo check this
+        # create bundle and validate it
         if isinstance(bundle, dict):
             bundle = Bundle(**bundle)
-
         elif isinstance(bundle, str):
             bundle = Bundle(**json.loads(bundle))
+        else:
+            bundle = Bundle.validate(bundle)
+        # check that all entries are bundle requests with methods post/put
+        if validate_entries:
+            print(bundle.entry)
+            self._validate_upload_bundle_entries(bundle.entry)
+
+
 
         response = self._upload_bundle(bundle)
         return response.json()
@@ -124,6 +132,7 @@ class FhirServer:
         upload_bundle.type = "transaction"
         upload_bundle.entry = []
 
+        # initialize fhir model instances from dict
         if isinstance(resources[0], dict):
             resources = [fhir.resources.construct_fhir_element(
                 resource.get("resourceType"),
@@ -137,10 +146,20 @@ class FhirServer:
 
         return upload_bundle
 
+    def _parse_transaction_response(self):
+        # todo
+        pass
+
+    @staticmethod
+    def _validate_upload_bundle_entries(entries: List[BundleEntry]):
+        for i, entry in enumerate(entries):
+            if entry.request.method.lower() not in ["post", "put"]:
+                raise ValueError(f"Entry {i}:  method is not in [post, put]")
+
     @staticmethod
     def _make_bundle_request_entry(resource: FHIRAbstractModel) -> BundleEntry:
         entry = BundleEntry().construct()
-        entry.request = BundleEntry(
+        entry.request = BundleEntryRequest(
             **{
                 "method": "POST",
                 "url": resource.get_resource_type()
@@ -149,7 +168,6 @@ class FhirServer:
         entry.resource = resource
 
         return entry
-
 
     def _upload_bundle(self, bundle: Bundle) -> Response:
         r = self.session.post(self.api_address, json=bundle.dict())
