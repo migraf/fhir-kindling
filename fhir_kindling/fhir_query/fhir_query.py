@@ -1,17 +1,15 @@
 import functools
 import inspect
+import os
 from typing import Union
 
+from dotenv import load_dotenv, find_dotenv
 from fhir.resources.resource import Resource
 from fhir.resources import FHIRAbstractModel
 import fhir.resources
 import requests
 import requests.auth
 from pprint import pprint
-
-from fhir.resources.patient import Patient
-
-
 # def showargs_decorator(func):
 #     # updates special attributes e.g. __name__,__doc__
 #     @functools.wraps(func)
@@ -58,6 +56,8 @@ from fhir.resources.patient import Patient
 #         for k, v in kwargs.items():
 #             print("**" + kwargsname + " " + k + "=" + str(v))
 
+from fhir.resources.patient import Patient
+
 
 class FHIRQuery:
 
@@ -81,8 +81,6 @@ class FHIRQuery:
             self.resource = fhir.resources.get_fhir_model_class(resource)
         else:
             self.resource = resource
-        print(type(self.resource))
-
         self.resource = self.resource.construct()
 
         self._query_string = None
@@ -123,8 +121,8 @@ class FHIRQuery:
         self._limit = 1
         return self._execute_query()
 
-    def set_query_string(self, query_string: str):
-        self._query_string = query_string
+    def set_query_string(self, raw_query_string: str):
+        self._query_string = self.base_url + raw_query_string
 
     @property
     def query_url(self):
@@ -136,9 +134,11 @@ class FHIRQuery:
     def _execute_query(self):
         r = self.session.get(self.query_url)
         r.raise_for_status()
-
-        full_response = self._resolve_response_pagination(r)
-        return full_response
+        link = r.json().get("link", None)
+        if link:
+            full_response = self._resolve_response_pagination(r)
+            return full_response
+        return r.json()
 
     def _resolve_response_pagination(self, server_response: requests.Response):
         # todo outsource into search response class
@@ -185,13 +185,3 @@ class FHIRQuery:
 
         print(query_string)
         self._query_string = query_string
-
-
-if __name__ == '__main__':
-    query = FHIRQuery("test", "Patient")
-
-    patient = Patient.construct()
-    print(inspect.signature(Patient))
-    filter = query.where(
-        patient.name == "John",
-        patient.address in ["Germany"])
