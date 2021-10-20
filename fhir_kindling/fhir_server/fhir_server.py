@@ -15,7 +15,7 @@ import fhir.resources
 
 from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling.fhir_server.auth import generate_auth
-from fhir_kindling.fhir_server.response import ResourceCreateResponse
+from fhir_kindling.fhir_server.response import ResourceCreateResponse, BundleCreateResponse
 from fhir_kindling.serde import flatten_bundle
 from oauthlib.oauth2 import BackendApplicationClient
 import pendulum
@@ -101,7 +101,7 @@ class FhirServer:
         response = self._upload_resource(resource)
         response.raise_for_status()
 
-        return ResourceCreateResponse(server_response=response, resource=resource)
+        return ResourceCreateResponse(server_response_dict=response.headers, resource=resource)
 
     def add_all(self, resources: List[Union[Resource, dict]]):
         bundle = self._make_bundle_from_resource_list(resources)
@@ -119,13 +119,12 @@ class FhirServer:
             bundle = Bundle.validate(bundle)
         # check that all entries are bundle requests with methods post/put
         if validate_entries:
-            print(bundle.entry)
             self._validate_upload_bundle_entries(bundle.entry)
 
-
-
         response = self._upload_bundle(bundle)
-        return response.json()
+
+        transaction_response = BundleCreateResponse(response, bundle)
+        return response
 
     def _make_bundle_from_resource_list(self, resources: List[Union[FHIRAbstractModel, dict]]) -> Bundle:
         upload_bundle = Bundle.construct()
@@ -145,10 +144,6 @@ class FhirServer:
             upload_bundle.entry.append(entry)
 
         return upload_bundle
-
-    def _parse_transaction_response(self):
-        # todo
-        pass
 
     @staticmethod
     def _validate_upload_bundle_entries(entries: List[BundleEntry]):
@@ -170,9 +165,8 @@ class FhirServer:
         return entry
 
     def _upload_bundle(self, bundle: Bundle) -> Response:
-        r = self.session.post(self.api_address, json=bundle.dict())
+        r = self.session.post(self.api_address, data=bundle.json(return_bytes=True))
         r.raise_for_status()
-
         return r
 
     def _upload_resource(self, resource: Resource) -> Response:
@@ -215,7 +209,6 @@ class FhirServer:
             return generate_auth(token=self.token)
         # basic or static token authentication
         elif self.username and self.password:
-
             return generate_auth(self.username, self.password)
 
         elif self.token:

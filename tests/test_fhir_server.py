@@ -1,5 +1,4 @@
 import os
-
 import pytest
 from fhir.resources import FHIRAbstractModel
 
@@ -107,6 +106,10 @@ def test_oidc_auth_server(api_url):
 def test_server_capabilities(oidc_server):
     capabilities = oidc_server.capabilities
     assert capabilities
+
+    print()
+    for rest_cap in capabilities.rest:
+        print(rest_cap.searchParam)
 
 
 def test_upload_single_resource(oidc_server: FhirServer):

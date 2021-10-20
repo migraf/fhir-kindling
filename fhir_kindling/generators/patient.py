@@ -1,25 +1,20 @@
 import math
 import os
-import sys
-from abc import ABC
-
 from dotenv import load_dotenv, find_dotenv
-from fhir.resources.domainresource import DomainResource
-from fhir.resources.reference import Reference
-
-from fhir_kindling.generators import FhirResourceGenerator
-from fhir_kindling import upload_resource, upload_bundle
 from typing import Union, Tuple, List
-from fhir.resources.patient import Patient
-from fhir.resources.humanname import HumanName
-from fhir.resources.organization import Organization
-from fhir.resources.address import Address
-from pendulum import DateTime
 import pendulum
 import pandas as pd
 import random
 from tqdm import tqdm
 from pathlib import Path
+from pendulum import DateTime
+
+from fhir.resources.reference import Reference
+from fhir.resources.patient import Patient
+from fhir.resources.humanname import HumanName
+
+from fhir_kindling.generators import FhirResourceGenerator
+from fhir_kindling.fhir_server import FhirServer
 
 
 class PatientGenerator(FhirResourceGenerator):
@@ -27,17 +22,19 @@ class PatientGenerator(FhirResourceGenerator):
                  n: int,
                  age_range: Union[Tuple[DateTime, DateTime], Tuple[int, int]] = None,
                  gender_distribution: Tuple[float, float, float, float] = None,
-                 organisation: Reference = None):
+                 organisation: Reference = None,
+                 generate_ids: bool = False):
         super().__init__(n, resource_type=Patient)
         self.age_range = age_range
         self.gender_distribution = gender_distribution
         self.birthdate_range = None
         self.organisation = organisation
+        self.generate_ids = generate_ids
 
-    def _generate(self):
+    def _generate(self, display: bool = False):
         patients = []
         names = self._generate_patient_names(self.n)
-        for i in tqdm(range(self.n), desc=f"Generating {self.n} patients"):
+        for i in tqdm(range(self.n), desc=f"Generating {self.n} patients", disable=display):
             patient = self._generate_patient_data(name=names[i])
             patients.append(patient)
         return patients
@@ -50,7 +47,6 @@ class PatientGenerator(FhirResourceGenerator):
         name = HumanName(**{"family": name[1], "given": [name[0]]})
 
         birthdate = self._generate_birthdate()
-
         patient_dict = {
             "gender": gender,
             "name": [name],
@@ -157,17 +153,18 @@ class PatientResourceGenerator:
         print(self.resources)
 
 
-
-
-
 if __name__ == '__main__':
     # pprint(Patient.schema()["properties"])
     load_dotenv(find_dotenv())
     pg = PatientGenerator(n=100)
-    gen_patients = pg.generate()
-    response, references = upload_bundle(pg.make_bundle(), fhir_api_url=os.getenv("IBM_API_URL"),
-                                         username=os.getenv("FHIR_USER"), password=os.getenv("FHIR_PW"),
-                                         references=True)
+    pg.generate()
+    bundle = pg.make_bundle()
+    server = FhirServer(
+        api_address="http://localhost:8080/fhir",
+        client_id=os.getenv("CLIENT_ID"),
+        client_secret=os.getenv("CLIENT_SECRET"),
+        oidc_provider_url=os.getenv("OIDC_PROVIDER_URL")
+    )
 
-    patient = Patient.construct()
-    print(references)
+    response = server.add_bundle(bundle)
+    print(response)

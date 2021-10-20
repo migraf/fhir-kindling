@@ -112,16 +112,16 @@ class FHIRQuery:
     def all(self):
         self._limit = None
         # todo execute the pre built query string and return all resources that match the query
-        results = self._query_server()
+        results = self._execute_query()
         return results
 
     def limit(self, n: int):
         self._limit = n
-        return self._query_server()
+        return self._execute_query()
 
     def first(self):
         self._limit = 1
-        return self._query_server()
+        return self._execute_query()
 
     def set_query_string(self, query_string: str):
         self._query_string = query_string
@@ -133,7 +133,7 @@ class FHIRQuery:
             self._make_query_string()
         return self._query_string
 
-    def _query_server(self):
+    def _execute_query(self):
         r = self.session.get(self.query_url)
         r.raise_for_status()
 
