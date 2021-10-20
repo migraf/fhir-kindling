@@ -126,7 +126,6 @@ class FHIRQuery:
 
     @property
     def query_url(self):
-
         if not self._query_string:
             self._make_query_string()
         return self._query_string
