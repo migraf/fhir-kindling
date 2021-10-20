@@ -106,7 +106,7 @@ class FhirServer:
     def add_all(self, resources: List[Union[Resource, dict]]):
         bundle = self._make_bundle_from_resource_list(resources)
         response = self._upload_bundle(bundle)
-        return response.json()
+        return response
 
     def add_bundle(self, bundle: Union[Bundle, dict, str], validate_entries: bool = True) -> BundleCreateResponse:
         # todo check this
