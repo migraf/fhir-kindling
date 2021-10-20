@@ -167,4 +167,4 @@ if __name__ == '__main__':
     )
 
     response = server.add_bundle(bundle)
-    print(response)
+    print(response.references)

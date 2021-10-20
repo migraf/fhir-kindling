@@ -108,7 +108,7 @@ class FhirServer:
         response = self._upload_bundle(bundle)
         return response.json()
 
-    def add_bundle(self, bundle: Union[Bundle, dict, str], validate_entries: bool = True):
+    def add_bundle(self, bundle: Union[Bundle, dict, str], validate_entries: bool = True) -> BundleCreateResponse:
         # todo check this
         # create bundle and validate it
         if isinstance(bundle, dict):
@@ -121,10 +121,8 @@ class FhirServer:
         if validate_entries:
             self._validate_upload_bundle_entries(bundle.entry)
 
-        response = self._upload_bundle(bundle)
-
-        transaction_response = BundleCreateResponse(response, bundle)
-        return response
+        transaction_response = self._upload_bundle(bundle)
+        return transaction_response
 
     def _make_bundle_from_resource_list(self, resources: List[Union[FHIRAbstractModel, dict]]) -> Bundle:
         upload_bundle = Bundle.construct()
@@ -164,10 +162,12 @@ class FhirServer:
 
         return entry
 
-    def _upload_bundle(self, bundle: Bundle) -> Response:
+    def _upload_bundle(self, bundle: Bundle) -> BundleCreateResponse:
         r = self.session.post(self.api_address, data=bundle.json(return_bytes=True))
         r.raise_for_status()
-        return r
+
+        bundle_response = BundleCreateResponse(r, bundle)
+        return bundle_response
 
     def _upload_resource(self, resource: Resource) -> Response:
         url = self.api_address + "/" + resource.get_resource_type()
