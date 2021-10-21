@@ -39,9 +39,10 @@ class ResourceCreateResponse(CreateResponse):
 
 
 class BundleCreateResponse:
-    create_responses: List[ResourceCreateResponse] = []
+    create_responses: List[ResourceCreateResponse] = None
 
     def __init__(self, server_response: Response, bundle: Bundle):
+        self.create_responses = []
         for i, entry in enumerate(server_response.json()["entry"]):
             resource = bundle.entry[i].resource
             create_response = ResourceCreateResponse(entry["response"], resource)

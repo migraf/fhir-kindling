@@ -163,9 +163,8 @@ class FhirServer:
         return entry
 
     def _upload_bundle(self, bundle: Bundle) -> BundleCreateResponse:
-        r = self.session.post(self.api_address, data=bundle.json(return_bytes=True))
+        r = self.session.post(url=self.api_address, data=bundle.json(return_bytes=True))
         r.raise_for_status()
-
         bundle_response = BundleCreateResponse(r, bundle)
         return bundle_response
 
