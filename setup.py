@@ -43,7 +43,7 @@ setup(
     packages=find_packages(include=['fhir_kindling', 'fhir_kindling.*']),
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://gitlab.com/PersonalHealthTrain/implementations/germanmii/difuture/incubating/fhir_kindling.git',
+    url='https://github.com/migraf/fhir-kindling',
     version='0.2.0',
     zip_safe=False,
 )

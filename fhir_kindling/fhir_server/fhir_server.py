@@ -12,6 +12,7 @@ from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.capabilitystatement import CapabilityStatement
 from requests_oauthlib import OAuth2Session
 import fhir.resources
+from requests_toolbelt import user_agent
 
 from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling.fhir_server.auth import generate_auth
@@ -31,7 +32,7 @@ class FhirServer:
 
         # server definition values
         self.fhir_server_type = fhir_server_type
-        self.api_address = self._validate_api_address(api_address)
+        self.api_address = self.validate_api_address(api_address)
         self._meta_data = None
 
         # possible basic auth class vars
@@ -49,17 +50,33 @@ class FhirServer:
         self.session = requests.Session()
         self._setup()
 
-    def query(self, resource: Union[Resource, fhir.resources.FHIRAbstractModel] = None) -> FHIRQuery:
+    @classmethod
+    def from_env(cls):
+        api_address = _api_address_from_env()
+        env_auth = _auth_info_from_env()
+        if isinstance(env_auth, str):
+            return cls(api_address=api_address, token=env_auth)
+        elif isinstance(env_auth, tuple) and len(env_auth) == 2:
+            return cls(api_address=api_address, username=env_auth[0], password=env_auth[1])
+        elif isinstance(env_auth, tuple) and len(env_auth) == 3:
+            return cls(api_address=api_address, client_id=env_auth[0], client_secret=env_auth[1],
+                       oidc_provider_url=env_auth[2])
+        else:
+            raise EnvironmentError("Authentication information could not be loaded from environment")
+
+    def query(self, resource: Union[Resource, fhir.resources.FHIRAbstractModel] = None,
+              output_format: str = "json") -> FHIRQuery:
         """
         Initialize a FHIR query against the server with the given resource
 
         Args:
+            output_format: the output format to request from the fhir server (json or xml) defaults to json
             resource: the FHIR resource to query from the server
 
         Returns: a FHIRQuery object that can be further modified with filters and conditions before being executed
         against the server
         """
-        return FHIRQuery(self.api_address, resource, auth=self.auth, session=self.session)
+        return FHIRQuery(self.api_address, resource, auth=self.auth, session=self.session, output_format=output_format)
 
     def raw_query(self, query_string: str) -> FHIRQuery:
         """
@@ -247,7 +264,7 @@ class FhirServer:
         return valid_query, resource
 
     @staticmethod
-    def _validate_api_address(api_address: str) -> str:
+    def validate_api_address(api_address: str) -> str:
         """
         Validate that api address is well formed and remove trailing / if present
         https://stackoverflow.com/a/7160778/3838313
@@ -276,3 +293,52 @@ class FhirServer:
 
         else:
             raise ValueError(f"Malformed API URL: {api_address}")
+
+
+def _api_address_from_env() -> str:
+    # load FHIR_API_URL
+    api_url = os.getenv("FHIR_API_URL")
+    if not api_url:
+        api_url = os.getenv("FHIR_SERVER_URL")
+    if not api_url:
+        raise EnvironmentError("No FHIR api address specified")
+    return FhirServer.validate_api_address(api_url)
+
+
+def _auth_info_from_env() -> Union[str, Tuple[str, str], Tuple[str, str, str]]:
+    # First try to load basic auth information
+    username = os.getenv("FHIR_USER")
+    if username:
+        password = os.getenv("FHIR_PW")
+        if not password:
+            raise EnvironmentError(f"No password specified for user: {username}")
+        else:
+            print(f"Basic auth environment info found -> ({username}:******)")
+            return username, password
+    # Static token auth
+    token = os.getenv("FHIR_TOKEN")
+    if username and token:
+        raise EnvironmentError("Conflicting auth information, bother username and token present.")
+    if token:
+        print("Found static auth token")
+        return token
+    # oauth2/oidc authentication
+    client_id = os.getenv("CLIENT_ID")
+    client_secret = os.getenv("CLIENT_SECRET")
+    oidc_provider_url = os.getenv("OIDC_PROVIDER_URL")
+
+    if username and client_id:
+        raise EnvironmentError("Conflicting auth information, bother username and client id present")
+    if token and client_id:
+        raise EnvironmentError("Conflicting auth information, bother static token and client id present")
+
+    if client_id and not client_secret:
+        raise EnvironmentError("Insufficient auth information, client id specified but no client secret found.")
+
+    if (client_id and client_secret) and not oidc_provider_url:
+        raise EnvironmentError("Insufficient auth information, client id and secret "
+                               "specified but no provider URL found")
+    if client_id and client_secret and oidc_provider_url:
+        print(f"Found OIDC auth configuration for client <{client_id}> with provider {oidc_provider_url}")
+        return client_id, client_secret, oidc_provider_url
+

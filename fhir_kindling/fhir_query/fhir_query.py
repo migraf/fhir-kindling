@@ -65,7 +65,8 @@ class FHIRQuery:
                  base_url: str,
                  resource: Union[Resource, FHIRAbstractModel, str] = None,
                  auth: requests.auth.AuthBase = None,
-                 session: requests.Session = None):
+                 session: requests.Session = None,
+                 output_format: str = "json"):
 
         self.base_url = base_url
 
@@ -83,6 +84,7 @@ class FHIRQuery:
             self.resource = resource
         self.resource = self.resource.construct()
 
+        self.output_format = output_format
         self._query_string = None
         self.conditions = None
         self._limit = None
@@ -133,11 +135,15 @@ class FHIRQuery:
     def _execute_query(self):
         r = self.session.get(self.query_url)
         r.raise_for_status()
-        link = r.json().get("link", None)
-        if link:
-            full_response = self._resolve_response_pagination(r)
-            return full_response
-        return r.json()
+        if self.output_format == "json":
+            link = r.json().get("link", None)
+            if link:
+                full_response = self._resolve_response_pagination(r)
+                return full_response
+            return r.json()
+
+        elif self.output_format == "xml":
+            print(r.text)
 
     def _resolve_response_pagination(self, server_response: requests.Response):
         # todo outsource into search response class
@@ -180,7 +186,6 @@ class FHIRQuery:
         else:
             query_string += f"_count=5000"
 
-        query_string += "&_format=json"
-
+        query_string += f"&_format={self.output_format}"
         print(query_string)
         self._query_string = query_string
