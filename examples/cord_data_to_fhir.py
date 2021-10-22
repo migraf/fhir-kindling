@@ -34,6 +34,7 @@ def upload_cord_data(csv_file, server_address):
 
     def make_condition_resource(row):
         condition = Condition.construct()
+
         condition.clinicalStatus = CodeableConcept(
             coding=[Coding(
                 **{
@@ -67,19 +68,21 @@ def upload_cord_data(csv_file, server_address):
 
     server = FhirServer(api_address=server_address, client_id=client_id, client_secret=client_secret,
                         oidc_provider_url=provider_url)
+
     patient_generator = PatientGenerator(n=n_patients)
     patients = patient_generator.generate()
 
     patients_create_response = server.add_all(patients)
 
     references = patients_create_response.references
-    print(len(references))
     for j, condition in enumerate(condition_resource_list):
         # set the subject reference
         condition.subject = references[j]
 
+    for cond in condition_resource_list:
+        Condition.validate(cond)
+
     response = server.add_all(condition_resource_list)
-    print(response)
 
 
 if __name__ == '__main__':

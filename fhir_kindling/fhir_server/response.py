@@ -1,4 +1,5 @@
 from typing import List
+from functools import cache
 
 from requests import Response
 from fhir.resources.resource import Resource
@@ -49,10 +50,12 @@ class BundleCreateResponse:
             self.create_responses.append(create_response)
 
     @property
+    @cache
     def resources(self):
         return [r.resource for r in self.create_responses]
 
     @property
+    @cache
     def references(self):
         return [r.reference for r in self.create_responses]
 
