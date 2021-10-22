@@ -51,18 +51,24 @@ class FhirServer:
         self._setup()
 
     @classmethod
-    def from_env(cls):
+    def from_env(cls, no_auth: bool = False):
         api_address = _api_address_from_env()
-        env_auth = _auth_info_from_env()
-        if isinstance(env_auth, str):
-            return cls(api_address=api_address, token=env_auth)
-        elif isinstance(env_auth, tuple) and len(env_auth) == 2:
-            return cls(api_address=api_address, username=env_auth[0], password=env_auth[1])
-        elif isinstance(env_auth, tuple) and len(env_auth) == 3:
-            return cls(api_address=api_address, client_id=env_auth[0], client_secret=env_auth[1],
-                       oidc_provider_url=env_auth[2])
+        server_type = os.getenv("FHIR_SERVER_TYPE")
+
+        if no_auth:
+            return FhirServer(api_address=api_address, fhir_server_type=server_type)
         else:
-            raise EnvironmentError("Authentication information could not be loaded from environment")
+            env_auth = _auth_info_from_env()
+            if isinstance(env_auth, str):
+                return cls(api_address=api_address, token=env_auth, fhir_server_type=server_type)
+            elif isinstance(env_auth, tuple) and len(env_auth) == 2:
+                return cls(api_address=api_address, username=env_auth[0], password=env_auth[1],
+                           fhir_server_type=server_type)
+            elif isinstance(env_auth, tuple) and len(env_auth) == 3:
+                return cls(api_address=api_address, client_id=env_auth[0], client_secret=env_auth[1],
+                           oidc_provider_url=env_auth[2], fhir_server_type=server_type)
+            else:
+                raise EnvironmentError("Authentication information could not be loaded from environment")
 
     def query(self, resource: Union[Resource, fhir.resources.FHIRAbstractModel] = None,
               output_format: str = "json") -> FHIRQuery:
@@ -78,7 +84,7 @@ class FhirServer:
         """
         return FHIRQuery(self.api_address, resource, auth=self.auth, session=self.session, output_format=output_format)
 
-    def raw_query(self, query_string: str) -> FHIRQuery:
+    def raw_query(self, query_string: str, output_format: str = "json") -> FHIRQuery:
         """
         Execute a raw query string against the server
 
@@ -93,7 +99,7 @@ class FhirServer:
         """
         valid_query_string, resource = self._validate_query_string_and_parse_resource(query_string)
 
-        query = FHIRQuery(self.api_address, resource, session=self.session)
+        query = FHIRQuery(self.api_address, resource, session=self.session, output_format=output_format)
         query.set_query_string(valid_query_string)
         return query
 
@@ -341,4 +347,3 @@ def _auth_info_from_env() -> Union[str, Tuple[str, str], Tuple[str, str, str]]:
     if client_id and client_secret and oidc_provider_url:
         print(f"Found OIDC auth configuration for client <{client_id}> with provider {oidc_provider_url}")
         return client_id, client_secret, oidc_provider_url
-
