@@ -14,6 +14,5 @@ PyYAML
 tqdm
 click-spinner
 orjson
-requests_oauthlib
-pendulum
 loguru
+attrs

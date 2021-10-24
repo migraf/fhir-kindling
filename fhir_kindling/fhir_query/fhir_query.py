@@ -1,69 +1,23 @@
 import functools
 import inspect
+import json
 import os
-from typing import Union
+from typing import Union, List
 
 from dotenv import load_dotenv, find_dotenv
 from fhir.resources.resource import Resource
-from fhir.resources import FHIRAbstractModel
+from fhir.resources.bundle import Bundle
 import fhir.resources
 import requests
 import requests.auth
-from pprint import pprint
-# def showargs_decorator(func):
-#     # updates special attributes e.g. __name__,__doc__
-#     @functools.wraps(func)
-#     def wrapper(*args, **kwargs):
-#         # call custom inspection logic
-#         inspect_decorator(func, args, kwargs)
-#         # calls original function
-#         func(*args, **kwargs)
-#
-#     # matches name of inner function
-#     return wrapper
-#
-#
-# def inspect_decorator(func, args, kwargs):
-#     funcname = func.__name__
-#     print("function {}()".format(funcname))
-#
-#     # get description of function params expected
-#     argspec = inspect.getargspec(func)
-#
-#     # go through each position based argument
-#     counter = 0
-#     if argspec.args and type(argspec.args is list):
-#         for arg in args:
-#             # when you run past the formal positional arguments
-#             try:
-#                 print(str(argspec.args[counter]) + "=" + str(arg))
-#                 members = inspect.getmembers(func)
-#                 frame = inspect.currentframe()
-#
-#                 outer_frames = inspect.getouterframes(frame)
-#                 print(inspect.getsource(arg))
-#                 counter += 1
-#             except IndexError as e:
-#                 # then fallback to using the positional varargs name
-#                 if argspec.varargs:
-#                     varargsname = argspec.varargs
-#                     print("*" + varargsname + "=" + str(arg))
-#                 pass
-#
-#     # finally show the named varargs
-#     if argspec.keywords:
-#         kwargsname = argspec.keywords
-#         for k, v in kwargs.items():
-#             print("**" + kwargsname + " " + k + "=" + str(v))
-
-from fhir.resources.patient import Patient
+import xml.etree.ElementTree as ET
 
 
 class FHIRQuery:
 
     def __init__(self,
                  base_url: str,
-                 resource: Union[Resource, FHIRAbstractModel, str] = None,
+                 resource: Union[Resource, fhir.resources.FHIRAbstractModel, str] = None,
                  auth: requests.auth.AuthBase = None,
                  session: requests.Session = None,
                  output_format: str = "json"):
@@ -86,22 +40,19 @@ class FHIRQuery:
 
         self.output_format = output_format
         self._query_string = None
-        self.conditions = None
+        self.conditions: List[str] = []
         self._limit = None
+        self._query_response: Union[Bundle, str] = None
 
-    def where(self, *filter_args):
+    def where(self, filter_dict: dict = None):
         # todo evaluate arbitrary number of expressions based on fields of the resource and query values
-        conditions = self._evaluate_conditions(filter_args)
+        self._parse_filter_dict(filter_dict)
         return self
 
     def _setup_session(self):
         self.session = requests.Session()
         self.session.auth = self.auth
         self.session.headers.update({"Content-Type": "application/fhir+json"})
-
-    def _evaluate_conditions(self, filter_args):
-        outer_frames = inspect.getouterframes(inspect.currentframe())
-        print(outer_frames)
 
     def include(self):
         pass
@@ -111,17 +62,18 @@ class FHIRQuery:
 
     def all(self):
         self._limit = None
-        # todo execute the pre built query string and return all resources that match the query
-        results = self._execute_query()
-        return results
+        self._execute_query()
+        return self._serialize_output()
 
     def limit(self, n: int):
         self._limit = n
-        return self._execute_query()
+        self._execute_query()
+        return self._serialize_output()
 
     def first(self):
         self._limit = 1
-        return self._execute_query()
+        self._execute_query()
+        return self._serialize_output()
 
     def set_query_string(self, raw_query_string: str):
         self._query_string = self.base_url + raw_query_string
@@ -135,43 +87,44 @@ class FHIRQuery:
     def _execute_query(self):
         r = self.session.get(self.query_url)
         r.raise_for_status()
-        if self.output_format == "json":
-            link = r.json().get("link", None)
-            if link:
-                full_response = self._resolve_response_pagination(r)
-                return full_response
-            return r.json()
-
-        elif self.output_format == "xml":
-            print(r.text)
+        if self.output_format == "xml":
+            self._query_response = r.content
+        else:
+            response = self._resolve_response_pagination(r)
+            self._query_response = Bundle(**response)
 
     def _resolve_response_pagination(self, server_response: requests.Response):
         # todo outsource into search response class
         response = server_response.json()
-        entries = []
-        entries.extend(response["entry"])
+        link = response.get("link", None)
+        if not link:
+            return response
+        else:
+            print("Resolving response pagination")
+            entries = []
+            entries.extend(response["entry"])
 
-        if self._limit:
-            if len(entries) >= self._limit:
-                response["entry"] = response["entry"][:self._limit]
-                return response
+            if self._limit:
+                if len(entries) >= self._limit:
+                    response["entry"] = response["entry"][:self._limit]
+                    return response
 
-        while response.get("link", None):
+            while response.get("link", None):
 
-            if self._limit and len(entries) >= self._limit:
-                print("Limit reached stopping pagination resolve")
-                break
+                if self._limit and len(entries) >= self._limit:
+                    print("Limit reached stopping pagination resolve")
+                    break
 
-            next_page = next((link for link in response["link"] if link.get("relation", None) == "next"), None)
-            if next_page:
-                response = self.session.get(next_page["url"]).json()
-                entries.extend(response["entry"])
-            else:
-                break
+                next_page = next((link for link in response["link"] if link.get("relation", None) == "next"), None)
+                if next_page:
+                    response = self.session.get(next_page["url"]).json()
+                    entries.extend(response["entry"])
+                else:
+                    break
 
-        response["entry"] = entries[:self._limit] if self._limit else entries
-
-        return response
+            response["entry"] = entries[:self._limit] if self._limit else entries
+            # remove next linked from resolved pagination
+            return response
 
     def _make_query_string(self):
         query_string = self.base_url + "/" + self.resource.get_resource_type() + "?"
@@ -179,13 +132,44 @@ class FHIRQuery:
         if self.conditions:
             # todo
             pass
-
-        # todo include and has
+        # todo implement include and has
         if self._limit:
             query_string += f"_count={self._limit}"
         else:
             query_string += f"_count=5000"
 
-        query_string += f"&_format={self.output_format}"
-        print(query_string)
+        # todo improve xml support with full parser
+        if self.output_format == "xml":
+            query_string += f"&_format=xml"
+        else:
+            query_string += f"&_format=json"
+
         self._query_string = query_string
+
+    def _parse_filter_dict(self, filter_dict: dict):
+        pass
+
+    def _serialize_output(self):
+        # TODO improve the super super basic xml support
+        if isinstance(self._query_response, bytes):
+            self._query_response = self._query_response.decode("utf-8")
+        if isinstance(self._query_response, str):
+            if self.output_format == "xml":
+                return self._query_response
+            elif self.output_format == "json":
+                return Bundle.construct(**json.loads(self._query_response)).json()
+            elif self.output_format == "dict":
+                return Bundle.construct(**json.loads(self._query_response)).dict()
+            elif self.output_format == "model":
+                return Bundle.construct(**json.loads(self._query_response))
+
+        elif isinstance(self._query_response, Bundle):
+            if self.output_format == "json":
+                return self._query_response.json(indent=2)
+            elif self.output_format == "dict":
+                return self._query_response.dict()
+            elif self.output_format == "model":
+                return self._query_response
+
+        else:
+            raise ValueError("Unable to serialize query response")
