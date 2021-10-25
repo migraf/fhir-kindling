@@ -6,8 +6,8 @@ from fhir.resources.bundle import BundleEntry, BundleEntryRequest
 
 from fhir_kindling.fhir_server.auth import generate_auth
 from fhir.resources import FHIRAbstractModel
-from fhir_kindling.fhir_query import query_server
-from fhir_kindling.upload import generate_fhir_headers
+from .query_functions import query_server
+from .upload import generate_fhir_headers
 from dotenv import load_dotenv, find_dotenv
 
 

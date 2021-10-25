@@ -17,7 +17,7 @@ def api_url():
     """
     load_dotenv(find_dotenv())
 
-    return os.getenv("FHIR_API_URL", "http://localhost:9090/fhir")
+    return os.getenv("FHIR_API_URL", "http://localhost:8080/fhir")
 
 
 @pytest.fixture

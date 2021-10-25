@@ -3,8 +3,6 @@ version: '3.8'
 volumes:
   blaze-data:
   blaze-data2:
-  hapi-data:
-  ibm-data:
 
 services:
   blaze:
@@ -13,7 +11,7 @@ services:
       JAVA_TOOL_OPTIONS: "-Xmx2g"
       OPENID_PROVIDER_URL: "https://keycloak-pht.tada5hi.net/auth/realms/blaze"
     ports:
-      - "9090:8080"
+      - "8080:8080"
     volumes:
       - "blaze-data:/app/data"
   blaze2:
@@ -21,7 +19,7 @@ services:
     environment:
       JAVA_TOOL_OPTIONS: "-Xmx2g"
     ports:
-      - "9091:8080"
+      - "8081:8080"
     volumes:
       - "blaze-data2:/app/data"
 

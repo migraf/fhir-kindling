@@ -101,9 +101,9 @@ class FhirServer:
 
         """
         valid_query_string, resource = self._validate_query_string_and_parse_resource(query_string)
-        print(resource)
         query = FHIRQuery(self.api_address, resource, session=self.session, output_format=output_format)
         query.set_query_string(valid_query_string)
+        print(query.query_url)
         return query
 
     def add(self, resource: Union[Resource, dict]) -> ResourceCreateResponse:

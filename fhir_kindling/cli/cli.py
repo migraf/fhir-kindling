@@ -3,8 +3,8 @@ import sys
 import click
 import yaml
 from fhir_kindling.generators import PatientGenerator
-from fhir_kindling import upload_bundle
-from fhir_kindling import query_server as execute_query
+from .upload import upload_bundle
+from .query_functions import query_server as execute_query
 from fhir_kindling.fhir_server.auth import load_environment_auth_vars
 from pathlib import Path
 from dotenv import load_dotenv, find_dotenv

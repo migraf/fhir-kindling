@@ -9,7 +9,7 @@ from fhir.resources.identifier import Identifier
 
 from fhir_kindling.generators import FhirResourceGenerator, PatientResourceGenerator, MolecularSequenceGenerator, \
     PatientGenerator
-from fhir_kindling.upload import upload_bundle, upload_resource
+from .upload import upload_bundle, upload_resource
 from dotenv import load_dotenv, find_dotenv
 
 
