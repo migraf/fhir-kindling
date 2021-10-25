@@ -7,6 +7,7 @@ from dotenv import load_dotenv, find_dotenv
 from fhir.resources.organization import Organization
 from fhir.resources.address import Address
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
+from fhir.resources.patient import Patient
 
 
 @pytest.fixture
@@ -16,7 +17,7 @@ def api_url():
     """
     load_dotenv(find_dotenv())
 
-    return os.getenv("FHIR_API_URL", "http://hapi.fhir.org/baseR4")
+    return os.getenv("FHIR_API_URL", "http://localhost:9090/fhir")
 
 
 @pytest.fixture
@@ -131,7 +132,7 @@ def test_upload_single_resource(oidc_server: FhirServer):
 
 
 def test_query_all(oidc_server: FhirServer):
-    response = oidc_server.query(Organization).all()
+    response = oidc_server.query(Organization, output_format="dict").all()
 
     assert response["entry"]
 
@@ -148,7 +149,7 @@ def test_query_with_string_resource(oidc_server: FhirServer):
 
 
 def test_query_with_limit(oidc_server: FhirServer):
-    response = oidc_server.query(Organization).limit(2)
+    response = oidc_server.query(Patient, output_format="dict").limit(2)
 
     assert response["entry"]
 
@@ -157,7 +158,7 @@ def test_query_with_limit(oidc_server: FhirServer):
 
 def test_query_raw_string(oidc_server: FhirServer):
     query_string = "/Patient?"
-    query = oidc_server.raw_query(query_string=query_string)
+    query = oidc_server.raw_query(query_string=query_string, output_format="dict")
 
     assert isinstance(query, FHIRQuery)
 

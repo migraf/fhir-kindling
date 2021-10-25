@@ -31,7 +31,7 @@ setup(
     description="Generates synthetic FHIR resources.",
     entry_points={
         'console_scripts': [
-            'fhir_kindling=fhir_kindling.cli:main',
+            'fhir_kindling=fhir_kindling.cli.cli:main',
         ],
     },
     install_requires=requirements,

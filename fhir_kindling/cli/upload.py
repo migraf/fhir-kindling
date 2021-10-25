@@ -154,7 +154,7 @@ def generate_fhir_headers(fhir_server_type: str):
 
 if __name__ == '__main__':
     load_dotenv(find_dotenv())
-    bundle_path = "../examples/polar/bundles/POLAR_Testdaten_UKB.json"
+    bundle_path = "../../examples/polar/bundles/POLAR_Testdaten_UKB.json"
     bundle = load_bundle(bundle_path)
     # print(bundle)
     # hapi upload

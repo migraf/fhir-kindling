@@ -59,11 +59,14 @@ class FhirServer:
             return FhirServer(api_address=api_address, fhir_server_type=server_type)
         else:
             env_auth = _auth_info_from_env()
+            # static token
             if isinstance(env_auth, str):
                 return cls(api_address=api_address, token=env_auth, fhir_server_type=server_type)
+            # username and password
             elif isinstance(env_auth, tuple) and len(env_auth) == 2:
                 return cls(api_address=api_address, username=env_auth[0], password=env_auth[1],
                            fhir_server_type=server_type)
+            # oauth2/oidc
             elif isinstance(env_auth, tuple) and len(env_auth) == 3:
                 return cls(api_address=api_address, client_id=env_auth[0], client_secret=env_auth[1],
                            oidc_provider_url=env_auth[2], fhir_server_type=server_type)
@@ -98,7 +101,7 @@ class FhirServer:
 
         """
         valid_query_string, resource = self._validate_query_string_and_parse_resource(query_string)
-
+        print(resource)
         query = FHIRQuery(self.api_address, resource, session=self.session, output_format=output_format)
         query.set_query_string(valid_query_string)
         return query
