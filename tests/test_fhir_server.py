@@ -16,7 +16,7 @@ def api_url():
     """
     Base api url and env vars
     """
-    load_dotenv(find_dotenv())
+    # load_dotenv(find_dotenv())
 
     return os.getenv("FHIR_API_URL", "http://localhost:9090/fhir")
 

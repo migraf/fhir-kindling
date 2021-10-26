@@ -151,16 +151,3 @@ def generate_fhir_headers(fhir_server_type: str):
 
     return headers
 
-
-if __name__ == '__main__':
-    load_dotenv(find_dotenv())
-    bundle_path = "../../examples/polar/bundles/POLAR_Testdaten_UKB.json"
-    bundle = load_bundle(bundle_path)
-    # print(bundle)
-    # hapi upload
-    # gecco_path = "../examples/gecco/bundles"
-    # response = upload_bundle(bundle=gecco_path, fhir_api_url=os.getenv("FHIR_API_URL"), username=os.getenv("FHIR_USER"),
-    #                          password=os.getenv("FHIR_PW"), fhir_server_type=os.getenv("FHIR_SERVER_TYPE"))
-    # blaze upload
-    response = upload_bundle(bundle=bundle, fhir_api_url=os.getenv("BLAZE_API_URL"), token=os.getenv("FHIR_TOKEN"),
-                             fhir_server_type=os.getenv("FHIR_SERVER_TYPE"))
