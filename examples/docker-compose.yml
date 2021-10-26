@@ -10,16 +10,18 @@ services:
     environment:
       JAVA_TOOL_OPTIONS: "-Xmx2g"
       OPENID_PROVIDER_URL: "https://keycloak-pht.tada5hi.net/auth/realms/blaze"
+      BASE_URL: "http://localhost:9090"
     ports:
-      - "8080:8080"
+      - "9090:8080"
     volumes:
       - "blaze-data:/app/data"
   blaze2:
     image: "samply/blaze:0.11.0"
     environment:
       JAVA_TOOL_OPTIONS: "-Xmx2g"
+      BASE_URL: "http://localhost:9091"
     ports:
-      - "8081:8080"
+      - "9091:8080"
     volumes:
       - "blaze-data2:/app/data"
 
