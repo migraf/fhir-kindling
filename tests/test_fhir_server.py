@@ -8,6 +8,7 @@ from fhir.resources.organization import Organization
 from fhir.resources.address import Address
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.patient import Patient
+from fhir_kindling.generators import PatientGenerator
 
 
 @pytest.fixture
@@ -17,7 +18,7 @@ def api_url():
     """
     load_dotenv(find_dotenv())
 
-    return os.getenv("FHIR_API_URL", "http://localhost:8080/fhir")
+    return os.getenv("FHIR_API_URL", "http://localhost:9090/fhir")
 
 
 @pytest.fixture
@@ -27,6 +28,14 @@ def oidc_server(api_url):
         client_id=os.getenv("CLIENT_ID"),
         client_secret=os.getenv("CLIENT_SECRET"),
         oidc_provider_url=os.getenv("OIDC_PROVIDER_URL")
+    )
+    return server
+
+
+@pytest.fixture
+def fhir_server():
+    server = FhirServer(
+        api_address="http://localhost:9091/fhir"
     )
     return server
 
@@ -93,26 +102,12 @@ def test_server_api_url_validation(api_url):
         server = FhirServer(api_address="http://bla_ze:8x80/fhir")
 
 
-def test_oidc_auth_server(api_url):
-    server = FhirServer(
-        api_address=api_url,
-        client_id=os.getenv("CLIENT_ID"),
-        client_secret=os.getenv("CLIENT_SECRET"),
-        oidc_provider_url=os.getenv("OIDC_PROVIDER_URL")
-    )
-
-    assert server.auth
-
-
-def test_server_capabilities(oidc_server):
-    capabilities = oidc_server.capabilities
+def test_server_capabilities(fhir_server):
+    capabilities = fhir_server.capabilities
     assert capabilities
 
-    for rest_cap in capabilities.rest:
-        print(rest_cap.searchParam)
 
-
-def test_upload_single_resource(oidc_server: FhirServer):
+def test_upload_single_resource(fhir_server: FhirServer):
     from fhir.resources.organization import Organization
     from fhir.resources.address import Address
 
@@ -124,22 +119,30 @@ def test_upload_single_resource(oidc_server: FhirServer):
 
     Organization.element_properties()
 
-    response = oidc_server.add(org)
+    response = fhir_server.add(org)
 
     print(response.resource)
 
     assert response
 
 
-def test_query_all(oidc_server: FhirServer):
-    response = oidc_server.query(Organization, output_format="dict").all()
+def test_server_add_all(fhir_server: FhirServer):
+    generator = PatientGenerator(n=100)
+    patients = generator.generate()
+    add_response = fhir_server.add_all(patients)
+
+    assert add_response
+
+
+def test_query_all(fhir_server: FhirServer):
+    response = fhir_server.query(Organization, output_format="dict").all()
 
     assert response["entry"]
 
 
-def test_query_with_string_resource(oidc_server: FhirServer):
-    auth = oidc_server.auth
-    query = FHIRQuery(oidc_server.api_address, "Patient", auth=auth)
+def test_query_with_string_resource(fhir_server: FhirServer):
+    auth = fhir_server.auth
+    query = FHIRQuery(fhir_server.api_address, "Patient", auth=auth)
 
     response = query.all()
 
@@ -148,17 +151,17 @@ def test_query_with_string_resource(oidc_server: FhirServer):
     assert response
 
 
-def test_query_with_limit(oidc_server: FhirServer):
-    response = oidc_server.query(Patient, output_format="dict").limit(2)
+def test_query_with_limit(fhir_server: FhirServer):
+    response = fhir_server.query(Patient, output_format="dict").limit(2)
 
     assert response["entry"]
 
     assert len(response["entry"]) == 2
 
 
-def test_query_raw_string(oidc_server: FhirServer):
+def test_query_raw_string(fhir_server: FhirServer):
     query_string = "/Patient?"
-    query = oidc_server.raw_query(query_string=query_string, output_format="dict")
+    query = fhir_server.raw_query(query_string=query_string, output_format="dict")
 
     assert isinstance(query, FHIRQuery)
 
@@ -167,7 +170,7 @@ def test_query_raw_string(oidc_server: FhirServer):
     assert query.all()["entry"]
 
 
-def test_add_bundle(oidc_server: FhirServer, org_bundle):
-    response = oidc_server.add_bundle(org_bundle)
+def test_add_bundle(fhir_server: FhirServer, org_bundle):
+    response = fhir_server.add_bundle(org_bundle)
     assert response
     print(response)

@@ -6,7 +6,6 @@ from fhir.resources.domainresource import DomainResource
 from fhir.resources.molecularsequence import MolecularSequence, MolecularSequenceVariant
 
 from fhir_kindling.generators import FhirResourceGenerator
-from fhir_kindling import upload_bundle
 
 from dotenv import load_dotenv, find_dotenv
 
@@ -66,18 +65,3 @@ class MolecularSequenceGenerator(FhirResourceGenerator):
 
         self.n = len(sequences)
         return sequences
-
-
-if __name__ == '__main__':
-    load_dotenv(find_dotenv())
-    sequence_file_1 = "../../examples/hiv_sequences/sequences_5.txt"
-    ms_generator = MolecularSequenceGenerator(sequence_file=[sequence_file_1])
-    resources = ms_generator.generate()
-    print(len(resources))
-
-
-    # print(resources)
-    # bundle = ms_generator.make_bundle()
-    # print()
-    # upload_bundle(bundle=bundle, fhir_api_url=os.getenv("FHIR_API_URL"), username=os.getenv("FHIR_USER"),
-    #               password=os.getenv("FHIR_PW"))

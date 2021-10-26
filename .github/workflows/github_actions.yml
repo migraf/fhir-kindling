@@ -5,9 +5,9 @@ name: fhir_kindling_ci
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -33,15 +33,11 @@ jobs:
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      - name: Test with pytest
-        run: |
-          pip install .
-          pytest
-      - name: Build and deploy documentation
-        run: mkdocs gh-deploy --force
 
-      - name: Generate coverage report
+      - name: Tests and coverage report
         run: |
+          # spin up test fhir servers
+          docker-compose -f ./examples/docker-compose.yml up -d
           coverage run -m pytest
           coverage xml
       - name: Upload coverage to Codecov
@@ -51,3 +47,6 @@ jobs:
           fail_ci_if_error: true
           name: codecov-umbrella
           verbose: true
+
+      - name: Build and deploy documentation
+        run: mkdocs gh-deploy --force

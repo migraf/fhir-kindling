@@ -10,6 +10,8 @@ from uuid import uuid4
 
 from abc import ABC, abstractmethod
 
+from fhir.resources.resource import Resource
+
 
 class FhirResourceGenerator:
 
@@ -25,7 +27,7 @@ class FhirResourceGenerator:
         return math.ceil(self.n/self.n_per_patient)
 
     def generate(self, out_dir: str = None, filename: str = None, generate_ids: bool = False,
-                 patient_references: List[Reference] = None):
+                 patient_references: List[Reference] = None) -> List[Resource]:
         self._patient_references = patient_references
         self.resources = self._generate()
         if generate_ids:
