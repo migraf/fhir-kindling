@@ -9,4 +9,3 @@ PyYAML
 tqdm
 click-spinner
 orjson
-loguru
