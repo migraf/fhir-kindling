@@ -52,8 +52,3 @@ jobs:
 
       - name: Build and deploy documentation
         run: mkdocs gh-deploy --force
-  docs:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Build and deploy documentation
-        run: mkdocs gh-deploy --force
