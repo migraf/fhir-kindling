@@ -34,6 +34,8 @@ setup(
             'fhir_kindling=fhir_kindling.cli.cli:main',
         ],
     },
+    long_description=readme + history,
+    long_description_content_type="text/markdown",
     install_requires=requirements,
     license="MIT license",
     include_package_data=True,
