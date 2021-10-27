@@ -1,0 +1,30 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+click = "*"
+python-dotenv = "*"
+pandas = "*"
+"fhir.resources" = "*"
+requests = "*"
+requests-oauthlib = "*"
+pendulum = "*"
+tqdm = "*"
+click-spinner = "*"
+orjson = "*"
+loguru = "*"
+PyYAML = "*"
+
+[dev-packages]
+pytest = "*"
+coverage = "*"
+tox = "*"
+mkdocs = "*"
+mkdocs-material = "*"
+twine = "*"
+bump2version = "*"
+
+[requires]
+python_version = "3.9"
