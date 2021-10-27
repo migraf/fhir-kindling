@@ -24,6 +24,7 @@ mkdocs = "*"
 mkdocs-material = "*"
 twine = "*"
 bump2version = "*"
+pipenv-setup = "*"
 
 [requires]
 python_version = "3.9"
