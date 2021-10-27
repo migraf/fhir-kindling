@@ -189,7 +189,8 @@ class FhirServer:
         return entry
 
     def _upload_bundle(self, bundle: Bundle) -> BundleCreateResponse:
-        r = self.session.post(url=self.api_address, data=bundle.json(return_bytes=True))
+        r = self.session.post(url=self.api_address + "/", data=bundle.json(return_bytes=True))
+        print(r.headers)
         r.raise_for_status()
         bundle_response = BundleCreateResponse(r, bundle)
         return bundle_response
@@ -209,7 +210,7 @@ class FhirServer:
             return flatten_bundle(bundle_response)
 
     def _get_meta_data(self):
-        url = self.api_address + "/metadata"
+        url = self.api_address + "/metadata?_format=json"
         r = self.session.get(url)
         r.raise_for_status()
         response = r.json()
@@ -223,7 +224,8 @@ class FhirServer:
     def capabilities(self) -> CapabilityStatement:
         if not self._meta_data:
             self._get_meta_data()
-        return CapabilityStatement(**self._meta_data)
+        # todo change back to return capability statement resource
+        return self._meta_data
 
     @property
     def auth(self) -> Union[requests.auth.AuthBase, None]:

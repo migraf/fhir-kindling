@@ -10,7 +10,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  test:
 
     runs-on: ubuntu-latest
     environment: CI
@@ -33,9 +33,12 @@ jobs:
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      - name: Spin up docker-compose
-        run: docker-compose -f ./examples/docker-compose.yml up -d
       - name: Tests and coverage report
+        env:
+          FHIR_API_URL: ${{ secrets.BLAZE_API_URL }}
+          CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
+          OIDC_PROVIDER_URL: ${{ secrets.KEYCLOAK_PROVIDER_URL }}
         run: |
           coverage run -m pytest
           coverage xml
@@ -47,5 +50,10 @@ jobs:
           name: codecov-umbrella
           verbose: true
 
+      - name: Build and deploy documentation
+        run: mkdocs gh-deploy --force
+  docs:
+    runs-on: ubuntu-latest
+    steps:
       - name: Build and deploy documentation
         run: mkdocs gh-deploy --force
