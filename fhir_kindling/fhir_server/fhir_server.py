@@ -10,6 +10,7 @@ import requests.auth
 from fhir.resources.resource import Resource
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.capabilitystatement import CapabilityStatement
+from fhir.resources.reference import Reference
 from requests_oauthlib import OAuth2Session
 import fhir.resources
 from requests_toolbelt import user_agent
@@ -49,29 +50,6 @@ class FhirServer:
         # setup the session
         self.session = requests.Session()
         self._setup()
-
-    @classmethod
-    def from_env(cls, no_auth: bool = False):
-        api_address = _api_address_from_env()
-        server_type = os.getenv("FHIR_SERVER_TYPE")
-
-        if no_auth:
-            return FhirServer(api_address=api_address, fhir_server_type=server_type)
-        else:
-            env_auth = _auth_info_from_env()
-            # static token
-            if isinstance(env_auth, str):
-                return cls(api_address=api_address, token=env_auth, fhir_server_type=server_type)
-            # username and password
-            elif isinstance(env_auth, tuple) and len(env_auth) == 2:
-                return cls(api_address=api_address, username=env_auth[0], password=env_auth[1],
-                           fhir_server_type=server_type)
-            # oauth2/oidc
-            elif isinstance(env_auth, tuple) and len(env_auth) == 3:
-                return cls(api_address=api_address, client_id=env_auth[0], client_secret=env_auth[1],
-                           oidc_provider_url=env_auth[2], fhir_server_type=server_type)
-            else:
-                raise EnvironmentError("Authentication information could not be loaded from environment")
 
     def query(self, resource: Union[Resource, fhir.resources.FHIRAbstractModel] = None,
               output_format: str = "json") -> FHIRQuery:
@@ -150,6 +128,42 @@ class FhirServer:
         transaction_response = self._upload_bundle(bundle)
         return transaction_response
 
+    def update(self,
+               resources: List[Union[Resource, dict]] = None,
+               references: List[Union[str, Reference]] = None):
+        # todo check that the resources exist and have an id?
+        # batch update transaction
+        pass
+
+    def delete(self,
+               resources: List[Union[Resource, dict]] = None,
+               references: List[Union[str, Reference]] = None):
+        # todo
+        pass
+
+    @classmethod
+    def from_env(cls, no_auth: bool = False):
+        api_address = _api_address_from_env()
+        server_type = os.getenv("FHIR_SERVER_TYPE")
+
+        if no_auth:
+            return FhirServer(api_address=api_address, fhir_server_type=server_type)
+        else:
+            env_auth = _auth_info_from_env()
+            # static token
+            if isinstance(env_auth, str):
+                return cls(api_address=api_address, token=env_auth, fhir_server_type=server_type)
+            # username and password
+            elif isinstance(env_auth, tuple) and len(env_auth) == 2:
+                return cls(api_address=api_address, username=env_auth[0], password=env_auth[1],
+                           fhir_server_type=server_type)
+            # oauth2/oidc
+            elif isinstance(env_auth, tuple) and len(env_auth) == 3:
+                return cls(api_address=api_address, client_id=env_auth[0], client_secret=env_auth[1],
+                           oidc_provider_url=env_auth[2], fhir_server_type=server_type)
+            else:
+                raise EnvironmentError("Authentication information could not be loaded from environment")
+
     def _make_bundle_from_resource_list(self, resources: List[Union[FHIRAbstractModel, dict]]) -> Bundle:
         upload_bundle = Bundle.construct()
         upload_bundle.type = "transaction"
@@ -190,7 +204,6 @@ class FhirServer:
 
     def _upload_bundle(self, bundle: Bundle) -> BundleCreateResponse:
         r = self.session.post(url=self.api_address, data=bundle.json(return_bytes=True))
-        print(r.headers)
         r.raise_for_status()
         bundle_response = BundleCreateResponse(r, bundle)
         return bundle_response
