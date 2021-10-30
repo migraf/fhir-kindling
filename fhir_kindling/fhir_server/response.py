@@ -64,6 +64,3 @@ class UpdateResponse:
     def __init__(self, server_response: Response):
         pass
 
-
-class SearchResponse:
-    pass

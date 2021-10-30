@@ -12,6 +12,8 @@ import requests
 import requests.auth
 import xml.etree.ElementTree as ET
 
+from fhir_kindling.fhir_query.query_response import QueryResponse
+
 
 class FHIRQuery:
 
@@ -62,21 +64,21 @@ class FHIRQuery:
 
     def all(self):
         self._limit = None
-        self._execute_query()
-        return self._serialize_output()
+        return self._execute_query()
 
     def limit(self, n: int):
         self._limit = n
         self._execute_query()
-        return self._serialize_output()
+        return self._execute_query()
 
     def first(self):
         self._limit = 1
-        self._execute_query()
-        return self._serialize_output()
+        return self._execute_query()
 
     def set_query_string(self, raw_query_string: str):
-        self._query_string = self.base_url + raw_query_string
+        # todo parse query string into conditions
+        validated_string = self._validate_raw_query_string(raw_query_string)
+        self._query_string = self.base_url + validated_string
 
     @property
     def query_url(self):
@@ -87,11 +89,8 @@ class FHIRQuery:
     def _execute_query(self):
         r = self.session.get(self.query_url)
         r.raise_for_status()
-        if self.output_format == "xml":
-            self._query_response = r.content
-        else:
-            response = self._resolve_response_pagination(r)
-            self._query_response = Bundle(**response)
+        response = QueryResponse(self.session, response=r, format=self.output_format, limit=self._limit)
+        return response
 
     def _resolve_response_pagination(self, server_response: requests.Response):
         # todo outsource into search response class
@@ -136,7 +135,7 @@ class FHIRQuery:
         if self._limit:
             query_string += f"_count={self._limit}"
         else:
-            query_string += f"_count=5000"
+            query_string += f"_count=50"
 
         # todo improve xml support with full parser
         if self.output_format == "xml":
@@ -146,11 +145,20 @@ class FHIRQuery:
 
         self._query_string = query_string
 
+    def _validate_raw_query_string(self, raw_query_string: str) -> str:
+        if self.output_format == "xml":
+            if "&_format=json" in raw_query_string:
+                return raw_query_string.replace("&_format=json", "&_format=xml")
+            if "&_format=xml" not in raw_query_string:
+                return raw_query_string + "&_format=xml"
+        if self.output_format == "json":
+            if "&_format=xml" in raw_query_string:
+                return raw_query_string.replace("&_format=xml", "")
+
     def _parse_filter_dict(self, filter_dict: dict):
         pass
 
     def _serialize_output(self):
-        # TODO improve the super super basic xml support
         if isinstance(self._query_response, bytes):
             self._query_response = self._query_response.decode("utf-8")
         if isinstance(self._query_response, str):
