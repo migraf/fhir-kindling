@@ -9,3 +9,4 @@ PyYAML
 tqdm
 click-spinner
 orjson
+xmltodict
