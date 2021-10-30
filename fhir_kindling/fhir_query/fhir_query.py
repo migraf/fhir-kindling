@@ -22,7 +22,8 @@ class FHIRQuery:
                  resource: Union[Resource, fhir.resources.FHIRAbstractModel, str] = None,
                  auth: requests.auth.AuthBase = None,
                  session: requests.Session = None,
-                 output_format: str = "json"):
+                 output_format: str = "json",
+                 count: int = 5000):
 
         self.base_url = base_url
 
@@ -44,6 +45,7 @@ class FHIRQuery:
         self._query_string = None
         self.conditions: List[str] = []
         self._limit = None
+        self._count = count
         self._query_response: Union[Bundle, str] = None
 
     def where(self, filter_dict: dict = None):
@@ -92,39 +94,6 @@ class FHIRQuery:
         response = QueryResponse(self.session, response=r, format=self.output_format, limit=self._limit)
         return response
 
-    def _resolve_response_pagination(self, server_response: requests.Response):
-        # todo outsource into search response class
-        response = server_response.json()
-        link = response.get("link", None)
-        if not link:
-            return response
-        else:
-            print("Resolving response pagination")
-            entries = []
-            entries.extend(response["entry"])
-
-            if self._limit:
-                if len(entries) >= self._limit:
-                    response["entry"] = response["entry"][:self._limit]
-                    return response
-
-            while response.get("link", None):
-
-                if self._limit and len(entries) >= self._limit:
-                    print("Limit reached stopping pagination resolve")
-                    break
-
-                next_page = next((link for link in response["link"] if link.get("relation", None) == "next"), None)
-                if next_page:
-                    response = self.session.get(next_page["url"]).json()
-                    entries.extend(response["entry"])
-                else:
-                    break
-
-            response["entry"] = entries[:self._limit] if self._limit else entries
-            # remove next linked from resolved pagination
-            return response
-
     def _make_query_string(self):
         query_string = self.base_url + "/" + self.resource.get_resource_type() + "?"
 
@@ -135,7 +104,7 @@ class FHIRQuery:
         if self._limit:
             query_string += f"_count={self._limit}"
         else:
-            query_string += f"_count=50"
+            query_string += f"_count={self._count}"
 
         # todo improve xml support with full parser
         if self.output_format == "xml":
@@ -151,9 +120,11 @@ class FHIRQuery:
                 return raw_query_string.replace("&_format=json", "&_format=xml")
             if "&_format=xml" not in raw_query_string:
                 return raw_query_string + "&_format=xml"
-        if self.output_format == "json":
+        if self.output_format in ["json", "dict", "bundle"]:
             if "&_format=xml" in raw_query_string:
                 return raw_query_string.replace("&_format=xml", "")
+            else:
+                return raw_query_string
 
     def _parse_filter_dict(self, filter_dict: dict):
         pass

@@ -138,9 +138,9 @@ def test_server_add_all(fhir_server: FhirServer):
 
 
 def test_query_all(fhir_server: FhirServer):
-    response = fhir_server.query(Organization, output_format="dict").all()
-
-    assert response["entry"]
+    response = fhir_server.query(Patient, output_format="dict").all()
+    print(response)
+    assert response.response
 
 
 def test_query_with_string_resource(fhir_server: FhirServer):
@@ -157,9 +157,9 @@ def test_query_with_string_resource(fhir_server: FhirServer):
 def test_query_with_limit(fhir_server: FhirServer):
     response = fhir_server.query(Patient, output_format="dict").limit(2)
 
-    assert response["entry"]
+    assert response.response["entry"]
 
-    assert len(response["entry"]) == 2
+    assert len(response.response["entry"]) == 2
 
 
 def test_query_raw_string(fhir_server: FhirServer):
@@ -170,7 +170,7 @@ def test_query_raw_string(fhir_server: FhirServer):
 
     assert query.resource.get_resource_type() == "Patient"
 
-    assert query.all()["entry"]
+    assert query.all().response["entry"]
 
 
 def test_add_bundle(fhir_server: FhirServer, org_bundle):

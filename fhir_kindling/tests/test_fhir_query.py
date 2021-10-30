@@ -6,6 +6,7 @@ from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling import FhirServer
 import xmltodict
 
+
 @pytest.fixture
 def api_url():
     """
@@ -1100,10 +1101,12 @@ def paginated_xml():
 def test_query_xml(server):
     resp = server.query("Patient", output_format="xml")
     result = resp.all()
-    print(result.response)
+    assert result.response
+    assert isinstance(result.response, str)
 
 
-def test_xml_pagination(server, paginated_xml):
-    parsed = xmltodict.parse(paginated_xml)
-    print(parsed["Bundle"]["entry"][0])
-
+def test_query_json(server):
+    resp = server.query("Patient", output_format="json")
+    result = resp.all()
+    assert result.response
+    assert isinstance(result.response, dict)

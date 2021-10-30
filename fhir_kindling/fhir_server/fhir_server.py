@@ -52,18 +52,20 @@ class FhirServer:
         self._setup()
 
     def query(self, resource: Union[Resource, fhir.resources.FHIRAbstractModel] = None,
-              output_format: str = "json") -> FHIRQuery:
+              output_format: str = "json", count: int = 5000) -> FHIRQuery:
         """
         Initialize a FHIR query against the server with the given resource
 
         Args:
             output_format: the output format to request from the fhir server (json or xml) defaults to json
             resource: the FHIR resource to query from the server
+            count: the number of resources requested per page
 
         Returns: a FHIRQuery object that can be further modified with filters and conditions before being executed
         against the server
         """
-        return FHIRQuery(self.api_address, resource, auth=self.auth, session=self.session, output_format=output_format)
+        return FHIRQuery(self.api_address, resource, auth=self.auth, session=self.session,
+                         output_format=output_format, count=count)
 
     def raw_query(self, query_string: str, output_format: str = "json") -> FHIRQuery:
         """
@@ -251,6 +253,7 @@ class FhirServer:
         elif self.username and self.password:
             return generate_auth(self.username, self.password)
 
+        # static token auth
         elif self.token:
             return generate_auth(token=self.token)
         else:
