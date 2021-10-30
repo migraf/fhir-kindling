@@ -15,7 +15,7 @@ tqdm = "*"
 click-spinner = "*"
 orjson = "*"
 PyYAML = "*"
-lxml = "*"
+xmltodict = "*"
 
 [dev-packages]
 pytest = "*"
@@ -28,7 +28,7 @@ bump2version = "*"
 pipenv-setup = "*"
 notebook = "*"
 jupyter = "*"
-xmltodict = "*"
+
 
 [requires]
 python_version = "3.9"

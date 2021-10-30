@@ -5,7 +5,6 @@ from typing import Union
 
 from fhir.resources.bundle import Bundle
 from requests import Session, Response
-from lxml import etree as et
 import xmltodict
 
 
