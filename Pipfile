@@ -28,7 +28,7 @@ bump2version = "*"
 pipenv-setup = "*"
 notebook = "*"
 jupyter = "*"
-
+mkdocstrings = "*"
 
 [requires]
 python_version = "3.9"

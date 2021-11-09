@@ -1,23 +1,37 @@
-site_name: FHIR kindling
+site_name: FHIR Kindling
 theme:
   name: material
   features:
     - navigation.tracking
     - navigation.expand
-
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
 site_dir: public
 
 nav:
   - Home: index.md
-  - Upload: upload.md
-  - Query: query.md
-  - Serde: serde.md
+  - Tutorial:
+    - Connect to a FHIR server: connect.md
+    - Query a server: query.md
+    - Upload: upload.md
+    - Serde: serde.md
+  - API docs: api.md
 
 
 markdown_extensions:
   - admonition
   - pymdownx.highlight
   - pymdownx.superfences
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
 
 plugins:
   - mkdocstrings

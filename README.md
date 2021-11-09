@@ -1,7 +1,7 @@
 [![codecov](https://codecov.io/gh/migraf/fhir-kindling/branch/master/graph/badge.svg?token=FKQENFXACB)](https://codecov.io/gh/migraf/fhir-kindling)
 [![Pipeline](https://github.com/migraf/fhir-kindling/actions/workflows/github_actions.yml/badge.svg)](https://github.com/migraf/fhir-kindling/actions/workflows/github_actions.yml)
 [![PyPI version](https://badge.fury.io/py/fhir-kindling.svg)](https://badge.fury.io/py/fhir-kindling)
-# FHIR Kindling
+# :fire: FHIR Kindling
 
 CRUD library for fhir servers, with resource validation and parsing powered by the [pydantic](https://github.com/samuelcolvin/pydantic)
 models created by [fhir.resources](https://github.com/nazrulworld/fhir.resources). 
@@ -11,8 +11,6 @@ More details in the [Documentation](https://migraf.github.io/fhir-kindling/).
 - Create, Read, Update, Delete using a server's REST API
 - Bundle creation, validation and data management on a FHIR server via the REST API
 - Supports Hapi, Blaze and IBM FHIR servers
-
-
 
 ## Installation
 Install the package using pip:
