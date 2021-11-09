@@ -115,13 +115,13 @@ def test_server_capabilities(fhir_server):
 
 def test_server_rest_resources(fhir_server: FhirServer):
     resources = fhir_server.rest_resources
-    print(resources)
     assert resources
     assert len(resources) > 1
 
 
 def test_server_summary(fhir_server: FhirServer):
-    summary = fhir_server.summary
+    summary = fhir_server.summary()
+
 
 
 def test_fhir_server_from_env():
@@ -233,6 +233,7 @@ def test_fhir_server_from_env():
             {
                 "FHIR_API_URL": "http://test.fhir.org/r4",
                 "CLIENT_ID": "token",
+                "CLIENT_SECRET": "",
             }):
         with pytest.raises(EnvironmentError):
             server = FhirServer.from_env()
@@ -244,6 +245,7 @@ def test_fhir_server_from_env():
                 "FHIR_API_URL": "http://test.fhir.org/r4",
                 "CLIENT_ID": "token",
                 "CLIENT_SECRET": "token",
+                "OIDC_PROVIDER_URL": "",
             }):
         with pytest.raises(EnvironmentError):
             server = FhirServer.from_env()

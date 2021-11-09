@@ -178,13 +178,11 @@ class FhirServer:
 
     def _make_delete_transaction(self, resources: List[Union[Resource, dict]] = None,
                                  references: List[Union[str, Reference]] = None, query: QueryResponse = None) -> Bundle:
-        # todo tests
         delete_bundle = Bundle.construct()
         delete_bundle.type = "transaction"
         delete_bundle.entry = []
 
         if resources:
-            # todo extract references
             if isinstance(resources[0], dict):
                 resources = [fhir.resources.construct_fhir_element(
                     resource.get("resourceType"),
@@ -292,29 +290,25 @@ class FhirServer:
     def capabilities(self) -> CapabilityStatement:
         if not self._meta_data:
             self._get_meta_data()
-        # todo change back to return capability statement resource
         return CapabilityStatement(**self._meta_data)
 
     @property
     def rest_resources(self) -> List[str]:
         return [capa.type for capa in self.capabilities.rest[0].resource]
 
-
-    @property
     def summary(self) -> dict:
-        # TODO cache this
-        rest_capabilities = self.capabilities.rest[0]
-        summary = self._make_server_summary(rest_capabilities)
+        summary = self._make_server_summary()
         return summary
 
-    def _make_server_summary(self, rest_capabilities: CapabilityStatementRest) -> dict:
+    def _make_server_summary(self) -> dict:
+        resource_counts = {}
+        for resource in self.rest_resources:
+            url = self.api_address + "/" + resource + "?_summary=count"
+            r = self.session.get(url)
+            r.raise_for_status()
+            resource_counts[resource] = r.json()["total"]
 
-        for resource_capability in rest_capabilities.resource:
-            print(resource_capability)
-
-        print(rest_capabilities.resource[0].type)
-
-
+        return resource_counts
 
     @property
     def auth(self) -> Union[requests.auth.AuthBase, None]:
