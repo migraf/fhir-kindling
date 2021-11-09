@@ -16,6 +16,7 @@ import fhir.resources
 from requests_toolbelt import user_agent
 
 from fhir_kindling.fhir_query import FHIRQuery
+from fhir_kindling.fhir_query.query_response import QueryResponse
 from fhir_kindling.fhir_server.auth import generate_auth
 from fhir_kindling.fhir_server.response import ResourceCreateResponse, BundleCreateResponse
 from fhir_kindling.serde import flatten_bundle
@@ -139,8 +140,17 @@ class FhirServer:
 
     def delete(self,
                resources: List[Union[Resource, dict]] = None,
-               references: List[Union[str, Reference]] = None):
+               references: List[Union[str, Reference]] = None,
+               query: FHIRQuery = None):
         # todo
+        transaction_bundle = self._make_delete_transaction(resources, references, query)
+
+        response = self.session.post(self.api_address, json=transaction_bundle.dict())
+        response.raise_for_status()
+
+        return response
+
+    def transfer(self, query: FHIRQuery = None):
         pass
 
     @classmethod
@@ -165,6 +175,48 @@ class FhirServer:
                            oidc_provider_url=env_auth[2], fhir_server_type=server_type)
             else:
                 raise EnvironmentError("Authentication information could not be loaded from environment")
+
+    def _make_delete_transaction(self, resources: List[Union[Resource, dict]] = None,
+                                 references: List[Union[str, Reference]] = None, query: QueryResponse = None) -> Bundle:
+        # todo tests
+        delete_bundle = Bundle.construct()
+        delete_bundle.type = "transaction"
+        delete_bundle.entry = []
+
+        if resources:
+            # todo extract references
+            if isinstance(resources[0], dict):
+                resources = [fhir.resources.construct_fhir_element(
+                    resource.get("resourceType"),
+                    resource
+                )
+                    for resource in resources
+                ]
+
+            delete_references = [res.relative_path() for res in resources]
+        elif references:
+            if isinstance(references[0], Reference):
+                references = [ref.reference for ref in references]
+            delete_references = references
+        elif query:
+            delete_references = [resource.relative_path() for resource in query.resources]
+        else:
+            raise ValueError("No resources or references provided")
+
+        bundle_entries = [self._make_delete_entry(ref) for ref in delete_references]
+        delete_bundle.entry = bundle_entries
+        return delete_bundle
+
+    def _make_delete_entry(self, reference: str) -> BundleEntry:
+        entry = BundleEntry.construct()
+        entry.request = BundleEntryRequest(
+            **{
+                "method": "DELETE",
+                "url": reference
+            }
+        )
+
+        return entry
 
     def _make_bundle_from_resource_list(self, resources: List[Union[FHIRAbstractModel, dict]]) -> Bundle:
         upload_bundle = Bundle.construct()

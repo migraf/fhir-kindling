@@ -179,3 +179,16 @@ def test_add_bundle(fhir_server: FhirServer, org_bundle):
     response = fhir_server.add_bundle(org_bundle)
     assert response
     print(response)
+
+
+def test_delete(fhir_server: FhirServer):
+
+    # create 100 patients
+    generator = PatientGenerator(n=100)
+    patients = generator.generate()
+    add_response = fhir_server.add_all(patients)
+    print(add_response.references)
+
+    delete_response = fhir_server.delete(references=add_response.references)
+
+    print(delete_response)
