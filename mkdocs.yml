@@ -17,10 +17,10 @@ site_dir: public
 
 nav:
   - Home: index.md
-  - Tutorial:
+  - Tutorial - User Guide:
     - Connect to a FHIR server: connect.md
     - Query a server: query.md
-    - Upload: upload.md
+    - Adding resources to a Server: upload.md
     - Serde: serde.md
   - API docs: api.md
 

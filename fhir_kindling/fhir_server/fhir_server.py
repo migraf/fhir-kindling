@@ -52,7 +52,7 @@ class FhirServer:
         self.session = requests.Session()
         self._setup()
 
-    def query(self, resource: Union[Resource, fhir.resources.FHIRAbstractModel] = None,
+    def query(self, resource: Union[Resource, FHIRAbstractModel, str] = None,
               output_format: str = "json", count: int = 5000) -> FHIRQuery:
         """
         Initialize a FHIR query against the server with the given resource
