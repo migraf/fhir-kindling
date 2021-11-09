@@ -9,7 +9,7 @@ from requests import Response
 import requests.auth
 from fhir.resources.resource import Resource
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
-from fhir.resources.capabilitystatement import CapabilityStatement
+from fhir.resources.capabilitystatement import CapabilityStatement, CapabilityStatementRest
 from fhir.resources.reference import Reference
 from requests_oauthlib import OAuth2Session
 import fhir.resources
@@ -293,7 +293,28 @@ class FhirServer:
         if not self._meta_data:
             self._get_meta_data()
         # todo change back to return capability statement resource
-        return self._meta_data
+        return CapabilityStatement(**self._meta_data)
+
+    @property
+    def rest_resources(self) -> List[str]:
+        return [capa.type for capa in self.capabilities.rest[0].resource]
+
+
+    @property
+    def summary(self) -> dict:
+        # TODO cache this
+        rest_capabilities = self.capabilities.rest[0]
+        summary = self._make_server_summary(rest_capabilities)
+        return summary
+
+    def _make_server_summary(self, rest_capabilities: CapabilityStatementRest) -> dict:
+
+        for resource_capability in rest_capabilities.resource:
+            print(resource_capability)
+
+        print(rest_capabilities.resource[0].type)
+
+
 
     @property
     def auth(self) -> Union[requests.auth.AuthBase, None]:

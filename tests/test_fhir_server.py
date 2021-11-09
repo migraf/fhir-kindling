@@ -113,6 +113,17 @@ def test_server_capabilities(fhir_server):
     assert capabilities
 
 
+def test_server_rest_resources(fhir_server: FhirServer):
+    resources = fhir_server.rest_resources
+    print(resources)
+    assert resources
+    assert len(resources) > 1
+
+
+def test_server_summary(fhir_server: FhirServer):
+    summary = fhir_server.summary
+
+
 def test_fhir_server_from_env():
     load_dotenv(find_dotenv())
 
