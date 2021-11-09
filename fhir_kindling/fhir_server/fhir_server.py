@@ -18,7 +18,7 @@ from requests_toolbelt import user_agent
 from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling.fhir_query.query_response import QueryResponse
 from fhir_kindling.fhir_server.auth import generate_auth
-from fhir_kindling.fhir_server.response import ResourceCreateResponse, BundleCreateResponse
+from fhir_kindling.fhir_server.server_responses import ResourceCreateResponse, BundleCreateResponse
 from fhir_kindling.serde import flatten_bundle
 from oauthlib.oauth2 import BackendApplicationClient
 import pendulum
@@ -150,7 +150,7 @@ class FhirServer:
 
         return response
 
-    def transfer(self, query: FHIRQuery = None):
+    def transfer(self, query: FHIRQuery = None, delete: bool = False):
         pass
 
     @classmethod
@@ -207,7 +207,8 @@ class FhirServer:
         delete_bundle.entry = bundle_entries
         return delete_bundle
 
-    def _make_delete_entry(self, reference: str) -> BundleEntry:
+    @staticmethod
+    def _make_delete_entry(reference: str) -> BundleEntry:
         entry = BundleEntry.construct()
         entry.request = BundleEntryRequest(
             **{
@@ -387,6 +388,20 @@ def _api_address_from_env() -> str:
 def _auth_info_from_env() -> Union[str, Tuple[str, str], Tuple[str, str, str]]:
     # First try to load basic auth information
     username = os.getenv("FHIR_USER")
+    # Static token auth
+    token = os.getenv("FHIR_TOKEN")
+    # oauth2/oidc authentication
+    client_id = os.getenv("CLIENT_ID")
+    client_secret = os.getenv("CLIENT_SECRET")
+    oidc_provider_url = os.getenv("OIDC_PROVIDER_URL")
+
+    if username and token:
+        raise EnvironmentError("Conflicting auth information, bother username and token present.")
+    if username and client_id:
+        raise EnvironmentError("Conflicting auth information, bother username and client id present")
+    if token and client_id:
+        raise EnvironmentError("Conflicting auth information, bother static token and client id present")
+
     if username:
         password = os.getenv("FHIR_PW")
         if not password:
@@ -394,22 +409,9 @@ def _auth_info_from_env() -> Union[str, Tuple[str, str], Tuple[str, str, str]]:
         else:
             print(f"Basic auth environment info found -> ({username}:******)")
             return username, password
-    # Static token auth
-    token = os.getenv("FHIR_TOKEN")
-    if username and token:
-        raise EnvironmentError("Conflicting auth information, bother username and token present.")
     if token:
         print("Found static auth token")
         return token
-    # oauth2/oidc authentication
-    client_id = os.getenv("CLIENT_ID")
-    client_secret = os.getenv("CLIENT_SECRET")
-    oidc_provider_url = os.getenv("OIDC_PROVIDER_URL")
-
-    if username and client_id:
-        raise EnvironmentError("Conflicting auth information, bother username and client id present")
-    if token and client_id:
-        raise EnvironmentError("Conflicting auth information, bother static token and client id present")
 
     if client_id and not client_secret:
         raise EnvironmentError("Insufficient auth information, client id specified but no client secret found.")

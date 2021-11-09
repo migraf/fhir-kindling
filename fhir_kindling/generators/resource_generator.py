@@ -48,7 +48,7 @@ class FhirResourceGenerator:
         return self.resources
 
     @abstractmethod
-    def _generate(self):
+    def _generate(self) -> List[Resource]:
         pass
 
     def make_bundle(self) -> Bundle:
