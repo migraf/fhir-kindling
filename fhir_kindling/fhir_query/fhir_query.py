@@ -10,7 +10,6 @@ from fhir.resources.bundle import Bundle
 import fhir.resources
 import requests
 import requests.auth
-import xml.etree.ElementTree as ET
 
 from fhir_kindling.fhir_query.query_response import QueryResponse
 
@@ -50,7 +49,7 @@ class FHIRQuery:
 
     def where(self, filter_dict: dict = None):
         # todo evaluate arbitrary number of expressions based on fields of the resource and query values
-        self._parse_filter_dict(filter_dict)
+        self.conditions = self._parse_filter_dict(filter_dict)
         return self
 
     def _setup_session(self):
@@ -98,13 +97,12 @@ class FHIRQuery:
         query_string = self.base_url + "/" + self.resource.get_resource_type() + "?"
 
         if self.conditions:
-            # todo
-            pass
+            query_string += self.conditions
         # todo implement include and has
         if self._limit:
-            query_string += f"_count={self._limit}"
+            query_string += f"&_count={self._limit}"
         else:
-            query_string += f"_count={self._count}"
+            query_string += f"&_count={self._count}"
 
         # todo improve xml support with full parser
         if self.output_format == "xml":
@@ -126,8 +124,19 @@ class FHIRQuery:
             else:
                 return raw_query_string
 
-    def _parse_filter_dict(self, filter_dict: dict):
-        pass
+    def _parse_filter_dict(self, filter_dict: dict) -> str:
+
+        resource = self.resource
+        # todo validate the query with the fields of the selected model
+        query_params = []
+        for key, value in filter_dict.items():
+            query_param = f"{key}={value}"
+            query_params.append(query_param)
+
+        query_string = "&".join(query_params)
+        return query_string
+
+
 
     def _serialize_output(self):
         if isinstance(self._query_response, bytes):

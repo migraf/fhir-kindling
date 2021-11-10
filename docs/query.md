@@ -20,10 +20,7 @@ results = query.all()
 
 ```
 
-
-
-
-### Query with pydantic resource
+### Query using pydantic resource
 The resource to be queried can also be specified using a pydantic model from the fhir.resources library.  
 
 ```python

@@ -13,6 +13,7 @@ def api_url():
     Base api url and env vars
     """
     load_dotenv(find_dotenv())
+    load_dotenv(find_dotenv())
 
     return os.getenv("FHIR_API_URL", "http://test.fhir.org/r4")
 
@@ -1108,5 +1109,13 @@ def test_query_xml(server):
 def test_query_json(server):
     resp = server.query("Patient", output_format="json")
     result = resp.all()
+    assert result.response
+    assert isinstance(result.response, dict)
+
+
+def test_query_filters(server):
+    resp = server.query("Patient").where({"active": "true", "birthdate": "gt1970-10-28"})
+    result = resp.all()
+    print(resp.query_url)
     assert result.response
     assert isinstance(result.response, dict)
