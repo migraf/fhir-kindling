@@ -1,5 +1,5 @@
 [![codecov](https://codecov.io/gh/migraf/fhir-kindling/branch/master/graph/badge.svg?token=FKQENFXACB)](https://codecov.io/gh/migraf/fhir-kindling)
-[![Pipeline](https://github.com/migraf/fhir-kindling/actions/workflows/github_actions.yml/badge.svg)](https://github.com/migraf/fhir-kindling/actions/workflows/github_actions.yml)
+[![fhir_kindling_ci](https://github.com/migraf/fhir-kindling/actions/workflows/main_ci.yml/badge.svg)](https://github.com/migraf/fhir-kindling/actions/workflows/main_ci.yml)
 [![PyPI version](https://badge.fury.io/py/fhir-kindling.svg)](https://badge.fury.io/py/fhir-kindling)
 # :fire: FHIR Kindling
 
@@ -15,7 +15,7 @@ More details in the [Documentation](https://migraf.github.io/fhir-kindling/).
 ## Installation
 Install the package using pip:
 ```shell
-pip install fhir_kindling --user
+pip install fhir-kindling --user
 ```
 
 ## Usage

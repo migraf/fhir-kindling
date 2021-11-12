@@ -18,7 +18,7 @@ from requests_toolbelt import user_agent
 from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling.fhir_query.query_response import QueryResponse
 from fhir_kindling.fhir_server.auth import generate_auth
-from fhir_kindling.fhir_server.server_responses import ResourceCreateResponse, BundleCreateResponse
+from fhir_kindling.fhir_server.server_responses import ResourceCreateResponse, BundleCreateResponse, ServerSummary
 from fhir_kindling.serde import flatten_bundle
 from oauthlib.oauth2 import BackendApplicationClient
 import pendulum
@@ -296,19 +296,29 @@ class FhirServer:
     def rest_resources(self) -> List[str]:
         return [capa.type for capa in self.capabilities.rest[0].resource]
 
-    def summary(self) -> dict:
+    def summary(self) -> ServerSummary:
         summary = self._make_server_summary()
         return summary
 
-    def _make_server_summary(self) -> dict:
-        resource_counts = {}
+    def _make_server_summary(self) -> ServerSummary:
+        resources = []
+        summary = {
+            "name": self.api_address
+        }
         for resource in self.rest_resources:
             url = self.api_address + "/" + resource + "?_summary=count"
             r = self.session.get(url)
             r.raise_for_status()
-            resource_counts[resource] = r.json()["total"]
 
-        return resource_counts
+            resource_dict = {
+                "resource": resource,
+                "count": r.json().get("total")
+            }
+            resources.append(resource_dict)
+
+        summary["resources"] = resources
+        summary = ServerSummary(**summary)
+        return summary
 
     @property
     def auth(self) -> Union[requests.auth.AuthBase, None]:

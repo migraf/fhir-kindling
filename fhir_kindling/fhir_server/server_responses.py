@@ -5,6 +5,7 @@ from requests import Response
 from fhir.resources.resource import Resource
 from fhir.resources.bundle import Bundle
 from fhir.resources.reference import Reference
+from pydantic import BaseModel
 
 
 class CreateResponse:
@@ -64,3 +65,12 @@ class UpdateResponse:
     def __init__(self, server_response: Response):
         pass
 
+
+class ResourceSummary(BaseModel):
+    resource: str
+    count: int
+
+
+class ServerSummary(BaseModel):
+    name: str
+    resources: List[ResourceSummary]
