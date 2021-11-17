@@ -1,0 +1,21 @@
+version: '3'
+
+volumes:
+  blaze-data:
+
+services:
+  blaze-fhir:
+    image: "samply/blaze:0.11.0"
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx2g"
+    ports:
+      - "8080:8080"
+    volumes:
+      - "blaze-data:/app/data"
+
+  kindling_test:
+    build: .
+    command: "pytest fhir_kindling"
+    depends_on:
+      - blaze-fhir
+
