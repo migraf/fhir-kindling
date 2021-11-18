@@ -8,14 +8,16 @@ services:
     image: "samply/blaze:0.11.0"
     environment:
       JAVA_TOOL_OPTIONS: "-Xmx2g"
-    ports:
-      - "8080:8080"
+#    ports:
+#      - "9090:8080"
     volumes:
       - "blaze-data:/app/data"
 
   kindling_test:
     build: .
     command: "pytest fhir_kindling"
+    environment:
+      - FHIR_API_URL=http://blaze-fhir:8080
     depends_on:
       - blaze-fhir
 
