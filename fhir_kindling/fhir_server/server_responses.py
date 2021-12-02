@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from functools import cache
 
 from requests import Response
@@ -74,3 +74,7 @@ class ResourceSummary(BaseModel):
 class ServerSummary(BaseModel):
     name: str
     resources: List[ResourceSummary]
+
+    @property
+    def available_resources(self) -> List[ResourceSummary]:
+        return [r for r in self.resources if r.count > 0]

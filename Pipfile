@@ -16,6 +16,7 @@ click-spinner = "*"
 orjson = "*"
 PyYAML = "*"
 xmltodict = "*"
+plotly = "*"
 
 [dev-packages]
 pytest = "*"

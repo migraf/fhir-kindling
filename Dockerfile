@@ -16,6 +16,10 @@ COPY ./.coveragerc /opt/coveragerc
 COPY ./README.md /opt/README.md
 COPY ./CHANGELOG.md /opt/CHANGELOG.md
 
-RUN pip install .
+RUN pip install . && \
+    curl https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh >> /opt/wait-for-it.sh && \
+    chmod +x /opt/wait-for-it.sh
 
-CMD ["coverage", "run", "-m", "pytest", "tests"]
+COPY ./scripts/container_coverage.sh /opt/container_coverage.sh
+
+CMD ["/opt/wait-for-it.sh", "blaze-fhir:8080","--timeout=40", "--", "/opt/container_coverage.sh"]

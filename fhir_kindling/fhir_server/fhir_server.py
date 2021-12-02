@@ -13,7 +13,6 @@ from fhir.resources.capabilitystatement import CapabilityStatement, CapabilitySt
 from fhir.resources.reference import Reference
 from requests_oauthlib import OAuth2Session
 import fhir.resources
-from requests_toolbelt import user_agent
 
 from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling.fhir_query.query_response import QueryResponse
@@ -31,6 +30,18 @@ class FhirServer:
     def __init__(self, api_address: str, username: str = None, password: str = None, token: str = None,
                  client_id: str = None, client_secret: str = None, oidc_provider_url: str = None,
                  fhir_server_type: str = "hapi"):
+        """
+        Initialize a FHIR server connection
+        Args:
+            api_address: the base endpoint of the fhir server api
+            username: username for basic auth
+            password: password for basic auth
+            token: token for static token auth
+            client_id: client id for oauth2
+            client_secret: client secret for oauth2
+            oidc_provider_url: provider url for oauth2
+            fhir_server_type: type of fhir server (hapi, blaze, etc)
+        """
 
         # server definition values
         self.fhir_server_type = fhir_server_type
@@ -108,9 +119,17 @@ class FhirServer:
         response = self._upload_resource(resource)
         response.raise_for_status()
 
-        return ResourceCreateResponse(server_response_dict=response.headers, resource=resource)
+        return ResourceCreateResponse(server_response_dict=dict(response.headers), resource=resource)
 
-    def add_all(self, resources: List[Union[Resource, dict]]):
+    def add_all(self, resources: List[Union[Resource, dict]]) -> BundleCreateResponse:
+        """
+        Upload a list of resources to the server, after packaging them into a bundle
+        Args:
+            resources: list of resources to upload to the server, either dictionary or FHIR resource objects
+
+        Returns: Bundle create response from the fhir server
+
+        """
         bundle = self._make_bundle_from_resource_list(resources)
         response = self._upload_bundle(bundle)
         return response
@@ -276,7 +295,7 @@ class FhirServer:
             return flatten_bundle(bundle_response)
 
     def _get_meta_data(self):
-        url = self.api_address + "/metadata?_format=json"
+        url = self.api_address + "/metadata"
         r = self.session.get(url)
         r.raise_for_status()
         response = r.json()
