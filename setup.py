@@ -28,7 +28,7 @@ setup(
         "Programming Language :: Python :: 3.9",
     ],
     description="Generates synthetic FHIR resources.",
-    entry_points={"console_scripts": ["fhir_kindling=fhir_kindling.cli.cli:main",],},
+    entry_points={"console_scripts": ["fhir_kindling=fhir_kindling.cli.cli:main", ], },
     long_description=readme + history,
     long_description_content_type="text/markdown",
     install_requires=[

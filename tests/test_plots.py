@@ -4,7 +4,7 @@ from dotenv import load_dotenv, find_dotenv
 
 from fhir_kindling import FhirServer
 
-from fhir_kindling.plots import server_summary_plot
+from fhir_kindling.plots import server_summary_plot, resource_summary_plot
 
 @pytest.fixture
 def api_url():
@@ -39,9 +39,16 @@ def fhir_server(api_url):
     )
     return server
 
-def test_server_summary(fhir_server):
 
+def test_server_summary(fhir_server):
     summary = fhir_server.summary()
 
     plot_dict = server_summary_plot(summary)
     print(plot_dict)
+
+
+def test_resource_summary_basic(fhir_server):
+    patients = fhir_server.query("Patient")
+    summary_plot = resource_summary_plot(patients, ["gender"])
+
+

@@ -1,10 +1,5 @@
-import functools
-import inspect
 import json
-import os
 from typing import Union, List
-
-from dotenv import load_dotenv, find_dotenv
 from fhir.resources.resource import Resource
 from fhir.resources.bundle import Bundle
 import fhir.resources
@@ -135,8 +130,6 @@ class FHIRQuery:
 
         query_string = "&".join(query_params)
         return query_string
-
-
 
     def _serialize_output(self):
         if isinstance(self._query_response, bytes):
