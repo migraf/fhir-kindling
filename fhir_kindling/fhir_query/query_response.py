@@ -100,6 +100,8 @@ class QueryResponse:
     def resources(self):
         if self.format == "xml":
             raise NotImplementedError("Resource parsing not supported for xml format")
+        else:
+            return Bundle(**self.response).entry
 
     def to_file(self, file_path: Union[str, pathlib.Path]):
 

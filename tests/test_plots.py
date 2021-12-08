@@ -4,7 +4,10 @@ from dotenv import load_dotenv, find_dotenv
 
 from fhir_kindling import FhirServer
 
-from fhir_kindling.plots import server_summary_plot, resource_summary_plot
+from fhir_kindling.plots import server_summary_plot, resource_summary_plot, plot_resource_field
+from tests.fixtures import fhir_server
+
+fhir_server = fhir_server
 
 
 @pytest.fixture
@@ -15,18 +18,6 @@ def api_url():
     load_dotenv(find_dotenv())
 
     return os.getenv("FHIR_API_URL", "http://test.fhir.org/r4")
-
-
-@pytest.fixture
-def oidc_server(api_url):
-    print(api_url)
-    server = FhirServer(
-        api_address=api_url,
-        client_id=os.getenv("CLIENT_ID"),
-        client_secret=os.getenv("CLIENT_SECRET"),
-        oidc_provider_url=os.getenv("OIDC_PROVIDER_URL")
-    )
-    return server
 
 
 @pytest.fixture
@@ -53,3 +44,8 @@ def test_resource_summary_basic(fhir_server):
     assert patients
     summary_plot = resource_summary_plot(patients, ["gender"])
     assert summary_plot
+
+
+def test_plot_resource_field(fhir_server):
+    patients = fhir_server.query("Patient").all()
+    plot_resource_field(patients.resources, field="gender")
