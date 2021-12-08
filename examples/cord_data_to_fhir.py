@@ -1,13 +1,8 @@
-import json
 import os
 from dotenv import load_dotenv, find_dotenv
-from fhir_kindling import upload_bundle, query_server, FhirServer
-from fhir_kindling.serde import load_bundle, validate_bundle
-from fhir.resources.patient import Patient
+from fhir_kindling import FhirServer
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
-from fhir.resources.reference import Reference
-from fhir.resources.observation import Observation
 from fhir.resources.condition import Condition
 import pandas as pd
 
@@ -83,6 +78,7 @@ def upload_cord_data(csv_file, server_address):
         Condition.validate(cond)
 
     response = server.add_all(condition_resource_list)
+    print(response)
 
 
 if __name__ == '__main__':

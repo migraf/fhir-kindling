@@ -1,7 +1,6 @@
 import json
 import os
 from typing import List, Union, Tuple
-
 import pandas as pd
 import requests
 from fhir.resources import FHIRAbstractModel
@@ -9,20 +8,19 @@ from requests import Response
 import requests.auth
 from fhir.resources.resource import Resource
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
-from fhir.resources.capabilitystatement import CapabilityStatement, CapabilityStatementRest
+from fhir.resources.capabilitystatement import CapabilityStatement
 from fhir.resources.reference import Reference
 from requests_oauthlib import OAuth2Session
 import fhir.resources
+import re
+from oauthlib.oauth2 import BackendApplicationClient
+import pendulum
 
 from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling.fhir_query.query_response import QueryResponse
 from fhir_kindling.fhir_server.auth import generate_auth
 from fhir_kindling.fhir_server.server_responses import ResourceCreateResponse, BundleCreateResponse, ServerSummary
 from fhir_kindling.serde import flatten_bundle
-from oauthlib.oauth2 import BackendApplicationClient
-import pendulum
-
-import re
 
 
 class FhirServer:

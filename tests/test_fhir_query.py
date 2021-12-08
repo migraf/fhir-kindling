@@ -2,9 +2,7 @@ import pytest
 import os
 from dotenv import load_dotenv, find_dotenv
 
-from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling import FhirServer
-import xmltodict
 
 
 @pytest.fixture
@@ -1095,8 +1093,7 @@ def paginated_xml():
         </search>
     </entry>
 </Bundle>
-    
-    """
+"""
 
 
 def test_query_xml(server):

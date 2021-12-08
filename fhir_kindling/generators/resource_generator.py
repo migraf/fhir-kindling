@@ -1,15 +1,13 @@
 import math
 import pprint
-from typing import List, Union
+from typing import List
 from fhir.resources.domainresource import DomainResource
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.reference import Reference
 import os
 import pendulum
 from uuid import uuid4
-
-from abc import ABC, abstractmethod
-
+from abc import abstractmethod
 from fhir.resources.resource import Resource
 
 
@@ -24,7 +22,7 @@ class FhirResourceGenerator:
 
     @property
     def num_patients(self):
-        return math.ceil(self.n/self.n_per_patient)
+        return math.ceil(self.n / self.n_per_patient)
 
     def generate(self, out_dir: str = None, filename: str = None, generate_ids: bool = False,
                  patient_references: List[Reference] = None) -> List[Resource]:

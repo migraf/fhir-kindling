@@ -100,11 +100,7 @@ class FHIRQuery:
             query_string += f"&_count={self._count}"
 
         # todo improve xml support with full parser
-        if self.output_format == "xml":
-            query_string += f"&_format=xml"
-        else:
-            query_string += f"&_format=json"
-
+        query_string += f"&_format={self.output_format}"
         self._query_string = query_string
 
     def _validate_raw_query_string(self, raw_query_string: str) -> str:
@@ -121,7 +117,6 @@ class FHIRQuery:
 
     def _parse_filter_dict(self, filter_dict: dict) -> str:
 
-        resource = self.resource
         # todo validate the query with the fields of the selected model
         query_params = []
         for key, value in filter_dict.items():

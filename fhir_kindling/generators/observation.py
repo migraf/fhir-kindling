@@ -1,7 +1,7 @@
 import random
 from typing import List, Tuple, Union
 
-from fhir.resources.observation import Observation, ObservationComponent, ObservationReferenceRange
+from fhir.resources.observation import Observation
 from fhir_kindling.generators import FhirResourceGenerator
 from fhir.resources.patient import Patient
 from fhir.resources.codeableconcept import CodeableConcept

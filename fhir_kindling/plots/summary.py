@@ -1,6 +1,5 @@
 from typing import List, Dict, Callable
 import plotly.express as px
-import plotly.graph_objects as go
 from fhir.resources.resource import Resource
 
 from fhir_kindling.fhir_server.server_responses import ServerSummary
@@ -30,7 +29,6 @@ def server_summary_plot(server_summary: ServerSummary, show: bool = True) -> dic
 
 def resource_summary_plot(resources: List[Resource], selected_fields: List[str] = None,
                           field_functions: List[Dict[str, Callable]] = None) -> dict:
-
     """
     Generate a plotly plot of the resource summary displaying the number of resources with the selected fields.
 
@@ -49,4 +47,3 @@ def resource_summary_plot(resources: List[Resource], selected_fields: List[str] 
         title=f"{resources[0].get_resource_type()} Summary"
     )
     return fig.to_dict()
-

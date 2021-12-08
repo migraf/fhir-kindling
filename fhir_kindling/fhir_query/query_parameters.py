@@ -10,4 +10,3 @@ class QueryParameter(object):
     @classmethod
     def from_segment(cls, str):
         pass
-

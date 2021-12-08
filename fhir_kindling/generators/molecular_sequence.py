@@ -1,13 +1,8 @@
-import os
 from typing import List, Union
-
-from fhir.resources.bundle import Bundle
 from fhir.resources.domainresource import DomainResource
 from fhir.resources.molecularsequence import MolecularSequence, MolecularSequenceVariant
 
 from fhir_kindling.generators import FhirResourceGenerator
-
-from dotenv import load_dotenv, find_dotenv
 
 
 class MolecularSequenceGenerator(FhirResourceGenerator):

@@ -3,8 +3,6 @@ import os
 import click
 import requests
 from requests.auth import HTTPBasicAuth
-from requests_oauthlib import OAuth2Session
-from dotenv import load_dotenv, find_dotenv
 
 
 def load_environment_auth_vars() -> tuple:

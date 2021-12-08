@@ -4,6 +4,7 @@ from dotenv import load_dotenv, find_dotenv
 
 from fhir_kindling import FhirServer
 
+
 @pytest.fixture
 def api_url():
     """

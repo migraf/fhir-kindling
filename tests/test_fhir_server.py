@@ -121,8 +121,8 @@ def test_server_rest_resources(fhir_server: FhirServer):
 
 def test_server_summary(fhir_server: FhirServer):
     summary = fhir_server.summary()
+    assert summary
     print(summary)
-
 
 
 def test_fhir_server_from_env():

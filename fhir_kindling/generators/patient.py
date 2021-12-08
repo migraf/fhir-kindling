@@ -140,7 +140,6 @@ class PatientResourceGenerator:
             return patients
 
     def update_with_patient_ids(self):
-        old_res = self.resources.copy()
         # Step with n per patient
         for index in range(0, len(self.resources), self.n_per_patients):
             patient_resources = self.resources[index: index + self.n_per_patients]

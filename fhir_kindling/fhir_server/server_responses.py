@@ -1,6 +1,5 @@
-from typing import List, Tuple
+from typing import List
 from functools import cache
-
 from requests import Response
 from fhir.resources.resource import Resource
 from fhir.resources.bundle import Bundle

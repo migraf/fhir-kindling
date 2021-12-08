@@ -1,9 +1,9 @@
 from typing import List
-
 from fhir.resources.bundle import Bundle
 from fhir.resources.domainresource import DomainResource
 
-from fhir_kindling.resource_generator import FhirResourceGenerator
+from fhir_kindling.generators.resource_generator import FhirResourceGenerator
+
 
 class FHIRMediaGenerator(FhirResourceGenerator):
     def __init__(self, n: int, resources: List[DomainResource] = None, resource_type: DomainResource = None,

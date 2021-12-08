@@ -1,4 +1,3 @@
-import pytest
 from fhir.resources.patient import Patient
 
 from fhir_kindling.util.resources import get_resource_fields

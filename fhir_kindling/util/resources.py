@@ -7,7 +7,14 @@ from fhir.resources.fhirtypes import ResourceType
 
 
 def get_resource_fields(resource: Union[Resource, ResourceType, str]) -> List[ModelField]:
+    """
+    Get the fields of a resource.
+    Args:
+        resource:
 
+    Returns:
+
+    """
     # If the resource is a string, then we need to get the resource class
     if isinstance(resource, str):
         resource = get_fhir_model_class(resource)
@@ -15,5 +22,3 @@ def get_resource_fields(resource: Union[Resource, ResourceType, str]) -> List[Mo
     # Get the resource model fields
     fields = list(resource.__fields__.values())
     return fields
-
-
