@@ -49,3 +49,4 @@ def test_resource_summary_basic(fhir_server):
 def test_plot_resource_field(fhir_server):
     patients = fhir_server.query("Patient").all()
     plot_resource_field(patients.resources, field="gender")
+    plot_resource_field(patients.resources, field="gender", plot_type="pie")

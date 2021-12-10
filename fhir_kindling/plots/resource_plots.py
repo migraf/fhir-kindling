@@ -11,6 +11,7 @@ def plot_resource_field(resources: List[Resource], field: str, title: str = None
     :param resources: Resources for which to plot the field
     :param field: Field to plot
     :param title: Title of the plot
+    :param plot_type: Type of plot to use. Options are: bar, histogram, pie
     :return: Plotly figure
     """
     if title is None:
@@ -25,6 +26,12 @@ def plot_resource_field(resources: List[Resource], field: str, title: str = None
         figure.add_trace(go.Bar(
             x=val_counts.index,
             y=val_counts.values,
+            name=field
+        ))
+    elif plot_type == "pie":
+        figure.add_trace(go.Pie(
+            labels=val_counts.index,
+            values=val_counts.values,
             name=field
         ))
 
