@@ -1116,3 +1116,8 @@ def test_query_filters(server):
     print(resp.query_url)
     assert result.response
     assert isinstance(result.response, dict)
+
+def test_query_include(server):
+    query = server.query("Patient").include("jhsdha")
+    result = query.all()
+    assert isinstance(result.response, dict)

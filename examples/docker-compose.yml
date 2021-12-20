@@ -9,7 +9,7 @@ services:
     image: "samply/blaze:0.11.0"
     environment:
       JAVA_TOOL_OPTIONS: "-Xmx2g"
-      OPENID_PROVIDER_URL: "https://keycloak-pht.tada5hi.net/auth/realms/blaze"
+      OPENID_PROVIDER_URL: "https://dev-keycloak.grafm.de/auth/realms/blaze"
       BASE_URL: "http://localhost:9090"
     ports:
       - "9090:8080"

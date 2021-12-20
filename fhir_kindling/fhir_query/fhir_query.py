@@ -34,10 +34,10 @@ class FHIRQuery:
         else:
             self.resource = resource
         self.resource = self.resource.construct()
-
         self.output_format = output_format
         self._query_string = None
-        self.conditions: List[str] = []
+        self._includes = None
+        self.conditions = None
         self._limit = None
         self._count = count
         self._query_response: Union[Bundle, str] = None
@@ -47,15 +47,19 @@ class FHIRQuery:
         self.conditions = self._parse_filter_dict(filter_dict)
         return self
 
-    def _setup_session(self):
-        self.session = requests.Session()
-        self.session.auth = self.auth
-        self.session.headers.update({"Content-Type": "application/fhir+json"})
+    def include(self, include_resource: Union[Resource, fhir.resources.FHIRAbstractModel, str]):
 
-    def include(self):
-        pass
+        if self._includes is None:
+            self._includes = []
+        if isinstance(include_resource, str):
+            try:
+                include_resource = fhir.resources.get_fhir_model_class(include_resource)
+            except Exception as e:
+                print(e)
+        else:
+            include_resource = include_resource.get_resource_type()
 
-    def has(self):
+    def has(self, resource: Union[Resource, fhir.resources.FHIRAbstractModel, str], condition: str = None):
         pass
 
     def all(self):
@@ -81,6 +85,11 @@ class FHIRQuery:
         if not self._query_string:
             self._make_query_string()
         return self._query_string
+
+    def _setup_session(self):
+        self.session = requests.Session()
+        self.session.auth = self.auth
+        self.session.headers.update({"Content-Type": "application/fhir+json"})
 
     def _execute_query(self):
         r = self.session.get(self.query_url)

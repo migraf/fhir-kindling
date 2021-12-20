@@ -4,7 +4,7 @@ from dotenv import load_dotenv, find_dotenv
 
 from fhir_kindling import FhirServer
 
-from fhir_kindling.plots import server_summary_plot, resource_summary_plot, plot_resource_field
+from fhir_kindling.figures import server_summary_plot, plot_resource_field
 from tests.fixtures import fhir_server
 
 fhir_server = fhir_server
@@ -37,13 +37,6 @@ def test_server_summary(fhir_server):
 
     plot_dict = server_summary_plot(summary)
     print(plot_dict)
-
-
-def test_resource_summary_basic(fhir_server):
-    patients = fhir_server.query("Patient")
-    assert patients
-    summary_plot = resource_summary_plot(patients, ["gender"])
-    assert summary_plot
 
 
 def test_plot_resource_field(fhir_server):

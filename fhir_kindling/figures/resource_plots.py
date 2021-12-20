@@ -4,7 +4,8 @@ from fhir.resources.resource import Resource
 import pandas as pd
 
 
-def plot_resource_field(resources: List[Resource], field: str, title: str = None, plot_type: str = "bar") -> dict:
+def plot_resource_field(resources: List[Resource], field: str, title: str = None, plot_type: str = "bar",
+                        show: bool = True) -> go.Figure:
     """
     Plot a field of a resource.
 
@@ -12,6 +13,7 @@ def plot_resource_field(resources: List[Resource], field: str, title: str = None
     :param field: Field to plot
     :param title: Title of the plot
     :param plot_type: Type of plot to use. Options are: bar, histogram, pie
+    :param show: Show the plot
     :return: Plotly figure
     """
     if title is None:
@@ -34,7 +36,7 @@ def plot_resource_field(resources: List[Resource], field: str, title: str = None
             values=val_counts.values,
             name=field
         ))
+    if show:
+        figure.show()
 
-    figure.show()
-
-    return figure.to_dict()
+    return figure
