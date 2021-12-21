@@ -29,18 +29,19 @@ class QueryResponse:
     def _resolve_json_pagination(self, server_response: Response):
         response = server_response.json()
         link = response.get("link", None)
+        # If there is a link, get the next page otherwise return the response
         if not link:
             return response
         else:
-            print("Resolving response pagination")
+            print("Resolving response pagination")  # todo remove
             entries = []
             entries.extend(response["entry"])
-
+            # if the limit is reached, stop resolving the pagination
             if self._limit:
                 if len(entries) >= self._limit:
                     response["entry"] = response["entry"][:self._limit]
                     return response
-
+            # query the linked page and add the entries to the response
             while response.get("link", None):
 
                 if self._limit and len(entries) >= self._limit:
@@ -48,6 +49,7 @@ class QueryResponse:
                     break
 
                 next_page = next((link for link in response["link"] if link.get("relation", None) == "next"), None)
+
                 if next_page:
                     response = self.session.get(next_page["url"]).json()
                     entries.extend(response["entry"])
@@ -101,7 +103,7 @@ class QueryResponse:
         if self.format == "xml":
             raise NotImplementedError("Resource parsing not supported for xml format")
         else:
-            return Bundle(**self.response).entry
+            return [entry.resource for entry in Bundle(**self.response).entry]
 
     def to_file(self, file_path: Union[str, pathlib.Path]):
 

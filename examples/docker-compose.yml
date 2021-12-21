@@ -6,7 +6,7 @@ volumes:
 
 services:
   blaze:
-    image: "samply/blaze:0.11.0"
+    image: "samply/blaze:latest"
     environment:
       JAVA_TOOL_OPTIONS: "-Xmx2g"
       OPENID_PROVIDER_URL: "https://dev-keycloak.grafm.de/auth/realms/blaze"
@@ -16,7 +16,7 @@ services:
     volumes:
       - "blaze-data:/app/data"
   blaze2:
-    image: "samply/blaze:0.11.0"
+    image: "samply/blaze:latest"
     environment:
       JAVA_TOOL_OPTIONS: "-Xmx2g"
       BASE_URL: "http://localhost:9091"

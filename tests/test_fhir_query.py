@@ -1118,6 +1118,11 @@ def test_query_filters(server):
     assert isinstance(result.response, dict)
 
 def test_query_include(server):
-    query = server.query("Patient").include("jhsdha")
+    with pytest.raises(ValueError):
+        query = server.query("Patient").include("dsad")
+    query = server.query("Patient").include("Condition", param="subject", reverse=False)
+
+    # print(query.query_url)
     result = query.all()
+    # print(result.resources)
     assert isinstance(result.response, dict)

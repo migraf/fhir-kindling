@@ -7,6 +7,7 @@ import requests
 import requests.auth
 
 from fhir_kindling.fhir_query.query_response import QueryResponse
+from fhir_kindling.fhir_query.query_parameters import IncludeParam
 
 
 class FHIRQuery:
@@ -47,17 +48,23 @@ class FHIRQuery:
         self.conditions = self._parse_filter_dict(filter_dict)
         return self
 
-    def include(self, include_resource: Union[Resource, fhir.resources.FHIRAbstractModel, str]):
+    def include(self, include_resource: Union[Resource, fhir.resources.FHIRAbstractModel, str], param: str = None,
+                reverse: bool = False):
 
         if self._includes is None:
             self._includes = []
         if isinstance(include_resource, str):
             try:
-                include_resource = fhir.resources.get_fhir_model_class(include_resource)
-            except Exception as e:
-                print(e)
+                resource = fhir.resources.get_fhir_model_class(include_resource)
+                resource_name = resource.get_resource_type()
+            except KeyError as e:
+                raise ValueError(f"Invalid resource type: {include_resource}")
+
         else:
-            include_resource = include_resource.get_resource_type()
+            resource_name = include_resource.get_resource_type()
+        include_param = IncludeParam(resource=resource_name, search_param=param, reverse=reverse)
+        self._includes.append(include_param)
+        return self
 
     def has(self, resource: Union[Resource, fhir.resources.FHIRAbstractModel, str], condition: str = None):
         pass
@@ -103,6 +110,9 @@ class FHIRQuery:
         if self.conditions:
             query_string += self.conditions
         # todo implement include and has
+        if self._includes:
+            for include in self._includes:
+                query_string += f"&{include.query_string()}"
         if self._limit:
             query_string += f"&_count={self._limit}"
         else:
@@ -125,7 +135,6 @@ class FHIRQuery:
                 return raw_query_string
 
     def _parse_filter_dict(self, filter_dict: dict) -> str:
-
         # todo validate the query with the fields of the selected model
         query_params = []
         for key, value in filter_dict.items():
