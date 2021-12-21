@@ -1,8 +1,8 @@
 import collections
 import json
 import pathlib
-from typing import Union
-
+from importlib.resources import Resource
+from typing import Union, List, Dict
 from fhir.resources.bundle import Bundle
 from requests import Session, Response
 import xmltodict
@@ -10,11 +10,17 @@ import xmltodict
 
 class QueryResponse:
 
-    def __init__(self, session: Session, response: Response, format: str = "json", limit: int = None):
+    def __init__(self, session: Session, response: Response, resource: str, output_format: str = "json",
+                 limit: int = None,
+                 included_resources: List[str] = None):
         self.session = session
-        self.format = format
+        self.format = output_format
         self._limit = limit
         self.response = self.process_server_response(response)
+        self.includes = included_resources
+        self.resource = resource
+        self._resources = None
+        self._included_resources = None
 
     def process_server_response(self, response: Response):
         if self.format in ["json", "dict"]:
@@ -33,7 +39,6 @@ class QueryResponse:
         if not link:
             return response
         else:
-            print("Resolving response pagination")  # todo remove
             entries = []
             entries.extend(response["entry"])
             # if the limit is reached, stop resolving the pagination
@@ -43,7 +48,6 @@ class QueryResponse:
                     return response
             # query the linked page and add the entries to the response
             while response.get("link", None):
-
                 if self._limit and len(entries) >= self._limit:
                     print("Limit reached stopping pagination resolve")
                     break
@@ -61,9 +65,11 @@ class QueryResponse:
 
     def _resolve_xml_pagination(self, server_response: Response) -> str:
 
+        # parse the xml response and extract the initial entries
         initial_response = xmltodict.parse(server_response.text)
         entries = initial_response["Bundle"]["entry"]
         response = initial_response
+        # resolve the pagination
         while True:
             next_page = False
             for link in response["Bundle"]["link"]:
@@ -72,10 +78,9 @@ class QueryResponse:
                 else:
                     break
                 if relation_dict.get("@value") == "next":
-                    print("Getting next")
                     # get url and extend with xml format
                     url = link["url"]["@value"]
-                    url = url + "&_format=xml"
+                    url = url + "&_format=xml"  # todo check this
                     r = self.session.get(url)
                     r.raise_for_status()
                     response = xmltodict.parse(r.text)
@@ -99,11 +104,38 @@ class QueryResponse:
         return full_response_xml
 
     @property
-    def resources(self):
+    def resources(self) -> List[Resource]:
         if self.format == "xml":
             raise NotImplementedError("Resource parsing not supported for xml format")
         else:
-            return [entry.resource for entry in Bundle(**self.response).entry]
+            if self._resources is None:
+                self._extract_resources()
+            return self._resources
+
+    @property
+    def included_resources(self):
+        if self.format == "xml":
+            raise NotImplementedError("Resource parsing not supported for xml format")
+        else:
+            if not self.includes:
+                raise ValueError("No included resources defined in query.")
+            if self._included_resources is None:
+                self._extract_resources()
+
+            return self._included_resources
+
+    def _extract_resources(self):
+        if not self._resources:
+            self._resources = []
+        if not self._included_resources and self.includes:
+            self._included_resources = {resource: [] for resource in self.includes}
+        for entry in Bundle(**self.response).entry:
+
+            if entry.resource.resource_type == self.resource:
+                self._resources.append(entry.resource)
+            if self.includes:
+                if entry.resource.resource_type in self.includes:
+                    self._included_resources[entry.resource.resource_type].append(entry.resource)
 
     def to_file(self, file_path: Union[str, pathlib.Path]):
 

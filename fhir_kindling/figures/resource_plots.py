@@ -17,11 +17,11 @@ def plot_resource_field(resources: List[Resource], field: str, title: str = None
     :return: Plotly figure
     """
     if title is None:
-        title = f"{field} for {resources[0].resource.resource_type}"
+        title = f"{field} for {resources[0].resource_type}"
 
     figure = go.Figure()
     figure.update_layout(title_text=title, title_x=0.5)
-    values = [resource.dict().get("resource").get(field) for resource in resources]
+    values = [resource.dict().get(field) for resource in resources]
     # convert to series and get value counts
     val_counts = pd.Series(values).value_counts()
     if plot_type == "bar":

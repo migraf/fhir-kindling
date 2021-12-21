@@ -14,3 +14,6 @@ class IncludeParam:
         if self.type:
             query_string += f':{self.type}'
         return query_string
+
+
+

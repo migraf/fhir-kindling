@@ -1,6 +1,8 @@
 import pytest
 import os
 from dotenv import load_dotenv, find_dotenv
+from fhir.resources.condition import Condition
+from fhir.resources.patient import Patient
 
 from fhir_kindling import FhirServer
 
@@ -1117,12 +1119,26 @@ def test_query_filters(server):
     assert result.response
     assert isinstance(result.response, dict)
 
+
+def test_query_response_resources(server):
+    query = server.query("Patient")
+    result = query.all()
+
+    assert len(result.resources) >= 1
+    assert isinstance(result.resources[0], Patient)
+
+
 def test_query_include(server):
     with pytest.raises(ValueError):
         query = server.query("Patient").include("dsad")
-    query = server.query("Patient").include("Condition", param="subject", reverse=False)
+    query = server.query("Patient").include("Condition", param="subject", reverse=True)
 
     # print(query.query_url)
     result = query.all()
     # print(result.resources)
+    assert len(result.resources) >= 1
+    assert isinstance(result.resources[0], Patient)
+    assert isinstance(result.included_resources, dict)
+    assert isinstance(result.included_resources["Condition"], list)
+    assert isinstance(result.included_resources["Condition"][0], Condition)
     assert isinstance(result.response, dict)

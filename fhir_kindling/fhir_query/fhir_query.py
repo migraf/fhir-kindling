@@ -58,7 +58,7 @@ class FHIRQuery:
                 resource = fhir.resources.get_fhir_model_class(include_resource)
                 resource_name = resource.get_resource_type()
             except KeyError as e:
-                raise ValueError(f"Invalid resource type: {include_resource}")
+                raise ValueError(f"Invalid resource type: {include_resource} \n {e}")
 
         else:
             resource_name = include_resource.get_resource_type()
@@ -101,7 +101,13 @@ class FHIRQuery:
     def _execute_query(self):
         r = self.session.get(self.query_url)
         r.raise_for_status()
-        response = QueryResponse(self.session, response=r, format=self.output_format, limit=self._limit)
+        included_resources = [include.resource for include in self._includes] if self._includes else None
+        response = QueryResponse(self.session,
+                                 response=r,
+                                 resource=self.resource.get_resource_type(),
+                                 included_resources=included_resources,
+                                 output_format=self.output_format,
+                                 limit=self._limit)
         return response
 
     def _make_query_string(self):
@@ -109,10 +115,11 @@ class FHIRQuery:
 
         if self.conditions:
             query_string += self.conditions
-        # todo implement include and has
         if self._includes:
             for include in self._includes:
                 query_string += f"&{include.query_string()}"
+
+        # todo implement has / reverse chaining
         if self._limit:
             query_string += f"&_count={self._limit}"
         else:
