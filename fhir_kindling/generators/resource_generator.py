@@ -1,9 +1,11 @@
 import math
 import pprint
-from typing import List
+from typing import List, Union, Type
 from fhir.resources.domainresource import DomainResource
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.reference import Reference
+from fhir.resources.fhirtypes import AbstractBaseType, AbstractType
+from fhir.resources import get_fhir_model_class, FHIRAbstractModel
 import os
 import pendulum
 from uuid import uuid4
@@ -87,3 +89,34 @@ class FhirResourceGenerator:
     @staticmethod
     def generate_id():
         return str(uuid4())
+
+
+class ResourceGenerator:
+
+    def __init__(self, resource: str, n: int, field_values: dict = None, disable_validation: bool = False):
+        self.resource = get_fhir_model_class(resource).construct()
+        self.field_values = field_values
+        self.disable_validation = disable_validation
+
+    def required_fields(self) -> List[str]:
+        required_fields = []
+        for field_name, field in self.resource.__fields__.items():
+            if field.required:
+                required_fields.append(field_name)
+        return required_fields
+
+    def fields(self):
+        return self.resource.__fields__
+
+    def generate(self):
+        if not self.disable_validation:
+            self._check_required_fields()
+
+    def _check_required_fields(self):
+        required_fields = self.required_fields()
+        if required_fields:
+            if not self.field_values:
+                raise ValueError(f"Missing required fields: {','.join(required_fields)}")
+            if not set(required_fields).issubset(set(self.field_values.keys())):
+                missing_fields = set(required_fields) - set(self.field_values.keys())
+                raise ValueError(f"Missing required fields: {','.join(missing_fields)}")
