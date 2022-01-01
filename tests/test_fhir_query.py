@@ -1130,14 +1130,22 @@ def test_query_response_resources(server):
 def test_query_include(server):
     with pytest.raises(ValueError):
         query = server.query("Patient").include("dsad")
+
+    # test reverse include
     query = server.query("Patient").include("Condition", param="subject", reverse=True)
 
-    # print(query.query_url)
     result = query.all()
-    # print(result.resources)
     assert len(result.resources) >= 1
     assert isinstance(result.resources[0], Patient)
     assert isinstance(result.included_resources, dict)
     assert isinstance(result.included_resources["Condition"], list)
     assert isinstance(result.included_resources["Condition"][0], Condition)
-    assert isinstance(result.response, dict)
+
+    include_results = server.query("Condition").include("Condition", param="subject").all()
+
+    print(include_results.included_resources.keys())
+    assert len(include_results.resources) >= 1
+    assert isinstance(include_results.resources[0], Condition)
+    assert isinstance(include_results.included_resources, dict)
+    assert isinstance(include_results.included_resources["Condition"], list)
+    assert isinstance(include_results.included_resources["Patient"][0], Patient)

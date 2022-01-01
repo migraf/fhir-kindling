@@ -17,6 +17,8 @@ orjson = "*"
 PyYAML = "*"
 xmltodict = "*"
 plotly = "*"
+fastapi = "*"
+uvicorn = {extras = ["standard"], version = "*"}
 
 [dev-packages]
 pytest = "*"

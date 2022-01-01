@@ -30,9 +30,12 @@ def test_check_required_fields():
     with pytest.raises(ValueError):
         generator.generate()
 
-    generator = ResourceGenerator("Condition", field_values={"hello": "Patient/1"})
+    generator = ResourceGenerator("Condition", n=10, field_values={"hello": "Patient/1"})
     with pytest.raises(ValueError):
         generator.generate()
 
-    generator = ResourceGenerator("Condition", field_values={"subject": "Patient/1"})
+    generator = ResourceGenerator("Condition", n=10, field_values={"subject": "Patient/1"})
     generator.generate()
+
+def test_resource_generation():
+    generator = ResourceGenerator("Condition", n=10, field_values={"subject": "Patient/1"})

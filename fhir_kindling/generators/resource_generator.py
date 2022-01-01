@@ -1,6 +1,6 @@
 import math
 import pprint
-from typing import List, Union, Type
+from typing import List, Union, Type, Callable
 from fhir.resources.domainresource import DomainResource
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.reference import Reference
@@ -94,9 +94,11 @@ class FhirResourceGenerator:
 class ResourceGenerator:
 
     def __init__(self, resource: str, n: int, field_values: dict = None, disable_validation: bool = False):
-        self.resource = get_fhir_model_class(resource).construct()
+        self.resource = get_fhir_model_class(resource)
         self.field_values = field_values
+        self._check_required_fields()
         self.disable_validation = disable_validation
+        self.n = n
 
     def required_fields(self) -> List[str]:
         required_fields = []
@@ -111,6 +113,37 @@ class ResourceGenerator:
     def generate(self):
         if not self.disable_validation:
             self._check_required_fields()
+        resources = self._generate_resources()
+        return resources
+
+    def _generate_resources(self):
+        resources = []
+        for i in range(self.n):
+            resource = self._generate_resource()
+            resources.append(resource)
+        return resources
+
+    def _generate_resource(self):
+        resource = self.resource.construct()
+        for field_name, field_value in self.field_values.items():
+            self._generate_field_value(resource, field_name, field_value)
+
+        return resource
+
+    def _generate_field_value(self, resource: Resource, field_name: str,
+                              field_value: Union[dict, str, int, float, list, Callable]):
+        if isinstance(field_value, dict):
+            value = self._generate_resource_value_from_dict(resource, field_name, field_value)
+        elif isinstance(field_value, list):
+            value = self._generate_resource_value_from_list(resource, field_name, field_value)
+
+        elif isinstance(field_value, Callable):
+            value = field_value()
+        else:
+            self._validate_scalar_field_value(resource, field_name, field_value)
+            value = field_value
+
+        setattr(resource, field_name, value)
 
     def _check_required_fields(self):
         required_fields = self.required_fields()
@@ -120,3 +153,12 @@ class ResourceGenerator:
             if not set(required_fields).issubset(set(self.field_values.keys())):
                 missing_fields = set(required_fields) - set(self.field_values.keys())
                 raise ValueError(f"Missing required fields: {','.join(missing_fields)}")
+
+    def _generate_resource_value_from_dict(self, resource: Resource, field_name: str, field_value: dict):
+        pass
+
+    def _generate_resource_value_from_list(self, resource: Resource, field_name: str, field_value: list):
+        pass
+
+    def _validate_scalar_field_value(self, resource: Resource, field_name: str, field_value: Union[str, int, float]):
+        pass
