@@ -3,8 +3,11 @@ import os
 from dotenv import load_dotenv, find_dotenv
 from fhir.resources.condition import Condition
 from fhir.resources.patient import Patient
+from pydantic import ValidationError
 
 from fhir_kindling import FhirServer
+from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters, IncludeParameter, FieldParameter, \
+    ReverseChainParameter, QueryOperators
 
 
 @pytest.fixture
@@ -1149,3 +1152,73 @@ def test_query_include(server):
     assert isinstance(include_results.included_resources, dict)
     assert isinstance(include_results.included_resources["Condition"], list)
     assert isinstance(include_results.included_resources["Patient"][0], Patient)
+
+
+"""
+################################################################################
+Test Query Parameters
+################################################################################
+"""
+
+
+def test_field_query_param():
+    resource = "Patient"
+    field_param = FieldParameter(
+        **dict(
+            field="active",
+            value=True,
+            operator=QueryOperators.eq
+        )
+    )
+
+    print(field_param)
+
+    assert field_param.to_url_param() == "active=true"
+
+    field_param = FieldParameter(
+        **dict(
+            field="active",
+            value=["hello", "world"],
+            operator=QueryOperators.in_
+        )
+    )
+
+    assert field_param.to_url_param() == "active=hello,world"
+
+    value = 7.3213
+    field_param = FieldParameter(
+        **dict(
+            field="active",
+            value=value,
+            operator=QueryOperators.gt
+        )
+    )
+    assert field_param.to_url_param() == f"active=gt{value}"
+
+    # list value arg without in operator should fail
+    with pytest.raises(ValidationError):
+        field_param = FieldParameter(
+            **dict(
+                field="active",
+                value=["hello", "world"],
+                operator=QueryOperators.eq
+            )
+        )
+
+    # in operator only for list value arg
+    with pytest.raises(ValidationError):
+        field_param = FieldParameter(
+            **dict(
+                field="active",
+                value="hello",
+                operator=QueryOperators.in_
+            )
+        )
+
+    # operator not included in enum
+    with pytest.raises(ValidationError):
+        field_param = FieldParameter(
+            field="active",
+            operator="hello",
+            value=True
+        )
