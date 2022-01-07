@@ -1171,8 +1171,6 @@ def test_field_query_param():
         )
     )
 
-    print(field_param)
-
     assert field_param.to_url_param() == "active=true"
 
     field_param = FieldParameter(
@@ -1214,6 +1212,14 @@ def test_field_query_param():
                 operator=QueryOperators.in_
             )
         )
+    with pytest.raises(ValidationError):
+        field_param = FieldParameter(
+            **dict(
+                field="active",
+                value=[32, "sdsa".encode()],
+                operator=QueryOperators.in_
+            )
+        )
 
     # operator not included in enum
     with pytest.raises(ValidationError):
@@ -1222,3 +1228,38 @@ def test_field_query_param():
             operator="hello",
             value=True
         )
+
+    # parameter generation from url snippet
+
+    param_from_url = FieldParameter.from_url_param("active=true")
+
+    assert param_from_url.field == "active"
+    assert param_from_url.operator == QueryOperators.eq
+    assert isinstance(param_from_url.value, bool)
+    assert param_from_url.value is True
+
+    # list of search params
+    param_from_url = FieldParameter.from_url_param("active=hello,world")
+
+    assert param_from_url.field == "active"
+    assert param_from_url.operator == QueryOperators.in_
+    assert param_from_url.value == ["hello", "world"]
+
+    # integer value
+    param_from_url = FieldParameter.from_url_param("integer=gt7")
+    assert param_from_url.field == "integer"
+    assert param_from_url.operator == QueryOperators.gt
+    assert isinstance(param_from_url.value, int)
+    assert param_from_url.value == 7
+
+    # float value
+    param_from_url = FieldParameter.from_url_param("float=7.3213")
+    assert param_from_url.field == "float"
+    assert param_from_url.operator == QueryOperators.eq
+    assert param_from_url.value == 7.3213
+
+    # list of numbers
+    param_from_url = FieldParameter.from_url_param("integers=7,8")
+    assert param_from_url.field == "integers"
+    assert param_from_url.operator == QueryOperators.in_
+    assert param_from_url.value == [7, 8]

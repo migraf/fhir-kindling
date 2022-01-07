@@ -39,6 +39,34 @@ class QueryParameter(BaseModel):
         """
         raise NotImplementedError()
 
+    @staticmethod
+    def check_url_param_primitives(value: str) -> Union[int, float, bool, str]:
+        """
+        Check if the string
+
+        Args:
+            value: string of the value to check
+
+        Returns:
+            The value if it is a primitive type, otherwise return string.
+        """
+        if value.lower() == "true" or value.lower() == "false":
+            return value.lower() == "true"
+        # parsing order matters for ints and floats
+        try:
+            value = int(value)
+            return value
+        except ValueError:
+            pass
+
+        try:
+            value = float(value)
+            return value
+        except ValueError:
+            pass
+
+        return value
+
 
 class IncludeParameter(QueryParameter):
     """
@@ -68,7 +96,7 @@ class ReverseChainParameter(QueryParameter):
     reference_param: str
     search_param: str
     query_operator: QueryOperators = QueryOperators.eq
-    value: Union[str, int, float, list, bool]
+    value: Union[int, float, list, bool, str]
 
     class Config:
         smart_union = True
@@ -87,7 +115,7 @@ class FieldParameter(QueryParameter):
     """
     field: str
     operator: QueryOperators
-    value: Union[str, int, float, list, bool]
+    value: Union[int, float, list, bool, str]
 
     class Config:
         smart_union = True
@@ -126,7 +154,30 @@ class FieldParameter(QueryParameter):
 
     @classmethod
     def from_url_param(cls, url_string: str) -> "FieldParameter":
-        pass
+        field, param = url_string.split("=")
+
+        try:
+            operator = QueryOperators(param[:2])
+            value = param[2:]
+            if operator == QueryOperators.ne and "," in value:
+                value = [cls.check_url_param_primitives(v) for v in value.split(",")]
+            else:
+                value = cls.check_url_param_primitives(value)
+
+        except ValueError:
+            value = param
+            if "," in value:
+                operator = QueryOperators.in_
+                value = [cls.check_url_param_primitives(v) for v in value.split(",")]
+            else:
+                operator = QueryOperators.eq
+                value = cls.check_url_param_primitives(value)
+
+        return FieldParameter(
+            field=field,
+            operator=operator,
+            value=value
+        )
 
 
 class FHIRQueryParameters(BaseModel):
