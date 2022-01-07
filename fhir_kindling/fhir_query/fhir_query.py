@@ -7,7 +7,7 @@ import requests
 import requests.auth
 
 from fhir_kindling.fhir_query.query_response import QueryResponse
-from fhir_kindling.fhir_query.query_parameters import IncludeParam
+from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters, IncludeParameter
 
 
 class FHIRQuery:
@@ -62,7 +62,7 @@ class FHIRQuery:
 
         else:
             resource_name = include_resource.get_resource_type()
-        include_param = IncludeParam(resource=resource_name, search_param=param, reverse=reverse)
+        include_param = IncludeParameter(resource=resource_name, search_param=param, reverse=reverse)
         self._includes.append(include_param)
         return self
 
@@ -140,6 +140,9 @@ class FHIRQuery:
                 return raw_query_string.replace("&_format=xml", "")
             else:
                 return raw_query_string
+
+    def process_query_parameters(self):
+        pass
 
     def _parse_filter_dict(self, filter_dict: dict) -> str:
         # todo validate the query with the fields of the selected model
