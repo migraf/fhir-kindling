@@ -2,6 +2,7 @@ import json
 from typing import Union, List
 from fhir.resources.resource import Resource
 from fhir.resources.bundle import Bundle
+from fhir.resources.fhirtypes import ResourceType
 import fhir.resources
 import requests
 import requests.auth
@@ -48,7 +49,8 @@ class FHIRQuery:
         self.conditions = self._parse_filter_dict(filter_dict)
         return self
 
-    def include(self, include_resource: Union[Resource, fhir.resources.FHIRAbstractModel, str], param: str = None,
+    def include(self, include_resource: Union[Resource, fhir.resources.FHIRAbstractModel, str, ResourceType],
+                param: str = None,
                 reverse: bool = False):
 
         if self._includes is None:
@@ -59,7 +61,6 @@ class FHIRQuery:
                 resource_name = resource.get_resource_type()
             except KeyError as e:
                 raise ValueError(f"Invalid resource type: {include_resource} \n {e}")
-
         else:
             resource_name = include_resource.get_resource_type()
         include_param = IncludeParameter(resource=resource_name, search_param=param, reverse=reverse)
