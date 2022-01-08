@@ -2,7 +2,7 @@ from abc import ABC
 
 from pydantic import BaseModel, validator
 from enum import Enum
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Tuple
 
 
 class QueryOperators(str, Enum):
@@ -23,6 +23,68 @@ class QueryOperators(str, Enum):
     regex = "regex"
 
 
+"""
+utility functions for parsing query parameters and values
+"""
+
+
+def check_url_param_primitives(value: str) -> Union[int, float, bool, str]:
+    """
+    Check if the string contains other primitives and return them before finally returning the string.
+
+    Args:
+        value: string of the value to check
+
+    Returns:
+        The value if it is a primitive type, otherwise return string.
+    """
+    if value.lower() == "true" or value.lower() == "false":
+        return value.lower() == "true"
+    # parsing order matters for ints and floats
+    try:
+        value = int(value)
+        return value
+    except ValueError:
+        pass
+    try:
+        value = float(value)
+        return value
+    except ValueError:
+        pass
+
+    return value
+
+
+def parse_parameter_value(url_value: str) -> Tuple[QueryOperators, Union[int, float, bool, str, list]]:
+    """
+    Parse a query parameter value for operators and value types
+
+    Args:
+        url_value: string snippet of the query url (after =)
+
+    Returns: Tuple of the operator and the value
+
+    """
+    try:
+        operator = QueryOperators(url_value[:2])
+        value = url_value[2:]
+        if operator == QueryOperators.ne and "," in value:
+            value = [check_url_param_primitives(v) for v in value.split(",")]
+            operator = QueryOperators.not_in
+        else:
+            value = check_url_param_primitives(value)
+
+    except ValueError:
+        value = url_value
+        if "," in value:
+            operator = QueryOperators.in_
+            value = [check_url_param_primitives(v) for v in value.split(",")]
+        else:
+            operator = QueryOperators.eq
+            value = check_url_param_primitives(value)
+    return operator, value
+
+
 class QueryParameter(BaseModel):
     """
     Base class for query parameters.
@@ -40,34 +102,6 @@ class QueryParameter(BaseModel):
         Create a query parameter object from an url query snippet
         """
         raise NotImplementedError()
-
-    @staticmethod
-    def check_url_param_primitives(value: str) -> Union[int, float, bool, str]:
-        """
-        Check if the string
-
-        Args:
-            value: string of the value to check
-
-        Returns:
-            The value if it is a primitive type, otherwise return string.
-        """
-        if value.lower() == "true" or value.lower() == "false":
-            return value.lower() == "true"
-        # parsing order matters for ints and floats
-        try:
-            value = int(value)
-            return value
-        except ValueError:
-            pass
-
-        try:
-            value = float(value)
-            return value
-        except ValueError:
-            pass
-
-        return value
 
 
 class QuerySearchParameter(QueryParameter, ABC):
@@ -89,6 +123,20 @@ class QuerySearchParameter(QueryParameter, ABC):
                 raise ValueError("The 'in' and 'not_in' operators can only be used with a list value.")
 
         return v
+
+    def make_search_parameter_values(self) -> Tuple[str, str]:
+        if self.operator in [QueryOperators.eq, QueryOperators.in_]:
+            operator_prefix = ""
+        else:
+            operator_prefix = self.operator.value
+        if isinstance(self.value, list):
+            query_value = ",".join(self.value)
+        elif isinstance(self.value, bool):
+            query_value = str(self.value).lower()
+        else:
+            query_value = self.value
+
+        return operator_prefix, query_value
 
 
 class IncludeParameter(QueryParameter):
@@ -150,18 +198,30 @@ class ReverseChainParameter(QuerySearchParameter):
     resource: str
     reference_param: str
     search_param: str
-    operator: QueryOperators = QueryOperators.eq
+    operator: QueryOperators
     value: Union[int, float, list, bool, str]
 
     class Config:
         smart_union = True
 
     def to_url_param(self) -> str:
-        pass
+        operator_prefix, query_value = self.make_search_parameter_values()
+        url_param = f"_has:{self.resource}:{self.reference_param}:{self.search_param}={operator_prefix}{query_value}"
+
+        return url_param
 
     @classmethod
     def from_url_param(cls, url_string: str) -> "ReverseChainParameter":
-        pass
+        chained_field, param = url_string.split("=")
+        _, resource, reference_param, search_param = chained_field.split(":")
+        operator, value = parse_parameter_value(url_value=param)
+        return cls(
+            resource=resource,
+            reference_param=reference_param,
+            search_param=search_param,
+            operator=operator,
+            value=value
+        )
 
 
 class FieldParameter(QuerySearchParameter):
@@ -174,16 +234,7 @@ class FieldParameter(QuerySearchParameter):
         smart_union = True
 
     def to_url_param(self) -> str:
-        if self.operator in [QueryOperators.eq, QueryOperators.in_]:
-            operator_prefix = ""
-        else:
-            operator_prefix = self.operator.value
-        if isinstance(self.value, list):
-            query_value = ",".join(self.value)
-        elif isinstance(self.value, bool):
-            query_value = str(self.value).lower()
-        else:
-            query_value = self.value
+        operator_prefix, query_value = self.make_search_parameter_values()
 
         url_param = f"{self.field}={operator_prefix}{query_value}"
 
@@ -192,24 +243,7 @@ class FieldParameter(QuerySearchParameter):
     @classmethod
     def from_url_param(cls, url_string: str) -> "FieldParameter":
         field, param = url_string.split("=")
-
-        try:
-            operator = QueryOperators(param[:2])
-            value = param[2:]
-            if operator == QueryOperators.ne and "," in value:
-                value = [cls.check_url_param_primitives(v) for v in value.split(",")]
-            else:
-                value = cls.check_url_param_primitives(value)
-
-        except ValueError:
-            value = param
-            if "," in value:
-                operator = QueryOperators.in_
-                value = [cls.check_url_param_primitives(v) for v in value.split(",")]
-            else:
-                operator = QueryOperators.eq
-                value = cls.check_url_param_primitives(value)
-
+        operator, value = parse_parameter_value(url_value=param)
         return FieldParameter(
             field=field,
             operator=operator,
@@ -224,7 +258,7 @@ class FHIRQueryParameters(BaseModel):
     resource: str
     resource_parameters: Optional[List[FieldParameter]] = None
     include_parameters: Optional[List[IncludeParameter]] = None
-    has_parameters: Optional[List[QueryParameter]] = None
+    has_parameters: Optional[List[ReverseChainParameter]] = None
 
     def to_query_string(self) -> str:
         pass

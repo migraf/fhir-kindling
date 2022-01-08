@@ -35,11 +35,13 @@ def fhir_server(api_url):
 def test_server_summary(fhir_server):
     summary = fhir_server.summary()
 
-    plot_dict = server_summary_plot(summary)
-    print(plot_dict)
+    plot_dict = server_summary_plot(summary, show=False)
+    assert plot_dict
 
 
 def test_plot_resource_field(fhir_server):
     patients = fhir_server.query("Patient").all()
-    plot_resource_field(patients.resources, field="gender")
-    plot_resource_field(patients.resources, field="gender", plot_type="pie")
+    fig = plot_resource_field(patients.resources, field="gender", show=False)
+    assert fig
+    fig = plot_resource_field(patients.resources, field="gender", plot_type="pie", show=False)
+    assert fig

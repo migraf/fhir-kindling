@@ -1329,16 +1329,31 @@ def test_include_query_param():
     assert include_param.target == target
     assert include_param.iterate is True
 
+    with pytest.raises(ValueError):
+        include_param = IncludeParameter.from_url_param(f"_include:iterates={resource}:{search_param}&{target}")
+
 
 def test_reverse_chain_parameters():
     resource = "Condition"
     reference_param = "patient"
     search_param = "code"
-
+    value = "test"
+    query_url = f"_has:{resource}:{reference_param}:{search_param}=test"
     chain_param = ReverseChainParameter(
         resource=resource,
         reference_param=reference_param,
         search_param=search_param,
         operator=QueryOperators.eq,
-        value="test"
+        value=value
     )
+
+    assert chain_param.to_url_param() == query_url
+
+    param_from_url = ReverseChainParameter.from_url_param(query_url)
+
+    assert param_from_url.resource == chain_param.resource
+
+    query_url = f"_has:{resource}:{reference_param}:{search_param}=netest,test2"
+    param_from_url = ReverseChainParameter.from_url_param(query_url)
+    assert param_from_url.value == ["test", "test2"]
+    assert param_from_url.operator == QueryOperators.not_in
