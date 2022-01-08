@@ -1,3 +1,5 @@
+from abc import ABC
+
 from pydantic import BaseModel, validator
 from enum import Enum
 from typing import Union, Optional, List
@@ -33,7 +35,7 @@ class QueryParameter(BaseModel):
         raise NotImplementedError()
 
     @classmethod
-    def from_url_param(cls, url_string: str) -> "QueryParameter":
+    def from_url_param(cls, url_string: str):
         """
         Create a query parameter object from an url query snippet
         """
@@ -66,6 +68,27 @@ class QueryParameter(BaseModel):
             pass
 
         return value
+
+
+class QuerySearchParameter(QueryParameter, ABC):
+    operator: QueryOperators
+    value: Union[int, float, bool, str, list]
+
+    @validator("value")
+    def check_value(cls, v, values):
+        if isinstance(v, list):
+            if values["operator"] not in [QueryOperators.in_, QueryOperators.not_in]:
+                raise ValueError(
+                    "List values can only be used with the 'in' and 'not_in' operator."
+                )
+            for item in v:
+                if not isinstance(item, (str, int, float, bool)):
+                    raise ValueError(f"Invalid value type: {type(item)}")
+        else:
+            if values.get("operator") in [QueryOperators.in_, QueryOperators.not_in]:
+                raise ValueError("The 'in' and 'not_in' operators can only be used with a list value.")
+
+        return v
 
 
 class IncludeParameter(QueryParameter):
@@ -119,7 +142,7 @@ class IncludeParameter(QueryParameter):
         )
 
 
-class ReverseChainParameter(QueryParameter):
+class ReverseChainParameter(QuerySearchParameter):
     """
     Class to represent reverse chain parameters in a fhir query for querying resources based on properties of other
     resources that refer to them.
@@ -127,7 +150,7 @@ class ReverseChainParameter(QueryParameter):
     resource: str
     reference_param: str
     search_param: str
-    query_operator: QueryOperators = QueryOperators.eq
+    operator: QueryOperators = QueryOperators.eq
     value: Union[int, float, list, bool, str]
 
     class Config:
@@ -141,32 +164,14 @@ class ReverseChainParameter(QueryParameter):
         pass
 
 
-class FieldParameter(QueryParameter):
+class FieldParameter(QuerySearchParameter):
     """
     The Field Query Parameter class.
     """
     field: str
-    operator: QueryOperators
-    value: Union[int, float, list, bool, str]
 
     class Config:
         smart_union = True
-
-    @validator("value")
-    def check_value(cls, v, values):
-        if isinstance(v, list):
-            if values["operator"] not in [QueryOperators.in_, QueryOperators.not_in]:
-                raise ValueError(
-                    "List values can only be used with the 'in' and 'not_in' operator."
-                )
-            for item in v:
-                if not isinstance(item, (str, int, float, bool)):
-                    raise ValueError(f"Invalid value type: {type(item)}")
-        else:
-            if values.get("operator") in [QueryOperators.in_, QueryOperators.not_in]:
-                raise ValueError("The 'in' and 'not_in' operators can only be used with a list value.")
-
-        return v
 
     def to_url_param(self) -> str:
         if self.operator in [QueryOperators.eq, QueryOperators.in_]:

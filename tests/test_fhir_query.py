@@ -1328,3 +1328,17 @@ def test_include_query_param():
     assert include_param.search_param == search_param
     assert include_param.target == target
     assert include_param.iterate is True
+
+
+def test_reverse_chain_parameters():
+    resource = "Condition"
+    reference_param = "patient"
+    search_param = "code"
+
+    chain_param = ReverseChainParameter(
+        resource=resource,
+        reference_param=reference_param,
+        search_param=search_param,
+        operator=QueryOperators.eq,
+        value="test"
+    )
