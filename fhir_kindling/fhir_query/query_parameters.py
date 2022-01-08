@@ -80,11 +80,43 @@ class IncludeParameter(QueryParameter):
     iterate: bool = False
 
     def to_url_param(self) -> str:
-        pass
+        query_param = "_include" if not self.reverse else "_revinclude"
+
+        iterate = ":iterate" if self.iterate else ""
+        target = f"&{self.target}" if self.target else ""
+        url_param = f"{query_param}{iterate}={self.resource}:{self.search_param}{target}"
+        return url_param
 
     @classmethod
     def from_url_param(cls, url_string: str) -> "IncludeParameter":
-        pass
+        field, param = url_string.split("=")
+        split_field = field.split(":")
+        if len(split_field) == 2:
+            reverse = split_field[0] == "_revinclude"
+            iterate = split_field[1] == "iterate"
+            if not iterate:
+                raise ValueError(
+                    f"Invalid include iterate parameter in: {url_string}\n\t {field} must contain ':iterate'")
+        else:
+            reverse = split_field[0] == "_revinclude"
+            iterate = False
+        resource, search_param = param.split(":")
+
+        param_split = search_param.split("&")
+        if len(param_split) == 2:
+            target = param_split[1]
+            search_param = param_split[0]
+        else:
+            target = None
+            search_param = param_split[0]
+
+        return cls(
+            resource=resource,
+            search_param=search_param,
+            target=target,
+            iterate=iterate,
+            reverse=reverse
+        )
 
 
 class ReverseChainParameter(QueryParameter):

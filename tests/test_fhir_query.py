@@ -1263,3 +1263,68 @@ def test_field_query_param():
     assert param_from_url.field == "integers"
     assert param_from_url.operator == QueryOperators.in_
     assert param_from_url.value == [7, 8]
+
+
+def test_include_query_param():
+    resource = "Condition"
+    search_param = "subject"
+    target = "test"
+
+    # conversion to url strings
+
+    # basic include
+    include_param = IncludeParameter(
+        resource=resource,
+        search_param=search_param,
+    )
+    assert include_param.to_url_param() == f"_include={resource}:{search_param}"
+
+    # with target
+    include_param = IncludeParameter(
+        resource=resource,
+        search_param=search_param,
+        target=target
+    )
+    assert include_param.to_url_param() == f"_include={resource}:{search_param}&{target}"
+
+    # reverse include
+    include_param = IncludeParameter(
+        resource=resource,
+        search_param=search_param,
+        target=target,
+        reverse=True
+    )
+    assert include_param.to_url_param() == f"_revinclude={resource}:{search_param}&{target}"
+
+    # include with iterate & target
+    include_param = IncludeParameter(
+        resource=resource,
+        search_param=search_param,
+        target=target,
+        iterate=True,
+    )
+
+    assert include_param.to_url_param() == f"_include:iterate={resource}:{search_param}&{target}"
+
+    # parse from url snippet
+
+    include_param = IncludeParameter.from_url_param(f"_include={resource}:{search_param}")
+    assert include_param.resource == resource
+    assert include_param.search_param == search_param
+
+    include_param = IncludeParameter.from_url_param(f"_include={resource}:{search_param}&{target}")
+    assert include_param.resource == resource
+    assert include_param.search_param == search_param
+    assert include_param.target == target
+
+    include_param = IncludeParameter.from_url_param(f"_revinclude={resource}:{search_param}&{target}")
+    assert include_param.resource == resource
+    assert include_param.search_param == search_param
+    assert include_param.target == target
+    assert include_param.reverse is True
+
+    include_param = IncludeParameter.from_url_param(f"_include:iterate={resource}:{search_param}&{target}")
+    assert include_param.resource == resource
+    assert include_param.search_param == search_param
+    assert include_param.target == target
+    assert include_param.iterate is True
