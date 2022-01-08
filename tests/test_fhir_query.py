@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 from fhir_kindling import FhirServer
 from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters, IncludeParameter, FieldParameter, \
-    ReverseChainParameter, QueryOperators
+    ReverseChainParameter, QueryOperators, QueryParameter
 
 
 @pytest.fixture
@@ -1161,6 +1161,15 @@ Test Query Parameters
 """
 
 
+def test_query_param_abstract():
+    query_param = QueryParameter()
+    with pytest.raises(NotImplementedError):
+        query_param.to_url_param()
+
+    with pytest.raises(NotImplementedError):
+        param = QueryParameter.from_url_param("sdada")
+
+
 def test_field_query_param():
     resource = "Patient"
     field_param = FieldParameter(
@@ -1357,3 +1366,23 @@ def test_reverse_chain_parameters():
     param_from_url = ReverseChainParameter.from_url_param(query_url)
     assert param_from_url.value == ["test", "test2"]
     assert param_from_url.operator == QueryOperators.not_in
+
+
+def test_fhir_fhir_query_parameters():
+    query_params = FHIRQueryParameters(
+        resource="Condition"
+    )
+    assert query_params.to_query_string() == "/Condition?"
+
+    # invalid resource name
+    with pytest.raises(ValidationError):
+        query_params = FHIRQueryParameters(
+            resource="Conditionkdjsaldj"
+        )
+
+    query_url = "/Condition?code=test&_include=Condition:patient&_has:Patient:subject:age=gt:18"
+
+    query_params = FHIRQueryParameters.from_query_string(query_url)
+
+    assert query_params.to_query_string() == query_url
+    print(query_params)

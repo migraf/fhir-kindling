@@ -22,3 +22,19 @@ def get_resource_fields(resource: Union[Resource, ResourceType, str]) -> List[Mo
     # Get the resource model fields
     fields = list(resource.__fields__.values())
     return fields
+
+
+def valid_resource_name(resource_name: str) -> str:
+    """
+
+    Args:
+        resource_name:
+
+    Returns:
+
+    """
+    try:
+        get_fhir_model_class(resource_name)
+    except KeyError:
+        raise ValueError(f"Invalid resource name: {resource_name}")
+    return resource_name

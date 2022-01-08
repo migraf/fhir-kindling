@@ -1,8 +1,10 @@
 from abc import ABC
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, root_validator
 from enum import Enum
 from typing import Union, Optional, List, Tuple
+
+from fhir_kindling.util.resources import valid_resource_name
 
 
 class QueryOperators(str, Enum):
@@ -201,6 +203,8 @@ class ReverseChainParameter(QuerySearchParameter):
     operator: QueryOperators
     value: Union[int, float, list, bool, str]
 
+    _normalize_resource = validator("resource", allow_reuse=True)(valid_resource_name)
+
     class Config:
         smart_union = True
 
@@ -260,9 +264,67 @@ class FHIRQueryParameters(BaseModel):
     include_parameters: Optional[List[IncludeParameter]] = None
     has_parameters: Optional[List[ReverseChainParameter]] = None
 
+    _normalize_resource = validator("resource", allow_reuse=True)(valid_resource_name)
+
+    @root_validator
+    def validate_parameters(cls, values):
+        return values
+
     def to_query_string(self) -> str:
-        pass
+        """
+        Converts the parameters to a query string that can be used with a fhir server's REST API
+        Returns:
+        """
+        query_string = f"/{self.resource}?"
+        if self.resource_parameters:
+            resource_url_params = "&".join([param.to_url_param() for param in self.resource_parameters])
+            query_string += resource_url_params
+        # include parameters
+        if self.include_parameters:
+            if self.resource_parameters:
+                query_string += "&"
+            include_url_params = "&".join([param.to_url_param() for param in self.include_parameters])
+            query_string += include_url_params
+        # reverse chain parameters
+        if self.has_parameters:
+            if self.resource_parameters or self.include_parameters:
+                query_string += "&"
+            has_url_params = "&".join([param.to_url_param() for param in self.has_parameters])
+            query_string += has_url_params
+
+        return query_string
 
     @classmethod
     def from_query_string(cls, query_string: str) -> "FHIRQueryParameters":
-        pass
+
+        # split resource and query parameters
+        resource, query = query_string.split("?")
+
+        # clean up and validate resource
+        if resource[0] == "/":
+            resource = resource[1:]
+        resource = valid_resource_name(resource)
+
+        # parse query parameters
+        query_params = query.split("&")
+        resource_parameters = []
+        include_parameters = []
+        has_parameters = []
+        for param in query_params:
+            # start with the special keywords and finally attempt to parse as resource query
+            if param.startswith("_has"):
+                has_param = ReverseChainParameter.from_url_param(param)
+                has_parameters.append(has_param)
+            elif param.startswith("_include") or param.startswith("_revinclude"):
+                include_param = IncludeParameter.from_url_param(param)
+                include_parameters.append(include_param)
+            else:
+                resource_param = FieldParameter.from_url_param(param)
+                resource_parameters.append(resource_param)
+
+        return cls(
+            resource=resource,
+            resource_parameters=resource_parameters,
+            include_parameters=include_parameters,
+            has_parameters=has_parameters
+        )
