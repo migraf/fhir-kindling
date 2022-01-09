@@ -8,14 +8,15 @@ import requests
 import requests.auth
 
 from fhir_kindling.fhir_query.query_response import QueryResponse
-from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters, IncludeParameter
+from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters, IncludeParameter, FieldParameter, \
+    ReverseChainParameter, QueryOperators, parse_parameter_value
 
 
 class FHIRQuery:
 
     def __init__(self,
                  base_url: str,
-                 resource: Union[Resource, fhir.resources.FHIRAbstractModel, str] = None,
+                 resource: Union[Resource, fhir.resources.FHIRAbstractModel, str],
                  auth: requests.auth.AuthBase = None,
                  session: requests.Session = None,
                  output_format: str = "json",
@@ -35,7 +36,10 @@ class FHIRQuery:
             self.resource = fhir.resources.get_fhir_model_class(resource)
         else:
             self.resource = resource
+
         self.resource = self.resource.construct()
+        if not self.resource:
+            raise ValueError(f"No valid resource given: {resource}")
         self.output_format = output_format
         self._query_string = None
         self._includes = None
@@ -43,10 +47,58 @@ class FHIRQuery:
         self._limit = None
         self._count = count
         self._query_response: Union[Bundle, str] = None
+        self.query_parameters: FHIRQueryParameters = FHIRQueryParameters(resource=self.resource.resource_type)
 
-    def where(self, filter_dict: dict = None):
-        # todo evaluate arbitrary number of expressions based on fields of the resource and query values
-        self.conditions = self._parse_filter_dict(filter_dict)
+    def with_params(self, query_parameters: FHIRQueryParameters):
+        self.query_parameters = query_parameters
+
+    def where(self,
+              field_param: FieldParameter = None,
+              filter_dict: dict = None,
+              field: str = None,
+              operator: Union[QueryOperators, str] = None,
+              value: Union[int, float, bool, str, list] = None
+              ) -> 'FHIRQuery':
+
+        # evaluate arguments
+        if field_param and filter_dict:
+            raise ValueError("Cannot use both field_param and filter_dict")
+        elif field_param and field and operator and value:
+            raise ValueError("Cannot use both field_param and kv parameters")
+        elif filter_dict and (field or operator or value):
+            raise ValueError("Cannot use both filter_dict and kv parameters")
+
+        # create field parameters from the different argument options
+        if isinstance(field_param, FieldParameter):
+            added_query_param = field_param
+
+        elif isinstance(filter_dict, dict):
+            # todo allow for multiple filter_dicts/multiple parameters in dict
+            added_query_param = FieldParameter(**filter_dict)
+        elif field:
+            if not operator and value:
+                kv_error_message = f"\n\tField: {field}\n\tOperator: {operator}\n\tValue: {value}"
+                raise ValueError(f"Must provide operator and search value when using kv parameters.{kv_error_message}")
+            else:
+                if isinstance(operator, str):
+                    operator = QueryOperators(operator)
+                elif isinstance(operator, QueryOperators):
+                    pass
+                else:
+                    raise ValueError(f"Operator must be a string or QueryOperators. Got {operator}")
+                added_query_param = FieldParameter(field=field, operator=operator, value=value)
+
+        else:
+            raise ValueError("Must provide a valid instance of either field_param or filter_dict or the kv parameters")
+
+        query_field_params = self.query_parameters.resource_parameters
+        if isinstance(query_field_params, list) and len(query_field_params) > 0:
+            query_field_params.append(added_query_param)
+        else:
+            query_field_params = [added_query_param]
+
+        self.query_parameters.resource_parameters = query_field_params
+
         return self
 
     def include(self, include_resource: Union[Resource, fhir.resources.FHIRAbstractModel, str, ResourceType],

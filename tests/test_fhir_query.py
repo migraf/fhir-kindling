@@ -1368,7 +1368,7 @@ def test_reverse_chain_parameters():
     assert param_from_url.operator == QueryOperators.not_in
 
 
-def test_fhir_fhir_query_parameters():
+def test_fhir_query_parameters():
     query_params = FHIRQueryParameters(
         resource="Condition"
     )
@@ -1381,8 +1381,59 @@ def test_fhir_fhir_query_parameters():
         )
 
     query_url = "/Condition?code=test&_include=Condition:patient&_has:Patient:subject:age=gt:18"
-
     query_params = FHIRQueryParameters.from_query_string(query_url)
 
     assert query_params.to_query_string() == query_url
-    print(query_params)
+
+
+def test_fhir_query_where(server):
+    query_resource = "Patient"
+
+    query = server.query(query_resource)
+
+    assert query.resource.resource_type == query_resource
+
+    param = FieldParameter(
+        field="name",
+        operator=QueryOperators.eq,
+        value="test"
+    )
+
+    param_dict = dict(
+        field="name",
+        operator="gt",
+        value="test"
+    )
+
+    query = query.where(field_param=param)
+
+    assert len(query.query_parameters.resource_parameters) == 1
+    assert query.query_parameters.resource_parameters[0].field == "name"
+
+    query = query.where(filter_dict=param_dict)
+
+    assert len(query.query_parameters.resource_parameters) == 2
+    assert query.query_parameters.resource_parameters[1].field == "name"
+    assert query.query_parameters.resource_parameters[1].operator == QueryOperators.gt
+
+    query = query.where(field="name", operator="lt", value="test")
+
+    assert len(query.query_parameters.resource_parameters) == 3
+    assert query.query_parameters.resource_parameters[2].field == "name"
+    assert query.query_parameters.resource_parameters[2].operator == QueryOperators.lt
+
+    with pytest.raises(ValueError):
+        query = query.where(field="name", operator="fails", value="test")
+
+    with pytest.raises(ValueError):
+        query = query.where(field="name", value="test")
+
+    with pytest.raises(ValidationError):
+        param_dict = dict(
+            field="name",
+            operator="fails",
+            value="test"
+        )
+        query = query.where(filter_dict=param_dict)
+
+

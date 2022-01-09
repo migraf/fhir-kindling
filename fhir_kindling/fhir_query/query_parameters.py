@@ -268,6 +268,7 @@ class FHIRQueryParameters(BaseModel):
 
     @root_validator
     def validate_parameters(cls, values):
+        # todo
         return values
 
     def to_query_string(self) -> str:
