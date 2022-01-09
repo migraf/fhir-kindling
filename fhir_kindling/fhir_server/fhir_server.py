@@ -18,6 +18,7 @@ import pendulum
 
 from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling.fhir_query.query_response import QueryResponse
+from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters
 from fhir_kindling.fhir_server.auth import generate_auth
 from fhir_kindling.fhir_server.server_responses import ResourceCreateResponse, BundleCreateResponse, ServerSummary
 from fhir_kindling.serde import flatten_bundle
@@ -90,9 +91,15 @@ class FhirServer:
         Returns:
 
         """
-        valid_query_string, resource = self._validate_query_string_and_parse_resource(query_string)
-        query = FHIRQuery(self.api_address, resource, session=self.session, output_format=output_format)
-        query.set_query_string(valid_query_string)
+
+        query_parameters = FHIRQueryParameters.from_query_string(query_string)
+        query = FHIRQuery(
+            self.api_address,
+            resource=query_parameters.resource,
+            query_parameters=query_parameters,
+            session=self.session,
+            output_format=output_format
+        )
         print(query.query_url)
         return query
 

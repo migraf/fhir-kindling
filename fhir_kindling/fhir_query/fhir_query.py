@@ -16,7 +16,8 @@ class FHIRQuery:
 
     def __init__(self,
                  base_url: str,
-                 resource: Union[Resource, fhir.resources.FHIRAbstractModel, str],
+                 resource: Union[Resource, fhir.resources.FHIRAbstractModel, str] = None,
+                 query_parameters: FHIRQueryParameters = None,
                  auth: requests.auth.AuthBase = None,
                  session: requests.Session = None,
                  output_format: str = "json",
@@ -47,23 +48,37 @@ class FHIRQuery:
         self._limit = None
         self._count = count
         self._query_response: Union[Bundle, str] = None
-        self.query_parameters: FHIRQueryParameters = FHIRQueryParameters(resource=self.resource.resource_type)
-
-    def with_params(self, query_parameters: FHIRQueryParameters):
-        self.query_parameters = query_parameters
+        if query_parameters:
+            self.query_parameters = query_parameters
+        else:
+            self.query_parameters: FHIRQueryParameters = FHIRQueryParameters(resource=self.resource.resource_type)
 
     def where(self,
-              field_param: FieldParameter = None,
-              filter_dict: dict = None,
               field: str = None,
               operator: Union[QueryOperators, str] = None,
-              value: Union[int, float, bool, str, list] = None
+              value: Union[int, float, bool, str, list] = None,
+              field_param: FieldParameter = None,
+              filter_dict: dict = None
               ) -> 'FHIRQuery':
+        """
+        Add search conditions regarding a specific field of the queried resource.
+        Conditions can be added via FieldParmeter class instance, via a dictionary or specifying condition via this
+        method's parameter arguments (field, operator, value).
+        Args:
+            field_param: Instance of FieldParameter defining the field to filter for.
+            filter_dict: dictionary containing the field to search for and the value to filter for.
+            field: string specifier of the field to fileter for
+            operator: comparison operator either as string or QueryOperators
+            value: comparison value.
+
+        Returns:
+
+        """
 
         # evaluate arguments
         if field_param and filter_dict:
             raise ValueError("Cannot use both field_param and filter_dict")
-        elif field_param and field and operator and value:
+        elif field_param and (field or operator or value):
             raise ValueError("Cannot use both field_param and kv parameters")
         elif filter_dict and (field or operator or value):
             raise ValueError("Cannot use both filter_dict and kv parameters")
@@ -128,7 +143,6 @@ class FHIRQuery:
 
     def limit(self, n: int):
         self._limit = n
-        self._execute_query()
         return self._execute_query()
 
     def first(self):
@@ -142,9 +156,7 @@ class FHIRQuery:
 
     @property
     def query_url(self):
-        if not self._query_string:
-            self._make_query_string()
-        return self._query_string
+        return self._make_query_string()
 
     def _setup_session(self):
         self.session = requests.Session()
@@ -160,18 +172,12 @@ class FHIRQuery:
                                  resource=self.resource.get_resource_type(),
                                  included_resources=included_resources,
                                  output_format=self.output_format,
-                                 limit=self._limit)
+                                 limit=self._limit
+                                 )
         return response
 
     def _make_query_string(self):
-        query_string = self.base_url + "/" + self.resource.get_resource_type() + "?"
-
-        if self.conditions:
-            query_string += self.conditions
-        if self._includes:
-            for include in self._includes:
-                query_string += f"&{include.query_string()}"
-
+        query_string = f"{self.base_url}{self.query_parameters.to_query_string()}"
         # todo implement has / reverse chaining
         if self._limit:
             query_string += f"&_count={self._limit}"
@@ -181,6 +187,8 @@ class FHIRQuery:
         # todo improve xml support with full parser
         query_string += f"&_format={self.output_format}"
         self._query_string = query_string
+
+        return query_string
 
     def _validate_raw_query_string(self, raw_query_string: str) -> str:
         if self.output_format == "xml":

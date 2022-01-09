@@ -1100,60 +1100,6 @@ def paginated_xml():
 """
 
 
-def test_query_xml(server):
-    resp = server.query("Patient", output_format="xml")
-    result = resp.all()
-    assert result.response
-    assert isinstance(result.response, str)
-
-
-def test_query_json(server):
-    resp = server.query("Patient", output_format="json")
-    result = resp.all()
-    assert result.response
-    assert isinstance(result.response, dict)
-
-
-def test_query_filters(server):
-    resp = server.query("Patient").where({"active": "true", "birthdate": "gt1970-10-28"})
-    result = resp.all()
-    print(resp.query_url)
-    assert result.response
-    assert isinstance(result.response, dict)
-
-
-def test_query_response_resources(server):
-    query = server.query("Patient")
-    result = query.all()
-
-    assert len(result.resources) >= 1
-    assert isinstance(result.resources[0], Patient)
-
-
-def test_query_include(server):
-    with pytest.raises(ValueError):
-        query = server.query("Patient").include("dsad")
-
-    # test reverse include
-    query = server.query("Patient").include("Condition", param="subject", reverse=True)
-
-    result = query.all()
-    assert len(result.resources) >= 1
-    assert isinstance(result.resources[0], Patient)
-    assert isinstance(result.included_resources, dict)
-    assert isinstance(result.included_resources["Condition"], list)
-    assert isinstance(result.included_resources["Condition"][0], Condition)
-
-    include_results = server.query("Condition").include("Condition", param="subject").all()
-
-    print(include_results.included_resources.keys())
-    assert len(include_results.resources) >= 1
-    assert isinstance(include_results.resources[0], Condition)
-    assert isinstance(include_results.included_resources, dict)
-    assert isinstance(include_results.included_resources["Condition"], list)
-    assert isinstance(include_results.included_resources["Patient"][0], Patient)
-
-
 """
 ################################################################################
 Test Query Parameters
@@ -1380,16 +1326,69 @@ def test_fhir_query_parameters():
             resource="Conditionkdjsaldj"
         )
 
+    url = "/Patient?"
+    query_params = FHIRQueryParameters.from_query_string(url)
+
+    assert query_params.resource == "Patient"
+
     query_url = "/Condition?code=test&_include=Condition:patient&_has:Patient:subject:age=gt:18"
     query_params = FHIRQueryParameters.from_query_string(query_url)
 
     assert query_params.to_query_string() == query_url
 
 
-def test_fhir_query_where(server):
+"""
+########################################################################################################################
+Test query conditions and execution
+########################################################################################################################
+"""
+
+
+def test_query_xml(server):
+    resp = server.query("Patient", output_format="xml")
+    result = resp.all()
+    assert result.response
+    assert isinstance(result.response, str)
+
+
+def test_query_json(server):
+    resp = server.query("Patient", output_format="json")
+    result = resp.all()
+    assert result.response
+    assert isinstance(result.response, dict)
+
+
+
+
+def test_query_response_resources(server):
+    query = server.query("Patient")
+    result = query.all()
+
+    assert len(result.resources) >= 1
+    assert isinstance(result.resources[0], Patient)
+
+
+def test_query_first(server):
+    query = server.query("Patient")
+    result = query.first()
+
+    assert len(result.resources) == 1
+    assert isinstance(result.resources[0], Patient)
+
+
+def test_query_where(server):
     query_resource = "Patient"
 
     query = server.query(query_resource)
+
+    with pytest.raises(ValueError):
+        query.where(field_param="jdsha", filter_dict={"jdsh": "jdsh"})
+
+    with pytest.raises(ValueError):
+        query.where(field_param="jdsha", field="dsad")
+
+    with pytest.raises(ValueError):
+        query.where(field="jdsha", filter_dict={"jdsh": "jdsh"})
 
     assert query.resource.resource_type == query_resource
 
@@ -1422,6 +1421,12 @@ def test_fhir_query_where(server):
     assert query.query_parameters.resource_parameters[2].field == "name"
     assert query.query_parameters.resource_parameters[2].operator == QueryOperators.lt
 
+    query = query.where(field="name", operator=QueryOperators.lt, value="test")
+
+    assert len(query.query_parameters.resource_parameters) == 4
+    assert query.query_parameters.resource_parameters[2].field == "name"
+    assert query.query_parameters.resource_parameters[2].operator == QueryOperators.lt
+
     with pytest.raises(ValueError):
         query = query.where(field="name", operator="fails", value="test")
 
@@ -1436,4 +1441,8 @@ def test_fhir_query_where(server):
         )
         query = query.where(filter_dict=param_dict)
 
+    print(query.query_url)
 
+
+def test_query_include(server):
+    pass

@@ -306,22 +306,26 @@ class FHIRQueryParameters(BaseModel):
             resource = resource[1:]
         resource = valid_resource_name(resource)
 
-        # parse query parameters
-        query_params = query.split("&")
-        resource_parameters = []
-        include_parameters = []
-        has_parameters = []
-        for param in query_params:
-            # start with the special keywords and finally attempt to parse as resource query
-            if param.startswith("_has"):
-                has_param = ReverseChainParameter.from_url_param(param)
-                has_parameters.append(has_param)
-            elif param.startswith("_include") or param.startswith("_revinclude"):
-                include_param = IncludeParameter.from_url_param(param)
-                include_parameters.append(include_param)
-            else:
-                resource_param = FieldParameter.from_url_param(param)
-                resource_parameters.append(resource_param)
+        resource_parameters = None
+        include_parameters = None
+        has_parameters = None
+        if query:
+            # parse query parameters
+            query_params = query.split("&")
+            resource_parameters = []
+            include_parameters = []
+            has_parameters = []
+            for param in query_params:
+                # start with the special keywords and finally attempt to parse as resource query
+                if param.startswith("_has"):
+                    has_param = ReverseChainParameter.from_url_param(param)
+                    has_parameters.append(has_param)
+                elif param.startswith("_include") or param.startswith("_revinclude"):
+                    include_param = IncludeParameter.from_url_param(param)
+                    include_parameters.append(include_param)
+                else:
+                    resource_param = FieldParameter.from_url_param(param)
+                    resource_parameters.append(resource_param)
 
         return cls(
             resource=resource,
