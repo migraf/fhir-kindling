@@ -11,7 +11,7 @@ class QueryOperators(str, Enum):
     """
     Enumeration of query operators.
     """
-    eq = ""
+    eq = "eq"
     ne = "ne"
     gt = "gt"
     lt = "lt"

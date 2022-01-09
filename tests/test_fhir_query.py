@@ -1431,6 +1431,12 @@ def test_query_where(server):
         query = query.where(field="name", operator="fails", value="test")
 
     with pytest.raises(ValueError):
+        query = query.where(field="name", operator=67321.21, value="test")
+
+    # with pytest.raises(ValueError):
+    query = query.where(field="name", operator=QueryOperators.eq, value="test")
+
+    with pytest.raises(ValueError):
         query = query.where(field="name", value="test")
 
     with pytest.raises(ValidationError):

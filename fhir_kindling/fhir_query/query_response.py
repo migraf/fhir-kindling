@@ -152,3 +152,27 @@ class QueryResponse:
                     json.dump(self.response.dict(), f, indent=2)
                 else:
                     json.dump(self.response, f)
+
+    def _serialize_output(self):
+        if isinstance(self.response, bytes):
+            self.response = self.response.decode("utf-8")
+        if isinstance(self.response, str):
+            if self.format == "xml":
+                return self.response
+            elif self.format == "json":
+                return Bundle.construct(**json.loads(self.response)).json()
+            elif self.format == "dict":
+                return Bundle.construct(**json.loads(self.response)).dict()
+            elif self.format == "model":
+                return Bundle.construct(**json.loads(self.response))
+
+        elif isinstance(self.response, Bundle):
+            if self.format == "json":
+                return self.response.json(indent=2)
+            elif self.format == "dict":
+                return self.response.dict()
+            elif self.format == "model":
+                return self.response
+
+        else:
+            raise ValueError("Unable to serialize query response")

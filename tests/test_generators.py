@@ -15,27 +15,27 @@ def test_patient_generator_init():
 
 
 def test_generator_init():
-    generator = ResourceGenerator("Condition", 10)
-    assert isinstance(generator.resource, Condition)
-    with pytest.raises(KeyError):
-        generator = ResourceGenerator("jsdkasdh", 10)
-
-    patient_generator = ResourceGenerator("Patient", 10)
-
-    patient_generator.required_fields()
-
-
-def test_check_required_fields():
-    generator = ResourceGenerator("Condition", 10)
     with pytest.raises(ValueError):
+        generator = ResourceGenerator("Condition", 10)
         generator.generate()
 
     generator = ResourceGenerator("Condition", n=10, field_values={"hello": "Patient/1"})
     with pytest.raises(ValueError):
         generator.generate()
 
+    with pytest.raises(KeyError):
+        generator = ResourceGenerator("jsdkasdh", 10)
+
+    # generator = generator.generate()
     generator = ResourceGenerator("Condition", n=10, field_values={"subject": "Patient/1"})
-    generator.generate()
+    assert isinstance(generator.resource, Condition)
+
+
+def test_check_required_fields():
+    generator = ResourceGenerator("Condition", n=10, field_values={"subject": "Patient/1"})
+    generator = ResourceGenerator("Condition", n=10, field_values={"subject": "Patient/1"})
+    generator.required_fields()
+
 
 def test_resource_generation():
     generator = ResourceGenerator("Condition", n=10, field_values={"subject": "Patient/1"})

@@ -42,9 +42,7 @@ class FHIRQuery:
         if not self.resource:
             raise ValueError(f"No valid resource given: {resource}")
         self.output_format = output_format
-        self._query_string = None
         self._includes = None
-        self.conditions = None
         self._limit = None
         self._count = count
         self._query_response: Union[Bundle, str] = None
@@ -91,14 +89,16 @@ class FHIRQuery:
             # todo allow for multiple filter_dicts/multiple parameters in dict
             added_query_param = FieldParameter(**filter_dict)
         elif field:
-            if not operator and value:
+            if not (operator or operator is "") and value:
                 kv_error_message = f"\n\tField: {field}\n\tOperator: {operator}\n\tValue: {value}"
                 raise ValueError(f"Must provide operator and search value when using kv parameters.{kv_error_message}")
             else:
+
                 if isinstance(operator, str):
                     operator = QueryOperators(operator)
-                elif isinstance(operator, QueryOperators):
-                    pass
+                if isinstance(operator, QueryOperators):
+                    print(f"Operator: {operator}")
+                    operator = operator
                 else:
                     raise ValueError(f"Operator must be a string or QueryOperators. Got {operator}")
                 added_query_param = FieldParameter(field=field, operator=operator, value=value)
@@ -151,8 +151,8 @@ class FHIRQuery:
 
     def set_query_string(self, raw_query_string: str):
         # todo parse query string into conditions
-        validated_string = self._validate_raw_query_string(raw_query_string)
-        self._query_string = self.base_url + validated_string
+        query_parameters = FHIRQueryParameters.from_query_string(raw_query_string)
+        self.query_parameters = query_parameters
 
     @property
     def query_url(self):
@@ -178,63 +178,10 @@ class FHIRQuery:
 
     def _make_query_string(self):
         query_string = f"{self.base_url}{self.query_parameters.to_query_string()}"
-        # todo implement has / reverse chaining
         if self._limit:
             query_string += f"&_count={self._limit}"
         else:
             query_string += f"&_count={self._count}"
-
-        # todo improve xml support with full parser
         query_string += f"&_format={self.output_format}"
-        self._query_string = query_string
 
         return query_string
-
-    def _validate_raw_query_string(self, raw_query_string: str) -> str:
-        if self.output_format == "xml":
-            if "&_format=json" in raw_query_string:
-                return raw_query_string.replace("&_format=json", "&_format=xml")
-            if "&_format=xml" not in raw_query_string:
-                return raw_query_string + "&_format=xml"
-        if self.output_format in ["json", "dict", "bundle"]:
-            if "&_format=xml" in raw_query_string:
-                return raw_query_string.replace("&_format=xml", "")
-            else:
-                return raw_query_string
-
-    def process_query_parameters(self):
-        pass
-
-    def _parse_filter_dict(self, filter_dict: dict) -> str:
-        # todo validate the query with the fields of the selected model
-        query_params = []
-        for key, value in filter_dict.items():
-            query_param = f"{key}={value}"
-            query_params.append(query_param)
-
-        query_string = "&".join(query_params)
-        return query_string
-
-    def _serialize_output(self):
-        if isinstance(self._query_response, bytes):
-            self._query_response = self._query_response.decode("utf-8")
-        if isinstance(self._query_response, str):
-            if self.output_format == "xml":
-                return self._query_response
-            elif self.output_format == "json":
-                return Bundle.construct(**json.loads(self._query_response)).json()
-            elif self.output_format == "dict":
-                return Bundle.construct(**json.loads(self._query_response)).dict()
-            elif self.output_format == "model":
-                return Bundle.construct(**json.loads(self._query_response))
-
-        elif isinstance(self._query_response, Bundle):
-            if self.output_format == "json":
-                return self._query_response.json(indent=2)
-            elif self.output_format == "dict":
-                return self._query_response.dict()
-            elif self.output_format == "model":
-                return self._query_response
-
-        else:
-            raise ValueError("Unable to serialize query response")
