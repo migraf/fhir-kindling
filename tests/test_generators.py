@@ -19,8 +19,8 @@ def test_generator_init():
         generator = ResourceGenerator("Condition", 10)
         generator.generate()
 
-    generator = ResourceGenerator("Condition", n=10, field_values={"hello": "Patient/1"})
     with pytest.raises(ValueError):
+        generator = ResourceGenerator("Condition", n=10, field_values={"hello": "Patient/1"})
         generator.generate()
 
     with pytest.raises(KeyError):
@@ -28,7 +28,7 @@ def test_generator_init():
 
     # generator = generator.generate()
     generator = ResourceGenerator("Condition", n=10, field_values={"subject": "Patient/1"})
-    assert isinstance(generator.resource, Condition)
+    assert generator
 
 
 def test_check_required_fields():
