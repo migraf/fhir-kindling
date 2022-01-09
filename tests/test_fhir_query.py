@@ -1358,6 +1358,18 @@ def test_query_json(server):
     assert isinstance(result.response, dict)
 
 
+def test_query_first(server):
+    query = server.query("Patient")
+    result = query.first()
+
+    assert len(result.resources) == 1
+    assert isinstance(result.resources[0], Patient)
+
+
+def test_query_limit(server):
+    query = server.query("Patient")
+    result = query.limit(10)
+    assert len(result.resources) == 10
 
 
 def test_query_response_resources(server):
@@ -1368,12 +1380,16 @@ def test_query_response_resources(server):
     assert isinstance(result.resources[0], Patient)
 
 
-def test_query_first(server):
-    query = server.query("Patient")
-    result = query.first()
+def test_set_query_string(server, api_url):
+    query_resource = "Condition"
+    search_param = "subject"
 
-    assert len(result.resources) == 1
-    assert isinstance(result.resources[0], Patient)
+    query = server.query(query_resource)
+    query_string = f"/{query_resource}?_include={query_resource}:{search_param}"
+
+    query.set_query_string(query_string)
+    query_url = f"{api_url}/{query_resource}?_include={query_resource}:{search_param}&_count=5000&_format=json"
+    assert query.query_url == query_url
 
 
 def test_query_where(server):
@@ -1383,6 +1399,9 @@ def test_query_where(server):
 
     with pytest.raises(ValueError):
         query.where(field_param="jdsha", filter_dict={"jdsh": "jdsh"})
+
+    with pytest.raises(ValueError):
+        query.where()
 
     with pytest.raises(ValueError):
         query.where(field_param="jdsha", field="dsad")
@@ -1450,5 +1469,103 @@ def test_query_where(server):
     print(query.query_url)
 
 
-def test_query_include(server):
-    pass
+def test_query_include(server, api_url):
+    query_resource = "Condition"
+    search_param = "subject"
+
+    query = server.query(query_resource)
+
+    with pytest.raises(ValueError):
+        query = query.include()
+
+    query = query.include(resource=query_resource, search_param=search_param)
+
+    assert query.query_parameters.include_parameters[0].resource == query_resource
+
+    query_url = f"{api_url}/{query_resource}?_include={query_resource}:{search_param}&_count=5000&_format=json"
+    print(query.query_url)
+    assert query.query_url == query_url
+
+    include_param = IncludeParameter(
+        resource=query_resource,
+        search_param=search_param,
+        target="criteria",
+        reverse=True
+    )
+
+    query = query.include(include_param=include_param)
+    assert query.query_parameters.include_parameters[1].resource == query_resource
+    assert query.query_parameters.include_parameters[1].target == "criteria"
+
+    include_dict = dict(
+        resource=query_resource,
+        search_param=search_param,
+        target="hello",
+        reverse=False
+    )
+
+    query = query.include(include_dict=include_dict)
+    assert query.query_parameters.include_parameters[2].resource == query_resource
+    assert query.query_parameters.include_parameters[2].target == "hello"
+
+    with pytest.raises(ValueError):
+        query = query.include(include_param=include_param, resource=query_resource)
+
+    with pytest.raises(ValueError):
+        query = query.include(include_dict=include_dict, resource=query_resource)
+
+    with pytest.raises(ValueError):
+        query = query.include(include_param=include_param, include_dict=include_dict)
+
+
+def test_query_reverse_chain(server, api_url):
+    has_resource = "Condition"
+    reference_param = "subject"
+    search_param = "code"
+    operator = QueryOperators.eq
+    value = "test"
+
+    query = server.query("Patient")
+
+    query = query.has(resource=has_resource, reference_param=reference_param, search_param=search_param,
+                      operator=operator, value=value)
+
+    assert query
+
+    has_param = ReverseChainParameter(
+        resource=has_resource,
+        reference_param=reference_param,
+        search_param=search_param,
+        operator=operator,
+        value=7
+    )
+
+    has_param_dict = dict(
+        resource=has_resource,
+        reference_param=reference_param,
+        search_param=search_param,
+        operator=QueryOperators.in_,
+        value=["test1", "test2"]
+    )
+
+    query = query.has(has_param=has_param)
+    assert query.query_parameters.has_parameters[1].resource == has_resource
+    assert query.query_parameters.has_parameters[1].value == 7
+
+    query = query.has(has_param_dict=has_param_dict)
+
+    assert query.query_parameters.has_parameters[2].resource == has_resource
+    assert query.query_parameters.has_parameters[2].operator == QueryOperators.in_
+    assert query.query_parameters.has_parameters[2].value == ["test1", "test2"]
+
+    with pytest.raises(ValueError):
+        query = query.has(has_param=has_param, has_param_dict=has_param_dict)
+
+    with pytest.raises(ValueError):
+        query = query.has(has_param=has_param, resource="test")
+
+    with pytest.raises(ValueError):
+        query = query.has(resource="has_param", has_param_dict=has_param_dict)
+
+    with pytest.raises(ValueError):
+        query = query.has()
