@@ -27,8 +27,7 @@ jobs:
           python-version: 3.9
       - name: install Dependecies
         run: |
-          pipenv install --system --dev --skip-lock --deploy
-          pip install pytest coverage
+          pipenv install --dev
       - name: Lint with flake8
         run: |
           pip install flake8
