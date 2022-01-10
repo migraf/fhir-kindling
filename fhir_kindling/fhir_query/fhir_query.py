@@ -8,7 +8,7 @@ import requests.auth
 
 from fhir_kindling.fhir_query.query_response import QueryResponse
 from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters, IncludeParameter, FieldParameter, \
-    ReverseChainParameter, QueryOperators, parse_parameter_value
+    ReverseChainParameter, QueryOperators
 
 
 class FHIRQuery:

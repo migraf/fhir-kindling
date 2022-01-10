@@ -30,11 +30,10 @@ jobs:
           pipenv install --dev
       - name: Lint with flake8
         run: |
-          pip install flake8
           # stop the build if there are Python syntax errors or undefined names
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          pipenv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          pipenv run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Tests and coverage report
         env:
           FHIR_API_URL: ${{ secrets.BLAZE_API_URL }}
@@ -42,9 +41,8 @@ jobs:
           CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
           OIDC_PROVIDER_URL: ${{ secrets.KEYCLOAK_PROVIDER_URL }}
         run: |
-          pipenv shell
-          coverage run -m pytest tests
-          coverage xml
+          pipenv run coverage run -m pytest tests
+          pipenv run coverage xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
