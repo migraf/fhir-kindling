@@ -25,8 +25,9 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
-          cache: 'pipenv'
-      - run: pipenv install --dev --system
+      - name: install Dependecies
+        run: |
+          pipenv install --dev --system --skip-lock
       - name: Lint with flake8
         run: |
           pip install flake8
@@ -41,7 +42,6 @@ jobs:
           CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
           OIDC_PROVIDER_URL: ${{ secrets.KEYCLOAK_PROVIDER_URL }}
         run: |
-          pip install coverage pytest
           coverage run -m pytest tests
           coverage xml
       - name: Upload coverage to Codecov
