@@ -42,8 +42,8 @@ jobs:
           CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
           OIDC_PROVIDER_URL: ${{ secrets.KEYCLOAK_PROVIDER_URL }}
         run: |
-          coverage run -m pytest tests
-          coverage xml
+          python -m coverage run -m pytest tests
+          python -m coverage xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
