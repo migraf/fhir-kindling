@@ -2,7 +2,7 @@ version: '3.8'
 
 volumes:
   blaze-data:
-  blaze-data2:
+  hapi-data:
 
 services:
   blaze:
@@ -15,14 +15,15 @@ services:
       - "9090:8080"
     volumes:
       - "blaze-data:/app/data"
-  blaze2:
-    image: "samply/blaze:latest"
-    environment:
-      JAVA_TOOL_OPTIONS: "-Xmx2g"
-      BASE_URL: "http://localhost:9091"
-    ports:
-      - "9091:8080"
-    volumes:
-      - "blaze-data2:/app/data"
 
+  hapi:
+    image: "hapiproject/hapi:latest"
+    ports:
+      - "8082:8080"
+    volumes:
+      - hapi-data:/data/hapi
+    environment:
+      hapi.fhir.default_encoding: json
+      hapi.fhir.: json
+      hapi.fhir.server_address: "http://localhost:8082/fhir"
 
