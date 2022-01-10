@@ -1,5 +1,5 @@
-[![codecov](https://codecov.io/gh/migraf/fhir-kindling/branch/master/graph/badge.svg?token=FKQENFXACB)](https://codecov.io/gh/migraf/fhir-kindling)
 [![fhir_kindling_ci](https://github.com/migraf/fhir-kindling/actions/workflows/main_ci.yml/badge.svg)](https://github.com/migraf/fhir-kindling/actions/workflows/main_ci.yml)
+[![codecov](https://codecov.io/gh/migraf/fhir-kindling/branch/main/graph/badge.svg?token=FKQENFXACB)](https://codecov.io/gh/migraf/fhir-kindling)
 [![PyPI version](https://badge.fury.io/py/fhir-kindling.svg)](https://badge.fury.io/py/fhir-kindling)
 # :fire: FHIR Kindling
 
