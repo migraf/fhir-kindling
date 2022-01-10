@@ -25,9 +25,8 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
-      - name: install Dependecies
-        run: |
-          pipenv install --dev
+          cache: "pipenv"
+      - run: pipenv install --dev
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
@@ -52,4 +51,4 @@ jobs:
           verbose: true
 
       - name: Build and deploy documentation
-        run: mkdocs gh-deploy --force
+        run: pipenv run mkdocs gh-deploy --force
