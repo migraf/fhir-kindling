@@ -7,30 +7,40 @@ from fhir.resources.bundle import Bundle
 from requests import Session, Response
 import xmltodict
 
+from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters
+
 
 class QueryResponse:
 
-    def __init__(self, session: Session, response: Response, resource: str, output_format: str = "json",
-                 limit: int = None,
-                 included_resources: List[str] = None):
+    def __init__(self,
+                 session: Session,
+                 response: Response,
+                 query_params: FHIRQueryParameters,
+                 output_format: str = "json",
+                 limit: int = None):
+
         self.session = session
         self.format = output_format
         self._limit = limit
         self.response = self.process_server_response(response)
-        self.includes = included_resources
-        self.resource = resource
+        self.query_params = query_params
+        self.resource = query_params.resource
         self._resources = None
         self._included_resources = None
 
-    def process_server_response(self, response: Response):
-        if self.format in ["json", "dict"]:
-            return self._resolve_json_pagination(response)
-        elif self.format == "xml":
+    def process_server_response(self, response: Response) -> Union[Dict, Bundle, str]:
+
+        # if the format is xml resolve pagination and return xml string response
+        if self.format == "xml":
             return self._resolve_xml_pagination(response)
 
-        elif self.format == "bundle":
+        # otherwise, resolve json pagination and process further according to selected outcome
+        else:
             json_bundle = self._resolve_json_pagination(response)
-            return Bundle(**json_bundle)
+            if self.format in ["json", "dict"]:
+                return json_bundle
+            elif self.format == "bundle":
+                return Bundle(**json_bundle)
 
     def _resolve_json_pagination(self, server_response: Response):
         response = server_response.json()
@@ -127,15 +137,11 @@ class QueryResponse:
     def _extract_resources(self):
         if not self._resources:
             self._resources = []
-        if not self._included_resources and self.includes:
-            self._included_resources = {resource: [] for resource in self.includes}
         for entry in Bundle(**self.response).entry:
 
             if entry.resource.resource_type == self.resource:
                 self._resources.append(entry.resource)
-            if self.includes:
-                if entry.resource.resource_type in self.includes:
-                    self._included_resources[entry.resource.resource_type].append(entry.resource)
+        # todo separate the included resources
 
     def to_file(self, file_path: Union[str, pathlib.Path]):
 

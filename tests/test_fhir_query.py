@@ -1368,8 +1368,9 @@ def test_query_first(server):
 
 def test_query_limit(server):
     query = server.query("Patient")
-    result = query.limit(10)
-    assert len(result.resources) == 10
+    query._count = 30
+    result = query.limit(100)
+    assert len(result.resources) == 100
 
 
 def test_query_response_resources(server):
@@ -1467,6 +1468,19 @@ def test_query_where(server):
         query = query.where(filter_dict=param_dict)
 
     print(query.query_url)
+
+    # execute a valid query
+    valid_query_param = FieldParameter(
+        field="birthdate",
+        operator=QueryOperators.gt,
+        value="1930-01-01"
+    )
+    query = server.query("Patient")
+    query = query.where(field_param=valid_query_param)
+
+    response = query.all()
+
+    assert response
 
 
 def test_query_include(server, api_url):

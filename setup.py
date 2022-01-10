@@ -32,7 +32,6 @@ setup(
     long_description=readme + history,
     long_description_content_type="text/markdown",
     install_requires=[
-        "click",
         "python-dotenv",
         "pandas",
         "fhir.resources",

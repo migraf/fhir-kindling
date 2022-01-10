@@ -255,8 +255,7 @@ class FHIRQuery:
         included_resources = [include.resource for include in self._includes] if self._includes else None
         response = QueryResponse(self.session,
                                  response=r,
-                                 resource=self.resource.get_resource_type(),
-                                 included_resources=included_resources,
+                                 query_params=self.query_parameters,
                                  output_format=self.output_format,
                                  limit=self._limit
                                  )
