@@ -26,9 +26,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 pytest
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          if [ -f requirements_dev.txt ]; then pip install -r requirements_dev.txt; fi
+          pip install pipenv
+          pipenv install --dev --skip-lock --system
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
@@ -42,8 +41,8 @@ jobs:
           CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
           OIDC_PROVIDER_URL: ${{ secrets.KEYCLOAK_PROVIDER_URL }}
         run: |
-          python -m coverage run -m pytest tests
-          python -m coverage xml
+          coverage run -m pytest tests
+          coverage xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
