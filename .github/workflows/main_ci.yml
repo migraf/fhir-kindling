@@ -14,7 +14,7 @@ on:
 jobs:
   test:
 
-    runs-on: self-hosted
+    runs-on: ubuntu
     environment: CI
 
     steps:
