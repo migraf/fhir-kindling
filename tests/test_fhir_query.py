@@ -1583,3 +1583,25 @@ def test_query_reverse_chain(server, api_url):
 
     with pytest.raises(ValueError):
         query = query.has()
+
+
+"""
+########################################################################################################################
+Test Query Response
+########################################################################################################################
+"""
+
+
+def test_query_response(server):
+    query_resource = "Patient"
+
+    query = server.query(query_resource)
+    query._count = 50
+
+    response = query.all()
+
+    assert len(response.resources) >= 2
+    assert response.resources[0].resource_type == query_resource
+
+    print(len(response.resources))
+

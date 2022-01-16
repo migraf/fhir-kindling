@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-click = "*"
 python-dotenv = "*"
 pandas = "*"
 "fhir.resources" = "*"
@@ -12,13 +11,12 @@ requests = "*"
 requests-oauthlib = "*"
 pendulum = "*"
 tqdm = "*"
-click-spinner = "*"
 orjson = "*"
 PyYAML = "*"
 xmltodict = "*"
 plotly = "*"
-fastapi = "*"
-uvicorn = {extras = ["standard"], version = "*"}
+pydantic = "*"
+
 
 [dev-packages]
 pytest = "*"

@@ -100,7 +100,6 @@ class FhirServer:
             session=self.session,
             output_format=output_format
         )
-        print(query.query_url)
         return query
 
     def add(self, resource: Union[Resource, dict]) -> ResourceCreateResponse:

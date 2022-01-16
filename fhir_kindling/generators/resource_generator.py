@@ -6,16 +6,21 @@ from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.reference import Reference
 from fhir.resources.fhirtypes import AbstractBaseType, AbstractType
 from fhir.resources import get_fhir_model_class, FHIRAbstractModel
+from fhir.resources.fhirabstractmodel import FHIRAbstractModel
+from fhir.resources.fhirresourcemodel import FHIRResourceModel
 import os
 import pendulum
 from uuid import uuid4
 from abc import abstractmethod
 from fhir.resources.resource import Resource
+from pydantic import BaseModel
+
+
+
 
 
 class FhirResourceGenerator:
-
-    def __init__(self, n: int = None, n_per_patient: int = 1, resource_type: DomainResource = None):
+    def __init__(self, n: int = None, n_per_patient: int = 1, resource_type: Union[FHIRAbstractModel, str] = None):
         self._patient_references = None
         self.n = n
         self.resource_type = resource_type

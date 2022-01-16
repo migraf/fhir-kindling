@@ -8,26 +8,26 @@ import random
 from tqdm import tqdm
 from pathlib import Path
 from pendulum import DateTime
+from datetime import datetime
 
 from fhir.resources.reference import Reference
 from fhir.resources.patient import Patient
 from fhir.resources.humanname import HumanName
 
 from fhir_kindling.generators import FhirResourceGenerator
-from fhir_kindling.fhir_server import FhirServer
 
 
 class PatientGenerator(FhirResourceGenerator):
     def __init__(self,
                  n: int,
-                 age_range: Union[Tuple[DateTime, DateTime], Tuple[int, int]] = None,
+                 age_range: Tuple[int, int] = None,
                  gender_distribution: Tuple[float, float, float, float] = None,
                  organisation: Reference = None,
                  generate_ids: bool = False):
         super().__init__(n, resource_type=Patient)
         self.age_range = age_range
         self.gender_distribution = gender_distribution
-        self.birthdate_range = None
+        self._birthdate_range = None
         self.organisation = organisation
         self.generate_ids = generate_ids
 
@@ -74,96 +74,74 @@ class PatientGenerator(FhirResourceGenerator):
         return names
 
     def _generate_birthdate(self):
-        if not self.birthdate_range:
+        if not self._birthdate_range:
             if self.age_range:
                 if isinstance(self.age_range[0], int):
                     # generate age range from 18-101 years old
                     now = pendulum.now()
                     youngest = pd.to_datetime((now - pendulum.duration(years=self.age_range[0])).to_date_string())
                     oldest = pd.to_datetime((now - pendulum.duration(years=self.age_range[1])).to_date_string())
-
-                elif isinstance(self.age_range[0], DateTime):
-                    youngest = self.age_range[0].to_date_string()
-                    oldest = self.age_range[1].to_date_string()
                 else:
                     raise ValueError(f"Unsupported type ({type(self.age_range[0])}) for generating patient ages."
-                                     f"Only integers and datetime are supported.")
+                                     f"Only integers are supported.")
             else:
                 # generate age range from 18-101 years old
                 now = pendulum.now()
                 youngest = pd.to_datetime((now - pendulum.duration(years=18)).to_date_string())
                 oldest = pd.to_datetime((now - pendulum.duration(years=101)).to_date_string())
 
-            self.birthdate_range = pd.date_range(oldest, youngest, freq="D").strftime('%Y-%m-%d').tolist()
+            self._birthdate_range = pd.date_range(oldest, youngest, freq="D").strftime('%Y-%m-%d').tolist()
 
-        birthdate = random.choice(self.birthdate_range)
+        birthdate = random.choice(self._birthdate_range)
         return birthdate
 
-
-class PatientResourceGenerator:
-
-    def __init__(self, resource_generator: FhirResourceGenerator = None,
-                 patients: Union[List[Patient], List[str], bool] = None,
-                 n_per_patient: int = 1):
-        self.patients = patients
-        self.n_per_patients = n_per_patient
-        self.resource_generator = resource_generator
-        self.n = self.resource_generator.n
-        self.resources = None
-
-    def generate(self, patients=None, out_dir: str = None, filename: str = None, generate_ids: bool = False):
-        if patients is None and self.patients is None:
-            raise ValueError("No patients given to generate Resources for.")
-        else:
-            self.patients = patients
-            # TODO use self patients and serialize newly generated patients to list
-            self.resources = self.resource_generator.generate(generate_ids=generate_ids)
-            self.update_with_patient_ids()
-            if filename:
-                if out_dir:
-                    output_path = os.path.join(out_dir, filename)
-                else:
-                    output_path = filename
-                with open(output_path, "w") as outputbundle:
-                    bundle = self.resource_generator.make_bundle()
-                    outputbundle.write(bundle.json(indent=2))
-
-        return self.resources, self.resource_generator.make_bundle()
-
-    def generate_patients(self, bundle=True):
-        n_patients = math.ceil(float(self.n) / self.n_per_patients)
-        patient_generator = PatientGenerator(n=n_patients)
-        patients = patient_generator.generate()
-        if bundle:
-            return patient_generator.make_bundle()
-        else:
-            return patients
-
-    def update_with_patient_ids(self):
-        # Step with n per patient
-        for index in range(0, len(self.resources), self.n_per_patients):
-            patient_resources = self.resources[index: index + self.n_per_patients]
-            for resource in patient_resources:
-                resource.patient = {
-                    "reference": self.patients[int(index / self.n_per_patients)],
-                    "type": "Patient"
-                }
-
-        print(self.resources)
-
-
-if __name__ == '__main__':
-    # pprint(Patient.schema()["properties"])
-    load_dotenv(find_dotenv())
-    pg = PatientGenerator(n=100)
-    pg.generate()
-    bundle = pg.make_bundle()
-    server = FhirServer(
-        api_address="http://localhost:8080/fhir",
-        client_id=os.getenv("CLIENT_ID"),
-        client_secret=os.getenv("CLIENT_SECRET"),
-        oidc_provider_url=os.getenv("OIDC_PROVIDER_URL")
-    )
-
-    response = server.add_bundle(bundle)
-    print(response.references)
+# class PatientResourceGenerator:
+#
+#     def __init__(self, resource_generator: FhirResourceGenerator = None,
+#                  patients: Union[List[Patient], List[str], bool] = None,
+#                  n_per_patient: int = 1):
+#         self.patients = patients
+#         self.n_per_patients = n_per_patient
+#         self.resource_generator = resource_generator
+#         self.n = self.resource_generator.n
+#         self.resources = None
+#
+#     def generate(self, patients=None, out_dir: str = None, filename: str = None, generate_ids: bool = False):
+#         if patients is None and self.patients is None:
+#             raise ValueError("No patients given to generate Resources for.")
+#         else:
+#             self.patients = patients
+#             # TODO use self patients and serialize newly generated patients to list
+#             self.resources = self.resource_generator.generate(generate_ids=generate_ids)
+#             self.update_with_patient_ids()
+#             if filename:
+#                 if out_dir:
+#                     output_path = os.path.join(out_dir, filename)
+#                 else:
+#                     output_path = filename
+#                 with open(output_path, "w") as outputbundle:
+#                     bundle = self.resource_generator.make_bundle()
+#                     outputbundle.write(bundle.json(indent=2))
+#
+#         return self.resources, self.resource_generator.make_bundle()
+#
+#     def generate_patients(self, bundle=True):
+#         n_patients = math.ceil(float(self.n) / self.n_per_patients)
+#         patient_generator = PatientGenerator(n=n_patients)
+#         patients = patient_generator.generate()
+#         if bundle:
+#             return patient_generator.make_bundle()
+#         else:
+#             return patients
+#
+#     def update_with_patient_ids(self):
+#         # Step with n per patient
+#         for index in range(0, len(self.resources), self.n_per_patients):
+#             patient_resources = self.resources[index: index + self.n_per_patients]
+#             for resource in patient_resources:
+#                 resource.patient = {
+#                     "reference": self.patients[int(index / self.n_per_patients)],
+#                     "type": "Patient"
+#                 }
+#
+#         print(self.resources)
