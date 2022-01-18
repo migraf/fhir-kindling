@@ -6,7 +6,7 @@ from typing import Union, List, Callable, Any, Optional
 
 
 class FieldGenerator(BaseModel):
-    name: str
+    field: str
     choices: Optional[List[Any]] = None
     choice_probabilities: Optional[List[float]] = None
     generator_function: Callable[[], Any] = None

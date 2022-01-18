@@ -1,50 +1,53 @@
-import math
-import os
-from dotenv import load_dotenv, find_dotenv
+from uuid import uuid4
 from typing import Union, Tuple, List
+from pathlib import Path
+
 import pendulum
 import pandas as pd
 import random
 from tqdm import tqdm
-from pathlib import Path
-from pendulum import DateTime
-from datetime import datetime
-
 from fhir.resources.reference import Reference
 from fhir.resources.patient import Patient
 from fhir.resources.humanname import HumanName
 
-from fhir_kindling.generators import FhirResourceGenerator
 
-
-class PatientGenerator(FhirResourceGenerator):
+class PatientGenerator:
     def __init__(self,
                  n: int,
                  age_range: Tuple[int, int] = None,
                  gender_distribution: Tuple[float, float, float, float] = None,
                  organisation: Reference = None,
                  generate_ids: bool = False):
-        super().__init__(n, resource_type=Patient)
+        self.resource_type = Patient
+        self.n = n
         self.age_range = age_range
         self.gender_distribution = gender_distribution
         self._birthdate_range = None
         self.organisation = organisation
         self.generate_ids = generate_ids
+        self.resources = None
+
+    def generate(self, display: bool = False):
+        patients = self._generate(display=display)
+        self.resources = patients
+        return patients
 
     def _generate(self, display: bool = False):
         patients = []
         names = self._generate_patient_names(self.n)
-        for i in tqdm(range(self.n), desc=f"Generating {self.n} patients", disable=display):
+        for i in tqdm(range(self.n), desc=f"Generating {self.n} patients", disable=not display):
             patient = self._generate_patient_data(name=names[i])
             patients.append(patient)
         return patients
 
     def _generate_patient_data(self, name: Tuple[str, str]) -> Patient:
+
+        first_name, last_name = name
         gender = random.choices(
             ["male", "female", "other", "unknown"],
             weights=self.gender_distribution if self.gender_distribution else [0.45, 0.45, 0.1, 0.0], k=1)[0]
 
-        name = HumanName(**{"family": name[1], "given": [name[0]]})
+        name = HumanName(**{"family": last_name, "given": [first_name]})
 
         birthdate = self._generate_birthdate()
         patient_dict = {
@@ -54,6 +57,10 @@ class PatientGenerator(FhirResourceGenerator):
         }
         if self.organisation:
             patient_dict["managingOrganization"] = self.organisation
+
+        if self.generate_ids:
+            patient_id = str(uuid4())
+            patient_dict["id"] = patient_id
 
         return Patient(**patient_dict)
 
