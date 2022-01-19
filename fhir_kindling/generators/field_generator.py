@@ -1,4 +1,3 @@
-from collections import Generator
 import random
 
 from pydantic import BaseModel, validator, root_validator
