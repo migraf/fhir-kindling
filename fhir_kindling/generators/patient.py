@@ -27,9 +27,15 @@ class PatientGenerator:
         self.generate_ids = generate_ids
         self.resources = None
 
-    def generate(self, display: bool = False):
+    def generate(self, display: bool = False, references: bool = False):
         patients = self._generate(display=display)
         self.resources = patients
+
+        if references and not self.generate_ids:
+            raise ValueError("Cannot generate references without generating ids")
+        elif references:
+            return patients, self._generate_references()
+
         return patients
 
     def _generate(self, display: bool = False):
@@ -101,6 +107,9 @@ class PatientGenerator:
 
         birthdate = random.choice(self._birthdate_range)
         return birthdate
+
+    def _generate_references(self) -> List[Reference]:
+        return [Reference(reference=f"Patient/{patient.id}") for patient in self.resources]
 
 # class PatientResourceGenerator:
 #

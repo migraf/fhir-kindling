@@ -8,6 +8,7 @@ from fhir.resources.organization import Organization
 from fhir.resources.observation import Observation
 from fhir.resources.fhirtypes import ObservationType
 from fhir.resources.codeableconcept import CodeableConcept
+from fhir.resources.immunization import Immunization
 from fhir.resources.coding import Coding
 from fhir.resources.reference import Reference
 from fhir_kindling.generators.patient import PatientGenerator
@@ -15,6 +16,7 @@ from fhir_kindling.generators.field_generator import FieldGenerator
 from fhir_kindling.generators.dataset import DatasetGenerator
 from pprint import pp
 import datetime
+import pendulum
 
 
 @pytest.fixture
@@ -22,12 +24,27 @@ def covid_code():
     covid_code = CodeableConcept(
         coding=[
             Coding(
-                system="https://icd.who.int/ct11",
+                system="http://id.who.int/icd/release/11/mms",
                 code="RA01.0",
                 display="COVID-19, virus identified"
             )
         ],
         text="COVID-19"
+    )
+    return covid_code
+
+
+@pytest.fixture
+def vaccination_code():
+    covid_code = CodeableConcept(
+        coding=[
+            Coding(
+                system="http://id.who.int/icd/release/11/mms",
+                code="XM0GQ8",
+                display="COVID-19 vaccine, RNA based"
+            )
+        ],
+        text="COVID vaccination"
     )
     return covid_code
 
@@ -141,8 +158,6 @@ def test_field_generator():
 
 
 def test_generator_with_parameters(covid_params):
-    # generate patients with ids and turn into an iterator to call as a reference
-
     params, patients, patient_ids = covid_params
 
     generator = ResourceGenerator("Condition", generator_parameters=params)
@@ -152,17 +167,119 @@ def test_generator_with_parameters(covid_params):
     assert len(resources) == 100
 
 
-def test_resource_generate_covid_dataset(covid_params):
-    # generate patients with ids and turn into an iterator to call as a reference
-    params, patients, patient_ids = covid_params
+def test_resource_generator(covid_code):
+    patient_generator = PatientGenerator(n=100, generate_ids=True)
+    patients, references = patient_generator.generate(references=True)
+
+    references_iter = iter(references)
+
+    params = GeneratorParameters(
+        count=100,
+        field_values=[
+
+        ],
+        field_generators=[
+            # user patient reference iterator to generate subject field
+            FieldGenerator(field="subject", generator_function=lambda: next(references_iter)),
+        ]
+    )
 
     generator = ResourceGenerator("Condition", generator_parameters=params)
+    data = generator.generate()
+
+    assert len(data) == 100
+
+    params = GeneratorParameters(
+        count=100,
+        field_values=[
+            FieldValue(field="subject", value=references),
+        ],
+    )
+
+    generator = ResourceGenerator("Condition", generator_parameters=params)
+    data = generator.generate()
+    assert len(data) == 100
+
+    # too few resources in field value
+    with pytest.raises(ValueError):
+        params = GeneratorParameters(
+            count=200,
+            field_values=[
+                FieldValue(field="subject", value=references),
+            ],
+        )
+
+        generator = ResourceGenerator("Condition", generator_parameters=params)
+        data = generator.generate()
+
+    # duplicate field values should raise error
+    with pytest.raises(ValueError):
+        patient_2, reference_2 = patient_generator.generate(references=True)
+        params = GeneratorParameters(
+            count=100,
+            field_values=[
+                FieldValue(field="subject", value=references),
+                FieldValue(field="subject", value=reference_2),
+            ],
+        )
+
+        generator = ResourceGenerator("Condition", generator_parameters=params)
+        data = generator.generate()
+
+    references_iter_2 = iter(references)
+
+    # generator and value targeting the same field should raise error
+    with pytest.raises(ValueError):
+        patient_2, reference_2 = patient_generator.generate(references=True)
+        params = GeneratorParameters(
+            count=100,
+            field_values=[
+                FieldValue(field="subject", value=references),
+                FieldGenerator(field="subject", generator_function=lambda: next(references_iter_2)),
+            ],
+        )
+
+        generator = ResourceGenerator("Condition", generator_parameters=params)
+        data = generator.generate()
 
 
-def test_generate_dataset():
-    generator = DatasetGenerator("Patient", n=100)
+def test_generate_covid_dataset(covid_params, vaccination_code):
+    count = 1000
+    dataset_generator = DatasetGenerator("Patient", n=count)
 
-    result = generator.generate()
+    params, _, _ = covid_params
+    params.count = count
+    covid_generator = ResourceGenerator("Condition", generator_parameters=params)
+    # add covid conditions to patients
+    dataset_generator.add_resource(covid_generator, name="covid")
 
-    assert result.base_resource == "Patient"
-    assert len(result.resources[0].resources) == 100
+    patients, patient_ids = PatientGenerator(n=count, generate_ids=True).generate(references=True)
+
+    patient_id_iter = iter(patient_ids)
+    patient_reference_generator = FieldGenerator(
+        field="patient",
+        generator_function=lambda: {"reference": f"Patient/{next(patient_id_iter)}"}
+    )
+    vaccination_date_generator = FieldGenerator(
+        field="occurrenceDateTime",
+        generator_function=lambda: pendulum.now().to_date_string()
+    )
+
+    first_vax_params = GeneratorParameters(
+        count=count,
+        field_values=[
+            FieldValue(field="vaccineCode", value=vaccination_code),
+            FieldValue(field="status", value="completed"),
+        ],
+        field_generators=[
+            patient_reference_generator,
+            vaccination_date_generator
+        ]
+    )
+    vaccination_generator = ResourceGenerator("Immunization", generator_parameters=first_vax_params)
+    dataset_generator.add_resource(vaccination_generator, name="first_vaccination", likelihood=0.8)
+
+    result = dataset_generator.generate()
+
+
+
