@@ -1,4 +1,4 @@
-from .resource_generator import FhirResourceGenerator
-from .patient import PatientGenerator, PatientResourceGenerator
-from .observation import ObservationGenerator
-from .molecular_sequence import MolecularSequenceGenerator
+from .resource_generator import ResourceGenerator
+from .patient import PatientGenerator
+from .dataset import DatasetGenerator
+from .field_generator import FieldGenerator

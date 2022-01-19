@@ -1,104 +1,50 @@
 import math
 import pprint
-from typing import List, Union, Type, Callable
+from typing import List, Union, Type, Callable, Optional, Any
 from fhir.resources.domainresource import DomainResource
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.reference import Reference
 from fhir.resources.fhirtypes import AbstractBaseType, AbstractType
 from fhir.resources import get_fhir_model_class, FHIRAbstractModel
+from fhir.resources.fhirabstractmodel import FHIRAbstractModel
+from fhir.resources.fhirresourcemodel import FHIRResourceModel
 import os
 import pendulum
 from uuid import uuid4
 from abc import abstractmethod
 from fhir.resources.resource import Resource
+from pydantic import BaseModel
+
+from fhir_kindling.generators.field_generator import FieldGenerator
 
 
-class FhirResourceGenerator:
+class FieldValue(BaseModel):
+    field: str
+    value: Union[Any, List[Any]]
 
-    def __init__(self, n: int = None, n_per_patient: int = 1, resource_type: DomainResource = None):
-        self._patient_references = None
-        self.n = n
-        self.resource_type = resource_type
-        self.resources = None
-        self.n_per_patient = n_per_patient
 
-    @property
-    def num_patients(self):
-        return math.ceil(self.n / self.n_per_patient)
+class GeneratorParameters(BaseModel):
+    count: Optional[int] = None
+    field_generators: Optional[List[FieldGenerator]] = None
+    field_values: Optional[List[FieldValue]] = None
 
-    def generate(self, out_dir: str = None, filename: str = None, generate_ids: bool = False,
-                 patient_references: List[Reference] = None) -> List[Resource]:
-        self._patient_references = patient_references
-        self.resources = self._generate()
-        if generate_ids:
-            for resource in self.resources:
-                resource.id = self.generate_id()
-
-        if self._patient_references:
-            self.update_with_patient_ids()
-
-        if out_dir:
-            bundle = self.make_bundle()
-            if filename:
-                path = os.path.join(out_dir, filename)
-            else:
-                path = os.path.join(out_dir, f"bundle-{pendulum.now().to_date_string()}.json")
-            with open(path, "w") as bundle_file:
-                bundle_file.write(bundle.json())
-        return self.resources
-
-    @abstractmethod
-    def _generate(self) -> List[Resource]:
-        pass
-
-    def make_bundle(self) -> Bundle:
-        entries = self._generate_bundle_entries()
-        bundle_data = {
-            "type": "transaction",
-            "entry": entries
-        }
-        bundle = Bundle(**bundle_data)
-        return bundle
-
-    def _generate_bundle_entries(self):
-        entries = []
-        for resource in self.resources:
-            bundle_entry_dict = {
-                "resource": resource,
-                "request": BundleEntryRequest(**{"method": "POST", "url": self.resource_type.get_resource_type()})
-            }
-            entry = BundleEntry(**bundle_entry_dict)
-            entries.append(entry)
-        return entries
-
-    def update_with_patient_ids(self):
-        # Step with n per patient
-        for index in range(0, len(self.resources), self.n_per_patient):
-            patient_resources = self.resources[index: index + self.n_per_patient]
-            for resource in patient_resources:
-                resource.patient = {
-                    "reference": self._patient_references[int(index / self.n_per_patient)],
-                    "type": "Patient"
-                }
-
-        print(self.resources)
-
-    def display_schema(self):
-        pprint.pprint(self.resource_type.schema())
-
-    @staticmethod
-    def generate_id():
-        return str(uuid4())
+    # todo count and list in field values of same length
 
 
 class ResourceGenerator:
 
-    def __init__(self, resource: str, n: int, field_values: dict = None, disable_validation: bool = False):
+    def __init__(self, resource: str, n: int = None, field_values: dict = None, disable_validation: bool = False,
+                 generator_parameters: GeneratorParameters = None):
         self.resource = get_fhir_model_class(resource)
+        self.params = generator_parameters
         self.field_values = field_values
-        self._check_required_fields()
+        if self.field_values and not disable_validation:
+            self._check_required_fields()
         self.disable_validation = disable_validation
         self.n = n
+        self._value_iterators = {}
+        # list to store the field names of all fields being generated
+        self._generated_fields = set()
 
     def required_fields(self) -> List[str]:
         required_fields = []
@@ -110,55 +56,123 @@ class ResourceGenerator:
     def fields(self):
         return self.resource.__fields__
 
-    def generate(self):
+    def generate(self, disable_validation: bool = False) -> Union[Resource, List[Resource]]:
+
+        self.disable_validation = disable_validation
+        # if field values are given parse them into parameters
+        if self.n and not self.params:
+            self.params = GeneratorParameters(count=self.n)
+
+        if self.field_values and self.n:
+            self._parse_field_values()
         if not self.disable_validation:
-            self._check_required_fields()
+            self._validate_params()
         resources = self._generate_resources()
         return resources
 
     def _generate_resources(self):
         resources = []
-        for i in range(self.n):
-            resource = self._generate_resource()
-            resources.append(resource)
-        return resources
+        if self.params.count:
+            for i in range(self.params.count):
+                resource = self._generate_resource()
+                resources.append(resource)
+            return resources
+        else:
+            return self._generate_resource()
 
     def _generate_resource(self):
+        # construct a resource object to hold the generated fields
         resource = self.resource.construct()
-        for field_name, field_value in self.field_values.items():
-            self._generate_field_value(resource, field_name, field_value)
+        # disable assignment validation
+        resource.Config.validate_assignment = False
+        if self.params.field_values:
+            for field_value in self.params.field_values:
+                # update resource with field value
+                self._update_with_field_value(resource, field_value)
+
+        if self.params.field_generators:
+            for generator in self.params.field_generators:
+                # update resource with generated field value
+                self._update_with_field_generator(resource, generator)
+
+        # validate resource when validation is enabled
+        if not self.disable_validation:
+            resource = self.resource(**resource.dict(exclude_none=True))
 
         return resource
 
-    def _generate_field_value(self, resource: Resource, field_name: str,
-                              field_value: Union[dict, str, int, float, list, Callable]):
-        if isinstance(field_value, dict):
-            value = self._generate_resource_value_from_dict(resource, field_name, field_value)
-        elif isinstance(field_value, list):
-            value = self._generate_resource_value_from_list(resource, field_name, field_value)
-
-        elif isinstance(field_value, Callable):
-            value = field_value()
+    def _update_with_field_value(self, resource: FHIRResourceModel, field_value: FieldValue):
+        if isinstance(field_value.value, list):
+            iterator = self._value_iterators.get(field_value.field)
+            if not iterator:
+                iterator = iter(field_value.value)
+                self._value_iterators[field_value.field] = iterator
+            resource.__setattr__(field_value.field, next(iterator))
         else:
-            self._validate_scalar_field_value(resource, field_name, field_value)
-            value = field_value
+            resource.__setattr__(field_value.field, field_value.value)
 
-        setattr(resource, field_name, value)
+    def _update_with_field_generator(self, resource: FHIRResourceModel, field_generator: FieldGenerator):
+
+        value = field_generator.generate()
+        resource.__setattr__(field_generator.field, value)
 
     def _check_required_fields(self):
-        required_fields = self.required_fields()
-        if required_fields:
-            if not self.field_values:
-                raise ValueError(f"Missing required fields: {','.join(required_fields)}")
-            if not set(required_fields).issubset(set(self.field_values.keys())):
-                missing_fields = set(required_fields) - set(self.field_values.keys())
-                raise ValueError(f"Missing required fields: {','.join(missing_fields)}")
+        """
+        Check if all required fields are being generated by the field generators or are given as field values
 
-    def _generate_resource_value_from_dict(self, resource: Resource, field_name: str, field_value: dict):
-        pass
+        Returns:
 
-    def _generate_resource_value_from_list(self, resource: Resource, field_name: str, field_value: list):
-        pass
+        """
+        required_fields_set = set(self.required_fields())
+        if not required_fields_set.issubset(self._generated_fields):
+            raise ValueError(f"Required fields {required_fields_set - self._generated_fields} not generated, "
+                             f"generated fields: {self._generated_fields}")
 
-    def _validate_scalar_field_value(self, resource: Resource, field_name: str, field_value: Union[str, int, float]):
-        pass
+    def _parse_field_values(self):
+
+        params = GeneratorParameters(
+            count=self.n
+        )
+
+        # todo: add support for field_values as a list of dicts
+
+        self.params = params
+
+    def _validate_params(self):
+        # validate field values
+        if self.params.field_values:
+            self._validate_field_values()
+
+        # validate field generators
+        if self.params.field_generators:
+            self._validate_field_generators()
+
+        # check that the required fields are being generated
+        self._check_required_fields()
+
+    def _validate_field_values(self):
+        field_values = self.params.field_values
+        resource_count = self.params.count
+
+        for field_value in field_values:
+            # check for duplicates in generated fields
+            if field_value.field in self._generated_fields:
+                raise ValueError(f"Field value {field_value.value} is already generated")
+            self._generated_fields.add(field_value.field)
+
+            # check that the list length matches the resource count
+            if isinstance(field_value.value, list):
+                if len(field_value.value) != resource_count:
+                    raise ValueError(f"Field value list length does not match resource count: {field_value.field}"
+                                     f"Items in field value list: {len(field_value.value)},"
+                                     f" resource count: {resource_count}")
+            # todo check that the type of the item fits into the selected field
+
+    def _validate_field_generators(self):
+        generators = self.params.field_generators
+        for resource_generator in generators:
+            # check for duplicates in generated fields
+            if resource_generator.field in self._generated_fields:
+                raise ValueError(f"Field generator {resource_generator.field} is already generated")
+            self._generated_fields.add(resource_generator.field)
+            # todo validate generator values

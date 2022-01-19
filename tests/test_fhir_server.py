@@ -257,6 +257,7 @@ def test_fhir_server_from_env():
                 "FHIR_API_URL": "http://test.fhir.org/r4",
                 "CLIENT_ID": "token",
                 "OIDC_PROVIDER_URL": "https://test.fhir.org/r4",
+                "CLIENT_SECRET": "",
             }):
         with pytest.raises(EnvironmentError):
             server = FhirServer.from_env()
