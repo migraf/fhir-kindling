@@ -56,8 +56,9 @@ class ResourceGenerator:
     def fields(self):
         return self.resource.__fields__
 
-    def generate(self):
+    def generate(self, disable_validation: bool = False) -> Union[Resource, List[Resource]]:
 
+        self.disable_validation = disable_validation
         # if field values are given parse them into parameters
         if self.n and not self.params:
             self.params = GeneratorParameters(count=self.n)
@@ -71,10 +72,13 @@ class ResourceGenerator:
 
     def _generate_resources(self):
         resources = []
-        for i in range(self.params.count):
-            resource = self._generate_resource()
-            resources.append(resource)
-        return resources
+        if self.params.count:
+            for i in range(self.params.count):
+                resource = self._generate_resource()
+                resources.append(resource)
+            return resources
+        else:
+            return self._generate_resource()
 
     def _generate_resource(self):
         # construct a resource object to hold the generated fields
@@ -121,7 +125,7 @@ class ResourceGenerator:
         """
         required_fields_set = set(self.required_fields())
         if not required_fields_set.issubset(self._generated_fields):
-            raise ValueError(f"Required fields {required_fields_set} not generated,"
+            raise ValueError(f"Required fields {required_fields_set - self._generated_fields} not generated, "
                              f"generated fields: {self._generated_fields}")
 
     def _parse_field_values(self):

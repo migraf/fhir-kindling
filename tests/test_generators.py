@@ -14,7 +14,7 @@ from fhir.resources.reference import Reference
 from fhir_kindling.generators.patient import PatientGenerator
 from fhir_kindling.generators.field_generator import FieldGenerator
 from fhir_kindling.generators.dataset import DatasetGenerator
-from pprint import pp
+from pprint import pp, pprint
 import datetime
 import pendulum
 
@@ -93,29 +93,6 @@ def test_patient_generator():
 
     patients = generator.generate()
     assert len(patients) == 10
-
-
-def test_generator_init():
-    with pytest.raises(ValueError):
-        generator = ResourceGenerator("Condition", 10)
-        generator.generate()
-
-    with pytest.raises(ValueError):
-        generator = ResourceGenerator("Condition", n=10, field_values={"hello": "Patient/1"})
-        generator.generate()
-
-    with pytest.raises(KeyError):
-        generator = ResourceGenerator("jsdkasdh", 10)
-
-    # generator = generator.generate()
-    generator = ResourceGenerator("Condition", n=10, field_values={"subject": "Patient/1"})
-    assert generator
-
-
-def test_check_required_fields():
-    generator = ResourceGenerator("Condition", n=10, field_values={"subject": "Patient/1"})
-    generator = ResourceGenerator("Condition", n=10, field_values={"subject": "Patient/1"})
-    generator.required_fields()
 
 
 def test_generator_field_parameters():
@@ -243,43 +220,38 @@ def test_resource_generator(covid_code):
         data = generator.generate()
 
 
-def test_generate_covid_dataset(covid_params, vaccination_code):
-    count = 1000
+def test_generate_covid_dataset(vaccination_code, covid_code):
+    count = 100
     dataset_generator = DatasetGenerator("Patient", n=count)
 
-    params, _, _ = covid_params
-    params.count = count
-    covid_generator = ResourceGenerator("Condition", generator_parameters=params)
+    covid_params = GeneratorParameters(
+        field_values=[
+            FieldValue(field="code", value=covid_code),
+        ]
+    )
+
+    covid_generator = ResourceGenerator("Condition", generator_parameters=covid_params)
     # add covid conditions to patients
     dataset_generator.add_resource(covid_generator, name="covid")
 
     patients, patient_ids = PatientGenerator(n=count, generate_ids=True).generate(references=True)
 
-    patient_id_iter = iter(patient_ids)
-    patient_reference_generator = FieldGenerator(
-        field="patient",
-        generator_function=lambda: {"reference": f"Patient/{next(patient_id_iter)}"}
-    )
     vaccination_date_generator = FieldGenerator(
         field="occurrenceDateTime",
         generator_function=lambda: pendulum.now().to_date_string()
     )
 
     first_vax_params = GeneratorParameters(
-        count=count,
         field_values=[
             FieldValue(field="vaccineCode", value=vaccination_code),
             FieldValue(field="status", value="completed"),
         ],
         field_generators=[
-            patient_reference_generator,
             vaccination_date_generator
         ]
     )
     vaccination_generator = ResourceGenerator("Immunization", generator_parameters=first_vax_params)
     dataset_generator.add_resource(vaccination_generator, name="first_vaccination", likelihood=0.8)
 
-    result = dataset_generator.generate()
-
-
-
+    result = dataset_generator.generate(ids=True)
+    pprint(result.dict(exclude_none=True))
