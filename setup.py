@@ -39,10 +39,10 @@ setup(
         "requests-oauthlib",
         "pendulum",
         "tqdm",
-        "click-spinner",
         "orjson",
         "pyyaml",
         "xmltodict",
+        "pydantic"
     ],
     license="MIT license",
     include_package_data=True,
