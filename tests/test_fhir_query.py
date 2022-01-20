@@ -1,5 +1,9 @@
+import json
+
 import pytest
 import os
+
+import xmltodict
 from dotenv import load_dotenv, find_dotenv
 from fhir.resources.condition import Condition
 from fhir.resources.patient import Patient
@@ -1101,9 +1105,9 @@ def paginated_xml():
 
 
 """
-################################################################################
+########################################################################################################################
 Test Query Parameters
-################################################################################
+########################################################################################################################
 """
 
 
@@ -1603,5 +1607,62 @@ def test_query_response(server):
     assert len(response.resources) >= 2
     assert response.resources[0].resource_type == query_resource
 
-    print(len(response.resources))
 
+def test_query_response_include(server):
+    query_resource = "Condition"
+    search_param = "subject"
+
+    query = server.query(query_resource)
+
+    with pytest.raises(ValueError):
+        query = query.include()
+
+    query = query.include(resource=query_resource, search_param=search_param)
+    response = query.all()
+
+    assert response.included_resources
+    assert response.resources
+    assert response.resources[0].resource_type == query_resource
+
+
+def test_query_response_save(server):
+    xml_file = "test_query_response_save.xml"
+    json_file = "test_query_response_save.json"
+
+    # test saving single resource and xml
+    query_resource = "Condition"
+    query = server.query(query_resource, output_format="xml")
+    response = query.limit(100)
+    response.save(xml_file, format="xml")
+
+    with pytest.raises(NotImplementedError):
+        response.save(xml_file, format="json")
+
+    assert os.path.isfile(xml_file)
+    assert xmltodict.parse(open(xml_file, "r").read()) == xmltodict.parse(response.response)
+
+    os.remove(xml_file)
+
+    # invalid format
+    with pytest.raises(ValueError):
+        response.save(xml_file, format="invalid")
+
+    # test with included resources and json
+
+    query_resource = "Condition"
+    search_param = "subject"
+
+    query = server.query(query_resource)
+
+    with pytest.raises(ValueError):
+        query = query.include()
+
+    query = query.include(resource=query_resource, search_param=search_param)
+    response = query.all()
+
+    response.save(json_file, format="json")
+
+    assert os.path.isfile(json_file)
+    assert json.loads(open(json_file, encoding="utf-16").read())
+
+    os.remove(json_file)
