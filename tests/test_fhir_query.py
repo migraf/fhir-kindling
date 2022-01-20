@@ -1658,11 +1658,11 @@ def test_query_response_save(server):
         query = query.include()
 
     query = query.include(resource=query_resource, search_param=search_param)
-    response = query.all()
+    response = query.limit(100)
 
     response.save(json_file, format="json")
 
     assert os.path.isfile(json_file)
-    assert json.loads(open(json_file, encoding="utf-16").read())
+    assert json.loads(open(json_file).read())
 
     os.remove(json_file)

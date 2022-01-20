@@ -111,15 +111,12 @@ class QueryResponse:
     def save(self, file_path: Union[str, pathlib.Path], format: str = "json"):
 
         format = OutputFormats(format)
-
         # check that only xml queries can be saved as xml
         if self.format == OutputFormats.XML:
             if not format == OutputFormats.XML:
                 raise NotImplementedError("XML query results can only be saved as XML")
 
         self.format = format
-
-        # todo improve encodings
         if self.format == OutputFormats.XML:
             with open(file_path, "w") as f:
                 f.write(self.response)
@@ -135,7 +132,11 @@ class QueryResponse:
 
         # parse the xml response and extract the initial entries
         initial_response = xmltodict.parse(server_response.text)
-        entries = initial_response["Bundle"]["entry"]
+        entries = initial_response["Bundle"].get("entry")
+
+        # if there are no entries, return the initial response
+        if not entries:
+            return server_response.text
         response = initial_response
         # resolve the pagination
         while True:
