@@ -1,6 +1,10 @@
+import os
+
 import pytest
+from dotenv import load_dotenv, find_dotenv
 from pydantic import ValidationError
 
+from fhir_kindling import FhirServer
 from fhir_kindling.generators.resource_generator import ResourceGenerator, GeneratorParameters, FieldValue
 from fhir.resources.condition import Condition
 from fhir.resources.patient import Patient
@@ -17,6 +21,27 @@ from fhir_kindling.generators.dataset import DatasetGenerator
 from pprint import pp, pprint
 import datetime
 import pendulum
+
+
+@pytest.fixture
+def api_url():
+    """
+    Base api url and env vars
+    """
+    load_dotenv(find_dotenv())
+
+    return os.getenv("FHIR_API_URL", "http://test.fhir.org/r4")
+
+
+@pytest.fixture
+def server(api_url):
+    server = FhirServer(
+        api_address=api_url,
+        client_id=os.getenv("CLIENT_ID"),
+        client_secret=os.getenv("CLIENT_SECRET"),
+        oidc_provider_url=os.getenv("OIDC_PROVIDER_URL")
+    )
+    return server
 
 
 @pytest.fixture
@@ -220,8 +245,8 @@ def test_resource_generator(covid_code):
         data = generator.generate()
 
 
-def test_generate_covid_dataset(vaccination_code, covid_code):
-    count = 100
+def test_generate_covid_dataset(vaccination_code, covid_code, server):
+    count = 10
     dataset_generator = DatasetGenerator("Patient", n=count)
 
     covid_params = GeneratorParameters(
@@ -253,5 +278,7 @@ def test_generate_covid_dataset(vaccination_code, covid_code):
     vaccination_generator = ResourceGenerator("Immunization", generator_parameters=first_vax_params)
     dataset_generator.add_resource(vaccination_generator, name="first_vaccination", likelihood=0.8)
 
-    result = dataset_generator.generate(ids=True)
-    pprint(result.dict(exclude_none=True))
+    dataset = dataset_generator.generate(ids=True)
+    # pprint(result.dict(exclude_none=True))
+
+    dataset.upload(server)

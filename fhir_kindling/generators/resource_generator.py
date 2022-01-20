@@ -56,7 +56,7 @@ class ResourceGenerator:
     def fields(self):
         return self.resource.__fields__
 
-    def generate(self, disable_validation: bool = False) -> Union[Resource, List[Resource]]:
+    def generate(self, disable_validation: bool = False, generate_ids: bool = False) -> Union[Resource, List[Resource]]:
 
         self.disable_validation = disable_validation
         # if field values are given parse them into parameters
@@ -67,20 +67,20 @@ class ResourceGenerator:
             self._parse_field_values()
         if not self.disable_validation:
             self._validate_params()
-        resources = self._generate_resources()
+        resources = self._generate_resources(generate_ids)
         return resources
 
-    def _generate_resources(self):
+    def _generate_resources(self, generate_ids: bool):
         resources = []
         if self.params.count:
             for i in range(self.params.count):
-                resource = self._generate_resource()
+                resource = self._generate_resource(generate_ids)
                 resources.append(resource)
             return resources
         else:
-            return self._generate_resource()
+            return self._generate_resource(generate_ids)
 
-    def _generate_resource(self):
+    def _generate_resource(self, generate_id: bool) -> FHIRResourceModel:
         # construct a resource object to hold the generated fields
         resource = self.resource.construct()
         # disable assignment validation
@@ -94,6 +94,8 @@ class ResourceGenerator:
             for generator in self.params.field_generators:
                 # update resource with generated field value
                 self._update_with_field_generator(resource, generator)
+        if generate_id:
+            resource.id = str(uuid4())
 
         # validate resource when validation is enabled
         if not self.disable_validation:

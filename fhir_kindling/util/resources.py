@@ -1,4 +1,7 @@
 from typing import Union, List
+
+from fhir.resources.bundle import BundleEntry, BundleEntryRequest
+from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from pydantic.fields import ModelField
 
 from fhir.resources.resource import Resource
@@ -38,3 +41,27 @@ def valid_resource_name(resource_name: str) -> str:
     except KeyError:
         raise ValueError(f"Invalid resource name: {resource_name}")
     return resource_name
+
+
+def generate_bundle_entry(resource: Union[Resource, FHIRResourceModel, dict], method: str = "POST") -> BundleEntry:
+    if isinstance(resource, dict):
+        url = resource.get("resourceType")
+        id = resource.get("id")
+    else:
+        url = resource.resource_type
+        id = resource.id
+
+    # Post a resource to the base endpoint
+    if method.lower() == "post":
+        pass
+    elif method.lower() == "put":
+        url += f"/{id}"
+
+    return BundleEntry(
+        request=BundleEntryRequest(
+            url=url if url else f"url/{resource.get('id')}",
+            method=method
+        ),
+        resource=resource
+    )
+
