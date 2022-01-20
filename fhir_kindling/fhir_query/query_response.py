@@ -1,5 +1,4 @@
 import collections
-import json
 import pathlib
 from typing import Union, List, Dict, Optional
 from enum import Enum
@@ -15,17 +14,26 @@ from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters
 
 
 class OutputFormats(Enum):
+    """
+    Enum for the output formats.
+    """
     JSON = "json"
     XML = "xml"
     CSV = "csv"
 
 
 class IncludedResources(BaseModel):
+    """
+    Container for resources included in the query via the _include/_revinclude parameters.
+    """
     resource_type: str
     resources: Optional[List[FHIRAbstractModel]] = None
 
 
 class QueryResponse:
+    """
+    Response object for the results of a FHIR query executed against a FHIR server.
+    """
 
     def __init__(self,
                  session: Session,
@@ -37,29 +45,22 @@ class QueryResponse:
         self.session = session
         self.format = output_format
         self._limit = limit
-        self.response: Union[str, dict] = self.process_server_response(response)
+        self.response: Union[str, dict] = self._process_server_response(response)
         self.query_params = query_params
         self.resource = query_params.resource
         self._resources = None
         self._included_resources = {}
         self._bundle = None
 
-    def process_server_response(self, response: Response) -> Union[Dict, Bundle, str]:
-
-        # if the format is xml resolve pagination and return xml string response
-        if self.format == "xml":
-            return self._resolve_xml_pagination(response)
-
-        # otherwise, resolve json pagination and process further according to selected outcome
-        else:
-            json_bundle = self._resolve_json_pagination(response)
-            if self.format in ["json", "dict"]:
-                return json_bundle
-            elif self.format == "bundle":
-                return Bundle(**json_bundle)
-
     @property
     def resources(self) -> List[FHIRResourceModel]:
+        """
+        List of primary resources returned by the server.
+
+        Returns:
+            List of FHIRResourceModel objects returned by the server.
+
+        """
         if self.format == "xml":
             raise NotImplementedError("Resource parsing not supported for xml format")
         else:
@@ -92,6 +93,12 @@ class QueryResponse:
             return included
 
     def _extract_resources(self):
+        """
+        Parse the resources from the server response bundle. Split into included resources and resources that match the
+        query exactly.
+        Returns:
+
+        """
         if not self._resources:
             self._resources = []
         for entry in Bundle(**self.response).entry:
@@ -109,6 +116,15 @@ class QueryResponse:
                 self._included_resources[entry.resource.resource_type] = included_resources
 
     def save(self, file_path: Union[str, pathlib.Path], format: str = "json"):
+        """
+        Save the response to a file.
+        Args:
+            file_path: path to the file to save the response to.
+            format: output format one of xml|json|(csv)
+
+        Returns:
+            None
+        """
 
         format = OutputFormats(format)
         # check that only xml queries can be saved as xml
@@ -127,6 +143,28 @@ class QueryResponse:
                 f.write(bundle.json(indent=2))
         elif self.format == OutputFormats.CSV:
             raise NotImplementedError("CSV format not yet supported")
+
+    def _process_server_response(self, response: Response) -> Union[Dict, Bundle, str]:
+        """
+        Handle the initial response from the server and resolve pagination if necessary.
+        Args:
+            response: the initial server response
+
+        Returns:
+            the server response, with pagination resolved if necessary
+
+        """
+
+        # if the format is xml resolve pagination and return xml string response
+        if self.format == "xml":
+            return self._resolve_xml_pagination(response)
+        # otherwise, resolve json pagination and process further according to selected outcome
+        else:
+            json_bundle = self._resolve_json_pagination(response)
+            if self.format in ["json", "dict"]:
+                return json_bundle
+            elif self.format == "bundle":
+                return Bundle(**json_bundle)
 
     def _resolve_xml_pagination(self, server_response: Response) -> str:
 
@@ -202,27 +240,3 @@ class QueryResponse:
 
             response["entry"] = entries[:self._limit] if self._limit else entries
             return response
-
-    def _serialize_output(self):
-        if isinstance(self.response, bytes):
-            self.response = self.response.decode("utf-8")
-        if isinstance(self.response, str):
-            if self.format == "xml":
-                return self.response
-            elif self.format == "json":
-                return Bundle.construct(**json.loads(self.response)).json()
-            elif self.format == "dict":
-                return Bundle.construct(**json.loads(self.response)).dict()
-            elif self.format == "model":
-                return Bundle.construct(**json.loads(self.response))
-
-        elif isinstance(self.response, Bundle):
-            if self.format == "json":
-                return self.response.json(indent=2)
-            elif self.format == "dict":
-                return self.response.dict()
-            elif self.format == "model":
-                return self.response
-
-        else:
-            raise ValueError("Unable to serialize query response")

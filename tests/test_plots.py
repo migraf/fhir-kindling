@@ -5,9 +5,6 @@ from dotenv import load_dotenv, find_dotenv
 from fhir_kindling import FhirServer
 
 from fhir_kindling.figures import server_summary_plot, plot_resource_field
-from tests.fixtures import fhir_server
-
-fhir_server = fhir_server
 
 
 @pytest.fixture

@@ -1,7 +1,7 @@
 import random
 
 from pydantic import BaseModel, validator, root_validator
-from typing import Union, List, Callable, Any, Optional
+from typing import List, Callable, Any, Optional
 
 
 class FieldGenerator(BaseModel):

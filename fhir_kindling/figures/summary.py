@@ -1,6 +1,4 @@
-from typing import List, Dict, Callable
 import plotly.express as px
-from fhir.resources.resource import Resource
 
 from fhir_kindling.fhir_server.server_responses import ServerSummary
 

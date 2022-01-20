@@ -246,7 +246,7 @@ def test_resource_generator(covid_code):
 
 
 def test_generate_covid_dataset(vaccination_code, covid_code, server):
-    count = 10
+    count = 100
     dataset_generator = DatasetGenerator("Patient", n=count)
 
     covid_params = GeneratorParameters(

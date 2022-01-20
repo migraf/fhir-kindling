@@ -1,5 +1,5 @@
 from uuid import uuid4
-from typing import Union, Tuple, List
+from typing import Tuple, List
 from pathlib import Path
 
 import pendulum
@@ -110,54 +110,3 @@ class PatientGenerator:
 
     def _generate_references(self) -> List[Reference]:
         return [Reference(reference=f"Patient/{patient.id}") for patient in self.resources]
-
-# class PatientResourceGenerator:
-#
-#     def __init__(self, resource_generator: FhirResourceGenerator = None,
-#                  patients: Union[List[Patient], List[str], bool] = None,
-#                  n_per_patient: int = 1):
-#         self.patients = patients
-#         self.n_per_patients = n_per_patient
-#         self.resource_generator = resource_generator
-#         self.n = self.resource_generator.n
-#         self.resources = None
-#
-#     def generate(self, patients=None, out_dir: str = None, filename: str = None, generate_ids: bool = False):
-#         if patients is None and self.patients is None:
-#             raise ValueError("No patients given to generate Resources for.")
-#         else:
-#             self.patients = patients
-#             # TODO use self patients and serialize newly generated patients to list
-#             self.resources = self.resource_generator.generate(generate_ids=generate_ids)
-#             self.update_with_patient_ids()
-#             if filename:
-#                 if out_dir:
-#                     output_path = os.path.join(out_dir, filename)
-#                 else:
-#                     output_path = filename
-#                 with open(output_path, "w") as outputbundle:
-#                     bundle = self.resource_generator.make_bundle()
-#                     outputbundle.write(bundle.json(indent=2))
-#
-#         return self.resources, self.resource_generator.make_bundle()
-#
-#     def generate_patients(self, bundle=True):
-#         n_patients = math.ceil(float(self.n) / self.n_per_patients)
-#         patient_generator = PatientGenerator(n=n_patients)
-#         patients = patient_generator.generate()
-#         if bundle:
-#             return patient_generator.make_bundle()
-#         else:
-#             return patients
-#
-#     def update_with_patient_ids(self):
-#         # Step with n per patient
-#         for index in range(0, len(self.resources), self.n_per_patients):
-#             patient_resources = self.resources[index: index + self.n_per_patients]
-#             for resource in patient_resources:
-#                 resource.patient = {
-#                     "reference": self.patients[int(index / self.n_per_patients)],
-#                     "type": "Patient"
-#                 }
-#
-#         print(self.resources)

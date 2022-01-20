@@ -224,24 +224,64 @@ class FHIRQuery:
         return self
 
     def all(self):
+        """
+        Execute the query and return all results matching the query parameters.
+        Returns:
+            QueryResponse object containing all resources matching the query, as well os optional included
+            resources.
+
+        """
         self._limit = None
         return self._execute_query()
 
     def limit(self, n: int):
+        """
+        Execute the query and return the first n results matching the query parameters.
+        Args:
+            n: number of resources to return
+
+        Returns:
+            QueryResponse object containing the first n resources matching the query, as well os optional included
+            resources.
+
+        """
         self._limit = n
         return self._execute_query()
 
     def first(self):
+        """
+        Return the first resource matching the query parameters.
+        Returns:
+            QueryResponse object containing the first resource matching the query
+
+        """
         self._limit = 1
         return self._execute_query()
 
     def set_query_string(self, raw_query_string: str):
-        # todo parse query string into conditions
+        """
+        Use a raw query string to set the query parameters.
+        e.g. /Patient?_id=123&_lastUpdated=gt2019-01-01
+
+        Args:
+            raw_query_string: Query string to set the query parameters
+
+        Returns:
+            Query object with the query parameters set based on the raw query string
+
+        """
         query_parameters = FHIRQueryParameters.from_query_string(raw_query_string)
         self.query_parameters = query_parameters
+        return self
 
     @property
-    def query_url(self):
+    def query_url(self) -> str:
+        """
+        Display the query URL that will be used to execute the query.
+
+        Returns:
+
+        """
         return self._make_query_string()
 
     def _setup_session(self):

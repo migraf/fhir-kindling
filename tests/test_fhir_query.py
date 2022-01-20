@@ -1350,16 +1350,22 @@ Test query conditions and execution
 
 def test_query_xml(server):
     resp = server.query("Patient", output_format="xml")
-    result = resp.all()
+    result = resp.limit(100)
+
     assert result.response
     assert isinstance(result.response, str)
+
+    with pytest.raises(NotImplementedError):
+        includes = result.included_resources
 
 
 def test_query_json(server):
     resp = server.query("Patient", output_format="json")
-    result = resp.all()
+    result = resp.limit(100)
     assert result.response
     assert isinstance(result.response, dict)
+    with pytest.raises(ValueError):
+        includes = result.included_resources
 
 
 def test_query_first(server):
@@ -1620,7 +1626,7 @@ def test_query_response_include(server):
     query = query.include(resource=query_resource, search_param=search_param)
     response = query.all()
 
-    # assert response.included_resources
+    assert response.included_resources
     assert response.resources
     assert response.resources[0].resource_type == query_resource
 
@@ -1666,3 +1672,6 @@ def test_query_response_save(server):
     assert json.loads(open(json_file).read())
 
     os.remove(json_file)
+
+    with pytest.raises(NotImplementedError):
+        response.save(json_file, format="csv")

@@ -1,17 +1,7 @@
-import math
-import pprint
-from typing import List, Union, Type, Callable, Optional, Any
-from fhir.resources.domainresource import DomainResource
-from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
-from fhir.resources.reference import Reference
-from fhir.resources.fhirtypes import AbstractBaseType, AbstractType
-from fhir.resources import get_fhir_model_class, FHIRAbstractModel
-from fhir.resources.fhirabstractmodel import FHIRAbstractModel
+from typing import List, Union, Optional, Any
+from fhir.resources import get_fhir_model_class
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
-import os
-import pendulum
 from uuid import uuid4
-from abc import abstractmethod
 from fhir.resources.resource import Resource
 from pydantic import BaseModel
 

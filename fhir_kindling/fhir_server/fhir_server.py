@@ -1,7 +1,6 @@
 import json
 import os
 from typing import List, Union, Tuple
-import pandas as pd
 import requests
 from fhir.resources import FHIRAbstractModel
 from requests import Response
@@ -21,7 +20,6 @@ from fhir_kindling.fhir_query.query_response import QueryResponse
 from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters
 from fhir_kindling.fhir_server.auth import generate_auth
 from fhir_kindling.fhir_server.server_responses import ResourceCreateResponse, BundleCreateResponse, ServerSummary
-from fhir_kindling.serde import flatten_bundle
 
 
 class FhirServer:
@@ -139,7 +137,6 @@ class FhirServer:
         return response
 
     def add_bundle(self, bundle: Union[Bundle, dict, str], validate_entries: bool = True) -> BundleCreateResponse:
-        # todo check this
         # create bundle and validate it
         if isinstance(bundle, dict):
             bundle = Bundle(**bundle)
@@ -293,15 +290,6 @@ class FhirServer:
         r = requests.post(url=url, headers=self._headers, auth=self.auth, json=resource.dict())
         return r
 
-    @staticmethod
-    def _format_output(bundle_response: dict, output_format: str) -> Union[dict, pd.DataFrame, Bundle]:
-        if output_format in {"json", "raw"}:
-            return bundle_response
-        elif output_format == "parsed":
-            return Bundle(**bundle_response)
-        elif output_format == "df":
-            return flatten_bundle(bundle_response)
-
     def _get_meta_data(self):
         url = self.api_address + "/metadata"
         r = self.session.get(url)
@@ -383,17 +371,6 @@ class FhirServer:
     @property
     def _headers(self):
         return {"Content-Type": "application/fhir+json"}
-
-    @staticmethod
-    def _validate_query_string_and_parse_resource(query_string_input: str) -> Tuple[str, FHIRAbstractModel]:
-        if query_string_input[0] != "/":
-            valid_query = "/" + query_string_input
-        else:
-            valid_query = query_string_input
-
-        resource_string = valid_query.split("/")[1].split("?")[0]
-        resource = fhir.resources.get_fhir_model_class(resource_string).construct()
-        return valid_query, resource
 
     @staticmethod
     def validate_api_address(api_address: str) -> str:
