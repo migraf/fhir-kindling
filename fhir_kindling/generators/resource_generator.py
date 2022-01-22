@@ -23,9 +23,16 @@ class GeneratorParameters(BaseModel):
 
 class ResourceGenerator:
 
-    def __init__(self, resource: str, n: int = None, field_values: dict = None, disable_validation: bool = False,
+    def __init__(self, resource: Union[str, Any], n: int = None, field_values: dict = None, disable_validation: bool = False,
                  generator_parameters: GeneratorParameters = None):
-        self.resource = get_fhir_model_class(resource)
+        if not isinstance(resource, str):
+            try:
+                resource_type = resource.get_resource_type()
+                self.resource = get_fhir_model_class(resource_type)
+            except Exception:
+                raise ValueError(f"Resource must be a string or a FHIRResourceModel, got {type(resource)}")
+        else:
+            self.resource = get_fhir_model_class(resource)
         self.params = generator_parameters
         self.field_values = field_values
         if self.field_values and not disable_validation:

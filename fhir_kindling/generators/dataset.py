@@ -73,7 +73,7 @@ class DatasetGenerator:
     Generates a dataset for a FHIR resource.
     """
 
-    def __init__(self, resource: str, n: int = None, name: str = None):
+    def __init__(self, resource: str = "Patient", n: int = None, name: str = None):
 
         self.name = name if name else str(uuid4())
 
@@ -95,7 +95,7 @@ class DatasetGenerator:
             name = str(uuid4())
         self._resource_types.add(resource_generator.resource.get_resource_type())
         self.generators.append(
-            DataSetResourceGenerator(
+            DataSetResourceGenerator.construct(
                 name=name,
                 generator=resource_generator,
                 depends_on=depends_on,
@@ -147,7 +147,6 @@ class DatasetGenerator:
         pass
 
     def _add_reference_param(self, resource: FHIRResourceModel, reference: Reference):
-
         # check if a reference field is present for the given resource type if not detect first required reference
         reference_field = self._reference_fields.get(
             resource.get_resource_type(),
@@ -157,12 +156,31 @@ class DatasetGenerator:
 
     def _get_required_reference(self, resource: FHIRResourceModel) -> str:
         fields = get_resource_fields(resource)
+        required_fields = []
         for field in fields:
             if field.required:
                 # todo check this further
-                # add the reference to the required reference field
+                # add the reference to the required reference fields
                 if field.type_ == ReferenceType:
-                    return field.name
+                    required_fields.append(field.name)
+            if field.name in ["patient", "subject"]:
+                required_fields.append(field.name)
+        # if there is only one reference field return it
+
+        if len(required_fields) == 1:
+            reference = required_fields[0]
+        # iterate over the reference fields and return the best match patient -> subject
+        else:
+            reference = None
+            for field in set(required_fields):
+                if field == "patient":
+                    reference = field
+                    break
+                elif field == "subject":
+                    reference = field
+                else:
+                    raise ValueError(f"No reference field found for {resource.get_resource_type()}")
+        return reference
 
     def _store_generated_resource(self, resource: FHIRResourceModel, resource_type: str):
         # todo improve this
@@ -178,7 +196,6 @@ class DatasetGenerator:
         for resource in self._resource_types:
             # find the reference field
             reference_field = self._get_required_reference(get_fhir_model_class(resource))
-            print(reference_field)
             self._reference_fields[resource] = reference_field
             # set up an initial empty resource store with
             dataset.resources.append(GeneratedResources(resource_type=resource, reference_key=reference_field))

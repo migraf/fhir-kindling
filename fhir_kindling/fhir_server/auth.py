@@ -51,7 +51,6 @@ def generate_auth(username: str = None, password: str = None, token: str = None,
 
     if username and password:
         return HTTPBasicAuth(username=username, password=password)
-    # TODO request token from id provider if configured
     elif token:
         return BearerAuth(token=token)
 

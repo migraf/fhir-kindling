@@ -350,7 +350,6 @@ class FhirServer:
         elif self.token:
             return generate_auth(token=self.token)
         else:
-            print("No authentication given")
             return None
 
     def _get_oidc_token(self):

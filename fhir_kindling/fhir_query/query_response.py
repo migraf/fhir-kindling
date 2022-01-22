@@ -30,6 +30,14 @@ class IncludedResources(BaseModel):
     resources: Optional[List[FHIRAbstractModel]] = None
 
 
+class ResponseStatusCodes(str, Enum):
+    OK = 200
+    CREATED = 201
+    NOT_FOUND = 404
+    BAD_REQUEST = 400
+    INTERNAL_SERVER_ERROR = 500
+
+
 class QueryResponse:
     """
     Response object for the results of a FHIR query executed against a FHIR server.
@@ -45,12 +53,15 @@ class QueryResponse:
         self.session = session
         self.format = output_format
         self._limit = limit
-        self.response: Union[str, dict] = self._process_server_response(response)
         self.query_params = query_params
         self.resource = query_params.resource
         self._resources = None
         self._included_resources = {}
         self._bundle = None
+        self.status_code: ResponseStatusCodes = None
+
+        # parse the response after the rest of the setup is complete
+        self.response: Union[str, dict] = self._process_server_response(response)
 
     @property
     def resources(self) -> List[FHIRResourceModel]:
@@ -64,6 +75,9 @@ class QueryResponse:
         if self.format == "xml":
             raise NotImplementedError("Resource parsing not supported for xml format")
         else:
+            # return empty list if no resource matched the query
+            if not self.response.get("entry"):
+                return []
             if self._resources is None:
                 self._extract_resources()
             return self._resources
@@ -80,6 +94,9 @@ class QueryResponse:
         if self.format == "xml":
             raise NotImplementedError("Resource parsing not supported for xml format")
         else:
+            # return empty list if no resource matched the query
+            if not self.response.get("entry"):
+                return []
             # raise error if there aren't any included resources
             if not self.query_params.include_parameters:
                 raise ValueError("No included resources defined in query.")
@@ -174,7 +191,11 @@ class QueryResponse:
 
         # if there are no entries, return the initial response
         if not entries:
+            self.status_code = ResponseStatusCodes.NOT_FOUND
+            print(f"No resources match the query - query url: {self.query_params.to_query_string()}")
             return server_response.text
+        else:
+            self.status_code = ResponseStatusCodes.OK
         response = initial_response
         # resolve the pagination
         while True:
@@ -218,7 +239,14 @@ class QueryResponse:
             return response
         else:
             entries = []
-            entries.extend(response["entry"])
+            initial_entry = response.get("entry", None)
+            if not initial_entry:
+                self.status_code = ResponseStatusCodes.NOT_FOUND
+                print(f"No resources match the query - query url: {self.query_params.to_query_string()}")
+                return response
+            else:
+                self.status_code = ResponseStatusCodes.OK
+                entries.extend(response["entry"])
             # if the limit is reached, stop resolving the pagination
             if self._limit:
                 if len(entries) >= self._limit:
