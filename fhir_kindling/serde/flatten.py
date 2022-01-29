@@ -1,5 +1,5 @@
 from typing import Union, List
-import collections
+from collections import MutableMapping
 
 import pandas as pd
 from fhir.resources import FHIRAbstractModel
@@ -52,11 +52,11 @@ def flatten_dict(d, parent_key='', sep='_') -> dict:
     items = []
     for k, v in d.items():
         new_key = parent_key + sep + k if parent_key else k
-        if isinstance(v, collections.MutableMapping):
+        if isinstance(v, MutableMapping):
             items.extend(flatten_dict(v, new_key, sep=sep).items())
         elif isinstance(v, list):
             for i, item in enumerate(v):
-                if isinstance(item, collections.MutableMapping):
+                if isinstance(item, MutableMapping):
                     items.extend(flatten_dict(item, f"{new_key}_{i}", sep=sep).items())
                 else:
                     items.append((f"{new_key}_{i}", item))
