@@ -11,6 +11,7 @@ from requests import Session, Response
 import xmltodict
 
 from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters
+from fhir_kindling.serde import flatten_resources
 
 
 class OutputFormats(Enum):
@@ -143,6 +144,9 @@ class QueryResponse:
             None
         """
 
+        if isinstance(file_path, str):
+            file_path = pathlib.Path(file_path)
+
         format = OutputFormats(format)
         # check that only xml queries can be saved as xml
         if self.format == OutputFormats.XML:
@@ -159,7 +163,13 @@ class QueryResponse:
                 bundle = Bundle(**self.response)
                 f.write(bundle.json(indent=2))
         elif self.format == OutputFormats.CSV:
-            raise NotImplementedError("CSV format not yet supported")
+            if self._included_resources:
+                for resource_type, resources in self._included_resources.items():
+                    df = flatten_resources(resources)
+                    included__resource_path = file_path.parent / f"{file_path.stem}_{resource_type}.csv"
+                    df.to_csv(included__resource_path, index=False)
+            df = flatten_resources(self.resources)
+            df.to_csv(file_path, index=False)
 
     def _process_server_response(self, response: Response) -> Union[Dict, Bundle, str]:
         """
