@@ -35,8 +35,8 @@ def test_flatten_resource(server):
     condition = server.query("Condition").limit(1).resources[0]
     flat_condition = flatten_resource(condition)
 
-    observation = server.query("Observation").limit(1).resources[0]
-    flat_obs = flatten_resource(observation)
+    # observation = server.query("Observation").limit(1).resources[0]
+    # flat_obs = flatten_resource(observation)
 
 
 def test_resources_to_csv(server):
