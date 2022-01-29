@@ -47,7 +47,7 @@ setup(
     ],
     license="MIT license",
     include_package_data=True,
-    keywords="fhir_kindling, fhir, pydantic, health, data",
+    keywords="fhir_kindling, fhir, pydantic, health, data, hl7",
     name="fhir_kindling",
     packages=find_packages(include=["fhir_kindling", "fhir_kindling.*"]),
     test_suite="tests",
