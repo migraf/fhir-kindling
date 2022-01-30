@@ -79,7 +79,8 @@ class FhirServer:
             return FHIRQuery(self.api_address, resource, auth=self.auth, session=self.session,
                              output_format=output_format, count=count)
         else:
-            return FHIRQuery(self.api_address, auth=self.auth, session=self.session, query_parameters=query_parameters)
+            return FHIRQuery(self.api_address, auth=self.auth, session=self.session, query_parameters=query_parameters,
+                             count=count, output_format=output_format)
 
     def raw_query(self, query_string: str, output_format: str = "json") -> FHIRQuery:
         """

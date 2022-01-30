@@ -24,7 +24,6 @@ def api_url():
 
 @pytest.fixture
 def oidc_server(api_url):
-    print(api_url)
     server = FhirServer(
         api_address=api_url,
         client_id=os.getenv("CLIENT_ID"),

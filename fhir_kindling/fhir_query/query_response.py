@@ -163,10 +163,11 @@ class QueryResponse:
                 bundle = Bundle(**self.response)
                 f.write(bundle.json(indent=2))
         elif self.format == OutputFormats.CSV:
-            if self._included_resources:
-                for resource_type, resources in self._included_resources.items():
-                    df = flatten_resources(resources)
-                    included__resource_path = file_path.parent / f"{file_path.stem}_{resource_type}.csv"
+            if self.query_params.include_parameters:
+                for included_resources in self.included_resources:
+                    df = flatten_resources(included_resources.resources)
+                    included__resource_path = f"{file_path.parent}/{file_path.stem}_" \
+                                              f"included_{included_resources.resource_type}.csv"
                     df.to_csv(included__resource_path, index=False)
             df = flatten_resources(self.resources)
             df.to_csv(file_path, index=False)

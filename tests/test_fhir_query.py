@@ -1,5 +1,6 @@
 import json
 
+import pandas as pd
 import pytest
 import os
 
@@ -1634,6 +1635,7 @@ def test_query_response_include(server):
 def test_query_response_save(server):
     xml_file = "test_query_response_save.xml"
     json_file = "test_query_response_save.json"
+    csv_file = "test_query_response_save.csv"
 
     # test saving single resource and xml
     query_resource = "Condition"
@@ -1654,7 +1656,6 @@ def test_query_response_save(server):
         response.save(xml_file, format="invalid")
 
     # test with included resources and json
-
     query_resource = "Condition"
     search_param = "subject"
 
@@ -1664,7 +1665,7 @@ def test_query_response_save(server):
         query = query.include()
 
     query = query.include(resource=query_resource, search_param=search_param)
-    response = query.limit(100)
+    response = query.all()
 
     response.save(json_file, format="json")
 
@@ -1673,5 +1674,24 @@ def test_query_response_save(server):
 
     os.remove(json_file)
 
-    with pytest.raises(NotImplementedError):
-        response.save(json_file, format="csv")
+    # save to csv
+    patient_response = server.query("Patient").all()
+    patient_response.save(csv_file, format="csv")
+
+    assert os.path.isfile(csv_file)
+    assert pd.read_csv(csv_file).shape[0] > 0
+
+    # os.remove(csv_file)
+
+    # save to csv with included resource
+    response.save(csv_file, format="csv")
+
+    assert os.path.isfile(csv_file)
+    assert pd.read_csv(csv_file).shape[0] > 0
+
+    included_patients_csv = "test_query_response_save_included_Patient.csv"
+    assert os.path.isfile(included_patients_csv)
+    assert pd.read_csv(included_patients_csv).shape[0] > 0
+
+    os.remove(csv_file)
+    os.remove(included_patients_csv)
