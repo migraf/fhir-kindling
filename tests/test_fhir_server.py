@@ -365,6 +365,14 @@ def test_delete(fhir_server: FhirServer):
     assert delete_resource
     print(delete_resource)
 
+    with pytest.raises(ValueError):
+        fhir_server.delete(resources=["asd"], references=["asd"])
+    with pytest.raises(ValueError):
+        fhir_server.delete(resources=["asd"], query=["asd"])
+
+    with pytest.raises(ValueError):
+        fhir_server.delete(references=["asd"], query=["asd"])
+
 
 def test_update(fhir_server: FhirServer):
     # create 100 patients

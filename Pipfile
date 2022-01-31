@@ -31,6 +31,7 @@ notebook = "*"
 jupyter = "*"
 mkdocstrings = "*"
 flake8 = "*"
+ipython = ">=7.31.1"
 
 [requires]
 python_version = "3.9"

@@ -192,6 +192,13 @@ class FhirServer:
                resources: List[Union[FHIRResourceModel, dict]] = None,
                references: List[Union[str, Reference]] = None,
                query: FHIRQuery = None):
+        if resources and references:
+            raise ValueError("Cannot delete based on resources and references at the same time")
+        if resources and query:
+            raise ValueError("Cannot delete based on resources and query at the same time")
+        if references and query:
+            raise ValueError("Cannot delete based on references and query at the same time")
+
         transaction_bundle = self._make_delete_transaction(resources, references, query)
 
         response = self.session.post(self.api_address, json=transaction_bundle.dict())
@@ -247,6 +254,7 @@ class FhirServer:
                 references = [ref.reference for ref in references]
             delete_references = references
         elif query:
+
             delete_references = [resource.relative_path() for resource in query.resources]
         else:
             raise ValueError("No resources or references provided")
