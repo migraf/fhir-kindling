@@ -9,6 +9,7 @@ from fhir.resources.resource import Resource
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.capabilitystatement import CapabilityStatement
 from fhir.resources.reference import Reference
+from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from requests_oauthlib import OAuth2Session
 import fhir.resources
 import re
@@ -157,18 +158,40 @@ class FhirServer:
         transaction_response = self._upload_bundle(bundle)
         return transaction_response
 
-    def update(self,
-               resources: List[Union[Resource, dict]] = None,
-               references: List[Union[str, Reference]] = None):
+    def update(self, resources: List[Union[FHIRResourceModel, dict]]):
         # todo check that the resources exist and have an id?
         # batch update transaction
-        pass
+        update_bundle = Bundle.construct()
+        update_bundle.type = "transaction"
+        update_bundle.entry = []
+        for resource in resources:
+            if isinstance(resource, dict):
+                resource_type = resource.get("resourceType")
+                if not resource_type:
+                    raise ValueError("No resource type defined in resource dictionary")
+                resource = fhir.resources.construct_fhir_element(resource_type, resource)
+            elif isinstance(resource, FHIRResourceModel):
+                resource = resource.validate(resource)
+            else:
+                raise ValueError(f"Invalid resource type {type(resource)}")
+            # make the transaction entry
+            entry = self._make_transaction_entry(resource.relative_path(), "PUT")
+            # add the resource to the entry
+            entry.resource = resource
+            # validate the entry and append it to the bundle
+            update_bundle.entry.append(BundleEntry(**entry.dict()))
+
+        # validate bundle
+        update_bundle = Bundle(**update_bundle.dict())
+        response = self.session.post(self.api_address, data=update_bundle.json())
+        response.raise_for_status()
+
+        return response.json()
 
     def delete(self,
-               resources: List[Union[Resource, dict]] = None,
+               resources: List[Union[FHIRResourceModel, dict]] = None,
                references: List[Union[str, Reference]] = None,
                query: FHIRQuery = None):
-        # todo
         transaction_bundle = self._make_delete_transaction(resources, references, query)
 
         response = self.session.post(self.api_address, json=transaction_bundle.dict())
@@ -209,6 +232,7 @@ class FhirServer:
         delete_bundle.entry = []
 
         if resources:
+            print(resources)
             if isinstance(resources[0], dict):
                 resources = [fhir.resources.construct_fhir_element(
                     resource.get("resourceType"),
@@ -227,16 +251,16 @@ class FhirServer:
         else:
             raise ValueError("No resources or references provided")
 
-        bundle_entries = [self._make_delete_entry(ref) for ref in delete_references]
+        bundle_entries = [self._make_transaction_entry(ref, method="DELETE") for ref in delete_references]
         delete_bundle.entry = bundle_entries
         return delete_bundle
 
     @staticmethod
-    def _make_delete_entry(reference: str) -> BundleEntry:
+    def _make_transaction_entry(reference: str, method: str = "POST") -> BundleEntry:
         entry = BundleEntry.construct()
         entry.request = BundleEntryRequest(
             **{
-                "method": "DELETE",
+                "method": method,
                 "url": reference
             }
         )
@@ -283,11 +307,7 @@ class FhirServer:
 
     def _upload_bundle(self, bundle: Bundle) -> BundleCreateResponse:
         r = self.session.post(url=self.api_address, data=bundle.json(return_bytes=True))
-        try:
-            r.raise_for_status()
-        except Exception as e:
-            print(r.text)
-            raise e
+        r.raise_for_status()
         bundle_response = BundleCreateResponse(r, bundle)
         return bundle_response
 

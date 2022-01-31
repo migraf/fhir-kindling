@@ -290,7 +290,10 @@ def test_upload_single_resource(fhir_server: FhirServer):
 
     response = fhir_server.add(org)
 
-    print(response.resource)
+    response2 = fhir_server.add(org.dict())
+
+    with pytest.raises(ValueError):
+        fhir_server.add({"dshadk": "sjdhka"})
 
     assert response
 
@@ -352,6 +355,37 @@ def test_delete(fhir_server: FhirServer):
     add_response = fhir_server.add_all(patients)
     print(add_response.references)
 
-    delete_response = fhir_server.delete(references=add_response.references)
-
+    delete_response = fhir_server.delete(references=add_response.references[:50])
     print(delete_response)
+
+    delete_resource = fhir_server.delete(resources=add_response.resources[50:75])
+    print(delete_resource)
+    assert delete_resource
+    delete_resource = fhir_server.delete(resources=[r.dict() for r in add_response.resources[75:]])
+    assert delete_resource
+    print(delete_resource)
+
+
+def test_update(fhir_server: FhirServer):
+    # create 100 patients
+    generator = PatientGenerator(n=2)
+    patients = generator.generate()
+    add_response = fhir_server.add_all(patients)
+    print(add_response.references)
+
+    # update the first patient
+    patient = add_response.resources[0]
+    patient.name[0].family = "Test"
+    update_response = fhir_server.update([patient])
+    print(update_response)
+
+    patient.name[0].family = "Test2"
+    update_response = fhir_server.update([patient.dict()])
+
+    # no resource type in dict
+    with pytest.raises(ValueError):
+        update_response = fhir_server.update([{"dsada": "asdas"}])
+
+    # invalid resource type
+    with pytest.raises(ValueError):
+        update_response = fhir_server.update(["sdjhadk"])
