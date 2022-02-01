@@ -12,7 +12,6 @@ from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters, Inclu
 
 
 class FHIRQuery:
-
     def __init__(self,
                  base_url: str,
                  resource: Union[FHIRResourceModel, fhir.resources.FHIRAbstractModel, str] = None,
@@ -115,7 +114,7 @@ class FHIRQuery:
 
     def include(self,
                 resource: str = None,
-                search_param: str = None,
+                reference_param: str = None,
                 target: str = None,
                 reverse: bool = False,
                 include_dict: dict = None,
@@ -128,7 +127,7 @@ class FHIRQuery:
         Args:
             resource: name of the resource from which to include related resources, has to match the main resource
                 of the query
-            search_param: the reference parameter to search for
+            reference_param: the reference parameter to search for
             target: further specification of the reference parameter to search for
             reverse: whether to consider reverse references
             include_dict: dictionary container the include parameters
@@ -141,17 +140,17 @@ class FHIRQuery:
 
         if include_dict and include_param:
             raise ValueError("Cannot use both include_dict and include_param")
-        elif include_dict and (resource or search_param or target):
+        elif include_dict and (resource or reference_param or target):
             raise ValueError("Cannot use both include_dict and kv parameters")
-        elif include_param and (resource or search_param or target):
+        elif include_param and (resource or reference_param or target):
             raise ValueError("Cannot use both include_param and kv parameters")
 
         if isinstance(include_dict, dict):
             added_include_param = IncludeParameter(**include_dict)
         elif isinstance(include_param, IncludeParameter):
             added_include_param = include_param
-        elif resource and search_param:
-            added_include_param = IncludeParameter(resource=resource, search_param=search_param, target=target,
+        elif resource and reference_param:
+            added_include_param = IncludeParameter(resource=resource, search_param=reference_param, target=target,
                                                    reverse=reverse)
         else:
             raise ValueError(

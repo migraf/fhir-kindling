@@ -148,7 +148,7 @@ class FhirServer:
         if isinstance(bundle, dict):
             bundle = Bundle(**bundle)
         elif isinstance(bundle, str):
-            bundle = Bundle(**json.loads(bundle))
+            bundle = Bundle.parse_raw(bundle)
         else:
             bundle = Bundle.validate(bundle)
         # check that all entries are bundle requests with methods post/put
@@ -206,7 +206,26 @@ class FhirServer:
 
         return response
 
-    def transfer(self, query: FHIRQuery = None, delete: bool = False):
+    def transfer(self, target_server: 'FhirServer', query: FHIRQuery = None, bundle: Union[Bundle, dict, str] = None):
+        if query and bundle:
+            raise ValueError("Cannot transfer based on query and bundle at the same time")
+        if query:
+            # todo execute query, get bundle and
+            raise NotImplementedError("Transfer by query is not implemented yet")
+
+        elif bundle:
+            if isinstance(bundle, dict):
+                bundle = Bundle(**bundle)
+            elif isinstance(bundle, str):
+                bundle = Bundle.parse_raw(bundle)
+
+        response = self._transfer_bundle(bundle, target_server)
+
+    def _transfer_bundle(self, bundle: Bundle, target_server: 'FhirServer') -> Bundle:
+
+        staged_upload = self._resolve_references(bundle)
+
+    def _resolve_references(self, bundle: Bundle):
         pass
 
     @classmethod

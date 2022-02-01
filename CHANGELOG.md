@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [0.7.0] - 2022-01-31
+Update a list of resources on the server. CSV/Pandas serialization of resources and query responses.
+
+### Added
+ - [x] `server.update(resources)` which updates a list of resources stored on the server
+ - [x] Recursive resource flattening for csv/tabular serialization
+ - [x] `query_response.save(path, format="csv)` to save the results of a query to csv
+
+### Changed
+- `server.query(params)` the query method now directly accepts query parameters
+
+
 ## [0.6.0] - 2022-01-19
 Query Response with included resources. Reworked Generators
 

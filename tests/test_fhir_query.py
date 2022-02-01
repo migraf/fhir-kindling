@@ -1503,7 +1503,7 @@ def test_query_include(server, api_url):
     with pytest.raises(ValueError):
         query = query.include()
 
-    query = query.include(resource=query_resource, search_param=search_param)
+    query = query.include(resource=query_resource, reference_param=search_param)
 
     assert query.query_parameters.include_parameters[0].resource == query_resource
 
@@ -1624,7 +1624,7 @@ def test_query_response_include(server):
     with pytest.raises(ValueError):
         query = query.include()
 
-    query = query.include(resource=query_resource, search_param=search_param)
+    query = query.include(resource=query_resource, reference_param=search_param)
     response = query.all()
 
     assert response.included_resources
@@ -1664,7 +1664,7 @@ def test_query_response_save(server):
     with pytest.raises(ValueError):
         query = query.include()
 
-    query = query.include(resource=query_resource, search_param=search_param)
+    query = query.include(resource=query_resource, reference_param=search_param)
     response = query.all()
 
     response.save(json_file, format="json")
