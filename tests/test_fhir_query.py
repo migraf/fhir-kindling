@@ -1695,3 +1695,25 @@ def test_query_response_save(server):
 
     os.remove(csv_file)
     os.remove(included_patients_csv)
+
+
+def test_query_response_to_dfs(server):
+    # test with included resources and json
+    query_resource = "Condition"
+    search_param = "subject"
+
+    query = server.query(query_resource)
+
+    with pytest.raises(ValueError):
+        query = query.include()
+
+    query = query.include(resource=query_resource, reference_param=search_param)
+    response = query.all()
+
+    with pytest.raises(ValueError):
+        response.to_dfs(format="invalid")
+
+    dfs = response.to_dfs()
+
+    assert len(dfs) > 1
+    assert dfs[0].shape[0] > 0

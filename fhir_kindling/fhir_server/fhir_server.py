@@ -206,7 +206,8 @@ class FhirServer:
 
         return response
 
-    def transfer(self, target_server: 'FhirServer', query: FHIRQuery = None, bundle: Union[Bundle, dict, str] = None):
+    def transfer(self, target_server: 'FhirServer', query: FHIRQuery = None,
+                 bundle: Union[Bundle, dict, str, bytes] = None):
         if query and bundle:
             raise ValueError("Cannot transfer based on query and bundle at the same time")
         if query:

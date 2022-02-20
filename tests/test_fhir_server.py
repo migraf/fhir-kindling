@@ -397,3 +397,14 @@ def test_update(fhir_server: FhirServer):
     # invalid resource type
     with pytest.raises(ValueError):
         update_response = fhir_server.update(["sdjhadk"])
+
+
+def test_transfer(fhir_server: FhirServer):
+    origin_server = FhirServer(api_address="https://mii-agiop-cord.life.uni-leipzig.de/fhir")
+    query = origin_server.query("Condition").all()
+    print(query.resources)
+
+
+
+
+

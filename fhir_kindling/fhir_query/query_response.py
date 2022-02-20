@@ -3,6 +3,7 @@ import pathlib
 from typing import Union, List, Dict, Optional
 from enum import Enum
 
+import pandas as pd
 from fhir.resources.bundle import Bundle
 from fhir.resources import FHIRAbstractModel
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
@@ -21,6 +22,11 @@ class OutputFormats(Enum):
     JSON = "json"
     XML = "xml"
     CSV = "csv"
+
+
+class DataframeFormat(Enum):
+    LIST = "list"
+    SINGLE = "single"
 
 
 class IncludedResources(BaseModel):
@@ -110,29 +116,6 @@ class QueryResponse:
                 included.append(IncludedResources(resource_type=resource_type, resources=resources))
             return included
 
-    def _extract_resources(self):
-        """
-        Parse the resources from the server response bundle. Split into included resources and resources that match the
-        query exactly.
-        Returns:
-
-        """
-        if not self._resources:
-            self._resources = []
-        for entry in Bundle(**self.response).entry:
-
-            # add the directly queried resource to the resources list
-            if entry.resource.resource_type == self.resource:
-                self._resources.append(entry.resource)
-
-            # process included resources
-            elif entry.search.mode == "include":
-                # get list of included resources based on type, if it does not return empty list
-                included_resources = self._included_resources.get(entry.resource.resource_type, [])
-                # update the list with the entry and update the included resources dict
-                included_resources.append(entry.resource)
-                self._included_resources[entry.resource.resource_type] = included_resources
-
     def save(self, file_path: Union[str, pathlib.Path], format: str = "json"):
         """
         Save the response to a file.
@@ -171,6 +154,52 @@ class QueryResponse:
                     df.to_csv(included__resource_path, index=False)
             df = flatten_resources(self.resources)
             df.to_csv(file_path, index=False)
+
+    def to_dfs(self, format: str = "list") -> Union[List[pd.DataFrame], pd.DataFrame]:
+        """
+        Serialize the response to a list of pandas dataframes
+        Args:
+            format: list of dataframe (one for each resource in the response) or single dataframe
+
+        Returns:
+            List of pandas dataframes or a single dataframe containing the resources in the query
+        """
+
+        df_format = DataframeFormat(format)
+
+        if df_format == DataframeFormat.LIST:
+            dfs = [flatten_resources(self.resources)]
+            if self.query_params.include_parameters:
+                for included_resources in self.included_resources:
+                    dfs.append(flatten_resources(included_resources.resources))
+
+            return dfs
+
+        elif df_format == DataframeFormat.SINGLE:
+            raise NotImplementedError("Single dataframe output format not implemented")
+
+    def _extract_resources(self):
+        """
+        Parse the resources from the server response bundle. Split into included resources and resources that match the
+        query exactly.
+        Returns:
+
+        """
+        if not self._resources:
+            self._resources = []
+        for entry in Bundle(**self.response).entry:
+
+            # add the directly queried resource to the resources list
+            if entry.resource.resource_type == self.resource:
+                self._resources.append(entry.resource)
+
+            # process included resources
+            elif entry.search.mode == "include":
+                # get list of included resources based on type, if it does not return empty list
+                included_resources = self._included_resources.get(entry.resource.resource_type, [])
+                # update the list with the entry and update the included resources dict
+                included_resources.append(entry.resource)
+                self._included_resources[entry.resource.resource_type] = included_resources
 
     def _process_server_response(self, response: Response) -> Union[Dict, Bundle, str]:
         """
