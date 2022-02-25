@@ -256,10 +256,7 @@ class QueryResponse:
                     entries.extend(added_entries)
                     # Stop resolving the pagination when the limit is reached
                     if self._limit:
-                        if len(entries) >= self._limit:
-                            next_page = False
-                        else:
-                            next_page = True
+                        next_page = len(entries) < self._limit
                     else:
                         next_page = True
 
@@ -276,6 +273,7 @@ class QueryResponse:
         link = response.get("link", None)
         # If there is a link, get the next page otherwise return the response
         if not link:
+            self.status_code = ResponseStatusCodes.OK
             return response
         else:
             entries = []

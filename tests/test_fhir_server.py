@@ -3,6 +3,8 @@ import pytest
 from fhir.resources import FHIRAbstractModel
 from unittest import mock
 
+from requests.auth import HTTPBasicAuth
+
 from fhir_kindling import FhirServer, FHIRQuery
 from dotenv import load_dotenv, find_dotenv
 from fhir.resources.organization import Organization
@@ -399,12 +401,31 @@ def test_update(fhir_server: FhirServer):
         update_response = fhir_server.update(["sdjhadk"])
 
 
-def test_transfer(fhir_server: FhirServer):
-    origin_server = FhirServer(api_address="https://mii-agiop-cord.life.uni-leipzig.de/fhir")
-    query = origin_server.query("Condition").all()
-    print(query.resources)
+# def test_transfer(fhir_server: FhirServer):
+#     origin_server = FhirServer(api_address="https://mii-agiop-cord.life.uni-leipzig.de/fhir")
+#     query = origin_server.query("Condition").all()
+#     print(query.resources)
+
+def test_custom_headers():
+    headers = {"X-Custom-Header": "Test", "X-Custom-Header2": "Test2"}
+    server = FhirServer(api_address="https://fhir.test/fhir", headers=headers)
+
+    assert server.session.headers["X-Custom-Header"] == "Test"
+    assert server.session.headers["X-Custom-Header2"] == "Test2"
+    assert server.session.headers["Content-Type"] == "application/fhir+json"
 
 
+def test_custom_auth():
+    auth = HTTPBasicAuth(username="test", password="test")
+    server = FhirServer(api_address="https://fhir.test/fhir", auth=auth)
 
+    assert server.session.auth == auth
 
+    with pytest.raises(ValueError):
+        server = FhirServer(api_address="https://fhir.test/fhir", auth=auth, username="test")
 
+    with pytest.raises(ValueError):
+        server = FhirServer(api_address="https://fhir.test/fhir", auth=auth, token="test")
+
+    with pytest.raises(ValueError):
+        server = FhirServer(api_address="https://fhir.test/fhir", auth=auth, client_id="test")
