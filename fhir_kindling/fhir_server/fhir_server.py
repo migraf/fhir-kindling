@@ -27,6 +27,7 @@ class FhirServer:
 
     def __init__(self, api_address: str, username: str = None, password: str = None, token: str = None,
                  client_id: str = None, client_secret: str = None, oidc_provider_url: str = None,
+                 auth: requests.auth.AuthBase = None, headers: dict = None,
                  fhir_server_type: str = "hapi"):
         """
         Initialize a FHIR server connection
@@ -38,13 +39,16 @@ class FhirServer:
             client_id: client id for oauth2
             client_secret: client secret for oauth2
             oidc_provider_url: provider url for oauth2
-            fhir_server_type: type of fhir server (hapi, blaze, etc)
+            auth: optional auth object to authenticate against a server
+            headers: optional additional headers to be added to the session
+            fhir_server_type: type of fhir server (hapi, blaze, etc.)
         """
 
         # server definition values
         self.fhir_server_type = fhir_server_type
         self.api_address = self.validate_api_address(api_address)
         self._meta_data = None
+        self.auth = None
 
         # possible basic auth class vars
         self.username = username
@@ -56,6 +60,9 @@ class FhirServer:
         self.client_secret = client_secret
         self.oidc_provider_url = oidc_provider_url
         self.token_expiration = None
+
+        self._auth = auth
+        self._headers = headers
 
         # setup the session
         self.session = requests.Session()
@@ -159,6 +166,15 @@ class FhirServer:
         return transaction_response
 
     def update(self, resources: List[Union[FHIRResourceModel, dict]]):
+        """
+        Update a list of resources that exist on the server
+        Args:
+            resources: List of updated resources coming to send to the server
+
+        Returns: Bundle update response from the fhir server
+
+        """
+
         # todo check that the resources exist and have an id?
         # batch update transaction
         update_bundle = Bundle.construct()
@@ -192,6 +208,16 @@ class FhirServer:
                resources: List[Union[FHIRResourceModel, dict]] = None,
                references: List[Union[str, Reference]] = None,
                query: FHIRQuery = None):
+        """
+        Delete resources from the server. Either resources or references must be specified.
+        Args:
+            resources: Resources coming from the server containing an id to delete
+            references: references {Resource}/{id} to delete
+            query: query to use to find resources to delete
+
+        Returns: Bundle delete response from the fhir server
+
+        """
         if resources and references:
             raise ValueError("Cannot delete based on resources and references at the same time")
         if resources and query:
@@ -211,7 +237,7 @@ class FhirServer:
         if query and bundle:
             raise ValueError("Cannot transfer based on query and bundle at the same time")
         if query:
-            # todo execute query, get bundle and
+            # todo execute query, get bundle, parse references, upload bundle
             raise NotImplementedError("Transfer by query is not implemented yet")
 
         elif bundle:
@@ -223,10 +249,11 @@ class FhirServer:
         response = self._transfer_bundle(bundle, target_server)
 
     def _transfer_bundle(self, bundle: Bundle, target_server: 'FhirServer') -> Bundle:
-
+        # todo
         staged_upload = self._resolve_references(bundle)
 
     def _resolve_references(self, bundle: Bundle):
+        # todo
         pass
 
     @classmethod
@@ -341,7 +368,7 @@ class FhirServer:
 
     def _upload_resource(self, resource: Resource) -> Response:
         url = self.api_address + "/" + resource.get_resource_type()
-        r = requests.post(url=url, headers=self._headers, auth=self.auth, json=resource.dict())
+        r = requests.post(url=url, headers=self.headers, auth=self.auth, json=resource.dict())
         return r
 
     def _get_meta_data(self):
@@ -352,8 +379,9 @@ class FhirServer:
         self._meta_data = response
 
     def _setup(self):
+        self.auth = self._validate_auth()
         self.session.auth = self.auth
-        self.session.headers.update(self._headers)
+        self.session.headers.update(self.headers)
 
     @property
     def capabilities(self) -> CapabilityStatement:
@@ -390,24 +418,13 @@ class FhirServer:
         return summary
 
     @property
-    def auth(self) -> Union[requests.auth.AuthBase, None]:
-        # todo more info about auth status and validation
-        # OIDC authentication
-        if self.client_id:
-            self._get_oidc_token()
-            return generate_auth(token=self.token)
-        # basic or static token authentication
-        elif self.username and self.password:
-            return generate_auth(self.username, self.password)
-
-        # static token auth
-        elif self.token:
-            return generate_auth(token=self.token)
-        else:
-            return None
+    def headers(self):
+        headers = {"Content-Type": "application/fhir+json"}
+        if self._headers:
+            headers.update(self._headers)
+        return headers
 
     def _get_oidc_token(self):
-
         # get a new token if it is expired or not yet set
         if (self.token_expiration and pendulum.now() > self.token_expiration) or not self.token:
             print("Requesting new token")
@@ -420,10 +437,6 @@ class FhirServer:
             )
             self.token = token["access_token"]
             self.token_expiration = pendulum.now() + pendulum.duration(seconds=token["expires_in"])
-
-    @property
-    def _headers(self):
-        return {"Content-Type": "application/fhir+json"}
 
     @staticmethod
     def validate_api_address(api_address: str) -> str:
@@ -455,6 +468,43 @@ class FhirServer:
 
         else:
             raise ValueError(f"Malformed API URL: {api_address}")
+
+    def _validate_auth(self) -> Union[requests.auth.AuthBase, None]:
+        if self._auth and (self.username or self.password):
+            raise ValueError(
+                "Only one authentication method can be used, auth object and username/password are mutually exclusive")
+        if self._auth and self.token:
+            raise ValueError("Only one authentication method can be used, auth object and token are mutually exclusive")
+        if self._auth and (self.client_id or self.client_secret or self.oidc_provider_url):
+            raise ValueError(
+                "Only one authentication method can be used, auth object and OIDC auth are mutually exclusive")
+
+        if self.token and (self.client_id or self.client_secret or self.oidc_provider_url):
+            raise ValueError("Only one authentication method can be used, token and OIDC auth are mutually exclusive")
+
+        if self.token and (self.username or self.password):
+            raise ValueError(
+                "Only one authentication method can be used, token and username/password are mutually exclusive")
+
+        if (self.username or self.password) and (self.client_id or self.client_secret or self.oidc_provider_url):
+            raise ValueError("Only one authentication method can be used, username/password and "
+                             "OIDC auth are mutually exclusive")
+
+        if self._auth:
+            return self._auth
+        # OIDC authentication
+        if self.client_id:
+            self._get_oidc_token()
+            return generate_auth(token=self.token)
+        # basic or static token authentication
+        elif self.username and self.password:
+            return generate_auth(self.username, self.password)
+
+        # static token auth
+        elif self.token:
+            return generate_auth(token=self.token)
+        else:
+            return None
 
 
 def _api_address_from_env() -> str:
