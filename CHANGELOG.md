@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.8.0] - 2022-02-
+Custom auth and header parameters for `FhirServer` http session. 
+
+### Changed
+- `FhirServer` constructor now accepts two additional optional parameters, `auth` and `headers` that will be used for the
+  instance's `requests` session.
+
 
 ## [0.7.0] - 2022-01-31
 Update a list of resources on the server. CSV/Pandas serialization of resources and query responses.

@@ -1365,9 +1365,9 @@ def test_query_json(server):
     result = resp.limit(100)
     assert result.response
     assert isinstance(result.response, dict)
-    with pytest.raises(ValueError):
-        includes = result.included_resources
 
+    includes = result.included_resources
+    assert not includes
 
 def test_query_first(server):
     query = server.query("Patient")

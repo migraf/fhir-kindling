@@ -106,7 +106,7 @@ class QueryResponse:
                 return []
             # raise error if there aren't any included resources
             if not self.query_params.include_parameters:
-                raise ValueError("No included resources defined in query.")
+                return []
             # parse the included resources if they don't exist
             if not self._included_resources:
                 self._extract_resources()

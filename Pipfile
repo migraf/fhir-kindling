@@ -17,7 +17,6 @@ xmltodict = "*"
 plotly = "*"
 pydantic = "*"
 
-
 [dev-packages]
 pytest = "*"
 coverage = "*"
