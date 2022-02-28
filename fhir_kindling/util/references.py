@@ -29,26 +29,44 @@ def extract_references(resource: Union[Resource, FHIRAbstractModel]) -> List[Tup
     return references
 
 
-def validate_references(response: QueryResponse = None) -> List[str]:
+def check_missing_references(resources: List[Union[Resource, FHIRAbstractModel]]) -> List[str]:
     """
-    Checks the references in a query response to ensure that the referenced resources exist in the
-    response.
+    Checks the references in a list of resources to ensure that the referenced resources exist in the list.
+    Args:
+        resources: list of fhir resources
 
-    :param response: The query response from which to extract references.
-    :return: A list with all missing references
+    Returns:
+
     """
-    resources = _resource_ids_from_query_response(response)
-    referenced_resources = _references_from_query_response(response)
+    references = {}
+    resource_ids = {}
+    for resource in resources:
+        # extract references
+        _update_reference_set(references, resource)
+        # extract ids
+        resource_id_set = resource_ids.get(resource.resource_type)
+        if resource_id_set is None:
+            resource_id_set = {resource.id}
+        else:
+            resource_id_set.add(resource.id)
+        resource_ids[resource.resource_type] = resource_id_set
+    missing = _get_missing_references(references, resource_ids)
+    return missing
 
+
+def _get_missing_references(references: dict, resource_ids: dict) -> List[str]:
     missing_references = []
-    for ref_resource, ref_ids in referenced_resources.items():
-
-        for ref_id in ref_ids:
-            if resources.get(ref_resource):
-                if ref_id not in resources[ref_resource]:
+    for ref_resource, reference_set in references.items():
+        # get set of resource ids for this resource type
+        id_set = resource_ids.get(ref_resource)
+        if id_set:
+            for ref_id in reference_set:
+                # check if the referenced id is present in the set of ids for this resource type
+                if ref_id not in id_set:
                     missing_references.append(f"{ref_resource}/{ref_id}")
-            else:
-                missing_references.append(f"{ref_resource}/{ref_id}")
+        # if there are no resources of the type add all references to missing references
+        else:
+            missing_references.extend([f"{ref_resource}/{ref_id}" for ref_id in reference_set])
     return missing_references
 
 

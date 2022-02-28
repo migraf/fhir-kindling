@@ -6,7 +6,8 @@ from fhir.resources.observation import Observation
 
 from fhir_kindling import FhirServer
 from fhir_kindling.util.resources import get_resource_fields
-from fhir_kindling.util.references import extract_references, _resource_ids_from_query_response, validate_references
+from fhir_kindling.util.references import extract_references, _resource_ids_from_query_response, \
+    check_missing_references
 from dotenv import load_dotenv, find_dotenv
 
 
@@ -20,6 +21,7 @@ def server():
         oidc_provider_url=os.getenv("OIDC_PROVIDER_URL")
     )
     return server
+
 
 def test_get_resource_fields():
     fields = get_resource_fields(Patient)
@@ -49,7 +51,6 @@ def test_extract_references():
 
 
 def test_extract_resource_ids(server):
-
     conditions = server.query("Condition").include(resource="Condition", reference_param="subject").all()
 
     resource_ids = _resource_ids_from_query_response(conditions)
@@ -57,15 +58,17 @@ def test_extract_resource_ids(server):
     assert len(resource_ids["Patient"]) == len(conditions.included_resources[0].resources)
 
 
-def test_validate_references(server):
-
+def test_check_missing_references(server):
     conditions = server.query("Condition").include(resource="Condition", reference_param="subject").all()
-    result = validate_references(conditions)
+    resources = conditions.resources
+    resources.extend(conditions.included_resources[0].resources)
 
-    assert len(result) == 0
+    no_missing = check_missing_references(resources)
+
+    assert len(no_missing) == 0
 
     conditions = server.query("Condition").all()
-    result = validate_references(conditions)
 
-    assert len(result) == len(conditions.resources)
+    missing = check_missing_references(conditions.resources)
 
+    assert len(missing) == len(conditions.resources)

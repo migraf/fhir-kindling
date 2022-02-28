@@ -36,6 +36,9 @@ class FHIRQuery:
         else:
             self.resource = resource
 
+        if query_parameters:
+            self.resource = fhir.resources.get_fhir_model_class(query_parameters.resource)
+
         self.resource = self.resource.construct()
         self.output_format = output_format
         self._includes = None

@@ -3,6 +3,7 @@ import pytest
 from fhir.resources import FHIRAbstractModel
 from unittest import mock
 
+from fhir.resources.reference import Reference
 from requests.auth import HTTPBasicAuth
 
 from fhir_kindling import FhirServer, FHIRQuery
@@ -429,3 +430,25 @@ def test_custom_auth():
 
     with pytest.raises(ValueError):
         server = FhirServer(api_address="https://fhir.test/fhir", auth=auth, client_id="test")
+
+
+def test_get(oidc_server: FhirServer):
+    response = oidc_server.query("Patient").first()
+    patient = oidc_server.get(f"Patient/{response.resources[0].id}")
+    assert patient
+    assert patient.id == response.resources[0].id
+
+    reference = Reference(reference=f"Patient/{response.resources[0].id}")
+    patient = oidc_server.get(reference)
+
+    assert patient
+    assert patient.id == response.resources[0].id
+
+
+def test_get_many(oidc_server: FhirServer):
+    patients = oidc_server.query("Patient").limit(10)
+    references = [p.relative_path() for p in patients.resources]
+    patients = oidc_server.get_many(references)
+    print(patients)
+    assert len(patients) == 10
+
