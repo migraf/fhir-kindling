@@ -429,3 +429,8 @@ def test_custom_auth():
 
     with pytest.raises(ValueError):
         server = FhirServer(api_address="https://fhir.test/fhir", auth=auth, client_id="test")
+
+
+def test_server_repr_str(fhir_server: FhirServer):
+    print(fhir_server)
+    assert fhir_server.__repr__() == fhir_server.__str__()

@@ -56,7 +56,7 @@ class FHIRQuery:
               ) -> 'FHIRQuery':
         """
         Add search conditions regarding a specific field of the queried resource.
-        Conditions can be added via FieldParmeter class instance, via a dictionary or specifying condition via this
+        Conditions can be added via FieldParameter class instance, via a dictionary or specifying condition via this
         method's parameter arguments (field, operator, value).
         Args:
             field_param: Instance of FieldParameter defining the field to filter for.
@@ -291,13 +291,13 @@ class FHIRQuery:
     def _execute_query(self):
         r = self.session.get(self.query_url)
         r.raise_for_status()
-        included_resources = [include.resource for include in self._includes] if self._includes else None
-        response = QueryResponse(self.session,
-                                 response=r,
-                                 query_params=self.query_parameters,
-                                 output_format=self.output_format,
-                                 limit=self._limit
-                                 )
+        response = QueryResponse(
+            session=self.session,
+            response=r,
+            query_params=self.query_parameters,
+            output_format=self.output_format,
+            limit=self._limit
+        )
         return response
 
     def _make_query_string(self):
@@ -309,3 +309,6 @@ class FHIRQuery:
         query_string += f"&_format={self.output_format}"
 
         return query_string
+
+    def __repr__(self):
+        return f"<FHIRQuery(resource={self.resource}, url={self.query_url}>"

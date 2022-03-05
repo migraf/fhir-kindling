@@ -66,6 +66,6 @@ class BearerAuth(requests.auth.AuthBase):
         r.headers["authorization"] = "Bearer " + self.token
         return r
 
+    def __repr__(self):
+        return f"BearerAuth(token={self.token[:16]}...)"
 
-if __name__ == '__main__':
-    pass

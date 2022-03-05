@@ -201,3 +201,7 @@ class DatasetGenerator:
             dataset.resources.append(GeneratedResources(resource_type=resource, reference_key=reference_field))
 
         self._dataset = dataset
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}(name={self.name}, resource_types={self._resource_types}, n={self.n}," \
+               f" generators={self.generators})>"

@@ -1710,6 +1710,8 @@ def test_query_response_to_dfs(server):
     query = query.include(resource=query_resource, reference_param=search_param)
     response = query.all()
 
+    print(query)
+
     with pytest.raises(ValueError):
         response.to_dfs(format="invalid")
 
@@ -1717,3 +1719,5 @@ def test_query_response_to_dfs(server):
 
     assert len(dfs) > 1
     assert dfs[0].shape[0] > 0
+
+    print(response)

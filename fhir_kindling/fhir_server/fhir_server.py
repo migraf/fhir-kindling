@@ -506,6 +506,10 @@ class FhirServer:
         else:
             return None
 
+    def __repr__(self):
+
+        return f"<FHIRServer api_address={self.api_address}, auth={self.auth}, headers={self.headers}>"
+
 
 def _api_address_from_env() -> str:
     # load FHIR_API_URL
@@ -554,3 +558,5 @@ def _auth_info_from_env() -> Union[str, Tuple[str, str], Tuple[str, str, str]]:
     if client_id and client_secret and oidc_provider_url:
         print(f"Found OIDC auth configuration for client <{client_id}> with provider {oidc_provider_url}")
         return client_id, client_secret, oidc_provider_url
+
+
