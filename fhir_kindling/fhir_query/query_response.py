@@ -306,3 +306,7 @@ class QueryResponse:
 
             response["entry"] = entries[:self._limit] if self._limit else entries
             return response
+
+    def __repr__(self):
+        return f"[{self.status_code}] QueryResponse<{self.resource}>:  total={len(self.resources)}\n" \
+               f"Query string: {self.query_params.to_query_string()}\nparameters: {self.query_params}"
