@@ -101,6 +101,7 @@ def test_patient_generator():
     assert len(patients) == 100
     assert isinstance(patients[0], Patient)
 
+
     generator = PatientGenerator(n=10, age_range=(18, 60))
     patients = generator.generate()
 
@@ -116,6 +117,7 @@ def test_patient_generator():
 
     generator = PatientGenerator(n=10, age_range=(18, 60), organisation=organization_reference)
 
+    print(generator)
     patients = generator.generate()
     assert len(patients) == 10
 
@@ -276,9 +278,11 @@ def test_generate_covid_dataset(vaccination_code, covid_code, server):
         ]
     )
     vaccination_generator = ResourceGenerator("Immunization", generator_parameters=first_vax_params)
+    print(vaccination_generator)
     dataset_generator.add_resource(vaccination_generator, name="first_vaccination", likelihood=0.8)
 
     dataset = dataset_generator.generate(ids=True)
+    print(dataset)
     # pprint(result.dict(exclude_none=True))
 
     dataset.upload(server)
