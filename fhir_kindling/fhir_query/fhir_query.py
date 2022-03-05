@@ -312,3 +312,7 @@ class FHIRQuery:
         query_string += f"&_format={self.output_format}"
 
         return query_string
+
+
+    def __repr__(self):
+        return f"<Query: {self.query_url}>"

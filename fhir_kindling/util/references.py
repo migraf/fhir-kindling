@@ -1,4 +1,4 @@
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, Dict
 
 from fhir.resources.bundle import Bundle, BundleEntry
 from fhir.resources.resource import Resource
@@ -7,6 +7,8 @@ from fhir.resources import FHIRAbstractModel
 
 from fhir_kindling.fhir_query.query_response import QueryResponse
 from fhir_kindling.util.resources import get_resource_fields
+import networkx as nx
+import matplotlib.pyplot as plt
 
 
 def extract_references(resource: Union[Resource, FHIRAbstractModel]) -> List[Tuple[str, str]]:
@@ -25,8 +27,51 @@ def extract_references(resource: Union[Resource, FHIRAbstractModel]) -> List[Tup
         if field.type_ == ReferenceType:
             field_value = getattr(resource, field.name)
             if field_value:
-                references.append(tuple(field_value.dict(exclude_none=True)["reference"].split("/")))
+                # if the field is a list of references add each of them
+                if isinstance(field_value, list) or isinstance(field_value, tuple):
+                    for value in field_value:
+                        references.append(tuple(value.dict(exclude_none=True)["reference"].split("/")))
+                # add the reference
+                else:
+                    references.append(tuple(field_value.dict(exclude_none=True)["reference"].split("/")))
     return references
+
+
+def references_from_resource_list(resources: List[Union[Resource, FHIRAbstractModel]]) -> Dict[str, set]:
+    """
+    Extracts the references from a list of resources and returns them as a dict.
+    Args:
+        resources: list of fhir resources to extract references from.
+
+    Returns: dict of references.
+
+    """
+    references = {}
+    for resource in resources:
+        _update_reference_set(references, resource)
+    return references
+
+
+def reference_graph(resources: List[Union[Resource, FHIRAbstractModel]], display=False) -> nx.DiGraph:
+    dg = nx.DiGraph()
+
+    for resource in resources:
+
+        path = resource.relative_path()
+        if path in dg:
+            dg.nodes[path]["resource"] = resource
+        else:
+            dg.add_node(path, resource=resource)
+        for reference in extract_references(resource):
+            reference_path = f"{reference[0]}/{reference[1]}"
+            dg.add_node(reference_path, resource=None)
+            dg.add_edge(reference_path, path)
+
+    if display:
+        nx.draw(dg, with_labels=True)
+        plt.show()
+
+    return dg
 
 
 def check_missing_references(resources: List[Union[Resource, FHIRAbstractModel]]) -> List[str]:

@@ -1,8 +1,12 @@
 import os
+import uuid
+
 import pytest
 from fhir.resources import FHIRAbstractModel
 from unittest import mock
 
+from fhir.resources.condition import Condition
+from fhir.resources.encounter import Encounter
 from fhir.resources.reference import Reference
 from requests.auth import HTTPBasicAuth
 
@@ -13,6 +17,7 @@ from fhir.resources.address import Address
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.patient import Patient
 from fhir_kindling.generators import PatientGenerator
+from fhir_kindling.util.references import reference_graph
 
 
 @pytest.fixture
@@ -445,10 +450,32 @@ def test_get(oidc_server: FhirServer):
     assert patient.id == response.resources[0].id
 
 
-def test_get_many(oidc_server: FhirServer):
+def test_get_many(fhir_server: FhirServer):
     patients = oidc_server.query("Patient").limit(10)
     references = [p.relative_path() for p in patients.resources]
     patients = oidc_server.get_many(references)
-    print(patients)
     assert len(patients) == 10
 
+
+def test_resolve_reference_graph(fhir_server: FhirServer):
+    patients, patient_references = PatientGenerator(n=10, generate_ids=True).generate(references=True)
+    organization = Organization(name="Test", id="test-org")
+    practitioner = Organization(name="Practitioner", id="test-practitioner")
+    conditions = []
+    encounter = Encounter(
+        **{
+            "id": "test-encounter",
+            "status": "planned",
+            "class": {"code": "AMB", "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode"}
+        }
+    )
+    for patient in patients:
+        patient.managingOrganization = {"reference": organization.relative_path()}
+        patient.generalPractitioner = [{"reference": practitioner.relative_path()}]
+        condition = Condition(subject={"reference": patient.relative_path()}, id=str(uuid.uuid4()))
+        condition.encounter = {"reference": encounter.relative_path()}
+        conditions.append(condition)
+
+    resources = patients + [organization, practitioner, encounter] + conditions
+    print(resources)
+    response = fhir_server._transfer_resources(fhir_server, resources)

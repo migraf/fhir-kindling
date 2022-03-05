@@ -43,7 +43,8 @@ setup(
         "pyyaml",
         "xmltodict",
         "pydantic",
-        "click"
+        "click",
+        "networkx"
     ],
     license="MIT license",
     include_package_data=True,

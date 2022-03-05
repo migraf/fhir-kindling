@@ -15,6 +15,8 @@ Custom auth and header parameters for `FhirServer` http session.
 ### Added
  - [x] `server.get(reference)` get a single resource from the server, based on relative path/reference.
  - [x] `server.get_many(references)` get multiple resources from the server, based on relative path/reference.
+ - [x] `server.transfer(other_server, query)` transfer resources matching the query from one server to another. Also requests
+   resources referenced by the resources matching to maintain referential integrity on the new server.
 
 ## [0.7.0] - 2022-01-31
 Update a list of resources on the server. CSV/Pandas serialization of resources and query responses.

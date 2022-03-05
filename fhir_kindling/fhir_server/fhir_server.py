@@ -16,13 +16,14 @@ import fhir.resources
 import re
 from oauthlib.oauth2 import BackendApplicationClient
 import pendulum
+from networkx import DiGraph
 
 from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling.fhir_query.query_response import QueryResponse
 from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters, FieldParameter, QueryOperators
 from fhir_kindling.fhir_server.auth import generate_auth
 from fhir_kindling.fhir_server.server_responses import ResourceCreateResponse, BundleCreateResponse, ServerSummary
-from fhir_kindling.util.references import check_missing_references
+from fhir_kindling.util.references import check_missing_references, reference_graph
 
 
 class FhirServer:
@@ -310,7 +311,8 @@ class FhirServer:
         # transfer resources to target server
         missing_references = check_missing_references(resources)
         if missing_references:
-            referenced_resources = self._get_missing_resources(missing_references)
+            resources = self._get_missing_resources(resources)
+        response = self._transfer_resources(target_server, resources)
 
     def summary(self) -> ServerSummary:
         """
@@ -552,11 +554,13 @@ class FhirServer:
             resources.extend(missing_resources)
             missing = check_missing_references(resources)
 
+        return resources
+
     def _make_get_many_transaction(self, str_references: List[str]):
         get_bundle = Bundle.construct()
         get_bundle.type = "batch"
         # create transaction entries and add them to the bundle
-        entries = [self._make_transaction_entry(f"/{reference}", "GET") for reference in str_references]
+        entries = [self._make_transaction_entry(reference, "GET") for reference in str_references]
         get_bundle.entry = entries
         # validate bundle
         get_bundle = Bundle(**get_bundle.dict(exclude_none=True))
@@ -580,6 +584,26 @@ class FhirServer:
             query_resources = self.query(query_parameters=params).all().resources
             resources.extend(query_resources)
         return resources
+
+    def _transfer_resources(self, target_server: 'FhirServer', resources: List[FHIRAbstractModel]):
+        graph = reference_graph(resources)
+        print(graph)
+        resources = self._resolve_reference_graph(graph, target_server)
+
+    def _resolve_reference_graph(self, graph: DiGraph, server: 'FhirServer'):
+
+        nodes = graph.nodes
+        print(nodes)
+        while len(nodes) > 0:
+            print(nodes)
+            top_nodes = [node for node in nodes if len(list(graph.predecessors(node))) == 0]
+            print(top_nodes)
+            resources = [graph[node] for node in top_nodes]
+            print(resources)
+            # todo upload and update references
+            for tn in top_nodes:
+                graph.remove_node(tn)
+            nodes = graph.nodes
 
 
 def _api_address_from_env() -> str:

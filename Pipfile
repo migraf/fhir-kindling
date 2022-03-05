@@ -16,6 +16,7 @@ PyYAML = "*"
 xmltodict = "*"
 plotly = "*"
 pydantic = "*"
+networkx = "*"
 
 [dev-packages]
 pytest = "*"
