@@ -310,4 +310,30 @@ class FHIRQuery:
         return query_string
 
     def __repr__(self):
-        return f"<FHIRQuery(resource={self.resource}, url={self.query_url}>"
+        if isinstance(self.resource, str):
+            resource = self.resource
+        else:
+            resource = self.resource.resource_type
+
+        if self.query_parameters.include_parameters:
+            includes = []
+            rev_includes = []
+            for include_param in self.query_parameters.include_parameters:
+                if include_param.reverse:
+                    rev_string = f"{include_param.resource}:{include_param.search_param}{include_param.target}"
+                    if include_param.target:
+                        rev_string += f":{include_param.target}"
+                    rev_includes.append(rev_string)
+                else:
+                    include_string = f"{include_param.search_param}"
+                    if include_param.target:
+                        include_string += f":{include_param.target}"
+                    includes.append(include_string)
+
+            include_repr = f", include={','.join(includes)}" if includes else ""
+            rev_include_repr = f", reverse_includes={','.join(rev_includes)}" if rev_includes else ""
+            includes_repr = include_repr + rev_include_repr
+            return f"<FHIRQuery(resource={resource}{includes_repr}, url={self.query_url}>"
+        else:
+
+            return f"<FHIRQuery(resource={resource}, url={self.query_url}>"

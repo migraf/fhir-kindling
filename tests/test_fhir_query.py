@@ -1365,9 +1365,9 @@ def test_query_json(server):
     result = resp.limit(100)
     assert result.response
     assert isinstance(result.response, dict)
-    with pytest.raises(ValueError):
-        includes = result.included_resources
 
+    includes = result.included_resources
+    assert not includes
 
 def test_query_first(server):
     query = server.query("Patient")
@@ -1519,6 +1519,7 @@ def test_query_include(server, api_url):
     )
 
     query = query.include(include_param=include_param)
+    print(query)
     assert query.query_parameters.include_parameters[1].resource == query_resource
     assert query.query_parameters.include_parameters[1].target == "criteria"
 
@@ -1627,6 +1628,7 @@ def test_query_response_include(server):
     query = query.include(resource=query_resource, reference_param=search_param)
     response = query.all()
 
+    print(query)
     assert response.included_resources
     assert response.resources
     assert response.resources[0].resource_type == query_resource
@@ -1710,8 +1712,6 @@ def test_query_response_to_dfs(server):
     query = query.include(resource=query_resource, reference_param=search_param)
     response = query.all()
 
-    print(query)
-
     with pytest.raises(ValueError):
         response.to_dfs(format="invalid")
 
@@ -1719,5 +1719,3 @@ def test_query_response_to_dfs(server):
 
     assert len(dfs) > 1
     assert dfs[0].shape[0] > 0
-
-    print(response)
