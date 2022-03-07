@@ -93,7 +93,6 @@ class FHIRQuery:
                 if isinstance(operator, str):
                     operator = QueryOperators(operator)
                 if isinstance(operator, QueryOperators):
-                    print(f"Operator: {operator}")
                     operator = operator
                 else:
                     raise ValueError(f"Operator must be a string or QueryOperators. Got {operator}")
