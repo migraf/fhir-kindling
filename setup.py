@@ -18,7 +18,7 @@ setup(
     author_email="michael.graf@uni-tuebingen.de",
     python_requires=">=3.7",
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
@@ -27,7 +27,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ],
-    description="Generates synthetic FHIR resources.",
+    description="CRUD Operations against FHIR servers, resource validation and synthetic FHIR resource generation.",
     entry_points={"console_scripts": ["fhir_kindling=fhir_kindling.cli.cli:main", ], },
     long_description=readme + history,
     long_description_content_type="text/markdown",
@@ -43,7 +43,8 @@ setup(
         "pyyaml",
         "xmltodict",
         "pydantic",
-        "click"
+        "click",
+        "networkx"
     ],
     license="MIT license",
     include_package_data=True,
@@ -53,6 +54,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/migraf/fhir-kindling",
-    version='0.7.2',
+    version='0.7.1',
     zip_safe=False,
 )
