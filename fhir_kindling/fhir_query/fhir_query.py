@@ -320,7 +320,7 @@ class FHIRQuery:
             rev_includes = []
             for include_param in self.query_parameters.include_parameters:
                 if include_param.reverse:
-                    rev_string = f"{include_param.resource}:{include_param.search_param}{include_param.target}"
+                    rev_string = f"{include_param.resource}:{include_param.search_param}"
                     if include_param.target:
                         rev_string += f":{include_param.target}"
                     rev_includes.append(rev_string)

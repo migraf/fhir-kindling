@@ -104,9 +104,8 @@ class QueryResponse:
             # return empty list if no resource matched the query
             if not self.response.get("entry"):
                 return []
-            # raise error if there aren't any included resources
             if not self.query_params.include_parameters:
-                raise ValueError("No included resources defined in query.")
+                return []
             # parse the included resources if they don't exist
             if not self._included_resources:
                 self._extract_resources()
@@ -306,7 +305,3 @@ class QueryResponse:
 
             response["entry"] = entries[:self._limit] if self._limit else entries
             return response
-
-    def __repr__(self):
-        return f"[{self.status_code}] QueryResponse<{self.resource}>:  total={len(self.resources)}\n" \
-               f"Query string: {self.query_params.to_query_string()}\nparameters: {self.query_params}"

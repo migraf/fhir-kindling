@@ -156,7 +156,7 @@ class IncludeParameter(QueryParameter):
         query_param = "_include" if not self.reverse else "_revinclude"
 
         iterate = ":iterate" if self.iterate else ""
-        target = f"&{self.target}" if self.target else ""
+        target = f":{self.target}" if self.target else ""
         url_param = f"{query_param}{iterate}={self.resource}:{self.search_param}{target}"
         return url_param
 
