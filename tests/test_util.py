@@ -100,9 +100,9 @@ def test_reference_graph():
         conditions.append(condition)
 
     resources = patients + [organization, practitioner, encounter] + conditions
-    graph = reference_graph(resources)
+    graph = reference_graph(resources, display=True)
 
-    for node in graph.nodes:
+    for node in graph.nodes(data=True):
         print(node["resource"])
 
     assert len(graph.nodes) == len(resources)

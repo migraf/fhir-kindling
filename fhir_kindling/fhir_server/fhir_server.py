@@ -593,12 +593,9 @@ class FhirServer:
     def _resolve_reference_graph(self, graph: DiGraph, server: 'FhirServer'):
 
         nodes = graph.nodes
-        print(nodes)
         while len(nodes) > 0:
-            print(nodes)
             top_nodes = [node for node in nodes if len(list(graph.predecessors(node))) == 0]
-            print(top_nodes)
-            resources = [graph[node] for node in top_nodes]
+            resources = [node["resource"] for node in top_nodes]
             print(resources)
             # todo upload and update references
             for tn in top_nodes:

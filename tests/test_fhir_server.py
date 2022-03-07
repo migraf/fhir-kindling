@@ -477,5 +477,5 @@ def test_resolve_reference_graph(fhir_server: FhirServer):
         conditions.append(condition)
 
     resources = patients + [organization, practitioner, encounter] + conditions
-    print(resources)
+    # print(resources)
     response = fhir_server._transfer_resources(fhir_server, resources)

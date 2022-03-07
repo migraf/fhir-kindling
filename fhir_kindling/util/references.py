@@ -60,11 +60,16 @@ def reference_graph(resources: List[Union[Resource, FHIRAbstractModel]], display
         path = resource.relative_path()
         if path in dg:
             dg.nodes[path]["resource"] = resource
+            print(f"adding {resource.resource_type} resource to existing path")
         else:
+            print(f"adding {resource.resource_type} resource to new path")
             dg.add_node(path, resource=resource)
         for reference in extract_references(resource):
+
             reference_path = f"{reference[0]}/{reference[1]}"
-            dg.add_node(reference_path, resource=None)
+            if reference_path not in dg:
+                print(f"adding reference node {reference_path}")
+                dg.add_node(reference_path, resource=None)
             dg.add_edge(reference_path, path)
 
     if display:
