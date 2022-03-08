@@ -1372,6 +1372,7 @@ def test_query_json(server):
     includes = result.included_resources
     assert not includes
 
+
 def test_query_first(server):
     query = server.query("Patient")
     result = query.first()
@@ -1385,6 +1386,24 @@ def test_query_limit(server):
     query._count = 30
     result = query.limit(100)
     assert len(result.resources) == 100
+
+
+def test_query_with_callback(server):
+    def callback1(resources):
+        print(len(resources))
+
+    server.query("Patient").all(page_callback=callback1, count=50)
+
+    def callback2():
+        print("callback2")
+
+    server.query("Patient").all(page_callback=callback2, count=200)
+
+    with pytest.raises(ValueError):
+        def callback3(a, b):
+            print("callback3")
+
+        server.query("Patient").all(page_callback=callback3, count=200)
 
 
 def test_query_response_resources(server):

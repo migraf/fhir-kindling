@@ -11,6 +11,8 @@ from fhir.resources.organization import Organization
 from fhir.resources.address import Address
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.patient import Patient
+
+from fhir_kindling.fhir_query import FHIRQueryParameters
 from fhir_kindling.generators import PatientGenerator
 
 
@@ -309,7 +311,7 @@ def test_server_add_all(fhir_server: FhirServer):
 
 
 def test_query_all(fhir_server: FhirServer):
-    response = fhir_server.query(Patient, output_format="dict").all()
+    response = fhir_server.query(Patient.construct(), output_format="dict").all()
     print(response)
     assert response.response
 
@@ -326,7 +328,7 @@ def test_query_with_string_resource(fhir_server: FhirServer):
 
 
 def test_query_with_limit(fhir_server: FhirServer):
-    response = fhir_server.query(Patient, output_format="dict").limit(2)
+    response = fhir_server.query(Patient.construct(), output_format="dict").limit(2)
 
     assert response.response["entry"]
 
@@ -429,6 +431,36 @@ def test_custom_auth():
 
     with pytest.raises(ValueError):
         server = FhirServer(api_address="https://fhir.test/fhir", auth=auth, client_id="test")
+
+
+def test_query_with_params(fhir_server: FhirServer):
+    params = FHIRQueryParameters(
+        resource="Condition"
+    )
+    query = fhir_server.query(query_parameters=params)
+    response = query.all()
+
+    assert response.resources
+
+
+def test_fhir_server_get(fhir_server: FhirServer):
+    patient = fhir_server.query("Patient").first().resources[0]
+
+    patient_by_reference = fhir_server.get(patient.relative_path())
+
+    assert patient_by_reference.id == patient.id
+
+
+def test_fhir_server_get_many(fhir_server: FhirServer):
+    patients = fhir_server.query("Patient").limit(10).resources
+
+    references = [p.relative_path() for p in patients]
+    patients_by_reference = fhir_server.get_many(references)
+
+    assert len(patients_by_reference) == len(patients)
+
+    for p, p2 in zip(patients, patients_by_reference):
+        assert p.id == p2.id
 
 
 def test_server_repr_str(fhir_server: FhirServer):
