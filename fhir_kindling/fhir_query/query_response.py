@@ -1,7 +1,8 @@
 import collections
 import pathlib
-from typing import Union, List, Dict, Optional
+from typing import Union, List, Dict, Optional, Callable, Any
 from enum import Enum
+from inspect import signature
 
 import pandas as pd
 from fhir.resources.bundle import Bundle
@@ -55,7 +56,10 @@ class QueryResponse:
                  response: Response,
                  query_params: FHIRQueryParameters,
                  output_format: str = "json",
-                 limit: int = None):
+                 limit: int = None,
+                 count: int = None,
+                 page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None
+                 ):
 
         self.session = session
         self.format = output_format
@@ -66,6 +70,8 @@ class QueryResponse:
         self._included_resources = {}
         self._bundle = None
         self.status_code: ResponseStatusCodes = None
+        self.count = count
+        self.page_callback = page_callback
 
         # parse the response after the rest of the setup is complete
         self.response: Union[str, dict] = self._process_server_response(response)
@@ -247,7 +253,7 @@ class QueryResponse:
                 if relation_dict.get("@value") == "next":
                     # get url and extend with xml format
                     url = link["url"]["@value"]
-                    url = url + "&_format=xml"  # todo check this
+                    url = url + "&_format=xml"
                     r = self.session.get(url)
                     r.raise_for_status()
                     response = xmltodict.parse(r.text)
@@ -279,15 +285,18 @@ class QueryResponse:
             initial_entry = response.get("entry", None)
             if not initial_entry:
                 self.status_code = ResponseStatusCodes.NOT_FOUND
-                print(f"No resources match the query - query url: {self.query_params.to_query_string()}")
                 return response
             else:
                 self.status_code = ResponseStatusCodes.OK
-                entries.extend(response["entry"])
+                response_entries = response["entry"]
+                entries.extend(response_entries)
+                self._execute_callback(response_entries)
             # if the limit is reached, stop resolving the pagination
             if self._limit:
                 if len(entries) >= self._limit:
-                    response["entry"] = response["entry"][:self._limit]
+                    response_entries = response["entry"][:self._limit]
+                    response["entry"] = response_entries
+                    self._execute_callback(response_entries)
                     return response
             # query the linked page and add the entries to the response
             while response.get("link", None):
@@ -299,9 +308,27 @@ class QueryResponse:
 
                 if next_page:
                     response = self.session.get(next_page["url"]).json()
-                    entries.extend(response["entry"])
+                    response_entries = response["entry"]
+                    entries.extend(response_entries)
+                    self._execute_callback(response_entries)
                 else:
                     break
 
             response["entry"] = entries[:self._limit] if self._limit else entries
             return response
+
+    def _execute_callback(self, entries: list):
+        # todo improve callback signature validation
+        if self.page_callback:
+            callback_signature = signature(self.page_callback)
+
+            if len(callback_signature.parameters) > 1:
+                raise ValueError("The callback function should have at most one parameter")
+
+            elif len(callback_signature.parameters) == 1:
+                self.page_callback(entries)
+            else:
+                self.page_callback()
+
+    def __repr__(self):
+        return f"<QueryResponse(resource={self.resource}, n={len(self.resources)})>"
