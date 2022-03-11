@@ -110,3 +110,7 @@ class PatientGenerator:
 
     def _generate_references(self) -> List[Reference]:
         return [Reference(reference=f"Patient/{patient.id}") for patient in self.resources]
+
+    def __repr__(self):
+        return f"<PatientGenerator(n={self.n}, age_range={self.age_range}, " \
+               f"gender_distribution={self.gender_distribution}>"

@@ -23,7 +23,8 @@ class GeneratorParameters(BaseModel):
 
 class ResourceGenerator:
 
-    def __init__(self, resource: Union[str, Any], n: int = None, field_values: dict = None, disable_validation: bool = False,
+    def __init__(self, resource: Union[str, Any], n: int = None, field_values: dict = None,
+                 disable_validation: bool = False,
                  generator_parameters: GeneratorParameters = None):
         if not isinstance(resource, str):
             try:
@@ -175,3 +176,6 @@ class ResourceGenerator:
                 raise ValueError(f"Field generator {resource_generator.field} is already generated")
             self._generated_fields.add(resource_generator.field)
             # todo validate generator values
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}(n={self.n}, resource={self.resource}>"

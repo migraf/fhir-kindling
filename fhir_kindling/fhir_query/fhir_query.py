@@ -1,7 +1,8 @@
-from typing import Union
+from typing import Union, Callable, List, Any
 from fhir.resources.resource import Resource
 from fhir.resources.bundle import Bundle
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
+from fhir.resources import FHIRAbstractModel
 import fhir.resources
 import requests
 import requests.auth
@@ -18,8 +19,7 @@ class FHIRQuery:
                  query_parameters: FHIRQueryParameters = None,
                  auth: requests.auth.AuthBase = None,
                  session: requests.Session = None,
-                 output_format: str = "json",
-                 count: int = 5000):
+                 output_format: str = "json"):
 
         self.base_url = base_url
 
@@ -30,25 +30,29 @@ class FHIRQuery:
         else:
             self._setup_session()
 
-        # initialize the resource
-        if isinstance(resource, str):
-            self.resource = fhir.resources.get_fhir_model_class(resource)
-        else:
-            self.resource = resource
+        # initialize the resource and query parameters
+        if resource:
+            if isinstance(resource, str):
+                self.resource = fhir.resources.get_fhir_model_class(resource)
+            elif isinstance(resource, FHIRResourceModel) or isinstance(resource, FHIRAbstractModel):
+                self.resource = resource
+            else:
+                raise ValueError(f"resource must be a FHIRResourceModel or a string, given {type(resource)}")
+            self.resource = self.resource.construct()
+            self.query_parameters = FHIRQueryParameters(resource=self.resource.resource_type)
 
-        if query_parameters:
+        elif query_parameters:
+            self.query_parameters = query_parameters
             self.resource = fhir.resources.get_fhir_model_class(query_parameters.resource)
+            self.resource = self.resource.construct()
+        else:
+            raise ValueError("Either resource or query_parameters must be set")
 
-        self.resource = self.resource.construct()
         self.output_format = output_format
         self._includes = None
         self._limit = None
-        self._count = count
-        self._query_response: Union[Bundle, str] = None
-        if query_parameters:
-            self.query_parameters = query_parameters
-        else:
-            self.query_parameters: FHIRQueryParameters = FHIRQueryParameters(resource=self.resource.resource_type)
+        self._count = None
+        self._query_response: Union[Bundle, str, None] = None
 
     def where(self,
               field: str = None,
@@ -59,7 +63,7 @@ class FHIRQuery:
               ) -> 'FHIRQuery':
         """
         Add search conditions regarding a specific field of the queried resource.
-        Conditions can be added via FieldParmeter class instance, via a dictionary or specifying condition via this
+        Conditions can be added via FieldParameter class instance, via a dictionary or specifying condition via this
         method's parameter arguments (field, operator, value).
         Args:
             field_param: Instance of FieldParameter defining the field to filter for.
@@ -96,7 +100,6 @@ class FHIRQuery:
                 if isinstance(operator, str):
                     operator = QueryOperators(operator)
                 if isinstance(operator, QueryOperators):
-                    print(f"Operator: {operator}")
                     operator = operator
                 else:
                     raise ValueError(f"Operator must be a string or QueryOperators. Got {operator}")
@@ -225,22 +228,34 @@ class FHIRQuery:
 
         return self
 
-    def all(self):
+    def all(self,
+            page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
+            count: int = None) -> QueryResponse:
         """
         Execute the query and return all results matching the query parameters.
+
+        Args:
+            page_callback: if this argument is set the given callback function will be called for each page of results
+            count: number of results in a page, default value of 50 is used when page_callback is set but no count is
         Returns:
             QueryResponse object containing all resources matching the query, as well os optional included
             resources.
 
         """
         self._limit = None
-        return self._execute_query()
+        self._count = count
+        return self._execute_query(page_callback=page_callback, count=count)
 
-    def limit(self, n: int):
+    def limit(self,
+              n: int,
+              page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
+              count: int = None) -> QueryResponse:
         """
         Execute the query and return the first n results matching the query parameters.
         Args:
             n: number of resources to return
+            page_callback: if this argument is set the given callback function will be called for each page of results
+            count: number of results in a page, default value of 50 is used when page_callback is set but no count is
 
         Returns:
             QueryResponse object containing the first n resources matching the query, as well os optional included
@@ -248,9 +263,10 @@ class FHIRQuery:
 
         """
         self._limit = n
-        return self._execute_query()
+        self._count = count
+        return self._execute_query(page_callback=page_callback, count=count)
 
-    def first(self):
+    def first(self) -> QueryResponse:
         """
         Return the first resource matching the query parameters.
         Returns:
@@ -291,21 +307,29 @@ class FHIRQuery:
         self.session.auth = self.auth
         self.session.headers.update({"Content-Type": "application/fhir+json"})
 
-    def _execute_query(self):
+    def _execute_query(self,
+                       page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
+                       count: int = None) -> QueryResponse:
         r = self.session.get(self.query_url)
         r.raise_for_status()
-        included_resources = [include.resource for include in self._includes] if self._includes else None
-        response = QueryResponse(self.session,
-                                 response=r,
-                                 query_params=self.query_parameters,
-                                 output_format=self.output_format,
-                                 limit=self._limit
-                                 )
+        response = QueryResponse(
+            session=self.session,
+            response=r,
+            query_params=self.query_parameters,
+            output_format=self.output_format,
+            limit=self._limit,
+            count=count,
+            page_callback=page_callback,
+        )
         return response
 
-    def _make_query_string(self):
-        query_string = f"{self.base_url}{self.query_parameters.to_query_string()}"
-        if self._limit:
+    def _make_query_string(self) -> str:
+        query_string = self.base_url + self.query_parameters.to_query_string()
+
+        if not self._count:
+            self._count = 5000
+
+        if self._limit and self._limit < self._count:
             query_string += f"&_count={self._limit}"
         else:
             query_string += f"&_count={self._count}"
@@ -313,6 +337,31 @@ class FHIRQuery:
 
         return query_string
 
-
     def __repr__(self):
-        return f"<Query: {self.query_url}>"
+        if isinstance(self.resource, str):
+            resource = self.resource
+        else:
+            resource = self.resource.resource_type
+
+        if self.query_parameters.include_parameters:
+            includes = []
+            rev_includes = []
+            for include_param in self.query_parameters.include_parameters:
+                if include_param.reverse:
+                    rev_string = f"{include_param.resource}:{include_param.search_param}"
+                    if include_param.target:
+                        rev_string += f":{include_param.target}"
+                    rev_includes.append(rev_string)
+                else:
+                    include_string = f"{include_param.search_param}"
+                    if include_param.target:
+                        include_string += f":{include_param.target}"
+                    includes.append(include_string)
+
+            include_repr = f", include={','.join(includes)}" if includes else ""
+            rev_include_repr = f", reverse_includes={','.join(rev_includes)}" if rev_includes else ""
+            includes_repr = include_repr + rev_include_repr
+            return f"<FHIRQuery(resource={resource}{includes_repr}, url={self.query_url}>"
+        else:
+
+            return f"<FHIRQuery(resource={resource}, url={self.query_url}>"

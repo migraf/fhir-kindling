@@ -37,6 +37,10 @@ class ResourceCreateResponse(CreateResponse):
             "reference": self.resource.get_resource_type() + "/" + resource_id
         })
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}(resource_id={self.resource_id}, location={self.location}," \
+               f" version={self.version}, resource=...)>"
+
 
 class BundleCreateResponse:
     create_responses: List[ResourceCreateResponse] = None
@@ -55,6 +59,10 @@ class BundleCreateResponse:
     @property
     def references(self):
         return [r.reference for r in self.create_responses]
+
+    def __repr__(self):
+        return f"BundleCreateResponse(create_responses={self.create_responses[0]}...{self.create_responses[-1]}, " \
+               f"num_resources={len(self.create_responses)})"
 
 
 class UpdateResponse:

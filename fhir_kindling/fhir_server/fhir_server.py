@@ -96,7 +96,7 @@ class FhirServer:
 
     def query(self, resource: Union[Resource, FHIRAbstractModel, str] = None,
               query_parameters: FHIRQueryParameters = None,
-              output_format: str = "json", count: int = 5000) -> FHIRQuery:
+              output_format: str = "json") -> FHIRQuery:
         """
         Initialize a FHIR query against the server with the given resource or query parameters
 
@@ -111,10 +111,10 @@ class FhirServer:
         """
         if resource:
             return FHIRQuery(self.api_address, resource, auth=self.auth, session=self.session,
-                             output_format=output_format, count=count)
+                             output_format=output_format)
         else:
             return FHIRQuery(self.api_address, auth=self.auth, session=self.session, query_parameters=query_parameters,
-                             count=count, output_format=output_format)
+                             output_format=output_format)
 
     def raw_query(self, query_string: str, output_format: str = "json") -> FHIRQuery:
         """
@@ -444,6 +444,20 @@ class FhirServer:
         self.session.auth = self.auth
         self.session.headers.update(self.headers)
 
+    @property
+    def capabilities(self) -> CapabilityStatement:
+        if not self._meta_data:
+            self._get_meta_data()
+        return CapabilityStatement(**self._meta_data)
+
+    @property
+    def rest_resources(self) -> List[str]:
+        return [capa.type for capa in self.capabilities.rest[0].resource]
+
+    def summary(self) -> ServerSummary:
+        summary = self._make_server_summary()
+        return summary
+
     def _make_server_summary(self) -> ServerSummary:
         resources = []
         summary = {
@@ -464,10 +478,16 @@ class FhirServer:
         summary = ServerSummary(**summary)
         return summary
 
+    @property
+    def headers(self):
+        headers = {"Content-Type": "application/fhir+json"}
+        if self._headers:
+            headers.update(self._headers)
+        return headers
+
     def _get_oidc_token(self):
         # get a new token if it is expired or not yet set
         if (self.token_expiration and pendulum.now() > self.token_expiration) or not self.token:
-            print("Requesting new token")
             client = BackendApplicationClient(client_id=self.client_id)
             oauth = OAuth2Session(client=client)
             token = oauth.fetch_token(
@@ -545,6 +565,35 @@ class FhirServer:
             return generate_auth(token=self.token)
         else:
             return None
+
+    def _make_get_many_transaction(self, str_references: List[str]):
+        get_bundle = Bundle.construct()
+        get_bundle.type = "batch"
+        # create transaction entries and add them to the bundle
+        entries = [self._make_transaction_entry(reference, "GET") for reference in str_references]
+        get_bundle.entry = entries
+        # validate bundle
+        get_bundle = Bundle(**get_bundle.dict(exclude_none=True))
+        return get_bundle
+
+    def _get_many_query(self, str_references: List[str]) -> List[FHIRAbstractModel]:
+        # todo remove this in favor of batch transactions
+        resource_refs = {}
+        for reference in str_references:
+            resource_type, id = reference.split("/")
+            resource_id_list = resource_refs.get(resource_type, [])
+            resource_id_list.append(id)
+            resource_refs[resource_type] = resource_id_list
+        resources = []
+        for resource_type, resource_ids in resource_refs.items():
+            params = FHIRQueryParameters(
+                resource=resource_type,
+                resource_parameters=[FieldParameter(field="_id", value=resource_ids, operator=QueryOperators.in_)]
+            )
+
+            query_resources = self.query(query_parameters=params).all().resources
+            resources.extend(query_resources)
+        return resources
 
     def _get_missing_resources(self, resources: List[Union[Resource, FHIRAbstractModel]]):
         missing = check_missing_references(resources)

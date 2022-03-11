@@ -27,7 +27,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ],
-    description="CRUD Operations against FHIR servers, synthetic FHIR resource generation.",
+    description="CRUD Operations against FHIR servers, resource validation and synthetic FHIR resource generation.",
     entry_points={"console_scripts": ["fhir_kindling=fhir_kindling.cli.cli:main", ], },
     long_description=readme + history,
     long_description_content_type="text/markdown",
@@ -54,6 +54,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/migraf/fhir-kindling",
-    version='0.7.1',
+    version='0.7.3',
     zip_safe=False,
 )

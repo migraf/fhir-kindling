@@ -1245,7 +1245,7 @@ def test_include_query_param():
         search_param=search_param,
         target=target
     )
-    assert include_param.to_url_param() == f"_include={resource}:{search_param}&{target}"
+    assert include_param.to_url_param() == f"_include={resource}:{search_param}:{target}"
 
     # reverse include
     include_param = IncludeParameter(
@@ -1254,7 +1254,7 @@ def test_include_query_param():
         target=target,
         reverse=True
     )
-    assert include_param.to_url_param() == f"_revinclude={resource}:{search_param}&{target}"
+    assert include_param.to_url_param() == f"_revinclude={resource}:{search_param}:{target}"
 
     # include with iterate & target
     include_param = IncludeParameter(
@@ -1264,7 +1264,7 @@ def test_include_query_param():
         iterate=True,
     )
 
-    assert include_param.to_url_param() == f"_include:iterate={resource}:{search_param}&{target}"
+    assert include_param.to_url_param() == f"_include:iterate={resource}:{search_param}:{target}"
 
     # parse from url snippet
 
@@ -1272,25 +1272,28 @@ def test_include_query_param():
     assert include_param.resource == resource
     assert include_param.search_param == search_param
 
-    include_param = IncludeParameter.from_url_param(f"_include={resource}:{search_param}&{target}")
+    include_param = IncludeParameter.from_url_param(f"_include={resource}:{search_param}:{target}")
     assert include_param.resource == resource
     assert include_param.search_param == search_param
     assert include_param.target == target
 
-    include_param = IncludeParameter.from_url_param(f"_revinclude={resource}:{search_param}&{target}")
+    include_param = IncludeParameter.from_url_param(f"_revinclude={resource}:{search_param}:{target}")
     assert include_param.resource == resource
     assert include_param.search_param == search_param
     assert include_param.target == target
     assert include_param.reverse is True
 
-    include_param = IncludeParameter.from_url_param(f"_include:iterate={resource}:{search_param}&{target}")
+    include_param = IncludeParameter.from_url_param(f"_include:iterate={resource}:{search_param}:{target}")
     assert include_param.resource == resource
     assert include_param.search_param == search_param
     assert include_param.target == target
     assert include_param.iterate is True
 
     with pytest.raises(ValueError):
-        include_param = IncludeParameter.from_url_param(f"_include:iterates={resource}:{search_param}&{target}")
+        include_param = IncludeParameter.from_url_param(f"_include:iterates={resource}:{search_param}:{target}")
+
+    with pytest.raises(ValueError):
+        include_param = IncludeParameter.from_url_param(f"_include:iterates={resource}:{search_param}:{target}:error")
 
 
 def test_reverse_chain_parameters():
@@ -1369,6 +1372,7 @@ def test_query_json(server):
     includes = result.included_resources
     assert not includes
 
+
 def test_query_first(server):
     query = server.query("Patient")
     result = query.first()
@@ -1382,6 +1386,24 @@ def test_query_limit(server):
     query._count = 30
     result = query.limit(100)
     assert len(result.resources) == 100
+
+
+def test_query_with_callback(server):
+    def callback1(resources):
+        print(len(resources))
+
+    server.query("Patient").all(page_callback=callback1, count=50)
+
+    def callback2():
+        print("callback2")
+
+    server.query("Patient").all(page_callback=callback2, count=200)
+
+    with pytest.raises(ValueError):
+        def callback3(a, b):
+            print("callback3")
+
+        server.query("Patient").all(page_callback=callback3, count=200)
 
 
 def test_query_response_resources(server):
@@ -1519,6 +1541,7 @@ def test_query_include(server, api_url):
     )
 
     query = query.include(include_param=include_param)
+    print(query)
     assert query.query_parameters.include_parameters[1].resource == query_resource
     assert query.query_parameters.include_parameters[1].target == "criteria"
 
@@ -1627,6 +1650,7 @@ def test_query_response_include(server):
     query = query.include(resource=query_resource, reference_param=search_param)
     response = query.all()
 
+    print(query)
     assert response.included_resources
     assert response.resources
     assert response.resources[0].resource_type == query_resource

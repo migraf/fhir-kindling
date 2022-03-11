@@ -156,7 +156,7 @@ class IncludeParameter(QueryParameter):
         query_param = "_include" if not self.reverse else "_revinclude"
 
         iterate = ":iterate" if self.iterate else ""
-        target = f"&{self.target}" if self.target else ""
+        target = f":{self.target}" if self.target else ""
         url_param = f"{query_param}{iterate}={self.resource}:{self.search_param}{target}"
         return url_param
 
@@ -173,15 +173,16 @@ class IncludeParameter(QueryParameter):
         else:
             reverse = split_field[0] == "_revinclude"
             iterate = False
-        resource, search_param = param.split(":")
+        param_fields = param.split(":")
 
-        param_split = search_param.split("&")
-        if len(param_split) == 2:
-            target = param_split[1]
-            search_param = param_split[0]
-        else:
+        if len(param_fields) == 2:
+            resource, search_param = param_fields
             target = None
-            search_param = param_split[0]
+        elif len(param_fields) == 3:
+            resource, search_param, target = param_fields
+        else:
+            raise ValueError(f"Too many fields in include parameter: {url_string} - "
+                             f"<resource>:<search_param> or <resource>:<search_param>:<target>")
 
         return cls(
             resource=resource,
