@@ -16,15 +16,15 @@ import fhir.resources
 import re
 from oauthlib.oauth2 import BackendApplicationClient
 import pendulum
+from networkx import DiGraph
 
 from fhir_kindling.fhir_query import FHIRQuery
 from fhir_kindling.fhir_query.query_response import QueryResponse
 from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters, FieldParameter, QueryOperators
 from fhir_kindling.fhir_server.auth import generate_auth
-from fhir_kindling.fhir_server.server_responses import ResourceCreateResponse, BundleCreateResponse, ServerSummary
-
-
-# from fhir_kindling.util.references import check_missing_references, reference_graph
+from fhir_kindling.fhir_server.server_responses import ResourceCreateResponse, BundleCreateResponse, ServerSummary, \
+    TransferResponse
+from fhir_kindling.util.references import check_missing_references, reference_graph
 
 
 class FhirServer:
@@ -297,6 +297,26 @@ class FhirServer:
 
         return response
 
+    def transfer(self, target_server: 'FhirServer', query_result: QueryResponse) -> TransferResponse:
+        """
+        Transfer resources from this server to another server while using server assigned ids and keeping referential
+        integrity.
+        Args:
+            target_server: FhirServer to transfer to
+            query_result: results of the initial query against the server
+
+        Returns: Transfer response for the transfer of the query result to the target server
+
+        """
+        # get all the referenced resources missing in the list from the source server
+        missing_references = check_missing_references(query_result.resources)
+        if missing_references:
+            resources = self._get_missing_resources(query_result.resources)
+        # transfer the resources keeping server assigned ids and referential integrity
+        response = self._transfer_resources(target_server, resources, query_result.query_params)
+
+        return response
+
     def summary(self) -> ServerSummary:
         """
         Create a summary for the server. Contains resource counts for all resources available on the server.
@@ -406,7 +426,11 @@ class FhirServer:
 
     def _upload_bundle(self, bundle: Bundle) -> BundleCreateResponse:
         r = self.session.post(url=self.api_address, data=bundle.json(return_bytes=True))
-        r.raise_for_status()
+        try:
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print(r.text)
+            raise e
         bundle_response = BundleCreateResponse(r, bundle)
         return bundle_response
 
@@ -556,6 +580,88 @@ class FhirServer:
             query_resources = self.query(query_parameters=params).all().resources
             resources.extend(query_resources)
         return resources
+
+    def _get_missing_resources(self, resources: List[Union[Resource, FHIRAbstractModel]]):
+        missing = check_missing_references(resources)
+
+        while missing:
+            missing_resources = self.get_many(missing)
+            resources.extend(missing_resources)
+            missing = check_missing_references(resources)
+
+        return resources
+
+    def _transfer_resources(self,
+                            target_server: 'FhirServer',
+                            resources: List[FHIRAbstractModel],
+                            params: FHIRQueryParameters = None) -> TransferResponse:
+        graph = reference_graph(resources)
+        create_responses = self._resolve_reference_graph(graph, target_server)
+
+        return TransferResponse(
+            origin_server=self.api_address,
+            destination_server=target_server.api_address,
+            create_responses=create_responses,
+            query_parameters=params
+        )
+
+    def _resolve_reference_graph(self, graph: DiGraph, server: 'FhirServer') -> List[ResourceCreateResponse]:
+        create_responses = []
+        nodes = graph.nodes
+        while len(nodes) > 0:
+            # find the nodes without references and add them to the target server
+            top_nodes = [node for node in nodes if len(list(graph.predecessors(node))) == 0]
+            resources = [graph.nodes[node]["resource"] for node in top_nodes]
+            add_response = server.add_all(resources)
+            # update dependant nodes in the graph with the obtained references
+            self._update_graph_references(graph, top_nodes, add_response.references)
+            create_responses.extend(add_response.create_responses)
+            # remove processed nodes from the graph
+            graph.remove_nodes_from(top_nodes)
+            nodes = graph.nodes
+        return create_responses
+
+    @staticmethod
+    def _update_graph_references(graph: DiGraph, nodes, references: List[str]) -> None:
+        """
+        Update the graph with the obtained references
+        Args:
+            graph: reference graph to update
+            nodes: the unreferenced nodes
+            references: references obtained from the server after submitting the resources contained in the unreferenced
+                nodes
+
+        Returns:
+
+        """
+        for node, reference in zip(nodes, references):
+            successors = graph.successors(node)
+            for successor in successors:
+                field = graph[node][successor]["field"]
+                list_field = graph[node][successor]["list_field"]
+                # if the reference field is a list of references, update the corresponding list item
+                if list_field:
+                    # Find the item that references the node
+                    reference_list = graph.nodes[successor]["resource"].dict()[field]
+                    reference_item = next(
+                        (item for item in reference_list if item.get("reference") == str(node)),
+                        None
+                    )
+                    # if the item is found replace it with the obtained reference
+                    if reference_item:
+                        index = reference_list.index(reference_item)
+                        resource = graph.nodes[successor]["resource"].dict()
+                        resource[field][index] = reference
+                        graph.nodes[successor]["resource"] = resource
+
+                # update the reference field in the dependant resource
+                else:
+                    if not isinstance(graph.nodes[successor]["resource"], dict):
+                        resource = graph.nodes[successor]["resource"].dict()
+                        resource[field] = reference
+                        graph.nodes[successor]["resource"] = resource
+                    else:
+                        graph.nodes[successor]["resource"][field] = reference
 
 
 def _api_address_from_env() -> str:

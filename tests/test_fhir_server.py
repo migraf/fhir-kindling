@@ -1,8 +1,13 @@
 import os
+import uuid
+
 import pytest
 from fhir.resources import FHIRAbstractModel
 from unittest import mock
 
+from fhir.resources.condition import Condition
+from fhir.resources.encounter import Encounter
+from fhir.resources.reference import Reference
 from requests.auth import HTTPBasicAuth
 
 from fhir_kindling import FhirServer, FHIRQuery
@@ -14,6 +19,7 @@ from fhir.resources.patient import Patient
 
 from fhir_kindling.fhir_query import FHIRQueryParameters
 from fhir_kindling.generators import PatientGenerator
+from fhir_kindling.util.references import reference_graph
 
 
 @pytest.fixture
@@ -466,3 +472,59 @@ def test_fhir_server_get_many(fhir_server: FhirServer):
 def test_server_repr_str(fhir_server: FhirServer):
     print(fhir_server)
     assert fhir_server.__repr__() == fhir_server.__str__()
+
+
+def test_get(oidc_server: FhirServer):
+    response = oidc_server.query("Patient").first()
+    patient = oidc_server.get(f"Patient/{response.resources[0].id}")
+    assert patient
+    assert patient.id == response.resources[0].id
+
+    reference = Reference(reference=f"Patient/{response.resources[0].id}")
+    patient = oidc_server.get(reference)
+
+    assert patient
+    assert patient.id == response.resources[0].id
+
+
+def test_get_many(fhir_server: FhirServer):
+    patients = fhir_server.query("Patient").limit(10)
+    references = [p.relative_path() for p in patients.resources]
+    patients = fhir_server.get_many(references)
+    assert len(patients) == 10
+
+
+def test_resolve_reference_graph(fhir_server: FhirServer):
+    patients, patient_references = PatientGenerator(n=10, generate_ids=True).generate(references=True)
+    organization = Organization(name="Test", id="test-org")
+    practitioner = Organization(name="Practitioner", id="test-practitioner")
+    conditions = []
+    encounter = Encounter(
+        **{
+            "id": "test-encounter",
+            "status": "planned",
+            "class": {"code": "AMB", "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode"}
+        }
+    )
+    for patient in patients:
+        patient.managingOrganization = {"reference": organization.relative_path()}
+        patient.generalPractitioner = [{"reference": practitioner.relative_path()}]
+        condition = Condition(subject={"reference": patient.relative_path()}, id=str(uuid.uuid4()))
+        condition.encounter = {"reference": encounter.relative_path()}
+        conditions.append(condition)
+
+    resources = patients + [organization, practitioner, encounter] + conditions
+    # print(resources)
+
+    hapi_server = FhirServer(api_address="http://localhost:8082/fhir")
+    response = fhir_server._transfer_resources(hapi_server, resources)
+
+
+def test_fhir_server_transfer(fhir_server: FhirServer):
+    conditions = fhir_server.query("Condition").limit(10)
+    hapi_server = FhirServer(api_address="http://localhost:8082/fhir")
+    response = fhir_server.transfer(hapi_server, conditions)
+
+    print(response)
+    assert response.destination_server == hapi_server.api_address
+    assert len(response.create_responses) >= 10
