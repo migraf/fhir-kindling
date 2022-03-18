@@ -17,6 +17,22 @@ jobs:
     runs-on: ubuntu-latest
     environment: CI
 
+    services:
+      hapi:
+        image: "hapiproject/hapi:latest"
+        ports:
+          - "8082:8080"
+        env:
+          hapi.fhir.default_encoding: json
+          hapi.fhir.: json
+          hapi.fhir.server_address: "http://localhost:8082/fhir"
+
+        options: >-
+          --health-cmd curl --fail http://localhost:8080/fhir/metadata
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 7
+
     steps:
       - uses: actions/checkout@v2
       - name: Install pipenv

@@ -46,13 +46,13 @@ def test_extract_references():
     }
 
     obs = Observation(**obs_dict)
-
+    print(obs)
     references = extract_references(obs)
     assert len(references) == 3
 
-    assert ("Patient", "123") in references
-    assert ("Specimen", "123") in references
-    assert ("Device", "123") in references
+    assert ("subject", "Patient", "123", False) in references
+    assert ("specimen", "Specimen", "123", False) in references
+    assert ("device", "Device", "123", False) in references
 
 
 def test_extract_resource_ids(server):
@@ -67,8 +67,8 @@ def test_check_missing_references(server):
     conditions = server.query("Condition").include(resource="Condition", reference_param="subject").all()
     resources = conditions.resources
     resources.extend(conditions.included_resources[0].resources)
-
     no_missing = check_missing_references(resources)
+    print(no_missing)
 
     assert len(no_missing) == 0
 
@@ -102,8 +102,9 @@ def test_reference_graph():
     resources = patients + [organization, practitioner, encounter] + conditions
     graph = reference_graph(resources, display=True)
 
-    for node in graph.nodes(data=True):
-        print(node["resource"])
+    for node in graph.nodes:
+        # print(node["resource"])
+        print(graph.nodes[node]["resource"])
 
     assert len(graph.nodes) == len(resources)
     assert len(list(graph.predecessors(organization.relative_path()))) == 0

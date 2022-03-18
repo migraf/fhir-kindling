@@ -5,6 +5,8 @@ from fhir.resources.bundle import Bundle
 from fhir.resources.reference import Reference
 from pydantic import BaseModel
 
+from fhir_kindling.fhir_query import FHIRQueryParameters
+
 
 class CreateResponse:
     @staticmethod
@@ -63,6 +65,28 @@ class BundleCreateResponse:
     def __repr__(self):
         return f"BundleCreateResponse(create_responses={self.create_responses[0]}...{self.create_responses[-1]}, " \
                f"num_resources={len(self.create_responses)})"
+
+
+class TransferResponse:
+    origin_server: str
+    destination_server: str
+    query_parameters: FHIRQueryParameters
+    create_responses: List[ResourceCreateResponse]
+
+    def __init__(self,
+                 origin_server: str,
+                 destination_server: str,
+                 create_responses: List[ResourceCreateResponse],
+                 query_parameters: FHIRQueryParameters):
+        self.origin_server = origin_server
+        self.destination_server = destination_server
+        self.create_responses = create_responses
+        self.query_parameters = query_parameters
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}(origin_server={self.origin_server}," \
+               f" destination_server={self.destination_server}, query_parameters={self.query_parameters}," \
+               f" create_responses={self.create_responses[0]}...{self.create_responses[-1]})"
 
 
 class UpdateResponse:

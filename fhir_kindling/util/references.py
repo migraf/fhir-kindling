@@ -1,6 +1,5 @@
-from typing import Union, List, Tuple, Dict
+from typing import Union, List, Tuple
 
-from fhir.resources.bundle import Bundle, BundleEntry
 from fhir.resources.resource import Resource
 from fhir.resources.fhirtypes import ReferenceType
 from fhir.resources import FHIRAbstractModel
@@ -11,66 +10,60 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
-def extract_references(resource: Union[Resource, FHIRAbstractModel]) -> List[Tuple[str, str]]:
+def extract_references(resource: Resource) -> List[Tuple[str, str, str, bool]]:
     """
     Extracts the references from a resource and returns them as a list of dicts.
     Args:
         resource: fhir resource object to extract references from.
 
-    Returns: list of dicts containing the reference information.
+    Returns: list of tuples containing the reference information (reference_field, resource_type, resource_id)
 
     """
     fields = get_resource_fields(resource)
-
+    resource_dict = resource.dict(exclude_none=True)
     references = []
     for field in fields:
+
         if field.type_ == ReferenceType:
-            field_value = getattr(resource, field.name)
+            field_value = resource_dict.get(field.name, None)
             if field_value:
                 # if the field is a list of references add each of them
                 if isinstance(field_value, list) or isinstance(field_value, tuple):
                     for value in field_value:
-                        references.append(tuple(value.dict(exclude_none=True)["reference"].split("/")))
+                        resource, resource_id = value.get("reference").split("/")
+                        references.append((field.name, resource, resource_id, True))
                 # add the reference
                 else:
-                    references.append(tuple(field_value.dict(exclude_none=True)["reference"].split("/")))
-    return references
-
-
-def references_from_resource_list(resources: List[Union[Resource, FHIRAbstractModel]]) -> Dict[str, set]:
-    """
-    Extracts the references from a list of resources and returns them as a dict.
-    Args:
-        resources: list of fhir resources to extract references from.
-
-    Returns: dict of references.
-
-    """
-    references = {}
-    for resource in resources:
-        _update_reference_set(references, resource)
+                    resource, resource_id = field_value.get("reference").split("/")
+                    references.append((field.name, resource, resource_id, False))
     return references
 
 
 def reference_graph(resources: List[Union[Resource, FHIRAbstractModel]], display=False) -> nx.DiGraph:
-    dg = nx.DiGraph()
+    """
+    Creates a graph of the references in a list of resources.
 
+    Args:
+        resources: List of resource to create the graph from.
+        display: whether to display the graph as a matplotlib plot.
+
+    Returns:
+        A directed graph depicting the references in the resources.
+    """
+    dg = nx.DiGraph()
     for resource in resources:
 
         path = resource.relative_path()
         if path in dg:
             dg.nodes[path]["resource"] = resource
-            print(f"adding {resource.resource_type} resource to existing path")
         else:
-            print(f"adding {resource.resource_type} resource to new path")
             dg.add_node(path, resource=resource)
         for reference in extract_references(resource):
 
-            reference_path = f"{reference[0]}/{reference[1]}"
+            reference_path = f"{reference[1]}/{reference[2]}"
             if reference_path not in dg:
-                print(f"adding reference node {reference_path}")
                 dg.add_node(reference_path, resource=None)
-            dg.add_edge(reference_path, path)
+            dg.add_edge(reference_path, path, field=reference[0], list_field=reference[3])
 
     if display:
         nx.draw(dg, with_labels=True)
@@ -120,25 +113,14 @@ def _get_missing_references(references: dict, resource_ids: dict) -> List[str]:
     return missing_references
 
 
-def _references_from_query_response(response: QueryResponse) -> dict:
-    references = {}
-    for resource in response.resources:
-        _update_reference_set(references, resource)
-    for included_resource in response.included_resources:
-        for resource in included_resource.resources:
-            _update_reference_set(references, resource)
-
-    return references
-
-
 def _update_reference_set(references: dict, resource: Union[Resource, FHIRAbstractModel]):
     resource_references = extract_references(resource)
     for reference in resource_references:
-        reference_set = references.get(reference[0])
+        reference_set = references.get(reference[1])
         if reference_set is None:
             reference_set = set()
-        reference_set.add(reference[1])
-        references[reference[0]] = reference_set
+        reference_set.add(reference[2])
+        references[reference[1]] = reference_set
 
 
 def _resource_ids_from_query_response(response: QueryResponse) -> dict:

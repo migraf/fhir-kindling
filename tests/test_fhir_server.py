@@ -488,9 +488,9 @@ def test_get(oidc_server: FhirServer):
 
 
 def test_get_many(fhir_server: FhirServer):
-    patients = oidc_server.query("Patient").limit(10)
+    patients = fhir_server.query("Patient").limit(10)
     references = [p.relative_path() for p in patients.resources]
-    patients = oidc_server.get_many(references)
+    patients = fhir_server.get_many(references)
     assert len(patients) == 10
 
 
@@ -515,4 +515,16 @@ def test_resolve_reference_graph(fhir_server: FhirServer):
 
     resources = patients + [organization, practitioner, encounter] + conditions
     # print(resources)
-    response = fhir_server._transfer_resources(fhir_server, resources)
+
+    hapi_server = FhirServer(api_address="http://localhost:8082/fhir")
+    response = fhir_server._transfer_resources(hapi_server, resources)
+
+
+def test_fhir_server_transfer(fhir_server: FhirServer):
+    conditions = fhir_server.query("Condition").limit(10)
+    hapi_server = FhirServer(api_address="http://localhost:8082/fhir")
+    response = fhir_server.transfer(hapi_server, conditions)
+
+    print(response)
+    assert response.destination_server == hapi_server.api_address
+    assert len(response.create_responses) >= 10
