@@ -28,7 +28,7 @@ jobs:
           hapi.fhir.server_address: "http://localhost:8082/fhir"
 
         options: >-
-          --health-cmd curl --fail http://localhost:8080/fhir/metadata
+          --health-cmd "curl --fail http://localhost:8080/fhir/metadata"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 7
