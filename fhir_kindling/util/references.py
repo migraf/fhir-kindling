@@ -7,7 +7,6 @@ from fhir.resources import FHIRAbstractModel
 from fhir_kindling.fhir_query.query_response import QueryResponse
 from fhir_kindling.util.resources import get_resource_fields
 import networkx as nx
-import matplotlib.pyplot as plt
 
 
 def extract_references(resource: Resource) -> List[Tuple[str, str, str, bool]]:
@@ -39,13 +38,12 @@ def extract_references(resource: Resource) -> List[Tuple[str, str, str, bool]]:
     return references
 
 
-def reference_graph(resources: List[Union[Resource, FHIRAbstractModel]], display=False) -> nx.DiGraph:
+def reference_graph(resources: List[Union[Resource, FHIRAbstractModel]]) -> nx.DiGraph:
     """
     Creates a graph of the references in a list of resources.
 
     Args:
         resources: List of resource to create the graph from.
-        display: whether to display the graph as a matplotlib plot.
 
     Returns:
         A directed graph depicting the references in the resources.
@@ -64,10 +62,6 @@ def reference_graph(resources: List[Union[Resource, FHIRAbstractModel]], display
             if reference_path not in dg:
                 dg.add_node(reference_path, resource=None)
             dg.add_edge(reference_path, path, field=reference[0], list_field=reference[3])
-
-    if display:
-        nx.draw(dg, with_labels=True)
-        plt.show()
 
     return dg
 
