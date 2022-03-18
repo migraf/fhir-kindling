@@ -100,7 +100,7 @@ def test_reference_graph():
         conditions.append(condition)
 
     resources = patients + [organization, practitioner, encounter] + conditions
-    graph = reference_graph(resources, display=True)
+    graph = reference_graph(resources)
 
     for node in graph.nodes:
         # print(node["resource"])
