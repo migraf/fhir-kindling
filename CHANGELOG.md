@@ -5,8 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.8.0] - 2022-02-
-Custom auth and header parameters for `FhirServer` http session. 
+## [0.8.0] - 2022-03-18
+Resource transfer between servers and querying resources by reference.  
+`get`, `get_many` for querying resource by reference
+`server.transfer(other_server, query_result)` for transferring resources
 
 ### Changed
 - `FhirServer` constructor now accepts two additional optional parameters, `auth` and `headers` that will be used for the
@@ -17,6 +19,7 @@ Custom auth and header parameters for `FhirServer` http session.
  - [x] `server.get_many(references)` get multiple resources from the server, based on relative path/reference.
  - [x] `server.transfer(other_server, query)` transfer resources matching the query from one server to another. Also requests
    resources referenced by the resources matching to maintain referential integrity on the new server.
+ - [x] `query.all(page_callback=callback, count=50)` callback functions and count for pagination resolving in query responses.
 
 ## [0.7.0] - 2022-01-31
 Update a list of resources on the server. CSV/Pandas serialization of resources and query responses.
