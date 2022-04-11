@@ -77,7 +77,7 @@ def vaccination_code():
 @pytest.fixture
 def covid_params(covid_code):
     # generate patients with ids and turn into an iterator to call as a reference
-    patients = PatientGenerator(n=100, generate_ids=True).generate(display=False)
+    patients = PatientGenerator(n=100, generate_ids=True).generate()
     patient_ids = iter([patient.id for patient in patients])
     params = GeneratorParameters(
         count=100,

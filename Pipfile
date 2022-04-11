@@ -17,6 +17,8 @@ xmltodict = "*"
 plotly = "*"
 pydantic = "*"
 networkx = "*"
+httpx = "*"
+
 
 [dev-packages]
 pytest = "*"
@@ -32,6 +34,7 @@ jupyter = "*"
 mkdocstrings = "*"
 flake8 = "*"
 ipython = ">=7.31.1"
+pytest-asyncio = "*"
 
 [requires]
 python_version = "3.9"

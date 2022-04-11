@@ -1,20 +1,25 @@
-import json
 import os
 from typing import List, Union, Tuple
+
 import requests
-from fhir.resources import FHIRAbstractModel
 from requests import Response
 import requests.auth
+from requests_oauthlib import OAuth2Session
+from oauthlib.oauth2 import BackendApplicationClient
+
+
+from httpx import AsyncClient
+
+from fhir.resources import FHIRAbstractModel
 from fhir.resources.resource import Resource
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.capabilitystatement import CapabilityStatement
 from fhir.resources.reference import Reference
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from fhir.resources import construct_fhir_element
-from requests_oauthlib import OAuth2Session
 import fhir.resources
+
 import re
-from oauthlib.oauth2 import BackendApplicationClient
 import pendulum
 from networkx import DiGraph
 
@@ -105,7 +110,6 @@ class FhirServer:
             output_format: the output format to request from the fhir server (json or xml) defaults to json
             query_parameters: optionally pass in a query parameters object to use for the query
             resource: the FHIR resource to query from the server
-            count: the number of resources requested per page
 
         Returns: a FHIRQuery object that can be further modified with filters and conditions before being executed
         against the server

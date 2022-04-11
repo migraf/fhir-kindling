@@ -1,6 +1,4 @@
 import os
-
-import click
 import requests
 from requests.auth import HTTPBasicAuth
 
@@ -37,7 +35,7 @@ def generate_auth(username: str = None, password: str = None, token: str = None,
     if (not username and not password) and not token:
 
         if load_env:
-            click.echo("No authentication given. Attempting authentication via environment variables")
+            print("No authentication given. Attempting authentication via environment variables")
             username, password, token = load_environment_auth_vars()
 
         if (not username and not password) and not token:

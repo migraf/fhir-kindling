@@ -33,19 +33,20 @@ setup(
     long_description_content_type="text/markdown",
     install_requires=[
         "python-dotenv",
-        "pandas",
         "fhir.resources",
         "requests",
+        "pandas",
         "requests-oauthlib",
         "pendulum",
-        "tqdm",
         "orjson",
         "pyyaml",
         "xmltodict",
         "pydantic",
-        "click",
         "networkx"
     ],
+    extras_require={
+        'csv': ["pandas"]
+    },
     license="MIT license",
     include_package_data=True,
     keywords="fhir_kindling, fhir, pydantic, health, data, hl7",

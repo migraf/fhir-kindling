@@ -5,7 +5,6 @@ from pathlib import Path
 import pendulum
 import pandas as pd
 import random
-from tqdm import tqdm
 from fhir.resources.reference import Reference
 from fhir.resources.patient import Patient
 from fhir.resources.humanname import HumanName
@@ -27,8 +26,8 @@ class PatientGenerator:
         self.generate_ids = generate_ids
         self.resources = None
 
-    def generate(self, display: bool = False, references: bool = False):
-        patients = self._generate(display=display)
+    def generate(self, references: bool = False):
+        patients = self._generate()
         self.resources = patients
 
         if references and not self.generate_ids:
@@ -38,11 +37,11 @@ class PatientGenerator:
 
         return patients
 
-    def _generate(self, display: bool = False):
+    def _generate(self):
         patients = []
         names = self._generate_patient_names(self.n)
-        for i in tqdm(range(self.n), desc=f"Generating {self.n} patients", disable=not display):
-            patient = self._generate_patient_data(name=names[i])
+        for name in names:
+            patient = self._generate_patient_data(name=name)
             patients.append(patient)
         return patients
 
