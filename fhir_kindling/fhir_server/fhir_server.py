@@ -7,9 +7,6 @@ import requests.auth
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
 
-
-from httpx import AsyncClient
-
 from fhir.resources import FHIRAbstractModel
 from fhir.resources.resource import Resource
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
