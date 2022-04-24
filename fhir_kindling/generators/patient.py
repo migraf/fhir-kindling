@@ -5,9 +5,12 @@ from pathlib import Path
 import pendulum
 import pandas as pd
 import random
+
 from fhir.resources.reference import Reference
 from fhir.resources.patient import Patient
 from fhir.resources.humanname import HumanName
+
+from fhir_kindling.generators.names import FIRST_NAMES, LAST_NAMES
 
 
 class PatientGenerator:
@@ -71,16 +74,8 @@ class PatientGenerator:
 
     @staticmethod
     def _generate_patient_names(n: int):
-
-        p = Path(__file__).parent.joinpath("data").joinpath("first_names.txt")
-        with open(p, "rb") as fnf:
-            first_name_list = [fn.decode().strip().capitalize() for fn in fnf.readlines()]
-        p = Path(__file__).parent.joinpath("data").joinpath("last_names.txt")
-        with open(p, "rb") as lnf:
-            last_name_list = [ln.decode().strip().capitalize() for ln in lnf.readlines()]
-
-        first_names = random.choices(first_name_list, k=n)
-        last_names = random.choices(last_name_list, k=n)
+        first_names = random.choices(FIRST_NAMES, k=n)
+        last_names = random.choices(LAST_NAMES, k=n)
         names = list(zip(first_names, last_names))
 
         return names
