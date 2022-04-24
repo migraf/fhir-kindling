@@ -47,6 +47,9 @@ setup(
     extras_require={
         'csv': ["pandas"]
     },
+    package_data={
+        "": ["*.txt"],
+    },
     license="MIT license",
     include_package_data=True,
     keywords="fhir_kindling, fhir, pydantic, health, data, hl7",
