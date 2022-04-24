@@ -2,7 +2,7 @@
 
 __author__ = """Michael Graf"""
 __email__ = 'michael.graf@uni-tuebingen.de'
-__version__ = '0.8.3'
+__version__ = '0.8.4'
 
 from .fhir_server import FhirServer
 from .fhir_query import FHIRQuery
