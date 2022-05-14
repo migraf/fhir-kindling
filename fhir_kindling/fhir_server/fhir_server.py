@@ -34,7 +34,7 @@ class FhirServer:
     def __init__(self, api_address: str, username: str = None, password: str = None, token: str = None,
                  client_id: str = None, client_secret: str = None, oidc_provider_url: str = None,
                  auth: requests.auth.AuthBase = None, headers: dict = None,
-                 fhir_server_type: str = "hapi"):
+                 fhir_server_type: str = "hapi", proxies : dict = None):
         """
         Initialize a FHIR server connection
         Args:
@@ -47,6 +47,7 @@ class FhirServer:
             oidc_provider_url: provider url for oauth2
             auth: optional auth object to authenticate against a server
             headers: optional additional headers to be added to the session
+            proxies: optional proxies to pass to :class:`requests.Session`
             fhir_server_type: type of fhir server (hapi, blaze, etc.)
         """
 
@@ -69,6 +70,7 @@ class FhirServer:
 
         self._auth = auth
         self._headers = headers
+        self._proxies = proxies
 
         # setup the session
         self.session = requests.Session()
@@ -451,6 +453,7 @@ class FhirServer:
         self.auth = self._validate_auth()
         self.session.auth = self.auth
         self.session.headers.update(self.headers)
+        self.session.proxies = self._proxies
 
     def _make_server_summary(self) -> ServerSummary:
         resources = []
