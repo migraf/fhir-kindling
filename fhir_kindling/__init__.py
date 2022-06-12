@@ -5,4 +5,4 @@ __email__ = 'michael.graf@uni-tuebingen.de'
 __version__ = '0.8.4'
 
 from .fhir_server import FhirServer
-from .fhir_query import FHIRQuery
+from .fhir_query import FHIRQuerySync, FHIRQueryAsync

@@ -61,8 +61,7 @@ def upload_cord_data(csv_file, server_address):
 
     n_patients = len(condition_resource_list)
 
-    server = FhirServer(api_address=server_address, client_id=client_id, client_secret=client_secret,
-                        oidc_provider_url=provider_url)
+    server = FhirServer(api_address=server_address)
 
     patient_generator = PatientGenerator(n=n_patients)
     patients = patient_generator.generate()
@@ -89,6 +88,6 @@ if __name__ == '__main__':
     server_2_address = "http://193.196.20.24:9002/fhir"
     server_3_address = "http://193.196.20.24:9003/fhir"
 
-    local_server_address = "http://127.0.0.1:8080/fhir"
+    local_server_address = "http://127.0.0.1:9090/fhir"
 
     upload_cord_data("../examples/cord/data_station_3.csv", local_server_address)

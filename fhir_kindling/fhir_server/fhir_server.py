@@ -20,7 +20,7 @@ import re
 import pendulum
 from networkx import DiGraph
 
-from fhir_kindling.fhir_query import FHIRQuery
+from fhir_kindling.fhir_query import FHIRQuerySync
 from fhir_kindling.fhir_query.query_response import QueryResponse
 from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters, FieldParameter, QueryOperators
 from fhir_kindling.fhir_server.auth import generate_auth
@@ -38,7 +38,7 @@ class FhirServer:
         """
         Initialize a FHIR server connection
         Args:
-            api_address: the base endpoint of the fhir server api
+            api_address: the base endpoint of the fhir server REST API
             username: username for basic auth
             password: password for basic auth
             token: token for static token auth
@@ -98,13 +98,15 @@ class FhirServer:
                 raise EnvironmentError("Authentication information could not be loaded from environment")
 
     def query(self, resource: Union[Resource, FHIRAbstractModel, str] = None,
+              query_string: str = None,
               query_parameters: FHIRQueryParameters = None,
-              output_format: str = "json") -> FHIRQuery:
+              output_format: str = "json") -> FHIRQuerySync:
         """
-        Initialize a FHIR query against the server with the given resource or query parameters
+        Initialize a FHIR query against the server with the given resource, query parameters or query string
 
         Args:
             output_format: the output format to request from the fhir server (json or xml) defaults to json
+            query_string: preformatted query string to execute against the servers REST API
             query_parameters: optionally pass in a query parameters object to use for the query
             resource: the FHIR resource to query from the server
 
@@ -112,13 +114,28 @@ class FhirServer:
         against the server
         """
         if resource:
-            return FHIRQuery(self.api_address, resource, auth=self.auth, session=self.session,
-                             output_format=output_format)
-        else:
-            return FHIRQuery(self.api_address, auth=self.auth, session=self.session, query_parameters=query_parameters,
-                             output_format=output_format)
+            return FHIRQuerySync(
+                base_url=self.api_address,
+                resource=resource,
+                auth=self.auth,
+                session=self.session,
+                output_format=output_format
+            )
+        elif query_string:
+            return self.raw_query(query_string, output_format)
 
-    def raw_query(self, query_string: str, output_format: str = "json") -> FHIRQuery:
+        elif query_parameters:
+            return FHIRQuerySync(
+                base_url=self.api_address,
+                auth=self.auth,
+                session=self.session,
+                query_parameters=query_parameters,
+                output_format=output_format
+            )
+        else:
+            raise ValueError("Must provide either resource, query_parameters or a query string")
+
+    def raw_query(self, query_string: str, output_format: str = "json") -> FHIRQuerySync:
         """
         Execute a raw query string against the server
 
@@ -133,7 +150,7 @@ class FhirServer:
         """
 
         query_parameters = FHIRQueryParameters.from_query_string(query_string)
-        query = FHIRQuery(
+        query = FHIRQuerySync(
             self.api_address,
             resource=query_parameters.resource,
             query_parameters=query_parameters,
@@ -273,7 +290,7 @@ class FhirServer:
     def delete(self,
                resources: List[Union[FHIRResourceModel, dict]] = None,
                references: List[Union[str, Reference]] = None,
-               query: FHIRQuery = None):
+               query: FHIRQuerySync = None):
         """
         Delete resources from the server. Either resources or references must be specified.
         Args:
@@ -663,6 +680,9 @@ class FhirServer:
                         graph.nodes[successor]["resource"] = resource
                     else:
                         graph.nodes[successor]["resource"][field] = reference
+
+    def __repr__(self):
+        return f"FhirServer(api_address={self.api_address})"
 
 
 def _api_address_from_env() -> str:

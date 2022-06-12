@@ -1376,7 +1376,7 @@ def test_query_json(server):
 def test_query_first(server):
     query = server.query("Patient")
     result = query.first()
-
+    print(result)
     assert len(result.resources) == 1
     assert isinstance(result.resources[0], Patient)
 

@@ -10,7 +10,7 @@ from fhir.resources.encounter import Encounter
 from fhir.resources.reference import Reference
 from requests.auth import HTTPBasicAuth
 
-from fhir_kindling import FhirServer, FHIRQuery
+from fhir_kindling import FhirServer, FHIRQuerySync
 from dotenv import load_dotenv, find_dotenv
 from fhir.resources.organization import Organization
 from fhir.resources.address import Address
@@ -282,7 +282,8 @@ def test_fhir_server_from_env():
                 "FHIR_USER": "",
                 "FHIR_PW": "",
                 "FHIR_TOKEN": ""
-            }):
+            }
+    ):
         server = FhirServer.from_env()
 
 
@@ -324,7 +325,7 @@ def test_query_all(fhir_server: FhirServer):
 
 def test_query_with_string_resource(fhir_server: FhirServer):
     auth = fhir_server.auth
-    query = FHIRQuery(fhir_server.api_address, "Patient", auth=auth)
+    query = FHIRQuerySync(fhir_server.api_address, "Patient", auth=auth)
 
     response = query.all()
 
@@ -345,7 +346,7 @@ def test_query_raw_string(fhir_server: FhirServer):
     query_string = "/Patient?"
     query = fhir_server.raw_query(query_string=query_string, output_format="dict")
 
-    assert isinstance(query, FHIRQuery)
+    assert isinstance(query, FHIRQuerySync)
 
     assert query.resource.get_resource_type() == "Patient"
 
