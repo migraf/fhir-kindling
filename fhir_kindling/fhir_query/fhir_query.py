@@ -1,5 +1,4 @@
 from typing import Union, Callable, List, Any, TypeVar
-from abc import ABC, abstractmethod
 from fhir.resources.resource import Resource
 from fhir.resources.bundle import Bundle
 from fhir.resources.fhirresourcemodel import FHIRResourceModel

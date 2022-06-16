@@ -529,3 +529,31 @@ def test_fhir_server_transfer(fhir_server: FhirServer):
     print(response)
     assert response.destination_server == hapi_server.api_address
     assert len(response.create_responses) >= 10
+
+
+@pytest.mark.asyncio
+async def test_fhir_server_get_async(fhir_server: FhirServer):
+    patient_gen = PatientGenerator(n=1)
+    patient = patient_gen.generate()[0]
+    patient_create = fhir_server.add(patient)
+
+    patient = await fhir_server.get_async(patient_create.reference)
+    assert patient
+    assert patient.id == patient_create.resource_id
+
+
+@pytest.mark.asyncio
+async def test_fhir_server_add_async(fhir_server: FhirServer):
+    patient_gen = PatientGenerator(n=1)
+    patient = patient_gen.generate()[0]
+    patient_create = await fhir_server.add_async(patient)
+
+    assert patient_create
+    assert patient_create.resource_id
+
+@pytest.mark.asyncio
+async def test_fhir_server_get_many_async(fhir_server: FhirServer):
+    patients = fhir_server.query("Patient").limit(10)
+    references = [p.relative_path() for p in patients.resources]
+    patients = await fhir_server.get_many_async(references)
+    assert len(patients) == 10

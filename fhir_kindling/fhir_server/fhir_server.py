@@ -6,6 +6,8 @@ from requests import Response
 import requests.auth
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
+import httpx
+import orjson
 
 from fhir.resources import FHIRAbstractModel
 from fhir.resources.resource import Resource
@@ -20,7 +22,7 @@ import re
 import pendulum
 from networkx import DiGraph
 
-from fhir_kindling.fhir_query import FHIRQuerySync
+from fhir_kindling.fhir_query import FHIRQuerySync, FHIRQueryAsync
 from fhir_kindling.fhir_query.query_response import QueryResponse
 from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters, FieldParameter, QueryOperators
 from fhir_kindling.fhir_server.auth import generate_auth
@@ -110,7 +112,7 @@ class FhirServer:
             query_parameters: optionally pass in a query parameters object to use for the query
             resource: the FHIR resource to query from the server
 
-        Returns: a FHIRQuery object that can be further modified with filters and conditions before being executed
+        Returns: a FHIRQuerySync object that can be further modified with filters and conditions before being executed
         against the server
         """
         if resource:
@@ -129,6 +131,49 @@ class FhirServer:
                 base_url=self.api_address,
                 auth=self.auth,
                 session=self.session,
+                query_parameters=query_parameters,
+                output_format=output_format
+            )
+        else:
+            raise ValueError("Must provide either resource, query_parameters or a query string")
+
+    def query_async(self, resource: Union[Resource, FHIRAbstractModel, str] = None,
+                    query_string: str = None,
+                    query_parameters: FHIRQueryParameters = None,
+                    output_format: str = "json") -> FHIRQueryAsync:
+        """
+        Initialize a FHIR query against the server with the given resource, query parameters or query string
+
+        Args:
+            output_format: the output format to request from the fhir server (json or xml) defaults to json
+            query_string: preformatted query string to execute against the servers REST API
+            query_parameters: optionally pass in a query parameters object to use for the query
+            resource: the FHIR resource to query from the server
+
+        Returns: a FHIRQueryAsync object that can be further modified with filters and conditions before being executed
+        against the server
+        """
+        if resource:
+            return FHIRQueryAsync(
+                base_url=self.api_address,
+                resource=resource,
+                auth=self.auth,
+                output_format=output_format
+            )
+        elif query_string:
+            query_parameters = FHIRQueryParameters.from_query_string(query_string)
+            query = FHIRQueryAsync(
+                self.api_address,
+                resource=query_parameters.resource,
+                query_parameters=query_parameters,
+                output_format=output_format
+            )
+            return query
+
+        elif query_parameters:
+            return FHIRQueryAsync(
+                base_url=self.api_address,
+                auth=self.auth,
                 query_parameters=query_parameters,
                 output_format=output_format
             )
@@ -161,7 +206,7 @@ class FhirServer:
 
     def get(self, reference: Union[str, Reference]) -> FHIRAbstractModel:
         """
-        Get a resource from the server specfied by the given reference {ResourceType}/{id}
+        Get a resource from the server specified by the given reference {ResourceType}/{id}
         Args:
             reference: reference to the resource, either a Reference object or a string of the form {ResourceType}/{id}
 
@@ -172,6 +217,24 @@ class FhirServer:
             reference = reference.reference
         r = self.session.get(f"{self.api_address}/{reference}")
         r.raise_for_status()
+        resource_dict = r.json()
+        resource = construct_fhir_element(resource_dict["resourceType"], resource_dict)
+        return resource
+
+    async def get_async(self, reference: Union[str, Reference]) -> FHIRAbstractModel:
+        """
+        Asynchronously get a resource from the server specified by the given reference {ResourceType}/{id}
+        Args:
+            reference: reference to the resource, either a Reference object or a string of the form {ResourceType}/{id}
+
+        Returns: the resource from the server specified by the reference
+
+        """
+        if isinstance(reference, Reference):
+            reference = reference.reference
+        async with self._async_client() as client:
+            r = await client.get(f"{self.api_address}/{reference}")
+            r.raise_for_status()
         resource_dict = r.json()
         resource = construct_fhir_element(resource_dict["resourceType"], resource_dict)
         return resource
@@ -218,6 +281,27 @@ class FhirServer:
         response = self._upload_resource(resource)
         response.raise_for_status()
 
+        return ResourceCreateResponse(server_response_dict=dict(response.headers), resource=resource)
+
+    async def add_async(self, resource: Union[Resource, dict]) -> ResourceCreateResponse:
+        """
+        Asynchronously upload a resource to the server
+
+        Args:
+            resource: dictionary containing the resource or FHIR resource object to be uploaded to the server
+
+        Returns:
+
+        """
+        # parse the resource given as dictionary into a fhir resource model
+        if isinstance(resource, dict):
+            resource_type = resource.get("resourceType")
+            if not resource_type:
+                raise ValueError("No resource type defined in resource dictionary")
+            resource = fhir.resources.construct_fhir_element(resource_type, resource)
+        else:
+            resource = resource.validate(resource)
+        response = await self._upload_resource_async(resource)
         return ResourceCreateResponse(server_response_dict=dict(response.headers), resource=resource)
 
     def add_all(self, resources: List[Union[Resource, dict]]) -> BundleCreateResponse:
@@ -454,8 +538,20 @@ class FhirServer:
 
     def _upload_resource(self, resource: Resource) -> Response:
         url = self.api_address + "/" + resource.get_resource_type()
-        r = requests.post(url=url, headers=self.headers, auth=self.auth, json=resource.dict())
+        r = requests.post(url=url, headers=self.headers, auth=self.auth, data=resource.json())
         return r
+
+    async def _upload_resource_async(self, resource: Resource) -> httpx.Response:
+        url = self.api_address + "/" + resource.get_resource_type()
+        async with self._async_client() as client:
+            r = await client.post(url=url, json=self._json_dict(resource))
+            try:
+                r.raise_for_status()
+            except Exception as e:
+                print(r.text)
+                raise e
+        return r
+
 
     def _get_meta_data(self):
         url = self.api_address + "/metadata"
@@ -463,6 +559,20 @@ class FhirServer:
         r.raise_for_status()
         response = r.json()
         self._meta_data = response
+
+    def _sync_client(self) -> httpx.Client:
+        client = httpx.Client(
+            headers=self.headers,
+            auth=self.auth,
+        )
+        return client
+
+    def _async_client(self) -> httpx.AsyncClient:
+        client = httpx.AsyncClient(
+            headers=self.headers,
+            auth=self.auth,
+        )
+        return client
 
     def _setup(self):
         self.auth = self._validate_auth()
@@ -680,6 +790,16 @@ class FhirServer:
                         graph.nodes[successor]["resource"] = resource
                     else:
                         graph.nodes[successor]["resource"][field] = reference
+
+    @staticmethod
+    def _json_dict(resource: Union[Resource, FHIRAbstractModel] = None, json_dict: dict = None) -> dict:
+        if resource:
+            json_dict = orjson.loads(resource.json(exclude_none=True))
+            print(json_dict)
+            return json_dict
+        elif json_dict:
+            return orjson.loads(orjson.dumps(json_dict))
+
 
     def __repr__(self):
         return f"FhirServer(api_address={self.api_address})"
