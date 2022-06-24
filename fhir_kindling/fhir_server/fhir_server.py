@@ -317,7 +317,27 @@ class FhirServer:
         response = self._upload_bundle(bundle)
         return response
 
+    async def add_all_async(self, resources: List[Union[Resource, dict]]) -> BundleCreateResponse:
+        """
+        Asynchronously upload a list of resources to the server, after packaging them into a bundle
+        Args:
+            resources: list of resources to upload to the server, either dictionary or FHIR resource objects
+
+        Returns: Bundle create response from the fhir server
+
+        """
+        bundle = self._make_bundle_from_resource_list(resources)
+        response = await self._upload_bundle_async(bundle)
+        return response
+
     def add_bundle(self, bundle: Union[Bundle, dict, str], validate_entries: bool = True) -> BundleCreateResponse:
+        """
+        Upload a bundle to the server
+        :param bundle: str, dict or Bundle object to upload to the server
+        :param validate_entries: whether to validate the entries in the bundle
+        :return: BundleCreateResponse from the fhir server containing the server assigned ids of the resources in
+        the bundle
+        """
         # create bundle and validate it
         if isinstance(bundle, dict):
             bundle = Bundle(**bundle)
@@ -414,6 +434,8 @@ class FhirServer:
         missing_references = check_missing_references(query_result.resources)
         if missing_references:
             resources = self._get_missing_resources(query_result.resources)
+        else:
+            resources = query_result.resources
         # transfer the resources keeping server assigned ids and referential integrity
         response = self._transfer_resources(target_server, resources, query_result.query_params)
 
@@ -452,7 +474,6 @@ class FhirServer:
         delete_bundle.entry = []
 
         if resources:
-            print(resources)
             if isinstance(resources[0], dict):
                 resources = [fhir.resources.construct_fhir_element(
                     resource.get("resourceType"),
@@ -467,7 +488,6 @@ class FhirServer:
                 references = [ref.reference for ref in references]
             delete_references = references
         elif query:
-
             delete_references = [resource.relative_path() for resource in query.resources]
         else:
             raise ValueError("No resources or references provided")
@@ -552,6 +572,16 @@ class FhirServer:
                 raise e
         return r
 
+    async def _upload_bundle_async(self, bundle: Bundle) -> BundleCreateResponse:
+        async with self._async_client() as client:
+            r = await client.post(url=self.api_address, json=bundle.json(return_bytes=True))
+            try:
+                r.raise_for_status()
+            except Exception as e:
+                print(r.text)
+                raise e
+        bundle_response = BundleCreateResponse(r, bundle)
+        return bundle_response
 
     def _get_meta_data(self):
         url = self.api_address + "/metadata"
@@ -799,7 +829,6 @@ class FhirServer:
             return json_dict
         elif json_dict:
             return orjson.loads(orjson.dumps(json_dict))
-
 
     def __repr__(self):
         return f"FhirServer(api_address={self.api_address})"
