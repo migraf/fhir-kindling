@@ -2,7 +2,6 @@ import collections
 import pathlib
 from typing import Union, List, Dict, Optional, Callable, Any
 from enum import Enum
-from inspect import signature
 
 import pandas as pd
 from fhir.resources.bundle import Bundle
@@ -272,63 +271,6 @@ class QueryResponse:
         initial_response["Bundle"]["entry"] = entries[:self._limit] if self._limit else entries
         full_response_xml = xmltodict.unparse(initial_response, pretty=True)
         return full_response_xml
-
-    def _resolve_json_pagination(self, server_response: Response):
-        response = server_response.json()
-        link = response.get("link", None)
-        # If there is a link, get the next page otherwise return the response
-        if not link:
-            self.status_code = ResponseStatusCodes.OK
-            return response
-        else:
-            entries = []
-            initial_entry = response.get("entry", None)
-            if not initial_entry:
-                self.status_code = ResponseStatusCodes.NOT_FOUND
-                return response
-            else:
-                self.status_code = ResponseStatusCodes.OK
-                response_entries = response["entry"]
-                entries.extend(response_entries)
-                self._execute_callback(response_entries)
-            # if the limit is reached, stop resolving the pagination
-            if self._limit:
-                if len(entries) >= self._limit:
-                    response_entries = response["entry"][:self._limit]
-                    response["entry"] = response_entries
-                    self._execute_callback(response_entries)
-                    return response
-            # query the linked page and add the entries to the response
-            while response.get("link", None):
-                if self._limit and len(entries) >= self._limit:
-                    print("Limit reached stopping pagination resolve")
-                    break
-
-                next_page = next((link for link in response["link"] if link.get("relation", None) == "next"), None)
-
-                if next_page:
-                    response = self.session.get(next_page["url"]).json()
-                    response_entries = response["entry"]
-                    entries.extend(response_entries)
-                    self._execute_callback(response_entries)
-                else:
-                    break
-
-            response["entry"] = entries[:self._limit] if self._limit else entries
-            return response
-
-    def _execute_callback(self, entries: list):
-        # todo improve callback signature validation
-        if self.page_callback:
-            callback_signature = signature(self.page_callback)
-
-            if len(callback_signature.parameters) > 1:
-                raise ValueError("The callback function should have at most one parameter")
-
-            elif len(callback_signature.parameters) == 1:
-                self.page_callback(entries)
-            else:
-                self.page_callback()
 
     def __repr__(self):
         return f"<QueryResponse(resource={self.resource}, n={len(self.resources)})>"

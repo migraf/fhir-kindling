@@ -4,11 +4,10 @@ from fhir.resources.bundle import Bundle
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from fhir.resources import FHIRAbstractModel
 import fhir.resources
-import requests
-import requests.auth
+from inspect import signature
 
 import httpx
-from fhir_kindling.fhir_query.query_response import QueryResponse
+from fhir_kindling.fhir_query.query_response import QueryResponse, ResponseStatusCodes
 from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters, IncludeParameter, FieldParameter, \
     ReverseChainParameter, QueryOperators
 
@@ -20,7 +19,7 @@ class FHIRQueryBase:
                  base_url: str,
                  resource: Union[FHIRResourceModel, fhir.resources.FHIRAbstractModel, str] = None,
                  query_parameters: FHIRQueryParameters = None,
-                 auth: requests.auth.AuthBase = None,
+                 auth: httpx.Auth = None,
                  headers: dict = None,
                  output_format: str = "json"):
 
@@ -268,6 +267,21 @@ class FHIRQueryBase:
         """
         return self._make_query_string()
 
+    @staticmethod
+    def _execute_callback(entries: list,
+                          callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None):
+        # todo improve callback signature validation
+        if callback:
+            callback_signature = signature(callback)
+
+            if len(callback_signature.parameters) > 1:
+                raise ValueError("The callback function should have at most one parameter")
+
+            elif len(callback_signature.parameters) == 1:
+                callback(entries)
+            else:
+                callback()
+
     def __repr__(self):
         if isinstance(self.resource, str):
             resource = self.resource
@@ -303,16 +317,16 @@ class FHIRQuerySync(FHIRQueryBase):
                  base_url: str,
                  resource: Union[FHIRResourceModel, fhir.resources.FHIRAbstractModel, str] = None,
                  query_parameters: FHIRQueryParameters = None,
-                 auth: requests.auth.AuthBase = None,
+                 auth: httpx.Auth = None,
                  headers: dict = None,
-                 session: requests.Session = None,
+                 client: httpx.Client = None,
                  output_format: str = "json"):
 
         super().__init__(base_url, resource, query_parameters, auth, headers, output_format)
-        if session:
-            self.session = session
+        if client:
+            self.client = client
         else:
-            self._setup_session()
+            self._setup_client()
 
     def all(self,
             page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
@@ -362,16 +376,17 @@ class FHIRQuerySync(FHIRQueryBase):
         self._limit = 1
         return self._execute_query()
 
-    def _setup_session(self):
-        self.session = requests.Session()
-        self.session.auth = self.auth
-        self.session.headers.update({"Content-Type": "application/fhir+json"})
+    def _setup_client(self):
+        headers = self.headers
+        headers["Content-Type"] = "application/fhir+json"
+        self.client = httpx.Client(auth=self.auth, headers=headers)
 
     def _execute_query(self,
                        page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
                        count: int = None) -> QueryResponse:
-        r = self.session.get(self.query_url)
+        r = self.client.get(self.query_url)
         r.raise_for_status()
+        total_response = self._resolve_response_pagination(r, page_callback, count)
         response = QueryResponse(
             session=self.session,
             response=r,
@@ -383,12 +398,82 @@ class FHIRQuerySync(FHIRQueryBase):
         )
         return response
 
+    def _resolve_response_pagination(
+            self,
+            initial_response: httpx.Response,
+            page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
+            count: int = None) -> QueryResponse:
+
+        if self.output_format == "json":
+            response_dict = self._resolve_json_pagination(initial_response, page_callback, count)
+        elif self.output_format == "xml":
+            response_xml = initial_response.xml()
+            if response_xml.find("link") is not None:
+                links = response_xml.find("link")
+                for link in links:
+                    if link.attrib["rel"] == "next":
+                        self.next_url = link.attrib["href"]
+                        break
+            else:
+                self.next_url = None
+        else:
+            raise ValueError(f"Unsupported output format: {self.output_format}")
+
+    def _resolve_json_pagination(
+            self,
+            initial_response: httpx.Response,
+            page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
+            count: int = None) -> dict:
+        response_json = initial_response.json()
+        link = response_json.get("link", None)
+        # If there is a link, get the next page otherwise return the response
+        if not link:
+            self.status_code = ResponseStatusCodes.OK
+            return response_json
+        else:
+            entries = []
+            initial_entry = response_json.get("entry", None)
+            if not initial_entry:
+                self.status_code = ResponseStatusCodes.NOT_FOUND
+                return response_json
+            else:
+                self.status_code = ResponseStatusCodes.OK
+                response_entries = response_json["entry"]
+                entries.extend(response_entries)
+                self._execute_callback(response_entries, page_callback)
+            # if the limit is reached, stop resolving the pagination
+            if self._limit:
+                if len(entries) >= self._limit:
+                    response_entries = response_json["entry"][:self._limit]
+                    response_json["entry"] = response_entries
+                    self._execute_callback(response_entries, page_callback)
+                    return response_json
+            # query the linked page and add the entries to the response
+            while response_json.get("link", None):
+                if self._limit and len(entries) >= self._limit:
+                    print("Limit reached stopping pagination resolve")
+                    break
+
+                next_page = next((link for link in response_json["link"] if link.get("relation", None) == "next"), None)
+
+                if next_page:
+                    response = self.client.get(next_page["url"]).json()
+                    response_entries = response["entry"]
+                    entries.extend(response_entries)
+                    self._execute_callback(response_entries, page_callback)
+                else:
+                    break
+
+            response_json["entry"] = entries[:self._limit] if self._limit else entries
+            return response_json
+
 
 class FHIRQueryAsync(FHIRQueryBase):
     def __init__(self,
                  base_url: str,
                  resource: Union[FHIRResourceModel, fhir.resources.FHIRAbstractModel, str] = None,
-                 query_parameters: FHIRQueryParameters = None, auth: requests.auth.AuthBase = None,
+                 query_parameters: FHIRQueryParameters = None,
+                 auth: httpx.Auth = None,
                  headers: dict = None,
                  output_format: str = "json",
                  ):
@@ -446,7 +531,8 @@ class FHIRQueryAsync(FHIRQueryBase):
         client = httpx.AsyncClient(auth=self.auth, headers=self.headers)
         return client
 
-    def _execute_query(self,
-                       page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
-                       count: int = None):
+    async def _execute_query(self,
+                             page_callback: Union[
+                                 Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
+                             count: int = None) -> QueryResponse:
         pass
