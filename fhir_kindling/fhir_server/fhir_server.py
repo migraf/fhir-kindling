@@ -120,7 +120,6 @@ class FhirServer:
                 base_url=self.api_address,
                 resource=resource,
                 auth=self.auth,
-                session=self.session,
                 output_format=output_format
             )
         elif query_string:
@@ -130,7 +129,6 @@ class FhirServer:
             return FHIRQuerySync(
                 base_url=self.api_address,
                 auth=self.auth,
-                session=self.session,
                 query_parameters=query_parameters,
                 output_format=output_format
             )
@@ -196,10 +194,9 @@ class FhirServer:
 
         query_parameters = FHIRQueryParameters.from_query_string(query_string)
         query = FHIRQuerySync(
-            self.api_address,
+            base_url=self.api_address,
             resource=query_parameters.resource,
             query_parameters=query_parameters,
-            session=self.session,
             output_format=output_format
         )
         return query
@@ -243,7 +240,8 @@ class FhirServer:
         """
         Get a list of resources from the server specified by the given references
         Args:
-            references: list of references to the resources, either a Reference object or a string of the form `{ResourceType}/{id}`
+            references: list of references to the resources, either a Reference object or a string of the form
+                `{ResourceType}/{id}`
 
         Returns: list of resources corresponding to the references
 

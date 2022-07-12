@@ -5,6 +5,8 @@ from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from fhir.resources import FHIRAbstractModel
 import fhir.resources
 from inspect import signature
+import xmltodict
+import collections
 
 import httpx
 from fhir_kindling.fhir_query.query_response import QueryResponse, ResponseStatusCodes
@@ -271,11 +273,13 @@ class FHIRQueryBase:
     def _execute_callback(entries: list,
                           callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None):
         # todo improve callback signature validation
+        print("executing callback")
+        print(callback.__code__.co_argcount)
         if callback:
             callback_signature = signature(callback)
 
             if len(callback_signature.parameters) > 1:
-                raise ValueError("The callback function should have at most one parameter")
+                raise ValueError("The callback function should have either one or zero arguments")
 
             elif len(callback_signature.parameters) == 1:
                 callback(entries)
@@ -377,7 +381,7 @@ class FHIRQuerySync(FHIRQueryBase):
         return self._execute_query()
 
     def _setup_client(self):
-        headers = self.headers
+        headers = self.headers if self.headers else {}
         headers["Content-Type"] = "application/fhir+json"
         self.client = httpx.Client(auth=self.auth, headers=headers)
 
@@ -386,16 +390,7 @@ class FHIRQuerySync(FHIRQueryBase):
                        count: int = None) -> QueryResponse:
         r = self.client.get(self.query_url)
         r.raise_for_status()
-        total_response = self._resolve_response_pagination(r, page_callback, count)
-        response = QueryResponse(
-            session=self.session,
-            response=r,
-            query_params=self.query_parameters,
-            output_format=self.output_format,
-            limit=self._limit,
-            count=count,
-            page_callback=page_callback,
-        )
+        response = self._resolve_response_pagination(r, page_callback, count)
         return response
 
     def _resolve_response_pagination(
@@ -405,19 +400,19 @@ class FHIRQuerySync(FHIRQueryBase):
             count: int = None) -> QueryResponse:
 
         if self.output_format == "json":
-            response_dict = self._resolve_json_pagination(initial_response, page_callback, count)
+            response = self._resolve_json_pagination(initial_response, page_callback, count)
+
         elif self.output_format == "xml":
-            response_xml = initial_response.xml()
-            if response_xml.find("link") is not None:
-                links = response_xml.find("link")
-                for link in links:
-                    if link.attrib["rel"] == "next":
-                        self.next_url = link.attrib["href"]
-                        break
-            else:
-                self.next_url = None
+            response = self._resolve_xml_pagination(initial_response)
         else:
             raise ValueError(f"Unsupported output format: {self.output_format}")
+
+        return QueryResponse(
+            response=response,
+            query_params=self.query_parameters,
+            count=count,
+            limit=self._limit,
+        )
 
     def _resolve_json_pagination(
             self,
@@ -466,6 +461,51 @@ class FHIRQuerySync(FHIRQueryBase):
 
             response_json["entry"] = entries[:self._limit] if self._limit else entries
             return response_json
+
+    def _resolve_xml_pagination(self, server_response: httpx.Response) -> str:
+
+        # parse the xml response and extract the initial entries
+        initial_response = xmltodict.parse(server_response.text)
+        entries = initial_response["Bundle"].get("entry")
+
+        # if there are no entries, return the initial response
+        if not entries:
+            self.status_code = ResponseStatusCodes.NOT_FOUND
+            print(f"No resources match the query - query url: {self.query_params.to_query_string()}")
+            return server_response.text
+        else:
+            self.status_code = ResponseStatusCodes.OK
+        response = initial_response
+        # resolve the pagination
+        while True:
+            next_page = False
+            for link in response["Bundle"]["link"]:
+                if isinstance(link, collections.OrderedDict):
+                    relation_dict = dict(link["relation"])
+                else:
+                    break
+                if relation_dict.get("@value") == "next":
+                    # get url and extend with xml format
+                    url = link["url"]["@value"]
+                    url = url + "&_format=xml"
+                    r = self.session.get(url)
+                    r.raise_for_status()
+                    response = xmltodict.parse(r.text)
+                    added_entries = response["Bundle"]["entry"]
+                    entries.extend(added_entries)
+                    # Stop resolving the pagination when the limit is reached
+                    if self._limit:
+                        next_page = len(entries) < self._limit
+                    else:
+                        next_page = True
+
+            if not next_page:
+                print("All pages found")
+                break
+        # added the paginated resources to the initial response
+        initial_response["Bundle"]["entry"] = entries[:self._limit] if self._limit else entries
+        full_response_xml = xmltodict.unparse(initial_response, pretty=True)
+        return full_response_xml
 
 
 class FHIRQueryAsync(FHIRQueryBase):

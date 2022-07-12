@@ -557,3 +557,4 @@ async def test_fhir_server_get_many_async(fhir_server: FhirServer):
     references = [p.relative_path() for p in patients.resources]
     patients = await fhir_server.get_many_async(references)
     assert len(patients) == 10
+

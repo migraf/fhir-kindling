@@ -1,4 +1,3 @@
-import collections
 import pathlib
 from typing import Union, List, Dict, Optional, Callable, Any
 from enum import Enum
@@ -8,8 +7,8 @@ from fhir.resources.bundle import Bundle
 from fhir.resources import FHIRAbstractModel
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from pydantic import BaseModel
-from requests import Session, Response
-import xmltodict
+import httpx
+
 
 from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters
 from fhir_kindling.serde import flatten_resources
@@ -51,16 +50,13 @@ class QueryResponse:
     """
 
     def __init__(self,
-                 session: Session,
-                 response: Response,
+                 response: Union[httpx.Response, str, dict],
                  query_params: FHIRQueryParameters,
                  output_format: str = "json",
                  limit: int = None,
-                 count: int = None,
-                 page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None
+                 count: int = None
                  ):
 
-        self.session = session
         self.format = output_format
         self._limit = limit
         self.query_params = query_params
@@ -70,7 +66,6 @@ class QueryResponse:
         self._bundle = None
         self.status_code: ResponseStatusCodes = None
         self.count = count
-        self.page_callback = page_callback
 
         # parse the response after the rest of the setup is complete
         self.response: Union[str, dict] = self._process_server_response(response)
@@ -205,7 +200,7 @@ class QueryResponse:
                 included_resources.append(entry.resource)
                 self._included_resources[entry.resource.resource_type] = included_resources
 
-    def _process_server_response(self, response: Response) -> Union[Dict, Bundle, str]:
+    def _process_server_response(self, response: Union[httpx.Response, str]) -> Union[Dict, Bundle, str]:
         """
         Handle the initial response from the server and resolve pagination if necessary.
         Args:
@@ -218,59 +213,26 @@ class QueryResponse:
 
         # if the format is xml resolve pagination and return xml string response
         if self.format == "xml":
-            return self._resolve_xml_pagination(response)
+            if isinstance(response, httpx.Response):
+                response = response.content
+            return response
         # otherwise, resolve json pagination and process further according to selected outcome
         else:
-            json_bundle = self._resolve_json_pagination(response)
             if self.format in ["json", "dict"]:
-                return json_bundle
-            elif self.format == "bundle":
-                return Bundle(**json_bundle)
-
-    def _resolve_xml_pagination(self, server_response: Response) -> str:
-
-        # parse the xml response and extract the initial entries
-        initial_response = xmltodict.parse(server_response.text)
-        entries = initial_response["Bundle"].get("entry")
-
-        # if there are no entries, return the initial response
-        if not entries:
-            self.status_code = ResponseStatusCodes.NOT_FOUND
-            print(f"No resources match the query - query url: {self.query_params.to_query_string()}")
-            return server_response.text
-        else:
-            self.status_code = ResponseStatusCodes.OK
-        response = initial_response
-        # resolve the pagination
-        while True:
-            next_page = False
-            for link in response["Bundle"]["link"]:
-                if isinstance(link, collections.OrderedDict):
-                    relation_dict = dict(link["relation"])
+                if isinstance(response, httpx.Response):
+                    response = response.json()
+                elif isinstance(response, dict):
+                    response = response
                 else:
-                    break
-                if relation_dict.get("@value") == "next":
-                    # get url and extend with xml format
-                    url = link["url"]["@value"]
-                    url = url + "&_format=xml"
-                    r = self.session.get(url)
-                    r.raise_for_status()
-                    response = xmltodict.parse(r.text)
-                    added_entries = response["Bundle"]["entry"]
-                    entries.extend(added_entries)
-                    # Stop resolving the pagination when the limit is reached
-                    if self._limit:
-                        next_page = len(entries) < self._limit
-                    else:
-                        next_page = True
-
-            if not next_page:
-                print("All pages found")
-                break
-        # added the paginated resources to the initial response
-        initial_response["Bundle"]["entry"] = entries[:self._limit] if self._limit else entries
-        full_response_xml = xmltodict.unparse(initial_response, pretty=True)
-        return full_response_xml
+                    response = Bundle.parse_raw(response).dict()
+                return response
+            elif self.format == "bundle":
+                if isinstance(response, httpx.Response):
+                    return Bundle(**response.json())
+                elif isinstance(response, dict):
+                    return Bundle(**response)
+                else:
+                    return Bundle.parse_raw(response)
 
     def __repr__(self):
         return f"<QueryResponse(resource={self.resource}, n={len(self.resources)})>"
