@@ -437,23 +437,20 @@ class FHIRQuerySync(FHIRQueryBase):
                 entries.extend(response_entries)
                 self._execute_callback(response_entries, page_callback)
             # if the limit is reached, stop resolving the pagination
-            if self._limit:
-                if len(entries) >= self._limit:
-                    response_entries = response_json["entry"][:self._limit]
-                    response_json["entry"] = response_entries
-                    self._execute_callback(response_entries, page_callback)
-                    return response_json
+            if self._limit and len(entries) >= self._limit:
+                response_entries = response_json["entry"][:self._limit]
+                response_json["entry"] = response_entries
+                self._execute_callback(response_entries, page_callback)
+                return response_json
             # query the linked page and add the entries to the response
+
             while response_json.get("link", None):
                 if self._limit and len(entries) >= self._limit:
-                    print("Limit reached stopping pagination resolve")
                     break
-
                 next_page = next((link for link in response_json["link"] if link.get("relation", None) == "next"), None)
-
                 if next_page:
-                    response = self.client.get(next_page["url"]).json()
-                    response_entries = response["entry"]
+                    response_json = self.client.get(next_page["url"]).json()
+                    response_entries = response_json["entry"]
                     entries.extend(response_entries)
                     self._execute_callback(response_entries, page_callback)
                 else:
