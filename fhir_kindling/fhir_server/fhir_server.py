@@ -185,9 +185,6 @@ class FhirServer:
         Args:
             query_string:
             output_format:
-            limit:
-            count:
-
         Returns:
 
         """
@@ -201,13 +198,37 @@ class FhirServer:
         )
         return query
 
+    def raw_query_async(self, query_string: str, output_format: str = "json") -> FHIRQueryAsync:
+        """
+        Asynchronously Execute a raw query string against the server
+
+        Args:
+            query_string: query string defining the query to execute
+            output_format: the output format to request from the fhir server (json or xml) defaults to json
+        Returns:
+            a FHIRQueryAsync object that can be further modified with filters and conditions before being executed
+            against the server
+
+        """
+
+        query_parameters = FHIRQueryParameters.from_query_string(query_string)
+        query = FHIRQueryAsync(
+            base_url=self.api_address,
+            resource=query_parameters.resource,
+            query_parameters=query_parameters,
+            output_format=output_format
+        )
+        return query
+
     def get(self, reference: Union[str, Reference]) -> FHIRAbstractModel:
         """
         Get a resource from the server specified by the given reference {ResourceType}/{id}
+
         Args:
             reference: reference to the resource, either a Reference object or a string of the form {ResourceType}/{id}
 
-        Returns: the resource from the server specified by the reference
+        Returns:
+            the resource from the server specified by the reference
 
         """
         if isinstance(reference, Reference):
@@ -221,10 +242,12 @@ class FhirServer:
     async def get_async(self, reference: Union[str, Reference]) -> FHIRAbstractModel:
         """
         Asynchronously get a resource from the server specified by the given reference {ResourceType}/{id}
+
         Args:
             reference: reference to the resource, either a Reference object or a string of the form {ResourceType}/{id}
 
-        Returns: the resource from the server specified by the reference
+        Returns:
+            the resource from the server specified by the reference
 
         """
         if isinstance(reference, Reference):
@@ -239,23 +262,50 @@ class FhirServer:
     def get_many(self, references: List[Union[str, Reference]]) -> List[FHIRAbstractModel]:
         """
         Get a list of resources from the server specified by the given references
+
         Args:
             references: list of references to the resources, either a Reference object or a string of the form
                 `{ResourceType}/{id}`
 
-        Returns: list of resources corresponding to the references
+        Returns:
+            list of resources corresponding to the references
 
         """
         str_references = [reference if isinstance(reference, str) else reference.reference for reference in references]
 
         resources = self._get_many_query(str_references)
         # todo use batched/transaction requests to get all resources in one request
-        # get_many_transaction = self._make_get_many_transaction(str_references)
+        get_many_transaction = self._make_get_many_transaction(str_references)
         # response = self.session.post(self.api_address, json=get_many_transaction.dict(exclude_none=True))
         #
         # entries = response.json()["entry"]
         # resources = [construct_fhir_element(entry["resource"]["resourceType"], entry["resource"]) for entry in entries]
 
+        return resources
+
+    async def get_many_async(self, references: List[Union[str, Reference]]) -> List[FHIRAbstractModel]:
+        """
+        Asynchronously get a list of resources from the server specified by the given references
+
+        Args:
+            references: list of references to the resources, either a Reference object or a string of the form
+                `{ResourceType}/{id}`
+
+        Returns:
+            list of resources corresponding to the references
+
+        """
+        str_references = [reference if isinstance(reference, str) else reference.reference for reference in references]
+        get_many_transaction = self._make_get_many_transaction(str_references)
+
+        async with self._async_client() as client:
+            response = await client.post(self.api_address, json=get_many_transaction.dict(exclude_none=True))
+
+        # construct the list of resources from the server response
+        resources = [
+                        construct_fhir_element(entry["resource"]["resourceType"], entry["resource"])
+                        for entry in response.json()["entry"]
+                     ]
         return resources
 
     def add(self, resource: Union[Resource, dict]) -> ResourceCreateResponse:
@@ -348,6 +398,28 @@ class FhirServer:
             self._validate_upload_bundle_entries(bundle.entry)
 
         transaction_response = self._upload_bundle(bundle)
+        return transaction_response
+
+    async def add_bundle_async(self, bundle: Union[Bundle, dict, str], validate_entries: bool = True) -> BundleCreateResponse:
+        """
+        Asynchronously upload a bundle to the server
+        :param bundle: str, dict or Bundle object to upload to the server
+        :param validate_entries: whether to validate the entries in the bundle
+        :return: BundleCreateResponse from the fhir server containing the server assigned ids of the resources in
+        the bundle
+        """
+        # create bundle and validate it
+        if isinstance(bundle, dict):
+            bundle = Bundle(**bundle)
+        elif isinstance(bundle, str):
+            bundle = Bundle.parse_raw(bundle)
+        else:
+            bundle = Bundle.validate(bundle)
+        # check that all entries are bundle requests with methods post/put
+        if validate_entries:
+            self._validate_upload_bundle_entries(bundle.entry)
+
+        transaction_response = await self._upload_bundle_async(bundle)
         return transaction_response
 
     def update(self, resources: List[Union[FHIRResourceModel, dict]]):

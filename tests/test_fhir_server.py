@@ -272,19 +272,19 @@ def test_fhir_server_from_env():
             server = FhirServer.from_env()
 
     print(client_id, client_secret, oidc_provider_url)
-    with mock.patch.dict(
-            os.environ,
-            {
-                "FHIR_API_URL": "http://test.fhir.org/r4",
-                "CLIENT_ID": client_id,
-                "CLIENT_SECRET": client_secret,
-                "OIDC_PROVIDER_URL": oidc_provider_url,
-                "FHIR_USER": "",
-                "FHIR_PW": "",
-                "FHIR_TOKEN": ""
-            }
-    ):
-        server = FhirServer.from_env()
+    # with mock.patch.dict(
+    #         os.environ,
+    #         {
+    #             "FHIR_API_URL": "http://test.fhir.org/r4",
+    #             "CLIENT_ID": "client",
+    #             "CLIENT_SECRET": "secret",
+    #             "OIDC_PROVIDER_URL": "url",
+    #             "FHIR_USER": "",
+    #             "FHIR_PW": "",
+    #             "FHIR_TOKEN": ""
+    #         }
+    # ):
+    #     server = FhirServer.from_env()
 
 
 def test_upload_single_resource(fhir_server: FhirServer):
@@ -318,7 +318,7 @@ def test_server_add_all(fhir_server: FhirServer):
 
 
 def test_query_all(fhir_server: FhirServer):
-    response = fhir_server.query(Patient.construct(), output_format="dict").all()
+    response = fhir_server.query(Patient.construct(), output_format="json").all()
     print(response)
     assert response.response
 
@@ -335,7 +335,7 @@ def test_query_with_string_resource(fhir_server: FhirServer):
 
 
 def test_query_with_limit(fhir_server: FhirServer):
-    response = fhir_server.query(Patient.construct(), output_format="dict").limit(2)
+    response = fhir_server.query(Patient.construct(), output_format="json").limit(2)
 
     assert response.response["entry"]
 
@@ -344,7 +344,7 @@ def test_query_with_limit(fhir_server: FhirServer):
 
 def test_query_raw_string(fhir_server: FhirServer):
     query_string = "/Patient?"
-    query = fhir_server.raw_query(query_string=query_string, output_format="dict")
+    query = fhir_server.raw_query(query_string=query_string, output_format="json")
 
     assert isinstance(query, FHIRQuerySync)
 
@@ -517,13 +517,13 @@ def test_resolve_reference_graph(fhir_server: FhirServer):
     resources = patients + [organization, practitioner, encounter] + conditions
     # print(resources)
 
-    hapi_server = FhirServer(api_address="http://localhost:8082/fhir")
+    hapi_server = FhirServer(api_address="http://localhost:9091/fhir")
     response = fhir_server._transfer_resources(hapi_server, resources)
 
 
 def test_fhir_server_transfer(fhir_server: FhirServer):
     conditions = fhir_server.query("Condition").limit(10)
-    hapi_server = FhirServer(api_address="http://localhost:8082/fhir")
+    hapi_server = FhirServer(api_address="http://localhost:9091/fhir")
     response = fhir_server.transfer(hapi_server, conditions)
 
     print(response)
@@ -558,3 +558,10 @@ async def test_fhir_server_get_many_async(fhir_server: FhirServer):
     patients = await fhir_server.get_many_async(references)
     assert len(patients) == 10
 
+
+@pytest.mark.asyncio
+async def test_fhir_server_query_async(fhir_server: FhirServer):
+    query = fhir_server.query_async(Patient.construct(), output_format="json")
+    response = await query.all()
+    print(response)
+    assert response

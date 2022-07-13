@@ -21,11 +21,21 @@ jobs:
       hapi:
         image: "hapiproject/hapi:latest"
         ports:
-          - "8082:8080"
+          - "9091:8080"
         env:
           hapi.fhir.default_encoding: json
           hapi.fhir.: json
-          hapi.fhir.server_address: "http://localhost:8082/fhir"
+          hapi.fhir.server_address: "http://localhost:9091/fhir"
+
+      blaze:
+        image: "samply/blaze:latest"
+        env:
+          JAVA_TOOL_OPTIONS: "-Xmx2g"
+          BASE_URL: "http://localhost:9090"
+        ports:
+            - "9090:8080"
+        volumes:
+            - blaze:/app/data
 
 #        options: >-
 #          --health-cmd curl http://localhost:8080/fhir/metadata
@@ -34,11 +44,11 @@ jobs:
 #          --health-retries 5
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install pipenv
         run: pipx install pipenv
       - name: Set up Python 3.9
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.9
           cache: "pipenv"

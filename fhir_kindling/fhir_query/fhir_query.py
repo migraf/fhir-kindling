@@ -272,9 +272,6 @@ class FHIRQueryBase:
     @staticmethod
     def _execute_callback(entries: list,
                           callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None):
-        # todo improve callback signature validation
-        print("executing callback")
-        print(callback.__code__.co_argcount)
         if callback:
             callback_signature = signature(callback)
 
@@ -412,6 +409,7 @@ class FHIRQuerySync(FHIRQueryBase):
             query_params=self.query_parameters,
             count=count,
             limit=self._limit,
+            output_format=self.output_format,
         )
 
     def _resolve_json_pagination(
@@ -468,7 +466,7 @@ class FHIRQuerySync(FHIRQueryBase):
         # if there are no entries, return the initial response
         if not entries:
             self.status_code = ResponseStatusCodes.NOT_FOUND
-            print(f"No resources match the query - query url: {self.query_params.to_query_string()}")
+            print(f"No resources match the query - query url: {self.query_parameters.to_query_string()}")
             return server_response.text
         else:
             self.status_code = ResponseStatusCodes.OK
@@ -485,7 +483,7 @@ class FHIRQuerySync(FHIRQueryBase):
                     # get url and extend with xml format
                     url = link["url"]["@value"]
                     url = url + "&_format=xml"
-                    r = self.session.get(url)
+                    r = self.client.get(url)
                     r.raise_for_status()
                     response = xmltodict.parse(r.text)
                     added_entries = response["Bundle"]["entry"]
@@ -497,7 +495,6 @@ class FHIRQuerySync(FHIRQueryBase):
                         next_page = True
 
             if not next_page:
-                print("All pages found")
                 break
         # added the paginated resources to the initial response
         initial_response["Bundle"]["entry"] = entries[:self._limit] if self._limit else entries

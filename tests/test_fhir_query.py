@@ -1387,6 +1387,9 @@ def test_query_limit(server):
     result = query.limit(100, page_callback=lambda x: print(len(x)))
     assert len(result.resources) == 100
 
+    query = server.query("Patient", output_format="xml").all(count=50)
+
+
 
 def test_query_with_callback(server):
     print("callback1")
@@ -1395,10 +1398,10 @@ def test_query_with_callback(server):
     print("callback2")
     result = server.query("Patient").all(page_callback=lambda x: print(len(x)), count=20)
 
-    # print("callback3")
-    # with pytest.raises(ValueError):
-    #
-    #     server.query("Patient").all(page_callback=lambda x,y: print(x, y), count=20)
+    print("callback3")
+    with pytest.raises(ValueError):
+
+        server.query("Patient").all(page_callback=lambda x,y: print(x, y), count=20)
 
 
 def test_query_response_resources(server):
