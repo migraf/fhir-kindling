@@ -3,6 +3,7 @@ from typing import Union, List, Dict, Optional, Callable, Any
 from enum import Enum
 
 import pandas as pd
+import xmltodict
 from fhir.resources.bundle import Bundle
 from fhir.resources import FHIRAbstractModel
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
@@ -115,12 +116,12 @@ class QueryResponse:
                 included.append(IncludedResources(resource_type=resource_type, resources=resources))
             return included
 
-    def save(self, file_path: Union[str, pathlib.Path], format: str = "json"):
+    def save(self, file_path: Union[str, pathlib.Path], output_format: str = "json"):
         """
         Save the response to a file.
         Args:
             file_path: path to the file to save the response to.
-            format: output format one of xml|json|(csv)
+            output_format: output format one of xml|json|(csv)
 
         Returns:
             None
@@ -129,13 +130,13 @@ class QueryResponse:
         if isinstance(file_path, str):
             file_path = pathlib.Path(file_path)
 
-        format = OutputFormats(format)
+        output_format = OutputFormats(output_format)
         # check that only xml queries can be saved as xml
         if self.format == OutputFormats.XML:
-            if not format == OutputFormats.XML:
+            if not output_format == OutputFormats.XML:
                 raise NotImplementedError("XML query results can only be saved as XML")
 
-        self.format = format
+        self.format = output_format
         if self.format == OutputFormats.XML:
             with open(file_path, "w") as f:
                 f.write(self.response)
@@ -154,17 +155,17 @@ class QueryResponse:
             df = flatten_resources(self.resources)
             df.to_csv(file_path, index=False)
 
-    def to_dfs(self, format: str = "list") -> Union[List[pd.DataFrame], pd.DataFrame]:
+    def to_dfs(self, df_format: str = "list") -> Union[List[pd.DataFrame], pd.DataFrame]:
         """
         Serialize the response to a list of pandas dataframes
         Args:
-            format: list of dataframe (one for each resource in the response) or single dataframe
+            df_format: list of dataframe (one for each resource in the response) or single dataframe
 
         Returns:
             List of pandas dataframes or a single dataframe containing the resources in the query
         """
 
-        df_format = DataframeFormat(format)
+        df_format = DataframeFormat(df_format)
 
         if df_format == DataframeFormat.LIST:
             dfs = [flatten_resources(self.resources)]

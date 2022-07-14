@@ -1663,10 +1663,10 @@ def test_query_response_save(server):
     query_resource = "Condition"
     query = server.query(query_resource, output_format="xml")
     response = query.limit(100)
-    response.save(xml_file, format="xml")
+    response.save(xml_file, output_format="xml")
 
     with pytest.raises(NotImplementedError):
-        response.save(xml_file, format="json")
+        response.save(xml_file, output_format="json")
 
     assert os.path.isfile(xml_file)
     assert xmltodict.parse(open(xml_file, "r").read()) == xmltodict.parse(response.response)
@@ -1675,7 +1675,7 @@ def test_query_response_save(server):
 
     # invalid format
     with pytest.raises(ValueError):
-        response.save(xml_file, format="invalid")
+        response.save(xml_file, output_format="invalid")
 
     # test with included resources and json
     query_resource = "Condition"
@@ -1689,7 +1689,7 @@ def test_query_response_save(server):
     query = query.include(resource=query_resource, reference_param=search_param)
     response = query.all()
 
-    response.save(json_file, format="json")
+    response.save(json_file, output_format="json")
 
     assert os.path.isfile(json_file)
     assert json.loads(open(json_file).read())
@@ -1698,7 +1698,7 @@ def test_query_response_save(server):
 
     # save to csv
     patient_response = server.query("Patient").all()
-    patient_response.save(csv_file, format="csv")
+    patient_response.save(csv_file, output_format="csv")
 
     assert os.path.isfile(csv_file)
     assert pd.read_csv(csv_file).shape[0] > 0
@@ -1706,7 +1706,7 @@ def test_query_response_save(server):
     # os.remove(csv_file)
 
     # save to csv with included resource
-    response.save(csv_file, format="csv")
+    response.save(csv_file, output_format="csv")
 
     assert os.path.isfile(csv_file)
     assert pd.read_csv(csv_file).shape[0] > 0
@@ -1733,7 +1733,7 @@ def test_query_response_to_dfs(server):
     response = query.all()
 
     with pytest.raises(ValueError):
-        response.to_dfs(format="invalid")
+        response.to_dfs(df_format="invalid")
 
     dfs = response.to_dfs()
 

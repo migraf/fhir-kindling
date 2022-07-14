@@ -41,7 +41,7 @@ class ResourceCreateResponse(CreateResponse):
 
     def __repr__(self):
         return f"<{self.__class__.__name__}(resource_id={self.resource_id}, location={self.location}," \
-               f" version={self.version}, resource=...)>"
+               f" version={self.version})>"
 
 
 class BundleCreateResponse:

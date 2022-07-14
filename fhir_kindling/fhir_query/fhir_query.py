@@ -513,6 +513,10 @@ class FHIRQueryAsync(FHIRQueryBase):
                  ):
         super().__init__(base_url, resource, query_parameters, auth, headers, output_format)
 
+        # set up the async client instance
+        self.client = None
+        self._setup_client()
+
     async def all(self,
                   page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
                   count: int = None) -> QueryResponse:
@@ -529,7 +533,8 @@ class FHIRQueryAsync(FHIRQueryBase):
         """
         self._limit = None
         self._count = count
-        return self._execute_query(page_callback=page_callback, count=count)
+        response = await self._execute_query(page_callback=page_callback, count=count)
+        return response
 
     async def limit(self,
                     n: int,
@@ -549,7 +554,8 @@ class FHIRQueryAsync(FHIRQueryBase):
         """
         self._limit = n
         self._count = count
-        return self._execute_query(page_callback=page_callback, count=count)
+        response = await self._execute_query(page_callback=page_callback, count=count)
+        return response
 
     async def first(self) -> QueryResponse:
         """
@@ -559,14 +565,130 @@ class FHIRQueryAsync(FHIRQueryBase):
 
         """
         self._limit = 1
-        return self._execute_query()
+        response = await self._execute_query(count=1)
+        return response
 
-    def _async_client(self) -> httpx.AsyncClient:
-        client = httpx.AsyncClient(auth=self.auth, headers=self.headers)
-        return client
+    def _setup_client(self):
+        headers = self.headers if self.headers else {}
+        headers["Content-Type"] = "application/fhir+json"
+        self.client = httpx.AsyncClient(auth=self.auth, headers=headers)
 
     async def _execute_query(self,
                              page_callback: Union[
                                  Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
                              count: int = None) -> QueryResponse:
-        pass
+        r = await self.client.get(self.query_url)
+        r.raise_for_status()
+        response = self._resolve_response_pagination(r, page_callback, count)
+        return response
+
+    async def _resolve_response_pagination(
+            self,
+            initial_response: httpx.Response,
+            page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
+            count: int = None) -> QueryResponse:
+
+        if self.output_format == "json":
+            response = await self._resolve_json_pagination(initial_response, page_callback, count)
+
+        elif self.output_format == "xml":
+            response = await self._resolve_xml_pagination(initial_response)
+        else:
+            raise ValueError(f"Unsupported output format: {self.output_format}")
+
+        return QueryResponse(
+            response=response,
+            query_params=self.query_parameters,
+            count=count,
+            limit=self._limit,
+            output_format=self.output_format,
+        )
+
+    async def _resolve_json_pagination(
+            self,
+            initial_response: httpx.Response,
+            page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
+            count: int = None) -> dict:
+        response_json = initial_response.json()
+        link = response_json.get("link", None)
+        # If there is a link, get the next page otherwise return the response
+        if not link:
+            self.status_code = ResponseStatusCodes.OK
+            return response_json
+        else:
+            entries = []
+            initial_entry = response_json.get("entry", None)
+            if not initial_entry:
+                self.status_code = ResponseStatusCodes.NOT_FOUND
+                return response_json
+            else:
+                self.status_code = ResponseStatusCodes.OK
+                response_entries = response_json["entry"]
+                entries.extend(response_entries)
+                self._execute_callback(response_entries, page_callback)
+            # if the limit is reached, stop resolving the pagination
+            if self._limit and len(entries) >= self._limit:
+                response_entries = response_json["entry"][:self._limit]
+                response_json["entry"] = response_entries
+                self._execute_callback(response_entries, page_callback)
+                return response_json
+            # query the linked page and add the entries to the response
+
+            while response_json.get("link", None):
+                if self._limit and len(entries) >= self._limit:
+                    break
+                next_page = next((link for link in response_json["link"] if link.get("relation", None) == "next"), None)
+                if next_page:
+                    response_json = await self.client.get(next_page["url"]).json()
+                    response_entries = response_json["entry"]
+                    entries.extend(response_entries)
+                    self._execute_callback(response_entries, page_callback)
+                else:
+                    break
+
+            response_json["entry"] = entries[:self._limit] if self._limit else entries
+            return response_json
+
+    def _resolve_xml_pagination(self, server_response: httpx.Response) -> str:
+
+        # parse the xml response and extract the initial entries
+        initial_response = xmltodict.parse(server_response.text)
+        entries = initial_response["Bundle"].get("entry")
+
+        # if there are no entries, return the initial response
+        if not entries:
+            self.status_code = ResponseStatusCodes.NOT_FOUND
+            print(f"No resources match the query - query url: {self.query_parameters.to_query_string()}")
+            return server_response.text
+        else:
+            self.status_code = ResponseStatusCodes.OK
+        response = initial_response
+        # resolve the pagination
+        while True:
+            next_page = False
+            for link in response["Bundle"]["link"]:
+                if isinstance(link, collections.OrderedDict):
+                    relation_dict = dict(link["relation"])
+                else:
+                    break
+                if relation_dict.get("@value") == "next":
+                    # get url and extend with xml format
+                    url = link["url"]["@value"]
+                    url = url + "&_format=xml"
+                    r = await self.client.get(url)
+                    r.raise_for_status()
+                    response = xmltodict.parse(r.text)
+                    added_entries = response["Bundle"]["entry"]
+                    entries.extend(added_entries)
+                    # Stop resolving the pagination when the limit is reached
+                    if self._limit:
+                        next_page = len(entries) < self._limit
+                    else:
+                        next_page = True
+
+            if not next_page:
+                break
+        # added the paginated resources to the initial response
+        initial_response["Bundle"]["entry"] = entries[:self._limit] if self._limit else entries
+        full_response_xml = xmltodict.unparse(initial_response, pretty=True)
+        return full_response_xml
