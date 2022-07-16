@@ -236,4 +236,6 @@ class QueryResponse:
                     return Bundle.parse_raw(response)
 
     def __repr__(self):
+        if self.format == "xml":
+            return f"<QueryResponse(resource={self.resource}, format=xml)>"
         return f"<QueryResponse(resource={self.resource}, n={len(self.resources)})>"

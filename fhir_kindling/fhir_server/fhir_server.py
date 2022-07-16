@@ -35,7 +35,7 @@ class FhirServer:
 
     def __init__(self, api_address: str, username: str = None, password: str = None, token: str = None,
                  client_id: str = None, client_secret: str = None, oidc_provider_url: str = None,
-                 auth: requests.auth.AuthBase = None, headers: dict = None,
+                 auth: httpx.Auth = None, headers: dict = None,
                  fhir_server_type: str = "hapi"):
         """
         Initialize a FHIR server connection
@@ -644,7 +644,7 @@ class FhirServer:
 
     async def _upload_bundle_async(self, bundle: Bundle) -> BundleCreateResponse:
         async with self._async_client() as client:
-            r = await client.post(url=self.api_address, json=bundle.json(return_bytes=True))
+            r = await client.post(url=self.api_address, json=self._json_dict(bundle))
             try:
                 r.raise_for_status()
             except Exception as e:
@@ -895,7 +895,6 @@ class FhirServer:
     def _json_dict(resource: Union[Resource, FHIRAbstractModel] = None, json_dict: dict = None) -> dict:
         if resource:
             json_dict = orjson.loads(resource.json(exclude_none=True))
-            print(json_dict)
             return json_dict
         elif json_dict:
             return orjson.loads(orjson.dumps(json_dict))

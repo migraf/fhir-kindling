@@ -551,6 +551,15 @@ async def test_fhir_server_add_async(fhir_server: FhirServer):
     assert patient_create
     assert patient_create.resource_id
 
+
+@pytest.mark.asyncio
+async def test_fhir_server_add_all_async(fhir_server: FhirServer):
+    patient_gen = PatientGenerator(n=10)
+    patients = patient_gen.generate()
+    patients_create = await fhir_server.add_all_async(patients)
+    assert patients_create
+
+
 @pytest.mark.asyncio
 async def test_fhir_server_get_many_async(fhir_server: FhirServer):
     patients = fhir_server.query("Patient").limit(10)
@@ -563,5 +572,10 @@ async def test_fhir_server_get_many_async(fhir_server: FhirServer):
 async def test_fhir_server_query_async(fhir_server: FhirServer):
     query = fhir_server.query_async(Patient.construct(), output_format="json")
     response = await query.all()
-    print(response)
     assert response
+
+@pytest.mark.asyncio
+async def test_add_bundle_async(fhir_server: FhirServer, org_bundle):
+    response = await fhir_server.add_bundle_async(org_bundle)
+    assert response
+    print(response)

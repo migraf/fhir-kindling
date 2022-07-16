@@ -1739,3 +1739,21 @@ def test_query_response_to_dfs(server):
 
     assert len(dfs) > 1
     assert dfs[0].shape[0] > 0
+
+
+@pytest.mark.asyncio
+async def test_query_async(server):
+    query = server.query_async("Patient")
+    response = await query.all()
+    print(response)
+
+    with pytest.raises(ValueError):
+        query = server.query_async("Patient", output_format="invalid")
+        response = await query.all()
+        print(response)
+
+@pytest.mark.asyncio
+async def test_query_async_xml(server):
+    query = server.query_async("Patient", output_format="xml")
+    response = await query.all()
+    print(response)
