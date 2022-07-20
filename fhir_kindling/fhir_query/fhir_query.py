@@ -648,27 +648,6 @@ class FHIRQueryAsync(FHIRQueryBase):
             response_json["entry"] = entries[:self._limit] if self._limit else entries
             return response_json
 
-    def _check_update_response_entries(self,
-                                       entries: List,
-                                       response_json: dict,
-                                       page_callback: Union[
-                                           Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None]):
-        initial_entry = response_json.get("entry", None)
-        if not initial_entry:
-            self.status_code = ResponseStatusCodes.NOT_FOUND
-            return response_json
-        else:
-            self.status_code = ResponseStatusCodes.OK
-            response_entries = response_json["entry"]
-            entries.extend(response_entries)
-            self._execute_callback(response_entries, page_callback)
-        # if the limit is reached, stop resolving the pagination
-        if self._limit and len(entries) >= self._limit:
-            response_entries = response_json["entry"][:self._limit]
-            response_json["entry"] = response_entries
-            self._execute_callback(response_entries, page_callback)
-            return response_json
-
     async def _resolve_xml_pagination(self, server_response: httpx.Response) -> str:
 
         # parse the xml response and extract the initial entries

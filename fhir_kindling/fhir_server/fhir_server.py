@@ -1,9 +1,6 @@
 import os
 from typing import List, Union, Tuple
 
-import requests
-from requests import Response
-import requests.auth
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
 import httpx
@@ -56,7 +53,6 @@ class FhirServer:
         self.fhir_server_type = fhir_server_type
         self.api_address = self.validate_api_address(api_address)
         self._meta_data = None
-        self.auth = None
 
         # possible basic auth class vars
         self.username = username
@@ -72,12 +68,8 @@ class FhirServer:
         self._auth = auth
         self._headers = headers
 
-        # setup the session
-        self.session = requests.Session()
-        self._setup()
-
     @classmethod
-    def from_env(cls, no_auth: bool = False):
+    def from_env(cls, no_auth: bool = False) -> 'FhirServer':
         api_address = _api_address_from_env()
         server_type = os.getenv("FHIR_SERVER_TYPE")
 
@@ -233,7 +225,7 @@ class FhirServer:
         """
         if isinstance(reference, Reference):
             reference = reference.reference
-        r = self.session.get(f"{self.api_address}/{reference}")
+        r = self._sync_client().get(f"{self.api_address}/{reference}")
         r.raise_for_status()
         resource_dict = r.json()
         resource = construct_fhir_element(resource_dict["resourceType"], resource_dict)
@@ -273,13 +265,13 @@ class FhirServer:
         """
         str_references = [reference if isinstance(reference, str) else reference.reference for reference in references]
 
-        resources = self._get_many_query(str_references)
+        # resources = self._get_many_query(str_references)
         # todo use batched/transaction requests to get all resources in one request
         get_many_transaction = self._make_get_many_transaction(str_references)
-        # response = self.session.post(self.api_address, json=get_many_transaction.dict(exclude_none=True))
+        response = self._sync_client().post(self.api_address, json=self._json_dict(get_many_transaction))
         #
-        # entries = response.json()["entry"]
-        # resources = [construct_fhir_element(entry["resource"]["resourceType"], entry["resource"]) for entry in entries]
+        entries = response.json()["entry"]
+        resources = [construct_fhir_element(entry["resource"]["resourceType"], entry["resource"]) for entry in entries]
 
         return resources
 
@@ -303,9 +295,9 @@ class FhirServer:
 
         # construct the list of resources from the server response
         resources = [
-                        construct_fhir_element(entry["resource"]["resourceType"], entry["resource"])
-                        for entry in response.json()["entry"]
-                     ]
+            construct_fhir_element(entry["resource"]["resourceType"], entry["resource"])
+            for entry in response.json()["entry"]
+        ]
         return resources
 
     def add(self, resource: Union[Resource, dict]) -> ResourceCreateResponse:
@@ -400,7 +392,8 @@ class FhirServer:
         transaction_response = self._upload_bundle(bundle)
         return transaction_response
 
-    async def add_bundle_async(self, bundle: Union[Bundle, dict, str], validate_entries: bool = True) -> BundleCreateResponse:
+    async def add_bundle_async(self, bundle: Union[Bundle, dict, str],
+                               validate_entries: bool = True) -> BundleCreateResponse:
         """
         Asynchronously upload a bundle to the server
         :param bundle: str, dict or Bundle object to upload to the server
@@ -456,7 +449,7 @@ class FhirServer:
 
         # validate bundle
         update_bundle = Bundle(**update_bundle.dict())
-        response = self.session.post(self.api_address, data=update_bundle.json())
+        response = self._sync_client().post(self.api_address, json=self._json_dict(update_bundle))
         response.raise_for_status()
 
         return response.json()
@@ -484,7 +477,7 @@ class FhirServer:
 
         transaction_bundle = self._make_delete_transaction(resources, references, query)
 
-        response = self.session.post(self.api_address, json=transaction_bundle.dict())
+        response = self._sync_client().post(self.api_address, json=transaction_bundle.dict())
         response.raise_for_status()
 
         return response
@@ -536,6 +529,15 @@ class FhirServer:
         if self._headers:
             headers.update(self._headers)
         return headers
+
+    @property
+    def auth(self):
+        if self._auth:
+            return self._auth
+        elif self.username and self.password:
+            return httpx.BasicAuth(username=self.username, password=self.password)
+        elif self.token:
+            return BearerAuth(self.token)
 
     def _make_delete_transaction(self, resources: List[Union[Resource, dict]] = None,
                                  references: List[Union[str, Reference]] = None, query: QueryResponse = None) -> Bundle:
@@ -617,18 +619,18 @@ class FhirServer:
         return entry
 
     def _upload_bundle(self, bundle: Bundle) -> BundleCreateResponse:
-        r = self.session.post(url=self.api_address, data=bundle.json(return_bytes=True))
+        r = self._sync_client().post(url=self.api_address, json=self._json_dict(bundle))
         try:
             r.raise_for_status()
-        except requests.exceptions.HTTPError as e:
+        except Exception as e:
             print(r.text)
             raise e
         bundle_response = BundleCreateResponse(r, bundle)
         return bundle_response
 
-    def _upload_resource(self, resource: Resource) -> Response:
+    def _upload_resource(self, resource: Resource) -> httpx.Response:
         url = self.api_address + "/" + resource.get_resource_type()
-        r = requests.post(url=url, headers=self.headers, auth=self.auth, data=resource.json())
+        r = self._sync_client().post(url=url, headers=self.headers, auth=self._auth, json=self._json_dict(resource))
         return r
 
     async def _upload_resource_async(self, resource: Resource) -> httpx.Response:
@@ -655,7 +657,7 @@ class FhirServer:
 
     def _get_meta_data(self):
         url = self.api_address + "/metadata"
-        r = self.session.get(url)
+        r = self._sync_client().get(url)
         r.raise_for_status()
         response = r.json()
         self._meta_data = response
@@ -674,10 +676,10 @@ class FhirServer:
         )
         return client
 
-    def _setup(self):
-        self.auth = self._validate_auth()
-        self.session.auth = self.auth
-        self.session.headers.update(self.headers)
+    # def _setup(self):
+    #     self.auth = self._validate_auth()
+    #     self.session.auth = self.auth
+    #     self.session.headers.update(self.headers)
 
     def _make_server_summary(self) -> ServerSummary:
         resources = []
@@ -686,7 +688,7 @@ class FhirServer:
         }
         for resource in self.rest_resources:
             url = self.api_address + "/" + resource + "?_summary=count"
-            r = self.session.get(url)
+            r = self._sync_client().get(url)
             r.raise_for_status()
 
             resource_dict = {
@@ -743,7 +745,7 @@ class FhirServer:
         else:
             raise ValueError(f"Malformed API URL: {api_address}")
 
-    def _validate_auth(self) -> Union[requests.auth.AuthBase, None]:
+    def _validate_auth(self) -> Union[httpx.Auth, None]:
         if self._auth and (self.username or self.password):
             raise ValueError(
                 "Only one authentication method can be used, auth object and username/password are mutually exclusive")
@@ -950,3 +952,13 @@ def _auth_info_from_env() -> Union[str, Tuple[str, str], Tuple[str, str, str]]:
     if client_id and client_secret and oidc_provider_url:
         print(f"Found OIDC auth configuration for client <{client_id}> with provider {oidc_provider_url}")
         return client_id, client_secret, oidc_provider_url
+
+
+class BearerAuth(httpx.Auth):
+    def __init__(self, token):
+        self.token = token
+
+    def auth_flow(self, request):
+        # Send the request, with a custom `X-Authentication` header.
+        request.headers['Authorization'] = f"Bearer {self.token}"
+        yield request
