@@ -1,6 +1,6 @@
 import pytest
 from fhir_kindling.fhir_server.auth import generate_auth, load_environment_auth_vars, BearerAuth
-from requests.auth import HTTPBasicAuth
+from httpx import Auth
 from unittest import mock
 import os
 
@@ -8,7 +8,7 @@ import os
 def test_generate_auth():
     basic_auth = generate_auth(username="basic", password="auth")
 
-    assert isinstance(basic_auth, HTTPBasicAuth)
+    assert isinstance(basic_auth, Auth)
 
     bearer_auth = generate_auth(token="test_token")
 
@@ -43,4 +43,4 @@ def test_env_var_conflicts():
 @mock.patch.dict(os.environ, {"FHIR_USER": "test", "FHIR_PW": "password"})
 def test_env_var_basic():
     basic_auth = generate_auth(load_env=True)
-    assert isinstance(basic_auth, HTTPBasicAuth)
+    assert isinstance(basic_auth, Auth)
