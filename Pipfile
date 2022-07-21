@@ -7,8 +7,6 @@ name = "pypi"
 python-dotenv = "*"
 pandas = "*"
 "fhir.resources" = "*"
-requests = "*"
-requests-oauthlib = "*"
 pendulum = "*"
 tqdm = "*"
 orjson = "*"
@@ -18,7 +16,7 @@ plotly = "*"
 pydantic = "*"
 networkx = "*"
 httpx = "*"
-
+authlib = "*"
 
 [dev-packages]
 pytest = "*"

@@ -34,9 +34,9 @@ setup(
     install_requires=[
         "python-dotenv",
         "fhir.resources",
-        "requests",
+        "httpx",
         "pandas",
-        "requests-oauthlib",
+        "authlib",
         "pendulum",
         "orjson",
         "pyyaml",

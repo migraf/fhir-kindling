@@ -1,10 +1,14 @@
 import os
-from typing import List, Union, Tuple
+from typing import List, Union
 
-from requests_oauthlib import OAuth2Session
-from oauthlib.oauth2 import BackendApplicationClient
 import httpx
 import orjson
+import re
+import pendulum
+from authlib.oauth2.rfc6749 import OAuth2Token
+from networkx import DiGraph
+from authlib.integrations.httpx_client import OAuth2Client
+from authlib.oauth2.rfc7523 import ClientSecretJWT
 
 from fhir.resources import FHIRAbstractModel
 from fhir.resources.resource import Resource
@@ -15,14 +19,10 @@ from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from fhir.resources import construct_fhir_element
 import fhir.resources
 
-import re
-import pendulum
-from networkx import DiGraph
-
 from fhir_kindling.fhir_query import FHIRQuerySync, FHIRQueryAsync
 from fhir_kindling.fhir_query.query_response import QueryResponse
 from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters, FieldParameter, QueryOperators
-from fhir_kindling.fhir_server.auth import generate_auth
+from fhir_kindling.fhir_server.auth import generate_auth, BearerAuth, auth_info_from_env
 from fhir_kindling.fhir_server.server_responses import ResourceCreateResponse, BundleCreateResponse, ServerSummary, \
     TransferResponse
 from fhir_kindling.util.references import check_missing_references, reference_graph
@@ -58,12 +58,14 @@ class FhirServer:
         self.username = username
         self.password = password
 
-        # token oidc auth class vars
+        # static token
         self.token = token
+
+        # oauth2 auth vars
         self.client_id = client_id
         self.client_secret = client_secret
         self.oidc_provider_url = oidc_provider_url
-        self.token_expiration = None
+        self.oauth_token: OAuth2Token = None
 
         self._auth = auth
         self._headers = headers
@@ -76,7 +78,7 @@ class FhirServer:
         if no_auth:
             return FhirServer(api_address=api_address, fhir_server_type=server_type)
         else:
-            env_auth = _auth_info_from_env()
+            env_auth = auth_info_from_env()
             # static token
             if isinstance(env_auth, str):
                 return cls(api_address=api_address, token=env_auth, fhir_server_type=server_type)
@@ -703,16 +705,16 @@ class FhirServer:
 
     def _get_oidc_token(self):
         # get a new token if it is expired or not yet set
-        if (self.token_expiration and pendulum.now() > self.token_expiration) or not self.token:
-            client = BackendApplicationClient(client_id=self.client_id)
-            oauth = OAuth2Session(client=client)
-            token = oauth.fetch_token(
-                token_url=self.oidc_provider_url,
+        if not self.oauth_token or self.oauth_token.is_expired():
+            client = OAuth2Client(
+                client_id=self.client_id,
                 client_secret=self.client_secret,
-                client_id=self.client_id
+                token_endpoint_auth_method='client_secret_jwt'
             )
+            client.register_client_auth_method(ClientSecretJWT(self.oidc_provider_url))
+            token = client.fetch_token(self.oidc_provider_url)
             self.token = token["access_token"]
-            self.token_expiration = pendulum.now() + pendulum.duration(seconds=token["expires_in"])
+            self.oauth_token = token
 
     @staticmethod
     def validate_api_address(api_address: str) -> str:
@@ -914,51 +916,3 @@ def _api_address_from_env() -> str:
         raise EnvironmentError("No FHIR api address specified")
     return FhirServer.validate_api_address(api_url)
 
-
-def _auth_info_from_env() -> Union[str, Tuple[str, str], Tuple[str, str, str]]:
-    # First try to load basic auth information
-    username = os.getenv("FHIR_USER")
-    # Static token auth
-    token = os.getenv("FHIR_TOKEN")
-    # oauth2/oidc authentication
-    client_id = os.getenv("CLIENT_ID")
-    client_secret = os.getenv("CLIENT_SECRET")
-    oidc_provider_url = os.getenv("OIDC_PROVIDER_URL")
-
-    if username and token:
-        raise EnvironmentError("Conflicting auth information, bother username and token present.")
-    if username and client_id:
-        raise EnvironmentError("Conflicting auth information, bother username and client id present")
-    if token and client_id:
-        raise EnvironmentError("Conflicting auth information, bother static token and client id present")
-
-    if username:
-        password = os.getenv("FHIR_PW")
-        if not password:
-            raise EnvironmentError(f"No password specified for user: {username}")
-        else:
-            print(f"Basic auth environment info found -> ({username}:******)")
-            return username, password
-    if token:
-        print("Found static auth token")
-        return token
-
-    if client_id and not client_secret:
-        raise EnvironmentError("Insufficient auth information, client id specified but no client secret found.")
-
-    if (client_id and client_secret) and not oidc_provider_url:
-        raise EnvironmentError("Insufficient auth information, client id and secret "
-                               "specified but no provider URL found")
-    if client_id and client_secret and oidc_provider_url:
-        print(f"Found OIDC auth configuration for client <{client_id}> with provider {oidc_provider_url}")
-        return client_id, client_secret, oidc_provider_url
-
-
-class BearerAuth(httpx.Auth):
-    def __init__(self, token):
-        self.token = token
-
-    def auth_flow(self, request):
-        # Send the request, with a custom `X-Authentication` header.
-        request.headers['Authorization'] = f"Bearer {self.token}"
-        yield request

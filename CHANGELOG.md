@@ -8,9 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.9.0] - 2022-06-18
 Asynchronous API for CRUD operations against fhir servers.
 
-
 ### Changed
-
+- Switched http client library from requests [httpx](https://www.python-httpx.org/)
+- 
 
 ### Added
 
