@@ -39,7 +39,6 @@ setup(
         "authlib",
         "pendulum",
         "orjson",
-        "pyyaml",
         "xmltodict",
         "pydantic",
         "networkx"

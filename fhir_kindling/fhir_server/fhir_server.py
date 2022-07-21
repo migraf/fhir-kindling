@@ -417,7 +417,7 @@ class FhirServer:
         transaction_response = await self._upload_bundle_async(bundle)
         return transaction_response
 
-    def update(self, resources: List[Union[FHIRResourceModel, dict]]):
+    def update(self, resources: List[Union[FHIRResourceModel, dict]]) -> dict:
         """
         Update a list of resources that exist on the server
         Args:
@@ -427,33 +427,16 @@ class FhirServer:
 
         """
 
-        # todo check that the resources exist and have an id?
-        # batch update transaction
-        update_bundle = Bundle.construct()
-        update_bundle.type = "transaction"
-        update_bundle.entry = []
-        for resource in resources:
-            if isinstance(resource, dict):
-                resource_type = resource.get("resourceType")
-                if not resource_type:
-                    raise ValueError("No resource type defined in resource dictionary")
-                resource = fhir.resources.construct_fhir_element(resource_type, resource)
-            elif isinstance(resource, FHIRResourceModel):
-                resource = resource.validate(resource)
-            else:
-                raise ValueError(f"Invalid resource type {type(resource)}")
-            # make the transaction entry
-            entry = self._make_transaction_entry(resource.relative_path(), "PUT")
-            # add the resource to the entry
-            entry.resource = resource
-            # validate the entry and append it to the bundle
-            update_bundle.entry.append(BundleEntry(**entry.dict()))
-
-        # validate bundle
-        update_bundle = Bundle(**update_bundle.dict())
+        update_bundle = self._make_update_transaction(resources)
         response = self._sync_client().post(self.api_address, json=self._json_dict(update_bundle))
         response.raise_for_status()
 
+        return response.json()
+
+    async def update_async(self, resources: List[Union[FHIRResourceModel, dict]]):
+        update_bundle = self._make_update_transaction(resources)
+        response = await self._async_client().post(self.api_address, json=self._json_dict(update_bundle))
+        response.raise_for_status()
         return response.json()
 
     def delete(self,
@@ -470,16 +453,21 @@ class FhirServer:
         Returns: Bundle delete response from the fhir server
 
         """
-        if resources and references:
-            raise ValueError("Cannot delete based on resources and references at the same time")
-        if resources and query:
-            raise ValueError("Cannot delete based on resources and query at the same time")
-        if references and query:
-            raise ValueError("Cannot delete based on references and query at the same time")
 
-        transaction_bundle = self._make_delete_transaction(resources, references, query)
+        delete_bundle = self._make_delete_transaction(resources, references, query)
 
-        response = self._sync_client().post(self.api_address, json=transaction_bundle.dict())
+        response = self._sync_client().post(self.api_address, json=self._json_dict(delete_bundle))
+        response.raise_for_status()
+
+        return response
+
+    async def delete_async(self,
+                           resources: List[Union[FHIRResourceModel, dict]] = None,
+                           references: List[Union[str, Reference]] = None,
+                           query: FHIRQuerySync = None):
+        delete_bundle = self._make_delete_transaction(resources, references, query)
+
+        response = await self._async_client().post(self.api_address, json=self._json_dict(delete_bundle))
         response.raise_for_status()
 
         return response
@@ -541,8 +529,42 @@ class FhirServer:
         elif self.token:
             return BearerAuth(self.token)
 
+    def _make_update_transaction(self, resources: List[Union[Resource, dict]]) -> Bundle:
+        # todo check that the resources exist and have an id?
+        # batch update transaction
+        update_bundle = Bundle.construct()
+        update_bundle.type = "transaction"
+        update_bundle.entry = []
+        for resource in resources:
+            if isinstance(resource, dict):
+                resource_type = resource.get("resourceType")
+                if not resource_type:
+                    raise ValueError("No resource type defined in resource dictionary")
+                resource = fhir.resources.construct_fhir_element(resource_type, resource)
+            elif isinstance(resource, FHIRResourceModel):
+                resource = resource.validate(resource)
+            else:
+                raise ValueError(f"Invalid resource type {type(resource)}")
+            # make the transaction entry
+            entry = self._make_transaction_entry(resource.relative_path(), "PUT")
+            # add the resource to the entry
+            entry.resource = resource
+            # validate the entry and append it to the bundle
+            update_bundle.entry.append(BundleEntry(**entry.dict()))
+
+        # validate bundle
+        update_bundle = Bundle(**update_bundle.dict())
+        return update_bundle
+
     def _make_delete_transaction(self, resources: List[Union[Resource, dict]] = None,
                                  references: List[Union[str, Reference]] = None, query: QueryResponse = None) -> Bundle:
+
+        if resources and references:
+            raise ValueError("Cannot delete based on resources and references at the same time")
+        if resources and query:
+            raise ValueError("Cannot delete based on resources and query at the same time")
+        if references and query:
+            raise ValueError("Cannot delete based on references and query at the same time")
         delete_bundle = Bundle.construct()
         delete_bundle.type = "transaction"
         delete_bundle.entry = []
@@ -915,4 +937,3 @@ def _api_address_from_env() -> str:
     if not api_url:
         raise EnvironmentError("No FHIR api address specified")
     return FhirServer.validate_api_address(api_url)
-
