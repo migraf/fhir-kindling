@@ -1,0 +1,29 @@
+version: '3.8'
+
+volumes:
+  testing-blaze:
+  testing-hapi:
+
+services:
+  blaze:
+    image: "samply/blaze:latest"
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx2g"
+#      OPENID_PROVIDER_URL: "https://dev-keycloak.grafm.de/auth/realms/blaze"
+      BASE_URL: "http://localhost:9090"
+    ports:
+      - "9090:8080"
+    volumes:
+      - testing-blaze:/app/data
+
+  hapi:
+    image: "hapiproject/hapi:latest"
+    ports:
+      - "9091:8080"
+    volumes:
+      - testing-hapi:/data/hapi
+    environment:
+      hapi.fhir.default_encoding: json
+      hapi.fhir.: json
+      hapi.fhir.server_address: "http://localhost:9091/fhir"
+

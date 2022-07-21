@@ -1,11 +1,14 @@
 import os
-from typing import List, Union, Tuple
+from typing import List, Union
 
-import requests
-from requests import Response
-import requests.auth
-from requests_oauthlib import OAuth2Session
-from oauthlib.oauth2 import BackendApplicationClient
+import httpx
+import orjson
+import re
+import pendulum
+from authlib.oauth2.rfc6749 import OAuth2Token
+from networkx import DiGraph
+from authlib.integrations.httpx_client import OAuth2Client
+from authlib.oauth2.rfc7523 import ClientSecretJWT
 
 from fhir.resources import FHIRAbstractModel
 from fhir.resources.resource import Resource
@@ -16,14 +19,10 @@ from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from fhir.resources import construct_fhir_element
 import fhir.resources
 
-import re
-import pendulum
-from networkx import DiGraph
-
-from fhir_kindling.fhir_query import FHIRQuery
+from fhir_kindling.fhir_query import FHIRQuerySync, FHIRQueryAsync
 from fhir_kindling.fhir_query.query_response import QueryResponse
 from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters, FieldParameter, QueryOperators
-from fhir_kindling.fhir_server.auth import generate_auth
+from fhir_kindling.fhir_server.auth import generate_auth, BearerAuth, auth_info_from_env
 from fhir_kindling.fhir_server.server_responses import ResourceCreateResponse, BundleCreateResponse, ServerSummary, \
     TransferResponse
 from fhir_kindling.util.references import check_missing_references, reference_graph
@@ -33,12 +32,12 @@ class FhirServer:
 
     def __init__(self, api_address: str, username: str = None, password: str = None, token: str = None,
                  client_id: str = None, client_secret: str = None, oidc_provider_url: str = None,
-                 auth: requests.auth.AuthBase = None, headers: dict = None,
-                 fhir_server_type: str = "hapi", proxies : dict = None):
+                 auth: httpx.Auth = None, headers: dict = None,
+                 fhir_server_type: str = "hapi"):
         """
         Initialize a FHIR server connection
         Args:
-            api_address: the base endpoint of the fhir server api
+            api_address: the base endpoint of the fhir server REST API
             username: username for basic auth
             password: password for basic auth
             token: token for static token auth
@@ -47,7 +46,6 @@ class FhirServer:
             oidc_provider_url: provider url for oauth2
             auth: optional auth object to authenticate against a server
             headers: optional additional headers to be added to the session
-            proxies: optional proxies to pass to :class:`requests.Session`
             fhir_server_type: type of fhir server (hapi, blaze, etc.)
         """
 
@@ -55,36 +53,32 @@ class FhirServer:
         self.fhir_server_type = fhir_server_type
         self.api_address = self.validate_api_address(api_address)
         self._meta_data = None
-        self.auth = None
 
         # possible basic auth class vars
         self.username = username
         self.password = password
 
-        # token oidc auth class vars
+        # static token
         self.token = token
+
+        # oauth2 auth vars
         self.client_id = client_id
         self.client_secret = client_secret
         self.oidc_provider_url = oidc_provider_url
-        self.token_expiration = None
+        self.oauth_token: OAuth2Token = None
 
         self._auth = auth
         self._headers = headers
-        self._proxies = proxies
-
-        # setup the session
-        self.session = requests.Session()
-        self._setup()
 
     @classmethod
-    def from_env(cls, no_auth: bool = False):
+    def from_env(cls, no_auth: bool = False) -> 'FhirServer':
         api_address = _api_address_from_env()
         server_type = os.getenv("FHIR_SERVER_TYPE")
 
         if no_auth:
             return FhirServer(api_address=api_address, fhir_server_type=server_type)
         else:
-            env_auth = _auth_info_from_env()
+            env_auth = auth_info_from_env()
             # static token
             if isinstance(env_auth, str):
                 return cls(api_address=api_address, token=env_auth, fhir_server_type=server_type)
@@ -100,63 +94,161 @@ class FhirServer:
                 raise EnvironmentError("Authentication information could not be loaded from environment")
 
     def query(self, resource: Union[Resource, FHIRAbstractModel, str] = None,
+              query_string: str = None,
               query_parameters: FHIRQueryParameters = None,
-              output_format: str = "json") -> FHIRQuery:
+              output_format: str = "json") -> FHIRQuerySync:
         """
-        Initialize a FHIR query against the server with the given resource or query parameters
+        Initialize a FHIR query against the server with the given resource, query parameters or query string
 
         Args:
             output_format: the output format to request from the fhir server (json or xml) defaults to json
+            query_string: preformatted query string to execute against the servers REST API
             query_parameters: optionally pass in a query parameters object to use for the query
             resource: the FHIR resource to query from the server
 
-        Returns: a FHIRQuery object that can be further modified with filters and conditions before being executed
+        Returns: a FHIRQuerySync object that can be further modified with filters and conditions before being executed
         against the server
         """
         if resource:
-            return FHIRQuery(self.api_address, resource, auth=self.auth, session=self.session,
-                             output_format=output_format)
-        else:
-            return FHIRQuery(self.api_address, auth=self.auth, session=self.session, query_parameters=query_parameters,
-                             output_format=output_format)
+            return FHIRQuerySync(
+                base_url=self.api_address,
+                resource=resource,
+                auth=self.auth,
+                output_format=output_format
+            )
+        elif query_string:
+            return self.raw_query(query_string, output_format)
 
-    def raw_query(self, query_string: str, output_format: str = "json") -> FHIRQuery:
+        elif query_parameters:
+            return FHIRQuerySync(
+                base_url=self.api_address,
+                auth=self.auth,
+                query_parameters=query_parameters,
+                output_format=output_format
+            )
+        else:
+            raise ValueError("Must provide either resource, query_parameters or a query string")
+
+    def query_async(self, resource: Union[Resource, FHIRAbstractModel, str] = None,
+                    query_string: str = None,
+                    query_parameters: FHIRQueryParameters = None,
+                    output_format: str = "json") -> FHIRQueryAsync:
+        """
+        Initialize a FHIR query against the server with the given resource, query parameters or query string
+
+        Args:
+            output_format: the output format to request from the fhir server (json or xml) defaults to json
+            query_string: preformatted query string to execute against the servers REST API
+            query_parameters: optionally pass in a query parameters object to use for the query
+            resource: the FHIR resource to query from the server
+
+        Returns: a FHIRQueryAsync object that can be further modified with filters and conditions before being executed
+        against the server
+        """
+        if resource:
+            return FHIRQueryAsync(
+                base_url=self.api_address,
+                resource=resource,
+                auth=self.auth,
+                output_format=output_format
+            )
+        elif query_string:
+            query_parameters = FHIRQueryParameters.from_query_string(query_string)
+            query = FHIRQueryAsync(
+                self.api_address,
+                resource=query_parameters.resource,
+                query_parameters=query_parameters,
+                output_format=output_format
+            )
+            return query
+
+        elif query_parameters:
+            return FHIRQueryAsync(
+                base_url=self.api_address,
+                auth=self.auth,
+                query_parameters=query_parameters,
+                output_format=output_format
+            )
+        else:
+            raise ValueError("Must provide either resource, query_parameters or a query string")
+
+    def raw_query(self, query_string: str, output_format: str = "json") -> FHIRQuerySync:
         """
         Execute a raw query string against the server
 
         Args:
             query_string:
             output_format:
-            limit:
-            count:
-
         Returns:
 
         """
 
         query_parameters = FHIRQueryParameters.from_query_string(query_string)
-        query = FHIRQuery(
-            self.api_address,
+        query = FHIRQuerySync(
+            base_url=self.api_address,
             resource=query_parameters.resource,
             query_parameters=query_parameters,
-            session=self.session,
+            output_format=output_format
+        )
+        return query
+
+    def raw_query_async(self, query_string: str, output_format: str = "json") -> FHIRQueryAsync:
+        """
+        Asynchronously Execute a raw query string against the server
+
+        Args:
+            query_string: query string defining the query to execute
+            output_format: the output format to request from the fhir server (json or xml) defaults to json
+        Returns:
+            a FHIRQueryAsync object that can be further modified with filters and conditions before being executed
+            against the server
+
+        """
+
+        query_parameters = FHIRQueryParameters.from_query_string(query_string)
+        query = FHIRQueryAsync(
+            base_url=self.api_address,
+            resource=query_parameters.resource,
+            query_parameters=query_parameters,
             output_format=output_format
         )
         return query
 
     def get(self, reference: Union[str, Reference]) -> FHIRAbstractModel:
         """
-        Get a resource from the server specfied by the given reference {ResourceType}/{id}
+        Get a resource from the server specified by the given reference {ResourceType}/{id}
+
         Args:
             reference: reference to the resource, either a Reference object or a string of the form {ResourceType}/{id}
 
-        Returns: the resource from the server specified by the reference
+        Returns:
+            the resource from the server specified by the reference
 
         """
         if isinstance(reference, Reference):
             reference = reference.reference
-        r = self.session.get(f"{self.api_address}/{reference}")
+        r = self._sync_client().get(f"{self.api_address}/{reference}")
         r.raise_for_status()
+        resource_dict = r.json()
+        resource = construct_fhir_element(resource_dict["resourceType"], resource_dict)
+        return resource
+
+    async def get_async(self, reference: Union[str, Reference]) -> FHIRAbstractModel:
+        """
+        Asynchronously get a resource from the server specified by the given reference {ResourceType}/{id}
+
+        Args:
+            reference: reference to the resource, either a Reference object or a string of the form {ResourceType}/{id}
+
+        Returns:
+            the resource from the server specified by the reference
+
+        """
+        if isinstance(reference, Reference):
+            reference = reference.reference
+        async with self._async_client() as client:
+            r = await client.get(f"{self.api_address}/{reference}")
+            r.raise_for_status()
         resource_dict = r.json()
         resource = construct_fhir_element(resource_dict["resourceType"], resource_dict)
         return resource
@@ -164,22 +256,50 @@ class FhirServer:
     def get_many(self, references: List[Union[str, Reference]]) -> List[FHIRAbstractModel]:
         """
         Get a list of resources from the server specified by the given references
-        Args:
-            references: list of references to the resources, either a Reference object or a string of the form `{ResourceType}/{id}`
 
-        Returns: list of resources corresponding to the references
+        Args:
+            references: list of references to the resources, either a Reference object or a string of the form
+                `{ResourceType}/{id}`
+
+        Returns:
+            list of resources corresponding to the references
 
         """
         str_references = [reference if isinstance(reference, str) else reference.reference for reference in references]
 
-        resources = self._get_many_query(str_references)
+        # resources = self._get_many_query(str_references)
         # todo use batched/transaction requests to get all resources in one request
-        # get_many_transaction = self._make_get_many_transaction(str_references)
-        # response = self.session.post(self.api_address, json=get_many_transaction.dict(exclude_none=True))
+        get_many_transaction = self._make_get_many_transaction(str_references)
+        response = self._sync_client().post(self.api_address, json=self._json_dict(get_many_transaction))
         #
-        # entries = response.json()["entry"]
-        # resources = [construct_fhir_element(entry["resource"]["resourceType"], entry["resource"]) for entry in entries]
+        entries = response.json()["entry"]
+        resources = [construct_fhir_element(entry["resource"]["resourceType"], entry["resource"]) for entry in entries]
 
+        return resources
+
+    async def get_many_async(self, references: List[Union[str, Reference]]) -> List[FHIRAbstractModel]:
+        """
+        Asynchronously get a list of resources from the server specified by the given references
+
+        Args:
+            references: list of references to the resources, either a Reference object or a string of the form
+                `{ResourceType}/{id}`
+
+        Returns:
+            list of resources corresponding to the references
+
+        """
+        str_references = [reference if isinstance(reference, str) else reference.reference for reference in references]
+        get_many_transaction = self._make_get_many_transaction(str_references)
+
+        async with self._async_client() as client:
+            response = await client.post(self.api_address, json=get_many_transaction.dict(exclude_none=True))
+
+        # construct the list of resources from the server response
+        resources = [
+            construct_fhir_element(entry["resource"]["resourceType"], entry["resource"])
+            for entry in response.json()["entry"]
+        ]
         return resources
 
     def add(self, resource: Union[Resource, dict]) -> ResourceCreateResponse:
@@ -205,6 +325,27 @@ class FhirServer:
 
         return ResourceCreateResponse(server_response_dict=dict(response.headers), resource=resource)
 
+    async def add_async(self, resource: Union[Resource, dict]) -> ResourceCreateResponse:
+        """
+        Asynchronously upload a resource to the server
+
+        Args:
+            resource: dictionary containing the resource or FHIR resource object to be uploaded to the server
+
+        Returns:
+
+        """
+        # parse the resource given as dictionary into a fhir resource model
+        if isinstance(resource, dict):
+            resource_type = resource.get("resourceType")
+            if not resource_type:
+                raise ValueError("No resource type defined in resource dictionary")
+            resource = fhir.resources.construct_fhir_element(resource_type, resource)
+        else:
+            resource = resource.validate(resource)
+        response = await self._upload_resource_async(resource)
+        return ResourceCreateResponse(server_response_dict=dict(response.headers), resource=resource)
+
     def add_all(self, resources: List[Union[Resource, dict]]) -> BundleCreateResponse:
         """
         Upload a list of resources to the server, after packaging them into a bundle
@@ -218,7 +359,27 @@ class FhirServer:
         response = self._upload_bundle(bundle)
         return response
 
+    async def add_all_async(self, resources: List[Union[Resource, dict]]) -> BundleCreateResponse:
+        """
+        Asynchronously upload a list of resources to the server, after packaging them into a bundle
+        Args:
+            resources: list of resources to upload to the server, either dictionary or FHIR resource objects
+
+        Returns: Bundle create response from the fhir server
+
+        """
+        bundle = self._make_bundle_from_resource_list(resources)
+        response = await self._upload_bundle_async(bundle)
+        return response
+
     def add_bundle(self, bundle: Union[Bundle, dict, str], validate_entries: bool = True) -> BundleCreateResponse:
+        """
+        Upload a bundle to the server
+        :param bundle: str, dict or Bundle object to upload to the server
+        :param validate_entries: whether to validate the entries in the bundle
+        :return: BundleCreateResponse from the fhir server containing the server assigned ids of the resources in
+        the bundle
+        """
         # create bundle and validate it
         if isinstance(bundle, dict):
             bundle = Bundle(**bundle)
@@ -233,7 +394,30 @@ class FhirServer:
         transaction_response = self._upload_bundle(bundle)
         return transaction_response
 
-    def update(self, resources: List[Union[FHIRResourceModel, dict]]):
+    async def add_bundle_async(self, bundle: Union[Bundle, dict, str],
+                               validate_entries: bool = True) -> BundleCreateResponse:
+        """
+        Asynchronously upload a bundle to the server
+        :param bundle: str, dict or Bundle object to upload to the server
+        :param validate_entries: whether to validate the entries in the bundle
+        :return: BundleCreateResponse from the fhir server containing the server assigned ids of the resources in
+        the bundle
+        """
+        # create bundle and validate it
+        if isinstance(bundle, dict):
+            bundle = Bundle(**bundle)
+        elif isinstance(bundle, str):
+            bundle = Bundle.parse_raw(bundle)
+        else:
+            bundle = Bundle.validate(bundle)
+        # check that all entries are bundle requests with methods post/put
+        if validate_entries:
+            self._validate_upload_bundle_entries(bundle.entry)
+
+        transaction_response = await self._upload_bundle_async(bundle)
+        return transaction_response
+
+    def update(self, resources: List[Union[FHIRResourceModel, dict]]) -> dict:
         """
         Update a list of resources that exist on the server
         Args:
@@ -243,39 +427,22 @@ class FhirServer:
 
         """
 
-        # todo check that the resources exist and have an id?
-        # batch update transaction
-        update_bundle = Bundle.construct()
-        update_bundle.type = "transaction"
-        update_bundle.entry = []
-        for resource in resources:
-            if isinstance(resource, dict):
-                resource_type = resource.get("resourceType")
-                if not resource_type:
-                    raise ValueError("No resource type defined in resource dictionary")
-                resource = fhir.resources.construct_fhir_element(resource_type, resource)
-            elif isinstance(resource, FHIRResourceModel):
-                resource = resource.validate(resource)
-            else:
-                raise ValueError(f"Invalid resource type {type(resource)}")
-            # make the transaction entry
-            entry = self._make_transaction_entry(resource.relative_path(), "PUT")
-            # add the resource to the entry
-            entry.resource = resource
-            # validate the entry and append it to the bundle
-            update_bundle.entry.append(BundleEntry(**entry.dict()))
-
-        # validate bundle
-        update_bundle = Bundle(**update_bundle.dict())
-        response = self.session.post(self.api_address, data=update_bundle.json())
+        update_bundle = self._make_update_transaction(resources)
+        response = self._sync_client().post(self.api_address, json=self._json_dict(update_bundle))
         response.raise_for_status()
 
+        return response.json()
+
+    async def update_async(self, resources: List[Union[FHIRResourceModel, dict]]):
+        update_bundle = self._make_update_transaction(resources)
+        response = await self._async_client().post(self.api_address, json=self._json_dict(update_bundle))
+        response.raise_for_status()
         return response.json()
 
     def delete(self,
                resources: List[Union[FHIRResourceModel, dict]] = None,
                references: List[Union[str, Reference]] = None,
-               query: FHIRQuery = None):
+               query: FHIRQuerySync = None):
         """
         Delete resources from the server. Either resources or references must be specified.
         Args:
@@ -286,16 +453,21 @@ class FhirServer:
         Returns: Bundle delete response from the fhir server
 
         """
-        if resources and references:
-            raise ValueError("Cannot delete based on resources and references at the same time")
-        if resources and query:
-            raise ValueError("Cannot delete based on resources and query at the same time")
-        if references and query:
-            raise ValueError("Cannot delete based on references and query at the same time")
 
-        transaction_bundle = self._make_delete_transaction(resources, references, query)
+        delete_bundle = self._make_delete_transaction(resources, references, query)
 
-        response = self.session.post(self.api_address, json=transaction_bundle.dict())
+        response = self._sync_client().post(self.api_address, json=self._json_dict(delete_bundle))
+        response.raise_for_status()
+
+        return response
+
+    async def delete_async(self,
+                           resources: List[Union[FHIRResourceModel, dict]] = None,
+                           references: List[Union[str, Reference]] = None,
+                           query: FHIRQuerySync = None):
+        delete_bundle = self._make_delete_transaction(resources, references, query)
+
+        response = await self._async_client().post(self.api_address, json=self._json_dict(delete_bundle))
         response.raise_for_status()
 
         return response
@@ -315,6 +487,8 @@ class FhirServer:
         missing_references = check_missing_references(query_result.resources)
         if missing_references:
             resources = self._get_missing_resources(query_result.resources)
+        else:
+            resources = query_result.resources
         # transfer the resources keeping server assigned ids and referential integrity
         response = self._transfer_resources(target_server, resources, query_result.query_params)
 
@@ -346,14 +520,56 @@ class FhirServer:
             headers.update(self._headers)
         return headers
 
+    @property
+    def auth(self):
+        if self._auth:
+            return self._auth
+        elif self.username and self.password:
+            return httpx.BasicAuth(username=self.username, password=self.password)
+        elif self.token:
+            return BearerAuth(self.token)
+
+    def _make_update_transaction(self, resources: List[Union[Resource, dict]]) -> Bundle:
+        # todo check that the resources exist and have an id?
+        # batch update transaction
+        update_bundle = Bundle.construct()
+        update_bundle.type = "transaction"
+        update_bundle.entry = []
+        for resource in resources:
+            if isinstance(resource, dict):
+                resource_type = resource.get("resourceType")
+                if not resource_type:
+                    raise ValueError("No resource type defined in resource dictionary")
+                resource = fhir.resources.construct_fhir_element(resource_type, resource)
+            elif isinstance(resource, FHIRResourceModel):
+                resource = resource.validate(resource)
+            else:
+                raise ValueError(f"Invalid resource type {type(resource)}")
+            # make the transaction entry
+            entry = self._make_transaction_entry(resource.relative_path(), "PUT")
+            # add the resource to the entry
+            entry.resource = resource
+            # validate the entry and append it to the bundle
+            update_bundle.entry.append(BundleEntry(**entry.dict()))
+
+        # validate bundle
+        update_bundle = Bundle(**update_bundle.dict())
+        return update_bundle
+
     def _make_delete_transaction(self, resources: List[Union[Resource, dict]] = None,
                                  references: List[Union[str, Reference]] = None, query: QueryResponse = None) -> Bundle:
+
+        if resources and references:
+            raise ValueError("Cannot delete based on resources and references at the same time")
+        if resources and query:
+            raise ValueError("Cannot delete based on resources and query at the same time")
+        if references and query:
+            raise ValueError("Cannot delete based on references and query at the same time")
         delete_bundle = Bundle.construct()
         delete_bundle.type = "transaction"
         delete_bundle.entry = []
 
         if resources:
-            print(resources)
             if isinstance(resources[0], dict):
                 resources = [fhir.resources.construct_fhir_element(
                     resource.get("resourceType"),
@@ -368,7 +584,6 @@ class FhirServer:
                 references = [ref.reference for ref in references]
             delete_references = references
         elif query:
-
             delete_references = [resource.relative_path() for resource in query.resources]
         else:
             raise ValueError("No resources or references provided")
@@ -428,32 +643,67 @@ class FhirServer:
         return entry
 
     def _upload_bundle(self, bundle: Bundle) -> BundleCreateResponse:
-        r = self.session.post(url=self.api_address, data=bundle.json(return_bytes=True))
+        r = self._sync_client().post(url=self.api_address, json=self._json_dict(bundle))
         try:
             r.raise_for_status()
-        except requests.exceptions.HTTPError as e:
+        except Exception as e:
             print(r.text)
             raise e
         bundle_response = BundleCreateResponse(r, bundle)
         return bundle_response
 
-    def _upload_resource(self, resource: Resource) -> Response:
+    def _upload_resource(self, resource: Resource) -> httpx.Response:
         url = self.api_address + "/" + resource.get_resource_type()
-        r = requests.post(url=url, headers=self.headers, auth=self.auth, json=resource.dict())
+        r = self._sync_client().post(url=url, headers=self.headers, auth=self._auth, json=self._json_dict(resource))
         return r
+
+    async def _upload_resource_async(self, resource: Resource) -> httpx.Response:
+        url = self.api_address + "/" + resource.get_resource_type()
+        async with self._async_client() as client:
+            r = await client.post(url=url, json=self._json_dict(resource))
+            try:
+                r.raise_for_status()
+            except Exception as e:
+                print(r.text)
+                raise e
+        return r
+
+    async def _upload_bundle_async(self, bundle: Bundle) -> BundleCreateResponse:
+        async with self._async_client() as client:
+            r = await client.post(url=self.api_address, json=self._json_dict(bundle))
+            try:
+                r.raise_for_status()
+            except Exception as e:
+                print(r.text)
+                raise e
+        bundle_response = BundleCreateResponse(r, bundle)
+        return bundle_response
 
     def _get_meta_data(self):
         url = self.api_address + "/metadata"
-        r = self.session.get(url)
+        r = self._sync_client().get(url)
         r.raise_for_status()
         response = r.json()
         self._meta_data = response
 
-    def _setup(self):
-        self.auth = self._validate_auth()
-        self.session.auth = self.auth
-        self.session.headers.update(self.headers)
-        self.session.proxies = self._proxies
+    def _sync_client(self) -> httpx.Client:
+        client = httpx.Client(
+            headers=self.headers,
+            auth=self.auth,
+        )
+        return client
+
+    def _async_client(self) -> httpx.AsyncClient:
+        client = httpx.AsyncClient(
+            headers=self.headers,
+            auth=self.auth,
+        )
+        return client
+
+    # def _setup(self):
+    #     self.auth = self._validate_auth()
+    #     self.session.auth = self.auth
+    #     self.session.headers.update(self.headers)
 
     def _make_server_summary(self) -> ServerSummary:
         resources = []
@@ -462,7 +712,7 @@ class FhirServer:
         }
         for resource in self.rest_resources:
             url = self.api_address + "/" + resource + "?_summary=count"
-            r = self.session.get(url)
+            r = self._sync_client().get(url)
             r.raise_for_status()
 
             resource_dict = {
@@ -477,16 +727,16 @@ class FhirServer:
 
     def _get_oidc_token(self):
         # get a new token if it is expired or not yet set
-        if (self.token_expiration and pendulum.now() > self.token_expiration) or not self.token:
-            client = BackendApplicationClient(client_id=self.client_id)
-            oauth = OAuth2Session(client=client)
-            token = oauth.fetch_token(
-                token_url=self.oidc_provider_url,
+        if not self.oauth_token or self.oauth_token.is_expired():
+            client = OAuth2Client(
+                client_id=self.client_id,
                 client_secret=self.client_secret,
-                client_id=self.client_id
+                token_endpoint_auth_method='client_secret_jwt'
             )
+            client.register_client_auth_method(ClientSecretJWT(self.oidc_provider_url))
+            token = client.fetch_token(self.oidc_provider_url)
             self.token = token["access_token"]
-            self.token_expiration = pendulum.now() + pendulum.duration(seconds=token["expires_in"])
+            self.oauth_token = token
 
     @staticmethod
     def validate_api_address(api_address: str) -> str:
@@ -519,7 +769,7 @@ class FhirServer:
         else:
             raise ValueError(f"Malformed API URL: {api_address}")
 
-    def _validate_auth(self) -> Union[requests.auth.AuthBase, None]:
+    def _validate_auth(self) -> Union[httpx.Auth, None]:
         if self._auth and (self.username or self.password):
             raise ValueError(
                 "Only one authentication method can be used, auth object and username/password are mutually exclusive")
@@ -667,6 +917,17 @@ class FhirServer:
                     else:
                         graph.nodes[successor]["resource"][field] = reference
 
+    @staticmethod
+    def _json_dict(resource: Union[Resource, FHIRAbstractModel] = None, json_dict: dict = None) -> dict:
+        if resource:
+            json_dict = orjson.loads(resource.json(exclude_none=True))
+            return json_dict
+        elif json_dict:
+            return orjson.loads(orjson.dumps(json_dict))
+
+    def __repr__(self):
+        return f"FhirServer(api_address={self.api_address})"
+
 
 def _api_address_from_env() -> str:
     # load FHIR_API_URL
@@ -676,42 +937,3 @@ def _api_address_from_env() -> str:
     if not api_url:
         raise EnvironmentError("No FHIR api address specified")
     return FhirServer.validate_api_address(api_url)
-
-
-def _auth_info_from_env() -> Union[str, Tuple[str, str], Tuple[str, str, str]]:
-    # First try to load basic auth information
-    username = os.getenv("FHIR_USER")
-    # Static token auth
-    token = os.getenv("FHIR_TOKEN")
-    # oauth2/oidc authentication
-    client_id = os.getenv("CLIENT_ID")
-    client_secret = os.getenv("CLIENT_SECRET")
-    oidc_provider_url = os.getenv("OIDC_PROVIDER_URL")
-
-    if username and token:
-        raise EnvironmentError("Conflicting auth information, bother username and token present.")
-    if username and client_id:
-        raise EnvironmentError("Conflicting auth information, bother username and client id present")
-    if token and client_id:
-        raise EnvironmentError("Conflicting auth information, bother static token and client id present")
-
-    if username:
-        password = os.getenv("FHIR_PW")
-        if not password:
-            raise EnvironmentError(f"No password specified for user: {username}")
-        else:
-            print(f"Basic auth environment info found -> ({username}:******)")
-            return username, password
-    if token:
-        print("Found static auth token")
-        return token
-
-    if client_id and not client_secret:
-        raise EnvironmentError("Insufficient auth information, client id specified but no client secret found.")
-
-    if (client_id and client_secret) and not oidc_provider_url:
-        raise EnvironmentError("Insufficient auth information, client id and secret "
-                               "specified but no provider URL found")
-    if client_id and client_secret and oidc_provider_url:
-        print(f"Found OIDC auth configuration for client <{client_id}> with provider {oidc_provider_url}")
-        return client_id, client_secret, oidc_provider_url

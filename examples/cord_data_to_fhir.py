@@ -10,15 +10,17 @@ from fhir_kindling.generators import PatientGenerator
 
 
 def split_cord_data():
-    cord_test_data = pd.read_csv("../examples/cord/A2-1.csv")
-    patients_per_station = int(len(cord_test_data) / 3)
+    cord_test_data = pd.read_csv("cord/A2-1.csv")
+    patients_per_station = int(len(cord_test_data) / 4)
     df_1 = cord_test_data[:patients_per_station]
     df_2 = cord_test_data[patients_per_station:2 * patients_per_station]
-    df_3 = cord_test_data[2 * patients_per_station:]
+    df_3 = cord_test_data[2 * patients_per_station:3 * patients_per_station]
+    df_4 = cord_test_data[3 * patients_per_station:]
 
     df_1.to_csv("../examples/cord/data_station_1.csv")
     df_2.to_csv("../examples/cord/data_station_2.csv")
     df_3.to_csv("../examples/cord/data_station_3.csv")
+    df_4.to_csv("../examples/cord/data_station_4.csv")
 
 
 def upload_cord_data(csv_file, server_address):
@@ -55,14 +57,9 @@ def upload_cord_data(csv_file, server_address):
 
     condition_resource_list = list(data["condition_resource"])
 
-    client_id = os.getenv("CLIENT_ID")
-    client_secret = os.getenv("CLIENT_SECRET")
-    provider_url = os.getenv("OIDC_PROVIDER_URL")
-
     n_patients = len(condition_resource_list)
 
-    server = FhirServer(api_address=server_address, client_id=client_id, client_secret=client_secret,
-                        oidc_provider_url=provider_url)
+    server = FhirServer(api_address=server_address, username=os.getenv("DEMO_USER"), password=os.getenv("DEMO_PW"))
 
     patient_generator = PatientGenerator(n=n_patients)
     patients = patient_generator.generate()
@@ -85,10 +82,12 @@ if __name__ == '__main__':
     load_dotenv(find_dotenv())
     data_path = "../examples/cord/data_station_1.csv"
     # split_cord_data()
-    server_1_address = "http://193.196.20.24:9001/fhir"
-    server_2_address = "http://193.196.20.24:9002/fhir"
-    server_3_address = "http://193.196.20.24:9003/fhir"
+    server_1_address = "https://demo.personalhealthtrain.de/demo-fhir-1"
+    server_2_address = "https://demo.personalhealthtrain.de/demo-fhir-2"
+    server_3_address = "https://demo.personalhealthtrain.de/demo-fhir-3"
+    server_4_address = "https://demo.personalhealthtrain.de/demo-fhir-4"
+
 
     local_server_address = "http://127.0.0.1:8080/fhir"
 
-    upload_cord_data("../examples/cord/data_station_3.csv", local_server_address)
+    upload_cord_data("cord/data_station_4.csv", server_4_address)

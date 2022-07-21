@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9.0] - 2022-07-21
+Asynchronous API for CRUD operations against fhir servers.
+
+### Changed
+- Switched http client library from requests [httpx](https://www.python-httpx.org/)
+- removed requests-oauthlib in favor of authlib for oauth2 authentication flow
+- `FHIRQuery` class renamed to `FHIRQuerySync` to allow for sync and async version
+- moved resolving response pagination from `QueryReponse` to the sync and async query classes
+- getting multiple resources via `server.get_many()` now uses proper batch requests
+
+### Added
+- `FHIRQueryAsync` class for async queries against a server
+- asynchronous counterparts for CRUD operations in the `FHIRServer` class using the same API:
+  - `query_async()`
+  - `raw_query_async()`
+  - `get_async()`
+  - `get_many_async()`
+  - `add_async()`
+  - `add_all_async()`
+  - `add_bundle_async()`
+  - `update_async()`
+  - `delete_async()`
+
+
 ## [0.8.0] - 2022-03-18
 Resource transfer between servers and querying resources by reference.  
 `get`, `get_many` for querying resource by reference

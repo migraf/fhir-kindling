@@ -11,9 +11,12 @@ the [Documentation](https://migraf.github.io/fhir-kindling/).
 
 ## Features
 
-- Create, Read, Update, Delete using a server's REST API
+- Create, Read, Update, Delete resources using a FHIR server's REST API
+- Transfer resources between servers while maintaining referential integrity using server-given IDs
 - Bundle creation, validation and data management on a FHIR server via the REST API
 - Supports Hapi, Blaze and IBM FHIR servers
+- CSV serialization of query results
+- Synthetic data generation and
 
 ## Installation
 
