@@ -529,7 +529,7 @@ def test_fhir_server_transfer(fhir_server: FhirServer):
     conditions = server.query("Condition").limit(10)
     assert len(conditions.resources) == 10
     transfer_url = os.getenv("TRANSFER_API_URL", "http://localhost:9091/fhir")
-    hapi_server = FhirServer(api_address=transfer_url)
+    hapi_server = FhirServer(api_address=transfer_url, timeout=None)
     response = server.transfer(hapi_server, conditions)
 
     print(response)
