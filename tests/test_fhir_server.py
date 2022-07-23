@@ -495,36 +495,36 @@ def test_get_many(fhir_server: FhirServer):
     assert len(patients) == 10
 
 
-def test_resolve_reference_graph(fhir_server: FhirServer):
-    fhir_server._timeout = None
-    patients, patient_references = PatientGenerator(n=10, generate_ids=True).generate(references=True)
-    organization = Organization(name="Test", id="test-org")
-    practitioner = Organization(name="Practitioner", id="test-practitioner")
-    conditions = []
-    encounter = Encounter(
-        **{
-            "id": "test-encounter",
-            "status": "planned",
-            "class": {"code": "AMB", "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode"}
-        }
-    )
-    for patient in patients:
-        patient.managingOrganization = {"reference": organization.relative_path()}
-        patient.generalPractitioner = [{"reference": practitioner.relative_path()}]
-        condition = Condition(subject={"reference": patient.relative_path()}, id=str(uuid.uuid4()))
-        condition.encounter = {"reference": encounter.relative_path()}
-        conditions.append(condition)
-
-    resources = patients + [organization, practitioner, encounter] + conditions
-    # print(resources)
-
-    transfer_url = os.getenv("TRANSFER_API_URL", "http://localhost:9091/fhir")
-    hapi_server = FhirServer(api_address=transfer_url)
-    response = fhir_server._transfer_resources(hapi_server, resources)
+# def test_resolve_reference_graph(fhir_server: FhirServer):
+#     fhir_server._timeout = 60
+#     patients, patient_references = PatientGenerator(n=10, generate_ids=True).generate(references=True)
+#     organization = Organization(name="Test", id="test-org")
+#     practitioner = Organization(name="Practitioner", id="test-practitioner")
+#     conditions = []
+#     encounter = Encounter(
+#         **{
+#             "id": "test-encounter",
+#             "status": "planned",
+#             "class": {"code": "AMB", "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode"}
+#         }
+#     )
+#     for patient in patients:
+#         patient.managingOrganization = {"reference": organization.relative_path()}
+#         patient.generalPractitioner = [{"reference": practitioner.relative_path()}]
+#         condition = Condition(subject={"reference": patient.relative_path()}, id=str(uuid.uuid4()))
+#         condition.encounter = {"reference": encounter.relative_path()}
+#         conditions.append(condition)
+#
+#     resources = patients + [organization, practitioner, encounter] + conditions
+#     # print(resources)
+#
+#     transfer_url = os.getenv("TRANSFER_API_URL", "http://localhost:9091/fhir")
+#     hapi_server = FhirServer(api_address=transfer_url)
+#     response = fhir_server._transfer_resources(hapi_server, resources)
 
 
 def test_fhir_server_transfer(fhir_server: FhirServer):
-    fhir_server._timeout = None
+    fhir_server._timeout = 60
     conditions = fhir_server.query("Condition").limit(10)
     assert len(conditions.resources) == 10
     transfer_url = os.getenv("TRANSFER_API_URL", "http://localhost:9091/fhir")
