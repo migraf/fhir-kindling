@@ -517,13 +517,16 @@ def test_resolve_reference_graph(fhir_server: FhirServer):
     resources = patients + [organization, practitioner, encounter] + conditions
     # print(resources)
 
-    hapi_server = FhirServer(api_address="http://localhost:9091/fhir")
+    transfer_url = os.getenv("TRANSFER_API_URL", "http://localhost:9091/fhir")
+    hapi_server = FhirServer(api_address=transfer_url)
     response = fhir_server._transfer_resources(hapi_server, resources)
 
 
 def test_fhir_server_transfer(fhir_server: FhirServer):
     conditions = fhir_server.query("Condition").limit(10)
-    hapi_server = FhirServer(api_address="http://localhost:9091/fhir")
+
+    transfer_url = os.getenv("TRANSFER_API_URL", "http://localhost:9091/fhir")
+    hapi_server = FhirServer(api_address=transfer_url)
     response = fhir_server.transfer(hapi_server, conditions)
 
     print(response)
@@ -579,3 +582,62 @@ async def test_add_bundle_async(fhir_server: FhirServer, org_bundle):
     response = await fhir_server.add_bundle_async(org_bundle)
     assert response
     print(response)
+
+@pytest.mark.asyncio
+async def test_fhir_server_query_raw_async(fhir_server: FhirServer):
+    query_string = "/Patient?"
+    query = fhir_server.raw_query_async(query_string=query_string, output_format="json")
+    response = await query.all()
+    assert response
+
+@pytest.mark.asyncio
+async def test_update_async(fhir_server: FhirServer):
+    # create 100 patients
+    generator = PatientGenerator(n=2)
+    patients = generator.generate()
+    add_response = fhir_server.add_all(patients)
+    print(add_response.references)
+
+    # update the first patient
+    patient = add_response.resources[0]
+    patient.name[0].family = "Test"
+    update_response = await fhir_server.update_async([patient])
+    print(update_response)
+
+    patient.name[0].family = "Test2"
+    update_response = await fhir_server.update_async([patient.dict()])
+
+    # no resource type in dict
+    with pytest.raises(ValueError):
+        update_response = await fhir_server.update_async([{"dsada": "asdas"}])
+
+    # invalid resource type
+    with pytest.raises(ValueError):
+        update_response = await fhir_server.update_async(["sdjhadk"])
+
+
+@pytest.mark.asyncio
+async def test_delete_async(fhir_server: FhirServer):
+    # create 100 patients
+    generator = PatientGenerator(n=100)
+    patients = generator.generate()
+    add_response = fhir_server.add_all(patients)
+    print(add_response.references)
+
+    delete_response = await fhir_server.delete_async(references=add_response.references[:50])
+    print(delete_response)
+
+    delete_resource = await fhir_server.delete_async(resources=add_response.resources[50:75])
+    print(delete_resource)
+    assert delete_resource
+    delete_resource = await fhir_server.delete_async(resources=[r.dict() for r in add_response.resources[75:]])
+    assert delete_resource
+    print(delete_resource)
+
+    with pytest.raises(ValueError):
+        await fhir_server.delete_async(resources=["asd"], references=["asd"])
+    with pytest.raises(ValueError):
+        await fhir_server.delete_async(resources=["asd"], query=["asd"])
+
+    with pytest.raises(ValueError):
+        await fhir_server.delete_async(references=["asd"], query=["asd"])

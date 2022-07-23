@@ -15,33 +15,25 @@ jobs:
   test:
 
     runs-on: ubuntu-latest
+    container: python:3.9
     environment: CI
-
     services:
       hapi:
         image: "hapiproject/hapi:latest"
-        ports:
-          - "9091:8080"
         env:
           hapi.fhir.default_encoding: json
           hapi.fhir.: json
-          hapi.fhir.server_address: "http://localhost:9091/fhir"
+          hapi.fhir.server_address: "http://hapi:8080/fhir"
 
       blaze:
         image: "samply/blaze:latest"
         env:
           JAVA_TOOL_OPTIONS: "-Xmx2g"
-          BASE_URL: "http://localhost:9090"
-        ports:
-            - "9090:8080"
+          BASE_URL: "http://blaze:8080"
         volumes:
             - blaze:/app/data
 
-#        options: >-
-#          --health-cmd curl http://localhost:8080/fhir/metadata
-#          --health-interval 10s
-#          --health-timeout 30s
-#          --health-retries 5
+
 
     steps:
       - uses: actions/checkout@v3
@@ -53,6 +45,21 @@ jobs:
           python-version: 3.9
           cache: "pipenv"
       - run: pipenv install --dev
+        name: Install dependencies
+      - uses: nev7n/wait_for_response@v1
+        name: Wait for Blaze to start
+        with:
+          url: 'http://blaze:8080/fhir'
+          responseCode: 200
+          timeout: 2000
+          interval: 500
+      - uses: nev7n/wait_for_response@v1
+        name: Wait for Hapi to start
+        with:
+          url: 'http://hapi:8080/fhir'
+          responseCode: 200
+          timeout: 2000
+          interval: 500
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
@@ -61,10 +68,8 @@ jobs:
           pipenv run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Tests and coverage report
         env:
-          FHIR_API_URL: ${{ secrets.BLAZE_API_URL }}
-          CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
-          CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
-          OIDC_PROVIDER_URL: ${{ secrets.KEYCLOAK_PROVIDER_URL }}
+          FHIR_API_URL: http://blaze:8080/fhir
+          TRANSFER_API_URL: http://hapi:8080/fhir
         run: |
           pipenv run coverage run -m pytest tests
           pipenv run coverage xml

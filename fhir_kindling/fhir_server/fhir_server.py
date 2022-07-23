@@ -700,11 +700,6 @@ class FhirServer:
         )
         return client
 
-    # def _setup(self):
-    #     self.auth = self._validate_auth()
-    #     self.session.auth = self.auth
-    #     self.session.headers.update(self.headers)
-
     def _make_server_summary(self) -> ServerSummary:
         resources = []
         summary = {
@@ -769,43 +764,6 @@ class FhirServer:
         else:
             raise ValueError(f"Malformed API URL: {api_address}")
 
-    def _validate_auth(self) -> Union[httpx.Auth, None]:
-        if self._auth and (self.username or self.password):
-            raise ValueError(
-                "Only one authentication method can be used, auth object and username/password are mutually exclusive")
-        if self._auth and self.token:
-            raise ValueError("Only one authentication method can be used, auth object and token are mutually exclusive")
-        if self._auth and (self.client_id or self.client_secret or self.oidc_provider_url):
-            raise ValueError(
-                "Only one authentication method can be used, auth object and OIDC auth are mutually exclusive")
-
-        if self.token and (self.client_id or self.client_secret or self.oidc_provider_url):
-            raise ValueError("Only one authentication method can be used, token and OIDC auth are mutually exclusive")
-
-        if self.token and (self.username or self.password):
-            raise ValueError(
-                "Only one authentication method can be used, token and username/password are mutually exclusive")
-
-        if (self.username or self.password) and (self.client_id or self.client_secret or self.oidc_provider_url):
-            raise ValueError("Only one authentication method can be used, username/password and "
-                             "OIDC auth are mutually exclusive")
-
-        if self._auth:
-            return self._auth
-        # OIDC authentication
-        if self.client_id:
-            self._get_oidc_token()
-            return generate_auth(token=self.token)
-        # basic or static token authentication
-        elif self.username and self.password:
-            return generate_auth(self.username, self.password)
-
-        # static token auth
-        elif self.token:
-            return generate_auth(token=self.token)
-        else:
-            return None
-
     def _make_get_many_transaction(self, str_references: List[str]):
         get_bundle = Bundle.construct()
         get_bundle.type = "batch"
@@ -815,25 +773,6 @@ class FhirServer:
         # validate bundle
         get_bundle = Bundle(**get_bundle.dict(exclude_none=True))
         return get_bundle
-
-    def _get_many_query(self, str_references: List[str]) -> List[FHIRAbstractModel]:
-        # todo remove this in favor of batch transactions
-        resource_refs = {}
-        for reference in str_references:
-            resource_type, id = reference.split("/")
-            resource_id_list = resource_refs.get(resource_type, [])
-            resource_id_list.append(id)
-            resource_refs[resource_type] = resource_id_list
-        resources = []
-        for resource_type, resource_ids in resource_refs.items():
-            params = FHIRQueryParameters(
-                resource=resource_type,
-                resource_parameters=[FieldParameter(field="_id", value=resource_ids, operator=QueryOperators.in_)]
-            )
-
-            query_resources = self.query(query_parameters=params).all().resources
-            resources.extend(query_resources)
-        return resources
 
     def _get_missing_resources(self, resources: List[Union[Resource, FHIRAbstractModel]]):
         missing = check_missing_references(resources)

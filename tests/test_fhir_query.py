@@ -1745,15 +1745,33 @@ def test_query_response_to_dfs(server):
 async def test_query_async(server):
     query = server.query_async("Patient")
     response = await query.all()
-    print(response)
+    assert response.resources
 
     with pytest.raises(ValueError):
         query = server.query_async("Patient", output_format="invalid")
         response = await query.all()
-        print(response)
 
 @pytest.mark.asyncio
 async def test_query_async_xml(server):
     query = server.query_async("Patient", output_format="xml")
     response = await query.all()
+    assert response
+
+    with pytest.raises(NotImplementedError):
+        resources = response.resources
+
+
+@pytest.mark.asyncio
+async def test_query_async_first(server):
+    query = server.query_async("Patient")
+    response = await query.first()
     print(response)
+    assert len(response.resources) == 1
+
+
+@pytest.mark.asyncio
+async def test_query_async_limit(server):
+    query = server.query_async("Patient")
+    response = await query.limit(10)
+    print(response)
+    assert len(response.resources) == 10
