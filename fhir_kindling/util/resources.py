@@ -1,13 +1,13 @@
-from typing import Union, List
+from typing import Union, List, Type
 
 from pydantic.fields import ModelField
 
 from fhir.resources.resource import Resource
-from fhir.resources import get_fhir_model_class
+from fhir.resources import get_fhir_model_class, FHIRAbstractModel
 from fhir.resources.fhirtypes import ResourceType
 
 
-def get_resource_fields(resource: Union[Resource, ResourceType, str]) -> List[ModelField]:
+def get_resource_fields(resource: Union[Resource, ResourceType, str, Type[FHIRAbstractModel]]) -> List[ModelField]:
     """
     Get the fields of a resource.
     Args:

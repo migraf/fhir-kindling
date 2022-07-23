@@ -63,7 +63,8 @@ jobs:
 #          interval: 500
       - name: Prefill servers with data
         run: |
-          pipenv install .
+          pipenv run pip install .
+          pipenv run pip install requests
           pipenv run python ./testing/prefill.py
 
       - name: Lint with flake8

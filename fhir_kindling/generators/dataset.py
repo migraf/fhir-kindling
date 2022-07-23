@@ -1,8 +1,8 @@
 import random
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Type
 from uuid import uuid4
 
-from fhir.resources import get_fhir_model_class
+from fhir.resources import get_fhir_model_class, FHIRAbstractModel
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from fhir.resources.patient import Patient
 from fhir.resources.reference import Reference
@@ -154,7 +154,8 @@ class DatasetGenerator:
         )
         resource.__setattr__(reference_field, reference)
 
-    def _get_required_reference(self, resource: FHIRResourceModel) -> str:
+    @staticmethod
+    def _get_required_reference(resource: Union[FHIRResourceModel, Type[FHIRAbstractModel]]) -> str:
         fields = get_resource_fields(resource)
         required_fields = []
         for field in fields:
@@ -182,7 +183,7 @@ class DatasetGenerator:
                     raise ValueError(f"No reference field found for {resource.get_resource_type()}")
         return reference
 
-    def _store_generated_resource(self, resource: FHIRResourceModel, resource_type: str):
+    def _store_generated_resource(self, resource: Union[FHIRResourceModel, FHIRAbstractModel], resource_type: str):
         # todo improve this
         for store in self._dataset.resources:
             if store.resource_type == resource_type:
