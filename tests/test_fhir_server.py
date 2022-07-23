@@ -524,12 +524,13 @@ def test_get_many(fhir_server: FhirServer):
 
 
 def test_fhir_server_transfer(fhir_server: FhirServer):
-    fhir_server._timeout = None
-    conditions = fhir_server.query("Condition").limit(10)
+    api_url = os.getenv("FHIR_API_URL", "http://localhost:9090/fhir")
+    server = FhirServer(api_address=api_url, timeout=None)
+    conditions = server.query("Condition").limit(10)
     assert len(conditions.resources) == 10
     transfer_url = os.getenv("TRANSFER_API_URL", "http://localhost:9091/fhir")
     hapi_server = FhirServer(api_address=transfer_url)
-    response = fhir_server.transfer(hapi_server, conditions)
+    response = server.transfer(hapi_server, conditions)
 
     print(response)
     assert response.destination_server == hapi_server.api_address
