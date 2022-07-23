@@ -524,7 +524,7 @@ def test_get_many(fhir_server: FhirServer):
 
 
 def test_fhir_server_transfer(fhir_server: FhirServer):
-    fhir_server._timeout = 60
+    fhir_server._timeout = None
     conditions = fhir_server.query("Condition").limit(10)
     assert len(conditions.resources) == 10
     transfer_url = os.getenv("TRANSFER_API_URL", "http://localhost:9091/fhir")
