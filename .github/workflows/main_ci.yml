@@ -37,12 +37,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: dschep/install-pipenv-action@v1
       - name: Set up Python 3.9
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
           cache: "pipenv"
+      - run: pip install pipenv
       - run: pipenv install --dev
         name: Install dependencies
       - uses: nev7n/wait_for_response@v1
