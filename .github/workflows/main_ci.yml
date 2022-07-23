@@ -45,20 +45,20 @@ jobs:
       - run: pip install pipenv
       - run: pipenv install --dev
         name: Install dependencies
-      - uses: nev7n/wait_for_response@v1
-        name: Wait for Blaze to start
-        with:
-          url: 'http://blaze:8080/fhir'
-          responseCode: 200
-          timeout: 2000
-          interval: 500
-      - uses: nev7n/wait_for_response@v1
-        name: Wait for Hapi to start
-        with:
-          url: 'http://hapi:8080/fhir'
-          responseCode: 200
-          timeout: 2000
-          interval: 500
+#      - uses: nev7n/wait_for_response@v1
+#        name: Wait for Blaze to start
+#        with:
+#          url: 'http://blaze:8080/fhir'
+#          responseCode: 200
+#          timeout: 2000
+#          interval: 500
+#      - uses: nev7n/wait_for_response@v1
+#        name: Wait for Hapi to start
+#        with:
+#          url: 'http://hapi:8080/fhir'
+#          responseCode: 200
+#          timeout: 2000
+#          interval: 500
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
