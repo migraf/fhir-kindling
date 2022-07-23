@@ -37,8 +37,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Install pipenv
-        run: pipx install pipenv
+      - uses: dschep/install-pipenv-action@v1
       - name: Set up Python 3.9
         uses: actions/setup-python@v4
         with:
