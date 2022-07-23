@@ -24,6 +24,8 @@ jobs:
           hapi.fhir.default_encoding: json
           hapi.fhir.: json
           hapi.fhir.server_address: "http://hapi:8080/fhir"
+        volumes:
+          - hapi:/data/hapi
 
       blaze:
         image: "samply/blaze:latest"
@@ -31,7 +33,7 @@ jobs:
           JAVA_TOOL_OPTIONS: "-Xmx2g"
           BASE_URL: "http://blaze:8080"
         volumes:
-            - blaze:/app/data
+          - blaze:/app/data
     env:
       FHIR_API_URL: http://blaze:8080/fhir
       TRANSFER_API_URL: http://hapi:8080/fhir
@@ -39,28 +41,28 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-#      - name: Set up Python 3.9
-#        uses: actions/setup-python@v4
-#        with:
-#          python-version: 3.9
-#          cache: "pipenv"
+      #      - name: Set up Python 3.9
+      #        uses: actions/setup-python@v4
+      #        with:
+      #          python-version: 3.9
+      #          cache: "pipenv"
       - run: pip install pipenv
       - run: pipenv install --dev
         name: Install dependencies
-#      - uses: nev7n/wait_for_response@v1
-#        name: Wait for Blaze to start
-#        with:
-#          url: 'http://blaze:8080/fhir'
-#          responseCode: 200
-#          timeout: 2000
-#          interval: 500
-#      - uses: nev7n/wait_for_response@v1
-#        name: Wait for Hapi to start
-#        with:
-#          url: 'http://hapi:8080/fhir'
-#          responseCode: 200
-#          timeout: 2000
-#          interval: 500
+      #      - uses: nev7n/wait_for_response@v1
+      #        name: Wait for Blaze to start
+      #        with:
+      #          url: 'http://blaze:8080/fhir'
+      #          responseCode: 200
+      #          timeout: 2000
+      #          interval: 500
+      #      - uses: nev7n/wait_for_response@v1
+      #        name: Wait for Hapi to start
+      #        with:
+      #          url: 'http://hapi:8080/fhir'
+      #          responseCode: 200
+      #          timeout: 2000
+      #          interval: 500
       - name: Prefill servers with data
         run: |
           pipenv run pip install .
