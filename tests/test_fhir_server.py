@@ -496,6 +496,7 @@ def test_get_many(fhir_server: FhirServer):
 
 
 def test_resolve_reference_graph(fhir_server: FhirServer):
+    fhir_server._timeout = None
     patients, patient_references = PatientGenerator(n=10, generate_ids=True).generate(references=True)
     organization = Organization(name="Test", id="test-org")
     practitioner = Organization(name="Practitioner", id="test-practitioner")
@@ -523,8 +524,9 @@ def test_resolve_reference_graph(fhir_server: FhirServer):
 
 
 def test_fhir_server_transfer(fhir_server: FhirServer):
+    fhir_server._timeout = None
     conditions = fhir_server.query("Condition").limit(10)
-
+    assert len(conditions.resources) == 10
     transfer_url = os.getenv("TRANSFER_API_URL", "http://localhost:9091/fhir")
     hapi_server = FhirServer(api_address=transfer_url)
     response = fhir_server.transfer(hapi_server, conditions)

@@ -29,9 +29,18 @@ from fhir_kindling.util.references import check_missing_references, reference_gr
 
 class FhirServer:
 
-    def __init__(self, api_address: str, username: str = None, password: str = None, token: str = None,
-                 client_id: str = None, client_secret: str = None, oidc_provider_url: str = None,
-                 auth: httpx.Auth = None, headers: dict = None, proxies: Union[dict, str] = None,
+    def __init__(self,
+                 api_address: str,
+                 username: str = None,
+                 password: str = None,
+                 token: str = None,
+                 client_id: str = None,
+                 client_secret: str = None,
+                 oidc_provider_url: str = None,
+                 auth: httpx.Auth = None,
+                 headers: dict = None,
+                 proxies: Union[dict, str] = None,
+                 timeout: int = 5,
                  fhir_server_type: str = "hapi"):
         """
         Initialize a FHIR server connection
@@ -69,6 +78,7 @@ class FhirServer:
         self._auth = auth
         self._headers = headers
         self._proxies = proxies
+        self._timeout = timeout
 
     @classmethod
     def from_env(cls, no_auth: bool = False) -> 'FhirServer':
@@ -727,6 +737,7 @@ class FhirServer:
             headers=self.headers,
             auth=self.auth,
             proxies=self._proxies,
+            timeout=self._timeout,
         )
         return client
 
@@ -735,6 +746,7 @@ class FhirServer:
             headers=self.headers,
             auth=self.auth,
             proxies=self._proxies,
+            timeout=self._timeout,
         )
         return client
 
