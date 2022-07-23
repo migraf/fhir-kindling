@@ -59,6 +59,11 @@ jobs:
 #          responseCode: 200
 #          timeout: 2000
 #          interval: 500
+      - name: Prefill servers with data
+        run: |
+          pipenv install .
+          python3 ./testing/prefill.py
+
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
