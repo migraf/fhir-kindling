@@ -4,7 +4,6 @@ from typing import List, Union
 import httpx
 import orjson
 import re
-import pendulum
 from authlib.oauth2.rfc6749 import OAuth2Token
 from networkx import DiGraph
 from authlib.integrations.httpx_client import OAuth2Client
@@ -21,8 +20,8 @@ import fhir.resources
 
 from fhir_kindling.fhir_query import FHIRQuerySync, FHIRQueryAsync
 from fhir_kindling.fhir_query.query_response import QueryResponse
-from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters, FieldParameter, QueryOperators
-from fhir_kindling.fhir_server.auth import generate_auth, BearerAuth, auth_info_from_env
+from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters
+from fhir_kindling.fhir_server.auth import BearerAuth, auth_info_from_env
 from fhir_kindling.fhir_server.server_responses import ResourceCreateResponse, BundleCreateResponse, ServerSummary, \
     TransferResponse
 from fhir_kindling.util.references import check_missing_references, reference_graph
@@ -32,7 +31,7 @@ class FhirServer:
 
     def __init__(self, api_address: str, username: str = None, password: str = None, token: str = None,
                  client_id: str = None, client_secret: str = None, oidc_provider_url: str = None,
-                 auth: httpx.Auth = None, headers: dict = None,
+                 auth: httpx.Auth = None, headers: dict = None, proxies: Union[dict, str] = None,
                  fhir_server_type: str = "hapi"):
         """
         Initialize a FHIR server connection
@@ -69,6 +68,7 @@ class FhirServer:
 
         self._auth = auth
         self._headers = headers
+        self._proxies = proxies
 
     @classmethod
     def from_env(cls, no_auth: bool = False) -> 'FhirServer':
@@ -227,7 +227,8 @@ class FhirServer:
         """
         if isinstance(reference, Reference):
             reference = reference.reference
-        r = self._sync_client().get(f"{self.api_address}/{reference}")
+        with self._sync_client() as client:
+            r = client.get(f"{self.api_address}/{reference}")
         r.raise_for_status()
         resource_dict = r.json()
         resource = construct_fhir_element(resource_dict["resourceType"], resource_dict)
@@ -267,12 +268,15 @@ class FhirServer:
         """
         str_references = [reference if isinstance(reference, str) else reference.reference for reference in references]
 
-        # resources = self._get_many_query(str_references)
-        # todo use batched/transaction requests to get all resources in one request
         get_many_transaction = self._make_get_many_transaction(str_references)
-        response = self._sync_client().post(self.api_address, json=self._json_dict(get_many_transaction))
-        #
-        entries = response.json()["entry"]
+        with self._sync_client() as client:
+            r = client.post(self.api_address, json=self._json_dict(get_many_transaction))
+            try:
+                r.raise_for_status()
+            except Exception as e:
+                print(r.text)
+                raise e
+        entries = r.json()["entry"]
         resources = [construct_fhir_element(entry["resource"]["resourceType"], entry["resource"]) for entry in entries]
 
         return resources
@@ -428,16 +432,26 @@ class FhirServer:
         """
 
         update_bundle = self._make_update_transaction(resources)
-        response = self._sync_client().post(self.api_address, json=self._json_dict(update_bundle))
-        response.raise_for_status()
-
-        return response.json()
+        with self._sync_client() as client:
+            r = client.post(self.api_address, json=self._json_dict(update_bundle))
+            try:
+                r.raise_for_status()
+            except Exception as e:
+                print(r.text)
+                raise e
+        return r.json()
 
     async def update_async(self, resources: List[Union[FHIRResourceModel, dict]]):
         update_bundle = self._make_update_transaction(resources)
-        response = await self._async_client().post(self.api_address, json=self._json_dict(update_bundle))
-        response.raise_for_status()
-        return response.json()
+
+        async with self._async_client() as client:
+            r = await client.post(self.api_address, json=self._json_dict(update_bundle))
+            try:
+                r.raise_for_status()
+            except Exception as e:
+                print(r.text)
+                raise e
+        return r.json()
 
     def delete(self,
                resources: List[Union[FHIRResourceModel, dict]] = None,
@@ -456,10 +470,14 @@ class FhirServer:
 
         delete_bundle = self._make_delete_transaction(resources, references, query)
 
-        response = self._sync_client().post(self.api_address, json=self._json_dict(delete_bundle))
-        response.raise_for_status()
-
-        return response
+        with self._sync_client() as client:
+            r = client.post(self.api_address, json=self._json_dict(delete_bundle))
+            try:
+                r.raise_for_status()
+            except Exception as e:
+                print(r.text)
+                raise e
+        return r
 
     async def delete_async(self,
                            resources: List[Union[FHIRResourceModel, dict]] = None,
@@ -467,10 +485,15 @@ class FhirServer:
                            query: FHIRQuerySync = None):
         delete_bundle = self._make_delete_transaction(resources, references, query)
 
-        response = await self._async_client().post(self.api_address, json=self._json_dict(delete_bundle))
-        response.raise_for_status()
+        async with self._async_client() as client:
+            r = await client.post(self.api_address, json=self._json_dict(delete_bundle))
+            try:
+                r.raise_for_status()
+            except Exception as e:
+                print(r.text)
+                raise e
 
-        return response
+        return r
 
     def transfer(self, target_server: 'FhirServer', query_result: QueryResponse) -> TransferResponse:
         """
@@ -643,18 +666,26 @@ class FhirServer:
         return entry
 
     def _upload_bundle(self, bundle: Bundle) -> BundleCreateResponse:
-        r = self._sync_client().post(url=self.api_address, json=self._json_dict(bundle))
-        try:
-            r.raise_for_status()
-        except Exception as e:
-            print(r.text)
-            raise e
+        with self._sync_client() as client:
+
+            r = client.post(url=self.api_address, json=self._json_dict(bundle))
+            try:
+                r.raise_for_status()
+            except Exception as e:
+                print(r.text)
+                raise e
         bundle_response = BundleCreateResponse(r, bundle)
         return bundle_response
 
     def _upload_resource(self, resource: Resource) -> httpx.Response:
         url = self.api_address + "/" + resource.get_resource_type()
-        r = self._sync_client().post(url=url, headers=self.headers, auth=self._auth, json=self._json_dict(resource))
+        with self._sync_client() as client:
+            r = client.post(url=url, json=self._json_dict(resource))
+            try:
+                r.raise_for_status()
+            except Exception as e:
+                print(r.text)
+                raise e
         return r
 
     async def _upload_resource_async(self, resource: Resource) -> httpx.Response:
@@ -681,8 +712,13 @@ class FhirServer:
 
     def _get_meta_data(self):
         url = self.api_address + "/metadata"
-        r = self._sync_client().get(url)
-        r.raise_for_status()
+        with self._sync_client() as client:
+            r = client.get(url)
+            try:
+                r.raise_for_status()
+            except Exception as e:
+                print(r.text)
+                raise e
         response = r.json()
         self._meta_data = response
 
@@ -690,6 +726,7 @@ class FhirServer:
         client = httpx.Client(
             headers=self.headers,
             auth=self.auth,
+            proxies=self._proxies,
         )
         return client
 
@@ -697,6 +734,7 @@ class FhirServer:
         client = httpx.AsyncClient(
             headers=self.headers,
             auth=self.auth,
+            proxies=self._proxies,
         )
         return client
 
@@ -705,18 +743,19 @@ class FhirServer:
         summary = {
             "name": self.api_address
         }
-        for resource in self.rest_resources:
-            url = self.api_address + "/" + resource + "?_summary=count"
-            r = self._sync_client().get(url)
-            r.raise_for_status()
+        with self._sync_client() as client:
+            for resource in self.rest_resources:
+                url = self.api_address + "/" + resource + "?_summary=count"
+                r = client.get(url)
+                r.raise_for_status()
 
-            resource_dict = {
-                "resource": resource,
-                "count": r.json().get("total")
-            }
-            resources.append(resource_dict)
+                resource_dict = {
+                    "resource": resource,
+                    "count": r.json().get("total")
+                }
+                resources.append(resource_dict)
 
-        summary["resources"] = resources
+            summary["resources"] = resources
         summary = ServerSummary(**summary)
         return summary
 

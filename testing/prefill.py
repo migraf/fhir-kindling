@@ -13,8 +13,14 @@ def prefill():
     server_1 = os.getenv("FHIR_API_URL")
     server_2 = os.getenv("TRANSFER_API_URL")
 
+    assert server_1
+    assert server_2
+
     server_1 = FhirServer(api_address=server_1)
     server_2 = FhirServer(api_address=server_2)
+
+    print(f"initialized server_1: {server_1}")
+    print(f"initialized server_2: {server_2}")
 
     count = 20
     dataset_generator = DatasetGenerator("Patient", n=count)
