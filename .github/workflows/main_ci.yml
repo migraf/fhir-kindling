@@ -32,7 +32,9 @@ jobs:
           BASE_URL: "http://blaze:8080"
         volumes:
             - blaze:/app/data
-
+    env:
+      FHIR_API_URL: http://blaze:8080/fhir
+      TRANSFER_API_URL: http://hapi:8080/fhir
 
 
     steps:
@@ -71,9 +73,6 @@ jobs:
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           pipenv run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Tests and coverage report
-        env:
-          FHIR_API_URL: http://blaze:8080/fhir
-          TRANSFER_API_URL: http://hapi:8080/fhir
         run: |
           pipenv run coverage run -m pytest tests
           pipenv run coverage xml
