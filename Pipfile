@@ -29,7 +29,7 @@ bump2version = "*"
 pipenv-setup = "*"
 notebook = "*"
 jupyter = "*"
-mkdocstrings = "*"
+mkdocstrings = {extras = ["python-legacy"], version = "*"}
 flake8 = "*"
 ipython = ">=7.31.1"
 pytest-asyncio = "*"
