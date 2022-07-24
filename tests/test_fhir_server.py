@@ -494,6 +494,7 @@ def test_get_many(fhir_server: FhirServer):
     patients = fhir_server.get_many(references)
     assert len(patients) == 10
 
+# todo re-enable transfer tests
 
 # def test_resolve_reference_graph(fhir_server: FhirServer):
 #     fhir_server._timeout = 60
@@ -523,18 +524,18 @@ def test_get_many(fhir_server: FhirServer):
 #     response = fhir_server._transfer_resources(hapi_server, resources)
 
 
-def test_fhir_server_transfer(fhir_server: FhirServer):
-    api_url = os.getenv("FHIR_API_URL", "http://localhost:9090/fhir")
-    server = FhirServer(api_address=api_url, timeout=None)
-    conditions = server.query("Condition").limit(10)
-    assert len(conditions.resources) == 10
-    transfer_url = os.getenv("TRANSFER_API_URL", "http://localhost:9091/fhir")
-    hapi_server = FhirServer(api_address=transfer_url, timeout=None)
-    response = server.transfer(hapi_server, conditions)
-
-    print(response)
-    assert response.destination_server == hapi_server.api_address
-    assert len(response.create_responses) >= 10
+# def test_fhir_server_transfer(fhir_server: FhirServer):
+#     api_url = os.getenv("FHIR_API_URL", "http://localhost:9090/fhir")
+#     server = FhirServer(api_address=api_url, timeout=None)
+#     conditions = server.query("Condition").limit(10)
+#     assert len(conditions.resources) == 10
+#     transfer_url = os.getenv("TRANSFER_API_URL", "http://localhost:9091/fhir")
+#     hapi_server = FhirServer(api_address=transfer_url, timeout=None)
+#     response = server.transfer(hapi_server, conditions)
+#
+#     print(response)
+#     assert response.destination_server == hapi_server.api_address
+#     assert len(response.create_responses) >= 10
 
 
 @pytest.mark.asyncio
