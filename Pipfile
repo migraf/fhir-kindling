@@ -17,6 +17,8 @@ pydantic = "*"
 networkx = "*"
 httpx = "*"
 authlib = "*"
+sqlmodel = "*"
+sqlalchemy2-stubs = "*"
 
 [dev-packages]
 pytest = "*"
