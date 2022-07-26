@@ -25,6 +25,7 @@ from fhir_kindling.fhir_server.auth import BearerAuth, auth_info_from_env
 from fhir_kindling.fhir_server.server_responses import ResourceCreateResponse, BundleCreateResponse, ServerSummary, \
     TransferResponse
 from fhir_kindling.util.references import check_missing_references, reference_graph
+from fhir_kindling.util.resources import valid_resource_name
 
 
 class FhirServer:
@@ -130,6 +131,8 @@ class FhirServer:
             raise ValueError("Must specify either a resource, query string or query parameters")
 
         if resource:
+            # validate the given resource name
+            resource = valid_resource_name(resource)
             return FHIRQuerySync(
                 base_url=self.api_address,
                 resource=resource,
@@ -868,6 +871,7 @@ class FhirServer:
             top_nodes = [node for node in nodes if len(list(graph.predecessors(node))) == 0]
             resources = [graph.nodes[node]["resource"] for node in top_nodes]
             add_response = server.add_all(resources)
+            print(add_response)
             # update dependant nodes in the graph with the obtained references
             self._update_graph_references(graph, top_nodes, add_response.references)
             create_responses.extend(add_response.create_responses)

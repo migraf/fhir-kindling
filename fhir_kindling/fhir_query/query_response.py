@@ -5,7 +5,7 @@ from enum import Enum
 import pandas as pd
 import xmltodict
 from fhir.resources.bundle import Bundle
-from fhir.resources import FHIRAbstractModel
+from fhir.resources import FHIRAbstractModel, get_fhir_model_class
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from pydantic import BaseModel
 import httpx
@@ -72,7 +72,7 @@ class QueryResponse:
         self.response: Union[str, dict] = self._process_server_response(response)
 
     @property
-    def resources(self) -> List[FHIRResourceModel]:
+    def resources(self) -> List[FHIRAbstractModel]:
         """
         List of primary resources returned by the server.
 
@@ -238,7 +238,7 @@ class QueryResponse:
     def __repr__(self):
         if self.format == "xml":
             return f"<QueryResponse(resource={self.resource}, format=xml)>"
-        if self.included_resources:
+        if self._included_resources:
             resources = [r.resource_type for r in self.included_resources]
             return f"<QueryResponse(resource={self.resource}, format=json, " \
                    f"included_resources={resources})>"

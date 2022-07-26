@@ -10,7 +10,7 @@ from fhir.resources.observation import Observation
 
 from fhir_kindling import FhirServer
 from fhir_kindling.generators import PatientGenerator
-from fhir_kindling.util.resources import get_resource_fields
+from fhir_kindling.util.resources import get_resource_fields, check_resource_contains_field
 from fhir_kindling.util.references import extract_references, _resource_ids_from_query_response, \
     check_missing_references, reference_graph
 from dotenv import load_dotenv, find_dotenv
@@ -109,3 +109,9 @@ def test_reference_graph():
     assert len(graph.nodes) == len(resources)
     assert len(list(graph.predecessors(organization.relative_path()))) == 0
     assert len(list(graph.predecessors(conditions[0].relative_path()))) == 2
+
+
+def test_resource_contains_field(server):
+    check_resource_contains_field("Patient", "birthDate")
+    with pytest.raises(ValueError):
+        check_resource_contains_field("Patient", "foo")

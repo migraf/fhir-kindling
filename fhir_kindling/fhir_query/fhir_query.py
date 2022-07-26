@@ -313,7 +313,6 @@ class FHIRQueryBase:
             return f"<{self.__class__.__name__}(resource={resource}, url={self.query_url}>"
 
 
-
 class FHIRQuerySync(FHIRQueryBase):
     def __init__(self,
                  base_url: str,
