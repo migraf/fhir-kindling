@@ -313,6 +313,7 @@ class FHIRQueryBase:
             return f"<{self.__class__.__name__}(resource={resource}, url={self.query_url}>"
 
 
+
 class FHIRQuerySync(FHIRQueryBase):
     def __init__(self,
                  base_url: str,
@@ -327,7 +328,7 @@ class FHIRQuerySync(FHIRQueryBase):
         if client:
             self.client = client
         else:
-            self._setup_client()
+            self.client = self._setup_client()
 
     def all(self,
             page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
@@ -380,13 +381,20 @@ class FHIRQuerySync(FHIRQueryBase):
     def _setup_client(self):
         headers = self.headers if self.headers else {}
         headers["Content-Type"] = "application/fhir+json"
-        self.client = httpx.Client(auth=self.auth, headers=headers)
+        client = httpx.Client(auth=self.auth, headers=headers)
+        return client
 
     def _execute_query(self,
                        page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
                        count: int = None) -> QueryResponse:
-        r = self.client.get(self.query_url)
-        r.raise_for_status()
+
+        with self._setup_client() as client:
+            r = client.get(self.query_url)
+        try:
+            r.raise_for_status()
+        except Exception as e:
+            print(r.text)
+            raise e
         response = self._resolve_response_pagination(r, page_callback, count)
         return response
 
@@ -420,39 +428,42 @@ class FHIRQuerySync(FHIRQueryBase):
         response_json = initial_response.json()
         link = response_json.get("link", None)
         # If there is a link, get the next page otherwise return the response
-        if not link:
-            self.status_code = ResponseStatusCodes.OK
-            return response_json
-        else:
-            entries = []
-            initial_entry = response_json.get("entry", None)
-            if not initial_entry:
-                self.status_code = ResponseStatusCodes.NOT_FOUND
+
+        with self._setup_client() as client:
+            if not link:
+                self.status_code = ResponseStatusCodes.OK
                 return response_json
             else:
-                self.status_code = ResponseStatusCodes.OK
-                response_entries = response_json["entry"]
-                entries.extend(response_entries)
-                self._execute_callback(response_entries, page_callback)
-            # if the limit is reached, stop resolving the pagination
-            if self._limit and len(entries) >= self._limit:
-                response_entries = response_json["entry"][:self._limit]
-                response_json["entry"] = response_entries
-                self._execute_callback(response_entries, page_callback)
-                return response_json
-            # query the linked page and add the entries to the response
-
-            while response_json.get("link", None):
-                if self._limit and len(entries) >= self._limit:
-                    break
-                next_page = next((link for link in response_json["link"] if link.get("relation", None) == "next"), None)
-                if next_page:
-                    response_json = self.client.get(next_page["url"]).json()
+                entries = []
+                initial_entry = response_json.get("entry", None)
+                if not initial_entry:
+                    self.status_code = ResponseStatusCodes.NOT_FOUND
+                    return response_json
+                else:
+                    self.status_code = ResponseStatusCodes.OK
                     response_entries = response_json["entry"]
                     entries.extend(response_entries)
                     self._execute_callback(response_entries, page_callback)
-                else:
-                    break
+                # if the limit is reached, stop resolving the pagination
+                if self._limit and len(entries) >= self._limit:
+                    response_entries = response_json["entry"][:self._limit]
+                    response_json["entry"] = response_entries
+                    self._execute_callback(response_entries, page_callback)
+                    return response_json
+                # query the linked page and add the entries to the response
+
+                while response_json.get("link", None):
+                    if self._limit and len(entries) >= self._limit:
+                        break
+                    next_page = next((link for link in response_json["link"] if link.get("relation", None) == "next"),
+                                     None)
+                    if next_page:
+                        response_json = client.get(next_page["url"]).json()
+                        response_entries = response_json["entry"]
+                        entries.extend(response_entries)
+                        self._execute_callback(response_entries, page_callback)
+                    else:
+                        break
 
             response_json["entry"] = entries[:self._limit] if self._limit else entries
             return response_json

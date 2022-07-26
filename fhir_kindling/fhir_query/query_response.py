@@ -238,4 +238,8 @@ class QueryResponse:
     def __repr__(self):
         if self.format == "xml":
             return f"<QueryResponse(resource={self.resource}, format=xml)>"
+        if self.included_resources:
+            resources = [r.resource_type for r in self.included_resources]
+            return f"<QueryResponse(resource={self.resource}, format=json, " \
+                   f"included_resources={resources})>"
         return f"<QueryResponse(resource={self.resource}, n={len(self.resources)})>"

@@ -119,6 +119,16 @@ class FhirServer:
         Returns: a FHIRQuerySync object that can be further modified with filters and conditions before being executed
         against the server
         """
+
+        if resource and query_parameters:
+            raise ValueError("Cannot specify both a resource and query parameters")
+        if query_string and query_parameters:
+            raise ValueError("Cannot specify both a query string and query parameters")
+        if resource and query_string:
+            raise ValueError("Cannot specify both a resource and query string")
+        if not resource and not query_string and not query_parameters:
+            raise ValueError("Must specify either a resource, query string or query parameters")
+
         if resource:
             return FHIRQuerySync(
                 base_url=self.api_address,
@@ -196,9 +206,9 @@ class FhirServer:
         query_parameters = FHIRQueryParameters.from_query_string(query_string)
         query = FHIRQuerySync(
             base_url=self.api_address,
-            resource=query_parameters.resource,
             query_parameters=query_parameters,
-            output_format=output_format
+            output_format=output_format,
+            auth=self.auth
         )
         return query
 
@@ -750,7 +760,7 @@ class FhirServer:
         )
         return client
 
-    def _make_server_summary(self) -> ServerSummary:
+    def _make_server_summary(self, include_empty: bool = False) -> ServerSummary:
         resources = []
         summary = {
             "name": self.api_address
@@ -761,11 +771,12 @@ class FhirServer:
                 r = client.get(url)
                 r.raise_for_status()
 
-                resource_dict = {
-                    "resource": resource,
-                    "count": r.json().get("total")
-                }
-                resources.append(resource_dict)
+                if r.json()["total"] > 0 or include_empty:
+                    resource_dict = {
+                        "resource": resource,
+                        "count": r.json().get("total")
+                    }
+                    resources.append(resource_dict)
 
             summary["resources"] = resources
         summary = ServerSummary(**summary)
