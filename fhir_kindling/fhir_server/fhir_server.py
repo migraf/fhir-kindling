@@ -1,5 +1,5 @@
 import os
-from typing import List, Union
+from typing import List, Union, OrderedDict
 
 import httpx
 import orjson
@@ -854,6 +854,7 @@ class FhirServer:
                             resources: List[FHIRAbstractModel],
                             params: FHIRQueryParameters = None) -> TransferResponse:
         graph = reference_graph(resources)
+        print(graph)
         create_responses = self._resolve_reference_graph(graph, target_server)
 
         return TransferResponse(
@@ -870,8 +871,22 @@ class FhirServer:
             # find the nodes without references and add them to the target server
             top_nodes = [node for node in nodes if len(list(graph.predecessors(node))) == 0]
             resources = [graph.nodes[node]["resource"] for node in top_nodes]
+            parsed_resources = []
+            for r in resources:
+                if isinstance(r, OrderedDict):
+                    resource_dict = dict(r)
+                    resource_type = resource_dict.get("resourceType", resource_dict.get("resource_type"))
+                    parsed_resources.append(construct_fhir_element(resource_type, resource_dict))
+                    parsed_resources.append(r)
+                elif isinstance(r, FHIRAbstractModel):
+                    print("model")
+                    parsed_resources.append(r)
+                else:
+                    print(type(r))
+
+
+            print("resources", resources)
             add_response = server.add_all(resources)
-            print(add_response)
             # update dependant nodes in the graph with the obtained references
             self._update_graph_references(graph, top_nodes, add_response.references)
             create_responses.extend(add_response.create_responses)
