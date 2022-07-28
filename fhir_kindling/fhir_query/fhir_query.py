@@ -321,9 +321,12 @@ class FHIRQuerySync(FHIRQueryBase):
                  auth: httpx.Auth = None,
                  headers: dict = None,
                  client: httpx.Client = None,
-                 output_format: str = "json"):
+                 output_format: str = "json",
+                 proxies: Union[str, dict] = None,
+                 ):
 
         super().__init__(base_url, resource, query_parameters, auth, headers, output_format)
+        self.proxies = proxies
         if client:
             self.client = client
         else:
@@ -387,7 +390,7 @@ class FHIRQuerySync(FHIRQueryBase):
     def _setup_client(self):
         headers = self.headers if self.headers else {}
         headers["Content-Type"] = "application/fhir+json"
-        client = httpx.Client(auth=self.auth, headers=headers)
+        client = httpx.Client(auth=self.auth, headers=headers, proxies=self.proxies)
         return client
 
     def _execute_query(self,
@@ -528,12 +531,17 @@ class FHIRQueryAsync(FHIRQueryBase):
                  auth: httpx.Auth = None,
                  headers: dict = None,
                  output_format: str = "json",
+                 client: httpx.AsyncClient = None,
+                 proxies: Union[str, dict] = None,
                  ):
         super().__init__(base_url, resource, query_parameters, auth, headers, output_format)
-
+        self.proxies = proxies
         # set up the async client instance
         self.client = None
-        self._setup_client()
+        if client:
+            self.client = client
+        else:
+            self._setup_client()
 
     async def all(self,
                   page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,

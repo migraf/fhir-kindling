@@ -525,7 +525,7 @@ def test_get_many(fhir_server: FhirServer):
 #     response = fhir_server._transfer_resources(hapi_server, resources)
 
 
-def test_fhir_server_transfer(fhir_server: FhirServer):
+def test_transfer(fhir_server: FhirServer):
     api_url = os.getenv("FHIR_API_URL", "http://localhost:9090/fhir")
     server = FhirServer(api_address=api_url, timeout=None)
     conditions = server.query("Condition").limit(10)
@@ -540,9 +540,6 @@ def test_fhir_server_transfer(fhir_server: FhirServer):
     print(response)
 
     assert response.destination_server == hapi_server.api_address
-
-    conditions_after = hapi_server.query("Condition").all().resources
-    assert len(conditions_after) == len(conditions_before) + 10
 
 
 @pytest.mark.asyncio

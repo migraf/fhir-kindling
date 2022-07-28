@@ -24,6 +24,7 @@ from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters
 from fhir_kindling.fhir_server.auth import BearerAuth, auth_info_from_env
 from fhir_kindling.fhir_server.server_responses import ResourceCreateResponse, BundleCreateResponse, ServerSummary, \
     TransferResponse
+from fhir_kindling.serde.json import json_dict
 from fhir_kindling.util.references import check_missing_references, reference_graph
 from fhir_kindling.util.resources import valid_resource_name
 
@@ -295,7 +296,7 @@ class FhirServer:
 
         get_many_transaction = self._make_get_many_transaction(str_references)
         with self._sync_client() as client:
-            r = client.post(self.api_address, json=self._json_dict(get_many_transaction))
+            r = client.post(self.api_address, json=json_dict(get_many_transaction))
             try:
                 r.raise_for_status()
             except Exception as e:
@@ -458,7 +459,7 @@ class FhirServer:
 
         update_bundle = self._make_update_transaction(resources)
         with self._sync_client() as client:
-            r = client.post(self.api_address, json=self._json_dict(update_bundle))
+            r = client.post(self.api_address, json=json_dict(update_bundle))
             try:
                 r.raise_for_status()
             except Exception as e:
@@ -470,7 +471,7 @@ class FhirServer:
         update_bundle = self._make_update_transaction(resources)
 
         async with self._async_client() as client:
-            r = await client.post(self.api_address, json=self._json_dict(update_bundle))
+            r = await client.post(self.api_address, json=json_dict(update_bundle))
             try:
                 r.raise_for_status()
             except Exception as e:
@@ -496,7 +497,7 @@ class FhirServer:
         delete_bundle = self._make_delete_transaction(resources, references, query)
 
         with self._sync_client() as client:
-            r = client.post(self.api_address, json=self._json_dict(delete_bundle))
+            r = client.post(self.api_address, json=json_dict(delete_bundle))
             try:
                 r.raise_for_status()
             except Exception as e:
@@ -511,7 +512,7 @@ class FhirServer:
         delete_bundle = self._make_delete_transaction(resources, references, query)
 
         async with self._async_client() as client:
-            r = await client.post(self.api_address, json=self._json_dict(delete_bundle))
+            r = await client.post(self.api_address, json=json_dict(delete_bundle))
             try:
                 r.raise_for_status()
             except Exception as e:
@@ -657,15 +658,19 @@ class FhirServer:
         upload_bundle.type = "transaction"
         upload_bundle.entry = []
 
-        # initialize fhir model instances from dict
-        if isinstance(resources[0], dict):
-            resources = [fhir.resources.construct_fhir_element(
-                resource.get("resourceType"),
-                resource
-            )
-                for resource in resources
-            ]
         for resource in resources:
+            # initialize fhir model instances from dict
+            if isinstance(resource, dict):
+                resource = fhir.resources.construct_fhir_element(
+                    resource.get("resourceType"),
+                    resource
+                )
+            elif isinstance(resource, OrderedDict):
+                resource = fhir.resources.construct_fhir_element(
+                    resource.get("resourceType"),
+                    resource
+                )
+            del resource.id
             entry = self._make_bundle_post_request_entry(resource)
             upload_bundle.entry.append(entry)
 
@@ -693,7 +698,7 @@ class FhirServer:
     def _upload_bundle(self, bundle: Bundle) -> BundleCreateResponse:
         with self._sync_client() as client:
 
-            r = client.post(url=self.api_address, json=self._json_dict(bundle))
+            r = client.post(url=self.api_address, json=json_dict(bundle))
             try:
                 r.raise_for_status()
             except Exception as e:
@@ -705,7 +710,7 @@ class FhirServer:
     def _upload_resource(self, resource: Resource) -> httpx.Response:
         url = self.api_address + "/" + resource.get_resource_type()
         with self._sync_client() as client:
-            r = client.post(url=url, json=self._json_dict(resource))
+            r = client.post(url=url, json=json_dict(resource))
             try:
                 r.raise_for_status()
             except Exception as e:
@@ -716,7 +721,7 @@ class FhirServer:
     async def _upload_resource_async(self, resource: Resource) -> httpx.Response:
         url = self.api_address + "/" + resource.get_resource_type()
         async with self._async_client() as client:
-            r = await client.post(url=url, json=self._json_dict(resource))
+            r = await client.post(url=url, json=json_dict(resource))
             try:
                 r.raise_for_status()
             except Exception as e:
@@ -726,7 +731,7 @@ class FhirServer:
 
     async def _upload_bundle_async(self, bundle: Bundle) -> BundleCreateResponse:
         async with self._async_client() as client:
-            r = await client.post(url=self.api_address, json=self._json_dict(bundle))
+            r = await client.post(url=self.api_address, json=json_dict(bundle))
             try:
                 r.raise_for_status()
             except Exception as e:
@@ -881,14 +886,14 @@ class FhirServer:
                     parsed_resources.append(construct_fhir_element(resource_type, resource_dict))
                     parsed_resources.append(r)
                 elif isinstance(r, FHIRAbstractModel):
-                    print("model")
                     parsed_resources.append(r)
                 else:
                     print(type(r))
 
+            print(graph)
 
             print("resources", resources)
-            add_response = server.add_all(resources)
+            add_response = server.add_all(parsed_resources)
             # update dependant nodes in the graph with the obtained references
             self._update_graph_references(graph, top_nodes, add_response.references)
             create_responses.extend(add_response.create_responses)
@@ -938,14 +943,6 @@ class FhirServer:
                         graph.nodes[successor]["resource"] = resource
                     else:
                         graph.nodes[successor]["resource"][field] = reference
-
-    @staticmethod
-    def _json_dict(resource: Union[Resource, FHIRAbstractModel] = None, json_dict: dict = None) -> dict:
-        if resource:
-            json_dict = orjson.loads(resource.json(exclude_none=True))
-            return json_dict
-        elif json_dict:
-            return orjson.loads(orjson.dumps(json_dict))
 
     def __repr__(self):
         return f"FhirServer(api_address={self.api_address})"
