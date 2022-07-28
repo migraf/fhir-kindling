@@ -233,7 +233,8 @@ class FhirServer:
             base_url=self.api_address,
             resource=query_parameters.resource,
             query_parameters=query_parameters,
-            output_format=output_format
+            output_format=output_format,
+            auth=self.auth
         )
         return query
 

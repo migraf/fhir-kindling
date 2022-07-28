@@ -648,7 +648,8 @@ class FHIRQueryAsync(FHIRQueryBase):
                     break
                 next_page = next((link for link in response_json["link"] if link.get("relation", None) == "next"), None)
                 if next_page:
-                    response_json = await self.client.get(next_page["url"]).json()
+                    page_response = await self.client.get(next_page["url"])
+                    response_json = page_response.json()
                     response_entries = response_json["entry"]
                     entries.extend(response_entries)
                     self._execute_callback(response_entries, page_callback)
