@@ -1774,3 +1774,16 @@ async def test_query_async_limit(server):
     response = await query.limit(10)
     print(response)
     assert len(response.resources) == 10
+
+
+def test_query_count(server):
+    count = server.query("Patient").count()
+    print(count)
+    assert count > 0
+
+
+@pytest.mark.asyncio
+async def test_query_count_async(server):
+    count = await server.query_async("Patient").count()
+    print(count)
+    assert count > 0

@@ -377,6 +377,13 @@ class FHIRQuerySync(FHIRQueryBase):
         self._limit = 1
         return self._execute_query()
 
+    def count(self) -> int:
+        self._count = 0
+        with self._setup_client() as client:
+            response = client.get(self._make_query_string() + "&_summary=count")
+        response.raise_for_status()
+        return response.json()["total"]
+
     def _setup_client(self):
         headers = self.headers if self.headers else {}
         headers["Content-Type"] = "application/fhir+json"
@@ -394,6 +401,7 @@ class FHIRQuerySync(FHIRQueryBase):
         except Exception as e:
             print(r.text)
             raise e
+
         response = self._resolve_response_pagination(r, page_callback, count)
         return response
 
@@ -577,6 +585,18 @@ class FHIRQueryAsync(FHIRQueryBase):
         self._limit = 1
         response = await self._execute_query(count=1)
         return response
+
+    async def count(self) -> int:
+        """
+        Return the number of resources matching the query parameters.
+        Returns:
+            number of resources matching the query
+
+        """
+
+        response = await self.client.get(self.query_url + "&_summary=count")
+        response.raise_for_status()
+        return response.json()["total"]
 
     def _setup_client(self):
         headers = self.headers if self.headers else {}

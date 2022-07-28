@@ -535,8 +535,6 @@ def test_fhir_server_transfer(fhir_server: FhirServer):
 
     conditions_before = hapi_server.query("Condition").all().resources
 
-    assert conditions_before
-
     response = server.transfer(hapi_server, conditions)
 
     print(response)

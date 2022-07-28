@@ -131,8 +131,9 @@ class FhirServer:
             raise ValueError("Must specify either a resource, query string or query parameters")
 
         if resource:
+            if isinstance(resource, str):
+                resource = valid_resource_name(resource)
             # validate the given resource name
-            resource = valid_resource_name(resource)
             return FHIRQuerySync(
                 base_url=self.api_address,
                 resource=resource,

@@ -97,15 +97,15 @@ def plot_results(results: dict):
 
 
 if __name__ == '__main__':
-    N = 10000
+    N = 1000000
     benchmark_server = "http://localhost:9090/fhir"
 
     # generate data for benchmark and measure generation and upload time
 
-    # generate_results = {}
-    # generate_data(benchmark_server, N, generate_results)
-    # with open(f"results/{N}-generate_results.json", "w") as f:
-    #     json.dump(generate_results, f)
+    generate_results = {}
+    generate_data(benchmark_server, N, generate_results)
+    with open(f"results/{N}-generate_results.json", "w") as f:
+        json.dump(generate_results, f)
 
     # benchmark query time
     query_results = {}
