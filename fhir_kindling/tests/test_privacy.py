@@ -20,6 +20,15 @@ def test_k_anonymity(fhir_server):
 
     assert is_k_anonymized(df, k=3)
 
+    non_anon_df = df.copy()
+    non_anon_df["age"] = list(range(100))
+    assert not is_k_anonymized(non_anon_df, k=3)
+
+    assert is_k_anonymized(non_anon_df, k=3, excluded_cols=["age"])
+
+    assert is_k_anonymized(non_anon_df, k=3, id_cols=["name"])
+
+
 # def test_anonymize(fhir_server):
 #     patients = fhir_server.query("Patient").limit(1000).resources
 #
