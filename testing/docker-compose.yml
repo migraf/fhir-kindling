@@ -11,6 +11,7 @@ services:
       JAVA_TOOL_OPTIONS: "-Xmx2g"
 #      OPENID_PROVIDER_URL: "https://dev-keycloak.grafm.de/auth/realms/blaze"
       BASE_URL: "http://localhost:9090"
+      DB_SYNC_TIMEOUT: 100000
     ports:
       - "9090:8080"
     volumes:

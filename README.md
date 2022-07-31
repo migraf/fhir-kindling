@@ -98,8 +98,11 @@ response = query_patient_condition.all()
 ```
 
 #### Query resources by reference
-If you know the id and resource type of the resource you want to query, you can use the `get` method for a single reference 
+
+If you know the id and resource type of the resource you want to query, you can use the `get` method for a single
+reference
 for a list of references use `get_many`. The passed references should follow the format of `<resource_type>/<id>`.
+
 ```python
 # server initialization omitted
 patient = server.get("Patient/123")
@@ -107,7 +110,6 @@ patient = server.get("Patient/123")
 patients = server.get_many(["Patient/123", "Patient/456"])
 
 ```
-
 
 ### Add resources to the server
 
@@ -161,9 +163,11 @@ server.delete(resources=response.resources[5:])
 ```
 
 ### Transfer resources between servers
+
 Transferring resources between servers is done using the `transfer` method on the server object. Using this method
 server assigned ids are used for transfer and referential integrity is maintained.  
-This method will also attempt to get all the resources that are referenced by the resources being transferred from the origin 
+This method will also attempt to get all the resources that are referenced by the resources being transferred from the
+origin
 server and transfer them to the destination server as well.
 
 ```python
@@ -179,6 +183,12 @@ conditions = server_1.query("Condition").limit(10)
 response = server_1.transfer(server_2, conditions)
 
 ```
+
+## Performance
+
+This library performs request at least 1.5 times faster than other popular fhir libraries.
+See [Benchmarks](benchmarks/README.md) for a more detailed description of the benchmarks.
+![Query Results](benchmarks/results/query_plot.png)
 
 ## Credits
 

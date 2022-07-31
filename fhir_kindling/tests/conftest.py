@@ -5,7 +5,7 @@ from dotenv import load_dotenv, find_dotenv
 from fhir_kindling import FhirServer
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def api_url():
     """
     Base api url and env vars
@@ -15,9 +15,8 @@ def api_url():
     return os.getenv("FHIR_API_URL", "http://test.fhir.org/r4")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def oidc_server(api_url):
-    print(api_url)
     server = FhirServer(
         api_address=api_url,
         client_id=os.getenv("CLIENT_ID"),
@@ -27,9 +26,8 @@ def oidc_server(api_url):
     return server
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def fhir_server(api_url):
-    print(api_url)
     server = FhirServer(
         api_address=api_url,
         client_id=os.getenv("CLIENT_ID"),

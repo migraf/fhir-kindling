@@ -1,0 +1,15 @@
+version: '3.8'
+
+volumes:
+  benchmark_data:
+
+services:
+  blaze:
+    image: "samply/blaze:latest"
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx2g"
+      BASE_URL: "http://localhost:9090"
+    ports:
+      - "9090:8080"
+    volumes:
+      - benchmark_data:/app/data

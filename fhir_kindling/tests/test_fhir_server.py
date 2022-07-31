@@ -494,6 +494,7 @@ def test_get_many(fhir_server: FhirServer):
     patients = fhir_server.get_many(references)
     assert len(patients) == 10
 
+
 # todo re-enable transfer tests
 
 # def test_resolve_reference_graph(fhir_server: FhirServer):
@@ -524,18 +525,21 @@ def test_get_many(fhir_server: FhirServer):
 #     response = fhir_server._transfer_resources(hapi_server, resources)
 
 
-# def test_fhir_server_transfer(fhir_server: FhirServer):
-#     api_url = os.getenv("FHIR_API_URL", "http://localhost:9090/fhir")
-#     server = FhirServer(api_address=api_url, timeout=None)
-#     conditions = server.query("Condition").limit(10)
-#     assert len(conditions.resources) == 10
-#     transfer_url = os.getenv("TRANSFER_API_URL", "http://localhost:9091/fhir")
-#     hapi_server = FhirServer(api_address=transfer_url, timeout=None)
-#     response = server.transfer(hapi_server, conditions)
-#
-#     print(response)
-#     assert response.destination_server == hapi_server.api_address
-#     assert len(response.create_responses) >= 10
+def test_transfer(fhir_server: FhirServer):
+    api_url = os.getenv("FHIR_API_URL", "http://localhost:9090/fhir")
+    server = FhirServer(api_address=api_url, timeout=None)
+    conditions = server.query("Condition").limit(10)
+    assert len(conditions.resources) == 10
+    transfer_url = os.getenv("TRANSFER_API_URL", "http://localhost:9091/fhir")
+    hapi_server = FhirServer(api_address=transfer_url, timeout=None)
+
+    conditions_before = hapi_server.query("Condition").all().resources
+
+    response = server.transfer(hapi_server, conditions)
+
+    print(response)
+
+    assert response.destination_server == hapi_server.api_address
 
 
 @pytest.mark.asyncio
@@ -581,11 +585,13 @@ async def test_fhir_server_query_async(fhir_server: FhirServer):
     response = await query.all()
     assert response
 
+
 @pytest.mark.asyncio
 async def test_add_bundle_async(fhir_server: FhirServer, org_bundle):
     response = await fhir_server.add_bundle_async(org_bundle)
     assert response
     print(response)
+
 
 @pytest.mark.asyncio
 async def test_fhir_server_query_raw_async(fhir_server: FhirServer):
@@ -593,6 +599,7 @@ async def test_fhir_server_query_raw_async(fhir_server: FhirServer):
     query = fhir_server.raw_query_async(query_string=query_string, output_format="json")
     response = await query.all()
     assert response
+
 
 @pytest.mark.asyncio
 async def test_update_async(fhir_server: FhirServer):

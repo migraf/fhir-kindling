@@ -35,6 +35,7 @@ mkdocstrings = {extras = ["python-legacy"], version = "*"}
 flake8 = "*"
 ipython = ">=7.31.1"
 pytest-asyncio = "*"
+rise = "*"
 
 [requires]
 python_version = "3.9"
