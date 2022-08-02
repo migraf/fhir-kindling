@@ -2,7 +2,14 @@
 import {Server} from "../../domains/server/type";
 import {ref, reactive} from "vue";
 
-const server = defineProps<Server>()
+interface ServerState {
+  state: string;
+  server?: Server;
+}
+const server = defineProps<ServerState>()
+
+const edit = ref(false);
+
 
 </script>
 <template>

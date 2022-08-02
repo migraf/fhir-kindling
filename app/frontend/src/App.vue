@@ -3,6 +3,8 @@
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 import {ref, reactive} from 'vue';
 import {Server} from "./domains/server/type";
+import QueryBuilder from './components/query/QueryBuilder.vue';
+import QueryHeader from "./components/query/QueryHeader.vue";
 
 const server = reactive<Server>({
   name: "",
@@ -26,10 +28,26 @@ const server = reactive<Server>({
       <p>{{ server.token }}</p>
     </div>
     <div class="flex-col w-3/4">
-      <h1 class="text-3xl font-bold underline text-center">
-        Hello world!
-      </h1>
+      <div class="flex-row">
+        <h1 class="text-3xl font-bold underline text-center">
+          Query Builder
+        </h1>
+      </div>
+      <div class="flex-row">
+        <Suspense>
+          <div>
+            <QueryHeader></QueryHeader>
+            <QueryBuilder/>
+          </div>
+          <template #fallback>
+            <div>Loading...</div>
+          </template>
+        </Suspense>
+
+      </div>
     </div>
+
+
   </div>
 </template>
 
