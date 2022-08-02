@@ -1,7 +1,7 @@
 <script lang="ts">
-import { getResourceNames } from '../../domains/resource/api';
-import {ref} from "vue";
-import ResourceSelector from "../resource/ResourceSelector.vue";
+import {getResourceFields, getResourceNames} from '../../domains/resource/api';
+import {reactive, ref} from "vue";
+import ResourceSelector from "../shared/SearchBar.vue";
 
 export default {
   components: {ResourceSelector},
@@ -10,9 +10,20 @@ export default {
     const resourceResponse = await getResourceNames();
     const resourceNames = resourceResponse
 
+    const state = reactive({
+      selectedResource: '',
+    })
+
+    function handleSelected(resource: string) {
+      console.log("handleSelected", resource);
+      state.selectedResource = resource;
+    }
+
     return {
+      state,
       loading,
       resourceNames,
+      handleSelected,
     };
   },
 }
@@ -23,7 +34,10 @@ export default {
   <div>
     <ResourceSelector
         :resource-names="resourceNames"
+        @selected="handleSelected"
     />
+    {{state.selectedResource}}
+
   </div>
 </template>
 

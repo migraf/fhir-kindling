@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, ref} from 'vue'
+import {computed, ref, reactive, onMounted} from 'vue'
 import Fuse from "fuse.js";
 
 const props = defineProps({
@@ -15,11 +15,63 @@ const pattern = ref('');
 const fuse = new Fuse(props.resourceNames, options);
 
 const matches = computed(() => {
-  return fuse.search(pattern.value)
+  return fuse.search(state.pattern)
 })
 
 const loading = ref(false);
+const state = reactive({
+  selectedIndex: 1000,
+  searchComplete: false,
+  pattern: '',
+})
 
+const itemRefs = ref([])
+const list = ref([
+  /* ... */
+])
+
+function arrowDownPress() {
+  console.log("arrowDownPress");
+  if (state.selectedIndex === 1000) {
+    state.selectedIndex = 0;
+    console.log("first")
+  } else {
+    if (state.selectedIndex < matches.value.length - 1) {
+      state.selectedIndex++;
+      const el = itemRefs.value[state.selectedIndex];
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }
+  console.log(state.selectedIndex);
+  console.log(itemRefs.value)
+}
+
+function arrowUpPress() {
+  console.log("arrowUpPress");
+  if (state.selectedIndex === 1000) {
+    state.selectedIndex = 1000;
+  } else {
+    if (state.selectedIndex === 0) {
+      state.selectedIndex = 1000;
+    } else {
+      state.selectedIndex--;
+    }
+  }
+  console.log(state.selectedIndex);
+}
+
+const emit = defineEmits(['selected', 'submit'])
+
+function handleSelect(index: number) {
+  console.log("handleSelect", index);
+  state.selectedIndex = index;
+  state.searchComplete = true;
+  state.pattern = "";
+  emit("selected", props.resourceNames[index]);
+
+}
 
 </script>
 
@@ -35,18 +87,32 @@ const loading = ref(false);
                 clip-rule="evenodd"></path>
         </svg>
       </div>
-      <input v-model="pattern" type="text" id="simple-search"
+      <input v-model="state.pattern" type="text" id="simple-search"
              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+             @keyup.down.prevent="arrowDownPress"
+             @keyup.up.prevent="arrowUpPress"
+             @focus="state.searchComplete = false"
              placeholder="Enter resource" required>
       <div
-          v-if="matches.length > 0"
+          v-if="matches.length > 0 && !state.searchComplete"
           class="absolute overflow-scroll top-100 mt-1 w-full border bg-gray-50 dark:bg-gray-700 shadow-xl rounded max-h-64 scrollbar scrollbar-thumb-gray-900 scrollbar-track-transparent divide-gray-500 divide-y"
+          @keyup.down.prevent="arrowDownPress"
+          @keyup.up.prevent="arrowUpPress"
+          @keyup.enter="handleSelect(state.selectedIndex)"
       >
         <div
             class="p-3 text-gray-900 dark:text-white"
-            v-for="match in matches"
+            v-for="(match, index) in matches"
+            :key="match.item"
+            @keyup.enter="handleSelect(match.refIndex)"
+            @click="handleSelect(match.refIndex)"
         >
-          {{match.item}}
+          <div
+            :class="{'bg-blue-500 dark:bg-blue-700': state.selectedIndex === index}"
+            ref="itemRefs"
+          >
+            {{ match.item }}
+          </div>
         </div>
 
       </div>
@@ -64,24 +130,5 @@ const loading = ref(false);
 </template>
 
 <style scoped>
-.scrollbar::-webkit-scrollbar {
-  width: 20px;
-  height: 20px;
-}
-
-.scrollbar::-webkit-scrollbar-track {
-  border-radius: 100vh;
-  background: #f7f4ed;
-}
-
-.scrollbar::-webkit-scrollbar-thumb {
-  background: #e0cbcb;
-  border-radius: 100vh;
-  border: 3px solid #f6f7ed;
-}
-
-.scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #c0a0b9;
-}
 
 </style>
