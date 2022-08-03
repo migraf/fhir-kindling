@@ -31,7 +31,7 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div class="p-2">
     <ResourceSelector
         :resource-names="resourceNames"
         @selected="handleSelected"

@@ -26,7 +26,7 @@ def extract_references(resource: Resource) -> List[Tuple[str, str, str, bool]]:
         if field.type_ == ReferenceType:
             field_value = resource_dict.get(field.name, None)
             if field_value:
-                # if the field is a list of references add each of them
+                # if the field is a list of references, add each of them to the references
                 if isinstance(field_value, list) or isinstance(field_value, tuple):
                     for value in field_value:
                         resource, resource_id = value.get("reference").split("/")

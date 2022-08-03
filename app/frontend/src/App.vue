@@ -5,10 +5,11 @@ import {ref, reactive} from 'vue';
 import {Server} from "./domains/server/type";
 import QueryBuilder from './components/query/QueryBuilder.vue';
 import QueryHeader from "./components/query/QueryHeader.vue";
+import ServerForm from "./components/server/ServerForm.vue";
 
 const server = reactive<Server>({
   name: "",
-  apiUrl: '',
+  api_url: '',
   credentials: {
     username: '',
     password: '',
@@ -19,24 +20,26 @@ const server = reactive<Server>({
 </script>
 
 <template>
-  <div class="flex items-stretch">
-    <div class="flex-col w-1/4">
-      <h5 class="text-3xl font-bold">
-        Server Configuration
-      </h5>
-      <p>{{ server.apiUrl }}</p>
+  <div class="flex items-stretch h-screen bg-gray-900 text-gray-200 divide-x divide-gray-500">
+    <div class="flex-col w-1/4 h-screen">
+      <ServerForm
+          :server="server"
+          @serverChanged="handleServerChanged"
+      >
+
+      </ServerForm>
+      <p>{{ server.api_url }}</p>
       <p>{{ server.token }}</p>
     </div>
     <div class="flex-col w-3/4">
       <div class="flex-row">
-        <h1 class="text-3xl font-bold underline text-center">
+        <h1 class="text-3xl font-bold underline text-center font-mono">
           Query Builder
         </h1>
       </div>
       <div class="flex-row">
         <Suspense>
           <div>
-            <QueryHeader></QueryHeader>
             <QueryBuilder/>
           </div>
           <template #fallback>

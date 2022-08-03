@@ -6,6 +6,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from app.backend.db import engine
 from app.backend.api.api import api_router
+from app.backend.memory_storage import Store
 
 
 class Hero(SQLModel, table=True):
@@ -15,11 +16,8 @@ class Hero(SQLModel, table=True):
     age: Optional[int] = Field(default=None, index=True)
 
 
-
-
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
-
 
 app = FastAPI()
 
@@ -30,7 +28,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 app.include_router(api_router, prefix="/api")
 

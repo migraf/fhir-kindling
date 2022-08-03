@@ -6,6 +6,6 @@ export interface ServerCredentials {
 
 export interface Server {
     name?: string;
-    apiUrl: string;
+    api_url: string;
     credentials?: ServerCredentials;
 }
