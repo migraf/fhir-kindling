@@ -4,7 +4,7 @@
 import {ref, reactive} from 'vue';
 import {Server} from "./domains/server/type";
 import QueryBuilder from './components/query/QueryBuilder.vue';
-import QueryHeader from "./components/query/QueryHeader.vue";
+import QueryHeader from "./components/query/ResourceQuery.vue";
 import ServerForm from "./components/server/ServerForm.vue";
 
 const server = reactive<Server>({
@@ -17,21 +17,22 @@ const server = reactive<Server>({
   }
 });
 
+function handleServerChanged(s: Server){
+  console.log("handleServerChanged", s);
+}
 </script>
 
 <template>
   <div class="flex items-stretch h-screen bg-gray-900 text-gray-200 divide-x divide-gray-500">
-    <div class="flex-col w-1/4 h-screen">
+    <div class="flex-col w-1/5 h-screen">
       <ServerForm
           :server="server"
           @serverChanged="handleServerChanged"
       >
 
       </ServerForm>
-      <p>{{ server.api_url }}</p>
-      <p>{{ server.token }}</p>
     </div>
-    <div class="flex-col w-3/4">
+    <div class="flex-col w-4/5">
       <div class="flex-row">
         <h1 class="text-3xl font-bold underline text-center font-mono">
           Query Builder

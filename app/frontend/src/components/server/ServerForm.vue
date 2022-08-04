@@ -41,7 +41,13 @@ async function onSubmit() {
     <h5 class="text-3xl font-bold text-center text-gray-100 font-mono pt-2">
       Server Configuration
     </h5>
-    <div class="w-full max-w-xs">
+    <div
+        v-if="formState.serverState === 'success'"
+        class="text-green-700 text-xl text-center"
+    >
+      connected
+    </div>
+    <div class="w-full ">
       <form class="shadow-md rounded px-8 pt-6 pb-8 mb-4">
         <div class="mb-4">
           <label class="block text-gray-100 text-sm font-bold mb-2" for="address">
@@ -55,12 +61,12 @@ async function onSubmit() {
               v-model="formState.serverForm.api_url"
           >
         </div>
-        <div class="mb-6">
+        <div class="flex-col mb-6 w-full">
           <label class="block text-gray-100 text-sm font-bold mb-2" for="auth-mode">
             Authentication
           </label>
-          <div class="flex">
-            <div class="flex items-center mr-4">
+          <div class="grid grid-flow-col grid-flow-row gap-4 auto-cols-auto flex-grow justify-between">
+            <div class="items-center">
               <input
                   :checked="formState.authMode === 'basic'"
                   id="inline-radio"
@@ -77,7 +83,7 @@ async function onSubmit() {
                 Basic
               </label>
             </div>
-            <div class="flex items-center mr-4">
+            <div class="items-center">
               <input
                   id="inline-radio"
                   v-model="formState.authMode"
@@ -94,7 +100,7 @@ async function onSubmit() {
                 Token
               </label>
             </div>
-            <div class="flex items-center mr-4">
+            <div class="items-center">
               <input
                   id="radio-oidc-auth"
                   disabled
@@ -112,7 +118,7 @@ async function onSubmit() {
                 OIDC
               </label>
             </div>
-            <div class="flex items-center mr-4">
+            <div class="items-center">
               <input
                   id="radio-oidc-auth"
                   v-model="formState.authMode"
@@ -177,20 +183,26 @@ async function onSubmit() {
 
         <div class="flex items-center justify-between">
           <button
-              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-gray-600"
               type="button"
               @click="onSubmit"
+              :disabled="formState.serverState === 'success'"
           >
             Connect
+          </button>
+          <font-awesome-icon icon="fa-solid fa-link-horizontal" class="text-gray-100" size="lg" inverse/>
+          <button
+              class="bg-cyan-700 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              type="button"
+              @click="formState.serverState = 'editing'"
+              v-if="formState.serverState === 'success'"
+          >
+            Edit
           </button>
 
         </div>
       </form>
     </div>
-    <div>
-      {{ formState.serverForm }}
-    </div>
-
   </div>
 
 </template>

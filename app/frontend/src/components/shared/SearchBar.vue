@@ -3,16 +3,20 @@ import {computed, ref, reactive, onMounted} from 'vue'
 import Fuse from "fuse.js";
 
 const props = defineProps({
-  resourceNames: {type: Array, required: true},
+  items: {type: Array, required: true},
+  keys: {type: Array<string>, required: false},
+  hint: {type: String, required: false},
+  button: {type: Boolean, required: false},
 })
 
 const options = {
-  includeScore: true
+  includeScore: true,
+  keys: props.keys? props.keys : [],
 }
 
 const pattern = ref('');
 
-const fuse = new Fuse(props.resourceNames, options);
+const fuse = new Fuse(props.items, options);
 
 const matches = computed(() => {
   return fuse.search(state.pattern)
@@ -68,8 +72,10 @@ function handleSelect(index: number) {
   console.log("handleSelect", index);
   state.selectedIndex = index;
   state.searchComplete = true;
-  state.pattern = "";
-  emit("selected", props.resourceNames[index]);
+  state.pattern = props.items[index];
+  console.log("searchComplete", state.searchComplete);
+  emit("selected", props.items[index]);
+  state.searchComplete = true;
 
 }
 
@@ -92,8 +98,10 @@ function handleSelect(index: number) {
                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                @keyup.down.prevent="arrowDownPress"
                @keyup.up.prevent="arrowUpPress"
-               @focus="state.searchComplete = false"
-               placeholder="Enter resource" required>
+               @click="state.searchComplete = false"
+               :placeholder="props.hint ? props.hint : 'Search'"
+               required
+        >
         <div
             v-if="matches.length > 0 && !state.searchComplete"
             class="absolute overflow-scroll top-100 mt-1 w-full border bg-gray-50 dark:bg-gray-700 shadow-xl rounded max-h-64 scrollbar scrollbar-thumb-gray-900 scrollbar-track-transparent divide-gray-500 divide-y"
@@ -118,8 +126,12 @@ function handleSelect(index: number) {
 
         </div>
       </div>
-      <button type="submit"
-              class="p-2.5 ml-2 text-sm font-medium text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+      <button
+          v-if="props.button"
+          type="submit"
+          class="p-2.5 ml-2 text-sm font-medium text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          @click="handleSelect(state.selectedIndex)"
+      >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>

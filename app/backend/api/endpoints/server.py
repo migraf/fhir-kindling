@@ -16,6 +16,11 @@ def get_server_info():
 
 @router.post("/", response_model=Server)
 def set_server_info(server: Server):
-    print(server)
     store.set_server_config(server)
+    try:
+        conn = store.get_server_connection()
+        assert conn.capabilities
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail=f"Error connecting to th server \n {e.args[0]}")
     return server
