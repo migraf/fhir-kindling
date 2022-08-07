@@ -4,7 +4,7 @@ import Fuse from "fuse.js";
 
 const props = defineProps({
   items: {type: Array, required: true},
-  keys: {type: Array<string>, required: false},
+  keys: {type: Array, required: false},
   hint: {type: String, required: false},
   button: {type: Boolean, required: false},
 })

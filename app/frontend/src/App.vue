@@ -4,7 +4,7 @@
 import {ref, reactive} from 'vue';
 import {Server} from "./domains/server/type";
 import QueryBuilder from './components/query/QueryBuilder.vue';
-import QueryHeader from "./components/query/ResourceQuery.vue";
+import QueryHeader from "./components/query/FilterBuilder.vue";
 import ServerForm from "./components/server/ServerForm.vue";
 
 const server = reactive<Server>({

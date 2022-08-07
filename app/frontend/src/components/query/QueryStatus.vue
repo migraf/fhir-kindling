@@ -5,18 +5,28 @@ const props = defineProps({
   status: {type: String, required: true},
   resource: {type: String, required: true},
   query: {type: String, required: true},
+  filters: {type: Array, required: false, default: () => []},
+  includes: {type: Array, required: false, default: () => []},
+  chainParams: {type: Array, required: false, default: () => []},
 })
 
 const hl7Url = computed(() => {
   return `https://hl7.org/fhir/${props.resource.toLowerCase()}.html`;
 })
 
-const emits = defineEmits(["editResource"]);
+const emits = defineEmits(["editResource", "selectTab"]);
+
+function tabClick(tab: string) {
+  console.log("tabClick", tab);
+  emits('selectTab', tab);
+  state.selectedTab = tab;
+}
 
 const state = reactive({
   selectedIndex: 1000,
   searchComplete: false,
   pattern: '',
+  selectedTab: '',
 })
 
 </script>
@@ -79,34 +89,90 @@ const state = reactive({
 
       </div>
     </div>
-
-    <div class="flex flex-row justify-center">
-      <div class="px-2 rounded-t border-gray-500 bg-gray-700 border-l border-t border-r mr-2 shadow-gray-300 shadow shadow-">
-        <span class="text-sm font-bold rounded-full mx-1 border border-gray-50 bg-gray-400 text-blue-600 my-0.5 text-center items-center">
-          0
-        </span>
-        Filters
-        <button class="hover:text-blue-500">
-          <i class="fa-solid fa-angle-down ml-2"></i>
-        </button>
-      </div>
-      <div class="px-2 rounded-t border-gray-500 bg-gray-700 border-l border-t border-r mr-2 shadow-gray-300 shadow">
-        <span class="text-sm font-bold rounded-full mx-1 border border-gray-50 bg-gray-400 text-blue-600 py-0 text-center items-center">
-          0
-        </span>
-        Includes
-        <button class="hover:text-blue-500">
-          <i class="fa-solid fa-angle-down ml-2"></i>
-        </button>
-      </div>
-      <div class="px-2 rounded-t border-gray-500 bg-gray-700 border-l border-t border-r mr-2 shadow-gray-300 shadow">
-        <span class="text-sm font-bold rounded-full mx-1 border border-gray-50 bg-gray-400 text-blue-600 my-0.5 text-center items-center">
-          0
-        </span>
-        Chained Params
-        <button class="hover:text-blue-500">
-          <i class="fa-solid fa-angle-down ml-2"></i>
-        </button>
+    <div class="flex flex-grow justify-center">
+      <div class="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
+        <ul class="flex flex-wrap -mb-px">
+          <li class="mr-2">
+            <div
+                class="gridinline-block px-4 pb-2 rounded-t-lg border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
+                :class="{
+                  'border-blue-600 text-blue-600 dark:text-blue-500 dark:border-blue-500': state.selectedTab === 'summary',
+                  'active': state.selectedTab === 'summary',
+                }"
+                @click="tabClick('summary')"
+            >
+              <div>
+                Summary
+              </div>
+            </div>
+          </li>
+          <li class="mr-2">
+            <div
+                class="grid gap-2 grid-cols-3 inline-block px-4 pb-2 rounded-t-lg border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
+                :class="{
+                  'border-blue-600 text-blue-600 dark:text-blue-500 dark:border-blue-500': state.selectedTab === 'filters',
+                  'active': state.selectedTab === 'filters',
+                }"
+                @click="tabClick('filters')"
+            >
+              <div
+                  class="rounded-full px-1 text-center text-amber-400"
+                  :class="{
+                    'text-green-600 dark:text-green-600': props.filters.length >= 1,
+                  }"
+              >
+                {{ props.filters.length }}
+              </div>
+              <div class="col-span-2">
+                Filters
+              </div>
+            </div>
+          </li>
+          <li class="mr-2">
+            <div
+                class="grid gap-2 grid-cols-3 inline-block px-4 pb-2 rounded-t-lg border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
+                :class="{
+                  'border-blue-600 text-blue-600 dark:text-blue-500 dark:border-blue-500': state.selectedTab === 'includes',
+                  'active': state.selectedTab === 'includes',
+                }"
+                @click="state.selectedTab = 'includes'"
+            >
+              <div
+                  class="rounded-full px-1 text-center text-amber-400"
+                  :class="{
+                    'text-green-600 dark:text-green-600': props.includes.length >= 1,
+                  }"
+              >
+                {{ props.filters.length }}
+              </div>
+              <div class="col-span-2">
+                Includes
+              </div>
+            </div>
+          </li>
+          <li class="mr-2">
+            <div
+                class="grid gap-2 grid-cols-4 inline-block px-4 pb-2 rounded-t-lg border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
+                :class="{
+                  'border-blue-600 text-blue-600 dark:text-blue-500 dark:border-blue-500': state.selectedTab === 'chainParams',
+                  'active': state.selectedTab === 'chainParams',
+                }"
+                @click="state.selectedTab = 'chainParams'"
+            >
+              <div
+                  class="rounded-full px-1 text-center text-amber-400"
+                  :class="{
+                    'text-green-600 dark:text-green-600': props.chainParams.length >= 1,
+                  }"
+              >
+                {{ props.chainParams.length }}
+              </div>
+              <div class="col-span-3">
+                Chain Params
+              </div>
+            </div>
+          </li>
+        </ul>
       </div>
     </div>
   </div>

@@ -1,8 +1,8 @@
 <script lang="ts">
 import {getResourceFields, getResourceNames} from '../../domains/resource/api';
 import {computed, reactive, ref} from "vue";
-import ResourceQuery from "./ResourceQuery.vue";
-import SearchBar from "../shared/SearchBar.vue";
+import ResourceQuery from "./FilterBuilder.vue";
+import SearchBar from "../common/SearchBar.vue";
 import QueryStatus from "./QueryStatus.vue";
 
 export default {
@@ -17,6 +17,7 @@ export default {
       selectedResource: '',
       resourceFields: [],
       status: 'initialized',
+      selectedTab: 'summary',
     })
 
     async function handleSelected(resource: string) {
@@ -29,12 +30,18 @@ export default {
       return `/${state.selectedResource}?`;
     });
 
+    function handleTabSelect(tab: string) {
+      console.log("handleTabSelect", tab);
+      state.selectedTab = tab;
+    }
+
     return {
       queryString,
       state,
       loading,
       resourceNames,
       handleSelected,
+      handleTabSelect,
     };
   },
   computed
@@ -56,9 +63,10 @@ export default {
         :query="queryString"
         :status="state.status"
         @edit-resource="state.status = 'initialized'"
+        @select-tab="handleTabSelect"
     />
     <ResourceQuery
-        v-if="state.selectedResource"
+        v-if="state.selectedResource && state.selectedTab === 'filters'"
         :resource="state.selectedResource"
     />
 
