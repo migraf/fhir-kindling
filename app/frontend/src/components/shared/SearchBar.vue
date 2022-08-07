@@ -101,6 +101,7 @@ function handleSelect(index: number) {
                @click="state.searchComplete = false"
                :placeholder="props.hint ? props.hint : 'Search'"
                required
+               autocomplete="off"
         >
         <div
             v-if="matches.length > 0 && !state.searchComplete"
