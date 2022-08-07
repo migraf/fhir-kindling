@@ -1,7 +1,9 @@
 <script lang="ts">
 import {reactive, ref} from "vue";
 import {getResourceFields} from "../../domains/resource/api";
+import FilterForm from "./FilterForm.vue";
 export default {
+  components: {FilterForm},
   props: {
     resource: String
   },
@@ -36,6 +38,12 @@ export default {
   <div>
     <h5>Todo</h5>
   </div>
+  <FilterForm
+      :resource="resource"
+      :fields="state.resourceFields"
+  >
+
+  </FilterForm>
 </template>
 
 <style scoped>
