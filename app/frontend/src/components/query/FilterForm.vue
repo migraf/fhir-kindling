@@ -15,7 +15,8 @@ const state = reactive({
   filters: {
     extensions: true,
     default: true,
-  }
+  },
+  searchKeys: ["name", "title", "description"],
 })
 
 function handleFieldSelect(item: string) {
@@ -27,14 +28,19 @@ function handleFieldSelect(item: string) {
 </script>
 
 <template>
-  <div class="flex grid gap-4 grid-cols-5 flex-grow">
+  <div class="flex grid gap-4 grid-cols-5 flex-grow p-2">
     <div class="col-span-2">
       <SearchBar
-          v-if="state.selectedField === ''"
           :items="fields"
           @selected="handleFieldSelect"
           :hint="'Select a field...'"
+          :keys="state.searchKeys"
       >
+        <template v-slot="slotProps">
+          <div>
+            {{ slotProps.content.name }}
+          </div>
+        </template>
       </SearchBar>
     </div>
     <div class="">

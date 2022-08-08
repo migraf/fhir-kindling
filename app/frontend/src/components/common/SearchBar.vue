@@ -16,6 +16,7 @@ const options = {
 
 const pattern = ref('');
 
+console.log("props", props);
 const fuse = new Fuse(props.items, options);
 
 const matches = computed(() => {
@@ -121,7 +122,9 @@ function handleSelect(index: number) {
                 :class="{'bg-blue-500 dark:bg-blue-700': state.selectedIndex === index}"
                 ref="itemRefs"
             >
-              {{ match.item }}
+              <slot :content="match.item">
+                {{ match.item }}
+              </slot>
             </div>
           </div>
 

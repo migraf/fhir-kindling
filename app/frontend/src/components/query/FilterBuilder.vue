@@ -17,7 +17,7 @@ export default {
       filters: {
         extensions: true,
         default: true,
-      }
+      },
     })
     async function handleSelected(item: string) {
       console.log("handleSelected", item);
@@ -35,12 +35,10 @@ export default {
 </script>
 
 <template>
-  <div>
-    <h5>Todo</h5>
-  </div>
   <FilterForm
       :resource="resource"
       :fields="state.resourceFields"
+      class="mt-4"
   >
 
   </FilterForm>
