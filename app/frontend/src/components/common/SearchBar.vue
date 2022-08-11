@@ -22,14 +22,13 @@ const matches = computed(() => {
   return fuse.search(state.pattern)
 })
 
-const loading = ref(false);
 const state = reactive({
   selectedIndex: 1000,
   searchComplete: false,
   pattern: '',
 })
 
-const itemRefs = ref([])
+const itemRefs = ref<HTMLElement[] | null >(null)
 
 function arrowDownPress() {
   console.log("arrowDownPress");
@@ -39,10 +38,13 @@ function arrowDownPress() {
   } else {
     if (state.selectedIndex < matches.value.length - 1) {
       state.selectedIndex++;
-      const el = itemRefs[state.selectedIndex];
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
+      if (itemRefs.value !== null) {
+        const el = itemRefs.value[state.selectedIndex];
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
       }
+
     }
   }
   console.log(state.selectedIndex);
