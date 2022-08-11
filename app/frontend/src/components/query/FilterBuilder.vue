@@ -38,12 +38,12 @@ export default {
   <div>
     <h5>Todo</h5>
   </div>
-  <FilterForm
-      :resource="resource"
-      :fields="state.resourceFields"
-  >
+<!--  <FilterForm-->
+<!--      :resource="resource"-->
+<!--      :fields="state.resourceFields"-->
+<!--  >-->
 
-  </FilterForm>
+<!--  </FilterForm>-->
 </template>
 
 <style scoped>

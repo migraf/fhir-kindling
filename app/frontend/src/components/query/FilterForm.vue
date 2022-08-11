@@ -34,6 +34,7 @@ function handleFieldSelect(item: string) {
           :items="fields"
           @selected="handleFieldSelect"
           :hint="'Select a field...'"
+          :keys="['name', 'description', 'title']"
       >
       </SearchBar>
     </div>

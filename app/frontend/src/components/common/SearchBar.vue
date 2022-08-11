@@ -2,19 +2,19 @@
 import {computed, ref, reactive, onMounted} from 'vue'
 import Fuse from "fuse.js";
 
-const props = defineProps({
-  items: {type: Array, required: true},
-  keys: {type: Array, required: false},
-  hint: {type: String, required: false},
-  button: {type: Boolean, required: false},
-})
+interface Props {
+  items: string[] | Array<any>;
+  keys?: string[];
+  hint?: string;
+  button?: boolean;
+}
+
+const props = defineProps<Props>()
 
 const options = {
   includeScore: true,
   keys: props.keys? props.keys : [],
 }
-
-const pattern = ref('');
 
 const fuse = new Fuse(props.items, options);
 
@@ -30,9 +30,6 @@ const state = reactive({
 })
 
 const itemRefs = ref([])
-const list = ref([
-  /* ... */
-])
 
 function arrowDownPress() {
   console.log("arrowDownPress");
@@ -42,7 +39,7 @@ function arrowDownPress() {
   } else {
     if (state.selectedIndex < matches.value.length - 1) {
       state.selectedIndex++;
-      const el = itemRefs.value[state.selectedIndex];
+      const el = itemRefs[state.selectedIndex];
       if (el) {
         el.scrollIntoView({ behavior: "smooth" });
       }
@@ -116,10 +113,10 @@ function handleSelect(index: number) {
               :key="match.item"
               @keyup.enter="handleSelect(match.refIndex)"
               @click="handleSelect(match.refIndex)"
+              :ref="itemRefs"
           >
             <div
                 :class="{'bg-blue-500 dark:bg-blue-700': state.selectedIndex === index}"
-                ref="itemRefs"
             >
               {{ match.item }}
             </div>
