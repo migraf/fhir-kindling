@@ -45,6 +45,7 @@ export default {
 
     function handleRemoveFilter(filter: FieldParameter) {
       console.log("handleRemoveFilter filter builder", filter);
+      context.emit("removeFilter", filter);
 
     }
     return {

@@ -1,26 +1,28 @@
 <script lang="ts">
-import {getResourceFields, getResourceNames} from '../../domains/resource/api';
+import {getResourceNames} from '../../domains/resource/api';
 import {computed, reactive, ref} from "vue";
 import FilterBuilder from "./filter/FilterBuilder.vue";
 import SearchBar from "../common/SearchBar.vue";
 import QueryStatus from "./QueryStatus.vue";
-import {FieldParameter} from "../../domains/query/type";
+import {FieldParameter, IncludeParameter, ReverseChainParameter} from "../../domains/query/type";
 import {urlResourceField} from "../../domains/query/api";
+import QueryOverview from "./QueryOverview.vue";
 
 export default {
-  components: {QueryStatus, SearchBar, ResourceQuery: FilterBuilder},
+  components: {QueryOverview, QueryStatus, SearchBar, FilterBuilder},
   async setup() {
     const loading = ref(false);
-    const resourceResponse = await getResourceNames();
-    const resourceNames = resourceResponse
+    const resourceNames = await getResourceNames()
 
 
     const state = reactive({
       selectedResource: '',
       resourceFields: [],
       status: 'initialized',
-      selectedTab: 'summary',
+      selectedTab: 'overview',
       fieldParameters: Array<FieldParameter>(),
+      includeParameters: Array<IncludeParameter>(),
+      chainParameters: Array<ReverseChainParameter>(),
     })
 
     async function handleSelected(resource: string) {
@@ -48,6 +50,14 @@ export default {
       state.fieldParameters.push(filter);
     }
 
+    function handleRemoveFilter(filter: FieldParameter) {
+      console.log("Query builder remove filter", filter);
+      state.fieldParameters = state.fieldParameters.filter(
+          param => {
+            return param.field !== filter.field && param.operator !== filter.operator && param.value !== filter.value;
+          });
+    }
+
     function handleEdit() {
       console.log("handleEdit");
       state.selectedResource = '';
@@ -63,7 +73,8 @@ export default {
       handleSelected,
       handleTabSelect,
       handleAddFilter,
-      handleEdit
+      handleEdit,
+      handleRemoveFilter
     };
   },
   computed
@@ -88,11 +99,19 @@ export default {
         @select-tab="handleTabSelect"
         :filters="state.fieldParameters"
     />
-    <ResourceQuery
+    <FilterBuilder
         v-if="state.selectedResource && state.selectedTab === 'filters'"
         :resource="state.selectedResource"
         :fields="state.fieldParameters"
         @addFilter="handleAddFilter"
+        @removeFilter="handleRemoveFilter"
+    />
+    <QueryOverview
+        v-if="state.selectedResource && state.selectedTab === 'overview'"
+        :field-params="state.fieldParameters"
+        :include-params="state.includeParameters"
+        :chain-params="state.chainParameters"
+        @removeFilter="handleRemoveFilter"
     />
 
   </div>

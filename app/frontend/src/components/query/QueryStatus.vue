@@ -26,7 +26,7 @@ const state = reactive({
   selectedIndex: 1000,
   searchComplete: false,
   pattern: '',
-  selectedTab: '',
+  selectedTab: 'overview',
 })
 
 </script>
@@ -49,73 +49,66 @@ const state = reactive({
                 class="hover:text-blue-500"
             >
               <div class="inline">
-              <span class="underline text-3xl">
-              {{ props.resource }}
-              </span>
-                <span class="text-xl ml-1">
-                <i class="fa-solid fa-circle-info"></i>
-              </span>
+                <span class="text-xl mx-2">
+                  <i class="fa-solid fa-circle-info"></i>
+                </span>
+                <span class="underline text-3xl">
+                  {{ props.resource }}
+                </span>
               </div>
             </a>
           </div>
-
-
+          <div class="flex flex-grow items-end justify-end mr-2">
+            <div class="flex flex-col justify-items-center text-start mb-1">
+              <button
+                  class="text-md justify-end hover:text-amber-500 text-orange-300"
+                  @click="$emit('editResource')"
+              >
+                <i class="fa-solid fa-edit"></i>
+                Edit
+              </button>
+            </div>
+            <div class="flex flex-col justify-items-center text-start mb-1 ml-4">
+              <button
+                  class="text-md justify-end hover:text-blue-600 text-blue-300"
+                  @click="$emit('saveQuery')"
+              >
+                <i class="fa-solid fa-save"></i>
+                Save
+              </button>
+            </div>
+          </div>
         </div>
 
         <div
             id="query-status"
-            class="flex flex-row flex-grow p-2"
+            class="flex flex-row flex-grow p-2 items-center"
         >
           <div
-              class="text-gray-300 text-xl"
+              class="text-gray-300 text-xl content-center"
           >
             <i class="fa-solid fa-search"></i>
             Query:
           </div>
           <div
-              class="flex flex-grow justify-items-center
+              class="flex flex-grow flex-row justify-items-center
           ml-2 text-gray-200 bg-gray-700 border border-gray-400 rounded-b rounded-t"
           >
             <div class="p-1 pl-2 justify-items-center">
               <span class="text-xl">{{ props.query }}</span>
             </div>
           </div>
+          <div class="flex justify-items-center ml-4">
+            <button
+                class="text-xl justify-end hover:text-green-500 text-green-300"
+                @click="$emit('runQuery')"
+            >
+              <i class="fa-solid fa-play"></i>
+              Run
+            </button>
+          </div>
         </div>
       </div>
-      <div
-          id="action-bar"
-          class="flex-col p-2 justify-between items-center text-center"
-      >
-        <div class="flex flex-col justify-items-center text-start mb-1">
-          <button
-              class="text-md justify-end hover:text-amber-500 text-orange-300"
-              @click="$emit('editResource')"
-          >
-            <i class="fa-solid fa-edit"></i>
-            Edit
-          </button>
-        </div>
-        <div class="flex flex-col justify-items-center text-start mb-1">
-          <button
-              class="text-md justify-end hover:text-blue-600 text-blue-300"
-              @click="$emit('saveQuery')"
-          >
-            <i class="fa-solid fa-save"></i>
-            Save
-          </button>
-        </div>
-        <div class="flex flex-col justify-items-center text-start">
-          <button
-              class="text-xl justify-end hover:text-green-500 text-green-300"
-              @click="$emit('runQuery')"
-          >
-            <i class="fa-solid fa-play"></i>
-            Run
-          </button>
-        </div>
-
-      </div>
-
     </div>
     <div class="flex flex-grow justify-center mt-2">
       <div
@@ -125,13 +118,13 @@ const state = reactive({
             <div
                 class="gridinline-block px-4 pb-2 rounded-t-lg border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
                 :class="{
-                  'border-blue-600 text-blue-600 dark:text-blue-500 dark:border-blue-500': state.selectedTab === 'summary',
-                  'active': state.selectedTab === 'summary',
+                  'border-blue-600 text-blue-600 dark:text-blue-500 dark:border-blue-500': state.selectedTab === 'overview',
+                  'active': state.selectedTab === 'overview',
                 }"
-                @click="tabClick('summary')"
+                @click="tabClick('overview')"
             >
               <div>
-                Summary
+                Overview
               </div>
             </div>
           </li>
