@@ -19,6 +19,8 @@ httpx = "*"
 authlib = "*"
 sqlmodel = "*"
 sqlalchemy2-stubs = "*"
+uvicorn = "*"
+fastapi = "*"
 cachetools = "*"
 types-cachetools = "*"
 

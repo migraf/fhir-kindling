@@ -33,38 +33,23 @@ const state = reactive({
 
 <template>
   <div class="flex flex-col bg-gray-800 border-gray-500 shadow-gray-400 shadow-md border rounded-b rounded-t ">
-    <div class="flex flex-row p-2">
+    <div
+        class="flex flex-row grow"
+    >
       <div
-          id="dashboard"
-          class="grid grid-cols-6 grow gap-2"
+          class="flex flex-col grow"
       >
         <div
-            class="flex flex-col text-center p-4 justify-between col-span-3"
+            class="flex flex-row flex-grow justify-center mb-2"
         >
-          <div class="flex text-gray-200 bg-gray-700 justify-items-center border border-gray-400 rounded-b rounded-t">
-            <div class="flex p-1 pl-2 justify-items-center">
-              <span class="text-xl">{{ props.query }}</span>
-            </div>
-          </div>
-          <div
-              class="text-gray-300 text-xl"
-          >
-            <i class="fa-solid fa-search"></i>
-            Query
-          </div>
-        </div>
-        <div
-            id="resource-name"
-            class="flex-col items-center text-center p-4 justify-between rounded-t rounded-b col-span-2"
-        >
-          <div class="mb-2 scrollbar-track-transparent scrollbar flex-row overflow-auto text-gray-200">
+          <div class="scrollbar-track-transparent scrollbar flex-row overflow-auto text-gray-200">
             <a
                 :href="hl7Url"
                 target="_blank"
                 class="hover:text-blue-500"
             >
               <div class="inline">
-              <span class="underline text-2xl">
+              <span class="underline text-3xl">
               {{ props.resource }}
               </span>
                 <span class="text-xl ml-1">
@@ -73,24 +58,68 @@ const state = reactive({
               </div>
             </a>
           </div>
-          <div class="text-gray-300 text-xl">
-            Resource
+
+
+        </div>
+
+        <div
+            id="query-status"
+            class="flex flex-row flex-grow p-2"
+        >
+          <div
+              class="text-gray-300 text-xl"
+          >
+            <i class="fa-solid fa-search"></i>
+            Query:
+          </div>
+          <div
+              class="flex flex-grow justify-items-center
+          ml-2 text-gray-200 bg-gray-700 border border-gray-400 rounded-b rounded-t"
+          >
+            <div class="p-1 pl-2 justify-items-center">
+              <span class="text-xl">{{ props.query }}</span>
+            </div>
           </div>
         </div>
-        <div class="flex flex-col justify-items-end items-end">
+      </div>
+      <div
+          id="action-bar"
+          class="flex-col p-2 justify-between items-center text-center"
+      >
+        <div class="flex flex-col justify-items-center text-start mb-1">
           <button
-              class="text-xl justify-end hover:text-amber-500 text-orange-300"
+              class="text-md justify-end hover:text-amber-500 text-orange-300"
               @click="$emit('editResource')"
           >
             <i class="fa-solid fa-edit"></i>
             Edit
           </button>
         </div>
+        <div class="flex flex-col justify-items-center text-start mb-1">
+          <button
+              class="text-md justify-end hover:text-blue-600 text-blue-300"
+              @click="$emit('editResource')"
+          >
+            <i class="fa-solid fa-save"></i>
+            Save
+          </button>
+        </div>
+        <div class="flex flex-col justify-items-center text-start">
+          <button
+              class="text-xl justify-end hover:text-green-500 text-green-300"
+              @click="$emit('editResource')"
+          >
+            <i class="fa-solid fa-play"></i>
+            Run
+          </button>
+        </div>
 
       </div>
+
     </div>
-    <div class="flex flex-grow justify-center">
-      <div class="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
+    <div class="flex flex-grow justify-center mt-2">
+      <div
+          class="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
         <ul class="flex flex-wrap -mb-px">
           <li class="mr-2">
             <div

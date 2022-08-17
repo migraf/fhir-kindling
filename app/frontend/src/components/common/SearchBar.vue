@@ -2,38 +2,33 @@
 import {computed, ref, reactive, onMounted} from 'vue'
 import Fuse from "fuse.js";
 
-const props = defineProps({
-  items: {type: Array, required: true},
-  keys: {type: Array, required: false},
-  hint: {type: String, required: false},
-  button: {type: Boolean, required: false},
-})
+interface Props {
+  items: string[] | Array<any>;
+  keys?: string[];
+  hint?: string;
+  button?: boolean;
+}
+
+const props = defineProps<Props>()
 
 const options = {
   includeScore: true,
   keys: props.keys? props.keys : [],
 }
 
-const pattern = ref('');
-
-console.log("props", props);
 const fuse = new Fuse(props.items, options);
 
 const matches = computed(() => {
   return fuse.search(state.pattern)
 })
 
-const loading = ref(false);
 const state = reactive({
   selectedIndex: 1000,
   searchComplete: false,
   pattern: '',
 })
 
-const itemRefs = ref([])
-const list = ref([
-  /* ... */
-])
+const itemRefs = ref<HTMLElement[] | null >(null)
 
 function arrowDownPress() {
   console.log("arrowDownPress");
@@ -43,10 +38,13 @@ function arrowDownPress() {
   } else {
     if (state.selectedIndex < matches.value.length - 1) {
       state.selectedIndex++;
-      const el = itemRefs.value[state.selectedIndex];
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
+      if (itemRefs.value !== null) {
+        const el = itemRefs.value[state.selectedIndex];
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
       }
+
     }
   }
   console.log(state.selectedIndex);
@@ -117,14 +115,12 @@ function handleSelect(index: number) {
               :key="match.item"
               @keyup.enter="handleSelect(match.refIndex)"
               @click="handleSelect(match.refIndex)"
+              :ref="itemRefs"
           >
             <div
                 :class="{'bg-blue-500 dark:bg-blue-700': state.selectedIndex === index}"
-                ref="itemRefs"
             >
-              <slot :content="match.item">
-                {{ match.item }}
-              </slot>
+              {{ match.item }}
             </div>
           </div>
 

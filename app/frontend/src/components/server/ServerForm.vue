@@ -69,7 +69,7 @@ async function onSubmit() {
             <div class="items-center">
               <input
                   :checked="formState.authMode === 'basic'"
-                  id="inline-radio"
+                  id="radio-basic-auth"
                   v-model="formState.authMode"
                   type="radio"
                   value="basic"
@@ -85,7 +85,7 @@ async function onSubmit() {
             </div>
             <div class="items-center">
               <input
-                  id="inline-radio"
+                  id="radio-token-auth"
                   v-model="formState.authMode"
                   :checked="formState.authMode === 'token'"
                   type="radio"
@@ -112,7 +112,7 @@ async function onSubmit() {
                   class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
               >
               <label
-                  for="inline-checked-radio"
+                  for="radio-oidc-auth"
                   class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
               >
                 OIDC
@@ -120,7 +120,7 @@ async function onSubmit() {
             </div>
             <div class="items-center">
               <input
-                  id="radio-oidc-auth"
+                  id="radio-no-auth"
                   v-model="formState.authMode"
                   :checked="formState.authMode === 'none'"
                   type="radio"
@@ -129,7 +129,7 @@ async function onSubmit() {
                   class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
               >
               <label
-                  for="inline-checked-radio"
+                  for="radio-no-auth"
                   class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
               >
                 None
