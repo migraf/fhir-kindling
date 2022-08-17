@@ -1,3 +1,5 @@
+import {ResourceField} from "../resource/type";
+
 export enum Operators {
     eq = "eq",
     ne = "ne",
@@ -13,7 +15,7 @@ export enum Operators {
 }
 
 export interface FieldParameter {
-    field: string;
+    field: ResourceField;
     operator: Operators;
     value: string | number | string[] | number[] | boolean;
 }

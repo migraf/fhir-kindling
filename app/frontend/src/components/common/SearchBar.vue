@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, ref, reactive, onMounted} from 'vue'
+import {computed, ref, reactive, onMounted } from 'vue'
 import Fuse from "fuse.js";
 
 interface Props {
@@ -26,7 +26,10 @@ const state = reactive({
   selectedIndex: 1000,
   searchComplete: false,
   pattern: '',
+  displayField: '',
 })
+
+const results = ref();
 
 const itemRefs = ref<HTMLElement[] | null >(null)
 
@@ -71,7 +74,7 @@ function handleSelect(index: number) {
   console.log("handleSelect", index);
   state.selectedIndex = index;
   state.searchComplete = true;
-  state.pattern = props.items[index];
+  state.pattern = props.items[index].name;
   console.log("searchComplete", state.searchComplete);
   emit("selected", props.items[index]);
   state.searchComplete = true;
@@ -101,26 +104,29 @@ function handleSelect(index: number) {
                :placeholder="props.hint ? props.hint : 'Search'"
                required
                autocomplete="off"
+               @keyup.enter.prevent="handleSelect(state.selectedIndex)"
         >
         <div
             v-if="matches.length > 0 && !state.searchComplete"
             class="absolute overflow-scroll top-100 mt-1 w-full border bg-gray-50 dark:bg-gray-700 shadow-xl rounded max-h-64 scrollbar scrollbar-thumb-gray-900 scrollbar-track-transparent divide-gray-500 divide-y"
             @keyup.down.prevent="arrowDownPress"
             @keyup.up.prevent="arrowUpPress"
-            @keyup.enter="handleSelect(state.selectedIndex)"
+            @keyup.enter.prevent="handleSelect(state.selectedIndex)"
         >
           <div
               class="p-3 text-gray-900 dark:text-white"
               v-for="(match, index) in matches"
               :key="match.item"
-              @keyup.enter="handleSelect(match.refIndex)"
+              @keyup.enter.prevent="handleSelect(match.refIndex)"
               @click="handleSelect(match.refIndex)"
               :ref="itemRefs"
           >
             <div
                 :class="{'bg-blue-500 dark:bg-blue-700': state.selectedIndex === index}"
             >
-              {{ match.item }}
+              <slot :item="match.item">
+                {{match.item}}
+              </slot>
             </div>
           </div>
 

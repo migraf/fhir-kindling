@@ -1,9 +1,11 @@
 <script lang="ts">
 import {getResourceFields, getResourceNames} from '../../domains/resource/api';
 import {computed, reactive, ref} from "vue";
-import ResourceQuery from "./FilterBuilder.vue";
+import ResourceQuery from "./filter/FilterBuilder.vue";
 import SearchBar from "../common/SearchBar.vue";
 import QueryStatus from "./QueryStatus.vue";
+import {FieldParameter} from "../../domains/query/type";
+import {urlResourceField} from "../../domains/query/api";
 
 export default {
   components: {QueryStatus, SearchBar, ResourceQuery},
@@ -18,6 +20,7 @@ export default {
       resourceFields: [],
       status: 'initialized',
       selectedTab: 'summary',
+      fieldParameters: Array<FieldParameter>(),
     })
 
     async function handleSelected(resource: string) {
@@ -27,12 +30,22 @@ export default {
     }
 
     const queryString = computed(() => {
-      return `/${state.selectedResource}?`;
+
+      let query = `/${state.selectedResource}?`;
+      if (state.fieldParameters.length > 0) {
+        query += `${state.fieldParameters.map(param => urlResourceField(param)).join('&')}`;
+      }
+      return query;
     });
 
     function handleTabSelect(tab: string) {
       console.log("handleTabSelect", tab);
       state.selectedTab = tab;
+    }
+
+    async function handleAddFilter(filter: FieldParameter) {
+      console.log("Query builder add filter", filter);
+      state.fieldParameters.push(filter);
     }
 
     return {
@@ -42,6 +55,7 @@ export default {
       resourceNames,
       handleSelected,
       handleTabSelect,
+      handleAddFilter
     };
   },
   computed
@@ -64,10 +78,12 @@ export default {
         :status="state.status"
         @edit-resource="state.status = 'initialized'"
         @select-tab="handleTabSelect"
+        :filters="state.fieldParameters"
     />
     <ResourceQuery
         v-if="state.selectedResource && state.selectedTab === 'filters'"
         :resource="state.selectedResource"
+        @addFilter="handleAddFilter"
     />
 
   </div>

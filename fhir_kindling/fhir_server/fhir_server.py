@@ -42,7 +42,7 @@ class FhirServer:
                  auth: httpx.Auth = None,
                  headers: dict = None,
                  proxies: Union[dict, str] = None,
-                 timeout: int = 5,
+                 timeout: int = 60,
                  fhir_server_type: str = "hapi"):
         """
         Initialize a FHIR server connection
@@ -56,6 +56,8 @@ class FhirServer:
             oidc_provider_url: provider url for oauth2
             auth: optional auth object to authenticate against a server
             headers: optional additional headers to be added to the session
+            proxies: optional proxies to be added to the session
+            timeout: optional timeout for the session default is 60 seconds
             fhir_server_type: type of fhir server (hapi, blaze, etc.)
         """
 

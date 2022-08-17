@@ -14,7 +14,7 @@ const hl7Url = computed(() => {
   return `https://hl7.org/fhir/${props.resource.toLowerCase()}.html`;
 })
 
-const emits = defineEmits(["editResource", "selectTab"]);
+const emits = defineEmits(["editResource", "selectTab", "saveQuery", "runQuery"]);
 
 function tabClick(tab: string) {
   console.log("tabClick", tab);
@@ -98,7 +98,7 @@ const state = reactive({
         <div class="flex flex-col justify-items-center text-start mb-1">
           <button
               class="text-md justify-end hover:text-blue-600 text-blue-300"
-              @click="$emit('editResource')"
+              @click="$emit('saveQuery')"
           >
             <i class="fa-solid fa-save"></i>
             Save
@@ -107,7 +107,7 @@ const state = reactive({
         <div class="flex flex-col justify-items-center text-start">
           <button
               class="text-xl justify-end hover:text-green-500 text-green-300"
-              @click="$emit('editResource')"
+              @click="$emit('runQuery')"
           >
             <i class="fa-solid fa-play"></i>
             Run
@@ -172,7 +172,7 @@ const state = reactive({
                     'text-green-600 dark:text-green-600': props.includes.length >= 1,
                   }"
               >
-                {{ props.filters.length }}
+                {{ props.includes.length }}
               </div>
               <div class="col-span-2">
                 Includes
