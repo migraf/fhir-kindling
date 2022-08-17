@@ -3,12 +3,14 @@ import {reactive, ref, defineEmits} from "vue";
 import {getResourceFields} from "../../../domains/resource/api";
 import FilterForm from "./FilterForm.vue";
 import FilterOverview from "./FilterOverview.vue";
-import {FieldParameter} from "../../../domains/query/type";
+import {FieldParameter, Operators} from "../../../domains/query/type";
+import {ResourceField} from "../../../domains/resource/type";
 
 export default {
   components: {FilterForm, FilterOverview},
   props: {
-    resource: String
+    resource: String,
+    fields: Array<FieldParameter>
   },
   emits: [
     "addFilter"
@@ -17,6 +19,7 @@ export default {
     const loading = ref(false);
     const fieldResponse = await getResourceFields(props.resource);
     const defaultFilters = ["resource_type"]
+    console.log("prop fields", props.resourceFields);
     const state = reactive({
       selectedField: '',
       resourceFields: fieldResponse.fields,
@@ -24,9 +27,10 @@ export default {
         extensions: true,
         default: true,
       },
-      fieldParameters: Array<FieldParameter>(),
+      fieldParameters: props.fields === undefined ? Array<FieldParameter>() : props.fields,
       add: true,
     })
+
     async function handleSelected(item: string) {
       console.log("handleSelected", item);
       state.selectedField = item;
@@ -34,9 +38,14 @@ export default {
 
     function handleAddFilter(filter: FieldParameter) {
       console.log("handleAddFilter", filter);
-      state.fieldParameters.push(filter);
+      // state.fieldParameters.push(filter);
       context.emit("addFilter", filter);
       state.add = false;
+    }
+
+    function handleRemoveFilter(filter: FieldParameter) {
+      console.log("handleRemoveFilter filter builder", filter);
+
     }
     return {
       state,
@@ -45,23 +54,40 @@ export default {
       defaultFilters,
       handleSelected,
       handleAddFilter,
+      handleRemoveFilter
     };
   },
 }
 </script>
 
 <template>
-  <div class="flex flex-col">
-    <h5>Todo</h5>
-  </div>
-  <FilterForm
-      v-if="state.add"
-      :resource="resource"
-      :fields="state.resourceFields"
-      @addFilter="handleAddFilter"
-  >
+  <div class="flex flex-col mt-4">
+    <FilterOverview
+        :filters="state.fieldParameters"
+        @removeFilter="handleRemoveFilter"
+    />
+    <div
+        v-if="!state.add"
+        class="flex flex-grow justify-center mt-2"
+        @click="state.add = true"
 
-  </FilterForm>
+    >
+      <button
+          class="bg-blue-700 text-white rounded-lg p-2 justify-items-center"
+      >
+        <font-awesome-icon icon="fa-solid fa-plus" />
+        Add Filter
+      </button>
+    </div>
+    <FilterForm
+        v-if="state.add"
+        :resource="resource"
+        :fields="state.resourceFields"
+        @addFilter="handleAddFilter"
+    >
+
+    </FilterForm>
+  </div>
 </template>
 
 <style scoped>

@@ -8,5 +8,8 @@ export function urlResourceField(field: FieldParameter): string {
     if (operator === "ne" || operator === "not_in") {
         return `${field.field.name}=ne${field.value}`;
     }
+    if (operator === "contains") {
+        return `${field.field.name}:contains=${field.value}`;
+    }
     return `${field.field.name}=${operator}${field.value}`;
 }

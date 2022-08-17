@@ -28,7 +28,10 @@ function handleOperatorSelect() {
             dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       @change="handleOperatorSelect"
       v-model="selected"
+
+
   >
+    <option value="" disabled selected>Select operator</option>
     <option
         v-for="option in options"
         :key="option.value"

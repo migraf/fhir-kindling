@@ -23,7 +23,7 @@ function handleServerChanged(s: Server){
 </script>
 
 <template>
-  <div class="flex items-stretch h-screen bg-gray-900 text-gray-200 divide-x divide-gray-500">
+  <div class="flex items-stretch h-screen bg-gray-900 text-gray-200 divide-x divide-gray-500 font-mono">
     <div class="flex-col w-1/5 h-screen">
       <ServerForm
           :server="server"
@@ -34,8 +34,8 @@ function handleServerChanged(s: Server){
     </div>
     <div class="flex-col w-4/5">
       <div class="flex-row">
-        <h1 class="text-3xl font-bold underline text-center font-mono">
-          Query Builder
+        <h1 class="text-4xl font-bold text-center font-mono mb-4 mt-2">
+          Kindling 🔥 Query Builder
         </h1>
       </div>
       <div class="flex-row">
