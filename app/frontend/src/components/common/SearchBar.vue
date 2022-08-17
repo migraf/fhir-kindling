@@ -31,7 +31,7 @@ const state = reactive({
 
 const results = ref();
 
-const itemRefs = ref<HTMLElement[] | null >(null)
+const itemRefs = ref<HTMLElement[] | null | any >(null)
 
 function arrowDownPress() {
   console.log("arrowDownPress");
