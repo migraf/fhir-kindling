@@ -85,7 +85,6 @@ function addFilter() {
       >
         Add Filter
       </button>
-
     </div>
   </div>
 </template>

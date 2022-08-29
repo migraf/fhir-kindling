@@ -22,6 +22,7 @@ class Hero(SQLModel, table=True):
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
 
+
 app = FastAPI()
 
 app.add_middleware(
@@ -36,10 +37,13 @@ app.include_router(api_router, prefix="/api")
 
 site_path = pathlib.Path(__file__).parent.parent / "frontend" / "dist"
 
+app.mount("/app", StaticFiles(directory=site_path, html=True), name="site")
+
 
 @app.on_event("startup")
 def on_startup():
     create_db_and_tables()
+
 
 @app.post("/heroes/")
 def create_hero(hero: Hero):
@@ -55,6 +59,3 @@ def read_heroes():
     with Session(engine) as session:
         heroes = session.exec(select(Hero)).all()
         return heroes
-
-
-app.mount("/app", StaticFiles(directory=site_path, html=True), name="site")

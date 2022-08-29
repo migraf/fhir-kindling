@@ -157,7 +157,7 @@ const state = reactive({
                   'border-blue-600 text-blue-600 dark:text-blue-500 dark:border-blue-500': state.selectedTab === 'includes',
                   'active': state.selectedTab === 'includes',
                 }"
-                @click="state.selectedTab = 'includes'"
+                @click="tabClick('includes')"
             >
               <div
                   class="rounded-full px-1 text-center text-amber-400"

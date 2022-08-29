@@ -2,6 +2,7 @@
 import {computed, ref, reactive, onMounted, defineEmits} from 'vue'
 import {FieldParameter, IncludeParameter, ReverseChainParameter} from "../../domains/query/type";
 import FilterOverview from "./filter/FilterOverview.vue";
+import IncludeOverview from "./include/IncludeOverview.vue";
 
 interface Props {
   fieldParams?: FieldParameter[];
@@ -11,13 +12,17 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const emits = defineEmits(["removeFilter"])
+const emits = defineEmits(["removeFilter", "removeInclude"])
 
 function handleRemoveFilter(filter: FieldParameter) {
   console.log("handleRemoveFilter query summary", filter);
   emits("removeFilter", filter);
 }
 
+function handleRemoveInclude(parameter: IncludeParameter) {
+  console.log("handleRemoveInclude query summary", parameter);
+  emits("removeInclude", parameter);
+}
 
 </script>
 
@@ -38,15 +43,16 @@ function handleRemoveFilter(filter: FieldParameter) {
     >
       None
     </div>
-    <div class="text-gray-100 text-xl mb-2">
+    <div class="text-gray-100 text-xl">
       Include Parameters:
     </div>
-    <div
+    <IncludeOverview
         v-if="props.includeParams !== undefined && props.includeParams.length > 0"
         class="mb-2"
-    >
-      Includes
-    </div>
+        :include-params="props.includeParams"
+        @removeInclude="handleRemoveInclude"
+    />
+
     <div
         v-else
         class="mb-2"
