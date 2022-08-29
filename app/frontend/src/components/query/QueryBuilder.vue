@@ -136,6 +136,7 @@ export default {
         :include-params="state.includeParameters"
         :chain-params="state.chainParameters"
         @removeFilter="handleRemoveFilter"
+        @removeInclude="handleRemoveInclude"
     />
     <IncludeBuilder
         v-if="state.selectedResource && state.selectedTab === 'includes'"
