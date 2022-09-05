@@ -5,11 +5,12 @@ import FilterBuilder from "./filter/FilterBuilder.vue";
 import SearchBar from "../common/SearchBar.vue";
 import QueryStatus from "./QueryStatus.vue";
 import {FieldParameter, IncludeParameter, ReverseChainParameter} from "../../domains/query/type";
-import {urlResourceField} from "../../domains/query/api";
+import {urlResourceField, urlIncludeParameter} from "../../domains/query/api";
 import QueryOverview from "./QueryOverview.vue";
+import IncludeBuilder from "./include/IncludeBuilder.vue";
 
 export default {
-  components: {QueryOverview, QueryStatus, SearchBar, FilterBuilder},
+  components: {IncludeBuilder, QueryOverview, QueryStatus, SearchBar, FilterBuilder},
   async setup() {
     const loading = ref(false);
     const resourceNames = await getResourceNames()
@@ -37,6 +38,13 @@ export default {
       if (state.fieldParameters.length > 0) {
         query += `${state.fieldParameters.map(param => urlResourceField(param)).join('&')}`;
       }
+
+      if (state.includeParameters.length > 0) {
+        if (state.fieldParameters.length > 0) {
+          query += '&';
+        }
+        query += `${state.includeParameters.map(param => urlIncludeParameter(param)).join('&')}`;
+      }
       return query;
     });
 
@@ -58,6 +66,19 @@ export default {
           });
     }
 
+    function handleAddInclude(include: IncludeParameter) {
+      console.log("Query builder add include", include);
+      state.includeParameters.push(include);
+    }
+
+    function handleRemoveInclude(include: IncludeParameter) {
+      console.log("Query builder remove include", include);
+      state.includeParameters = state.includeParameters.filter(
+          param => {
+            return param.resource !== include.resource && param.search_param !== include.search_param;
+          });
+    }
+
     function handleEdit() {
       console.log("handleEdit");
       state.selectedResource = '';
@@ -74,7 +95,9 @@ export default {
       handleTabSelect,
       handleAddFilter,
       handleEdit,
-      handleRemoveFilter
+      handleRemoveFilter,
+      handleAddInclude,
+      handleRemoveInclude,
     };
   },
   computed
@@ -98,6 +121,7 @@ export default {
         @edit-resource="handleEdit"
         @select-tab="handleTabSelect"
         :filters="state.fieldParameters"
+        :includes="state.includeParameters"
     />
     <FilterBuilder
         v-if="state.selectedResource && state.selectedTab === 'filters'"
@@ -112,7 +136,18 @@ export default {
         :include-params="state.includeParameters"
         :chain-params="state.chainParameters"
         @removeFilter="handleRemoveFilter"
+        @removeInclude="handleRemoveInclude"
     />
+    <IncludeBuilder
+        v-if="state.selectedResource && state.selectedTab === 'includes'"
+        :resource="state.selectedResource"
+        :fields="state.fieldParameters"
+        :resource-names="resourceNames"
+        :include-params="state.includeParameters"
+        @addInclude="handleAddInclude"
+        @removeInclude="handleRemoveInclude"
+    />
+
 
   </div>
 </template>

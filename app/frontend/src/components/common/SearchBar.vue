@@ -74,8 +74,14 @@ function handleSelect(index: number) {
   console.log("handleSelect", index);
   state.selectedIndex = index;
   state.searchComplete = true;
-  state.pattern = props.items[index].name;
+
+  if (Array.isArray(props.items) && props.items.every(item => typeof item === "string")){
+    state.pattern = props.items[index];
+  } else {
+    state.pattern = props.items[index].name;
+  }
   console.log("searchComplete", state.searchComplete);
+  console.log("pattern", state.pattern);
   emit("selected", props.items[index]);
   state.searchComplete = true;
 
@@ -107,7 +113,7 @@ function handleSelect(index: number) {
                @keyup.enter.prevent="handleSelect(state.selectedIndex)"
         >
         <div
-            v-if="matches.length > 0 && !state.searchComplete"
+            v-if="!state.searchComplete"
             class="absolute overflow-scroll top-100 mt-1 w-full border bg-gray-50 dark:bg-gray-700 shadow-xl rounded max-h-64 scrollbar scrollbar-thumb-gray-900 scrollbar-track-transparent divide-gray-500 divide-y"
             @keyup.down.prevent="arrowDownPress"
             @keyup.up.prevent="arrowUpPress"
