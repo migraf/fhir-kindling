@@ -12,7 +12,7 @@ def flatten_resources(resources: Union[List[FHIRResourceModel], List[FHIRAbstrac
     Args:
         resources: list of resources
 
-    Returns: pandas dataframe with columns corresponding to the flatten ed resource keys
+    Returns: pandas dataframe with columns corresponding to the flattened resource keys
 
     """
 
@@ -36,7 +36,7 @@ def flatten_resource(resource: Union[FHIRResourceModel, FHIRAbstractModel]) -> d
     return flat_dict
 
 
-def flatten_dict(d, parent_key='', sep='_') -> dict:
+def flatten_dict(d, parent_key: str = '', sep: str = '_', keys: List[str] = None) -> dict:
     """
     Flatten a nested dictionary into a single level dictionary.
 
@@ -45,6 +45,7 @@ def flatten_dict(d, parent_key='', sep='_') -> dict:
         d: dictionary to flatten
         parent_key: parent key user for recursion
         sep: separator for the nested keys
+        keys: list of keys to keep, all other keys will be skipped
 
     Returns:
 
