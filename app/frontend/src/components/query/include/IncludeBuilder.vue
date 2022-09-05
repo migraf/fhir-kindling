@@ -28,13 +28,21 @@ function handleRemoveInclude(parameter: IncludeParameter) {
 <template>
   <div>
     <IncludeOverview
+        v-if="props.includeParams.length > 0"
         :include-params="props.includeParams"
         @removeInclude="handleRemoveInclude"
     />
-    <IncludeForm
-        :resource-names="props.resourceNames"
-        @add-include="handleAddInclude"
-    />
+
+    <div
+        :class="{
+          'mt-8': props.includeParams.length < 1
+        }"
+    >
+      <IncludeForm
+          :resource-names="props.resourceNames"
+          @add-include="handleAddInclude"
+      />
+    </div>
   </div>
 </template>
 

@@ -42,7 +42,6 @@ function addIncludeParam() {
 
 <template>
   <div class="flex flex-col">
-    Include Form
     <div class="grid gap-2 grid-cols-8">
       <div class="col-span-3">
         <SearchBar

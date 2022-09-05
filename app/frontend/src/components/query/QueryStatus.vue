@@ -194,6 +194,20 @@ const state = reactive({
               </div>
             </div>
           </li>
+          <li class="mr-2">
+            <div
+                class="gridinline-block px-4 pb-2 rounded-t-lg border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
+                :class="{
+                  'border-blue-600 text-blue-600 dark:text-blue-500 dark:border-blue-500': state.selectedTab === 'results',
+                  'active': state.selectedTab === 'results',
+                }"
+                @click="tabClick('results')"
+            >
+              <div>
+                Results
+              </div>
+            </div>
+          </li>
         </ul>
       </div>
     </div>

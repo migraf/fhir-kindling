@@ -113,7 +113,7 @@ function handleSelect(index: number) {
                @keyup.enter.prevent="handleSelect(state.selectedIndex)"
         >
         <div
-            v-if="!state.searchComplete"
+            v-if="!state.searchComplete && state.pattern.length > 0"
             class="absolute overflow-scroll top-100 mt-1 w-full border bg-gray-50 dark:bg-gray-700 shadow-xl rounded max-h-64 scrollbar scrollbar-thumb-gray-900 scrollbar-track-transparent divide-gray-500 divide-y"
             @keyup.down.prevent="arrowDownPress"
             @keyup.up.prevent="arrowUpPress"

@@ -15,7 +15,7 @@ const emits = defineEmits(["removeInclude"]);
 </script>
 
 <template>
-  <div class="flex flex-row border rounded rounded-full rounded-md border-gray-500 p-2 mb-4 mt-2">
+  <div class="flex flex-row border rounded rounded-full rounded-md border-gray-500 p-2 mb-4 mt-4">
     <div
         class="rounded-full rounded-md bg-gray-600 flex items-center justify-center border border-gray-300 mr-2"
         v-for="(parameter, index) in includeParams"

@@ -1,4 +1,4 @@
-import {FieldParameter, IncludeParameter} from "./type";
+import {FieldParameter, IncludeParameter, QueryParameters} from "./type";
 
 export function urlResourceField(field: FieldParameter): string {
     let operator = field.operator.valueOf();
@@ -18,4 +18,10 @@ export function urlIncludeParameter(include: IncludeParameter): string {
     let url_param = include.reverse ? `_revinclude=` : `_include=`;
     url_param += `${include.resource}:${include.search_param}`;
     return url_param;
+}
+
+export async function runQuery(queryParameters: QueryParameters) {
+
+
+
 }

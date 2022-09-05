@@ -64,6 +64,7 @@ export default {
 <template>
   <div class="flex flex-col mt-4">
     <FilterOverview
+        v-if="state.fieldParameters.length > 0"
         :filters="state.fieldParameters"
         @removeFilter="handleRemoveFilter"
     />
