@@ -1,4 +1,5 @@
-import {FieldParameter, IncludeParameter, QueryParameters} from "./type";
+import {FieldParameter, IncludeParameter, QueryParameters, QueryResponse} from "./type";
+import axios from "axios";
 
 export function urlResourceField(field: FieldParameter): string {
     let operator = field.operator.valueOf();
@@ -20,8 +21,9 @@ export function urlIncludeParameter(include: IncludeParameter): string {
     return url_param;
 }
 
-export async function runQuery(queryParameters: QueryParameters) {
-
-
+export async function runQuery(queryParameters: QueryParameters): Promise<QueryResponse> {
+    const response = await  axios.post('http://localhost:8002/api/query', queryParameters);
+    console.log(response.data);
+    return response.data;
 
 }

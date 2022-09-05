@@ -43,3 +43,7 @@ export interface QueryParameters {
     has_parameters?: ReverseChainParameter[];
 }
 
+export interface QueryResponse {
+    resource: string;
+}
+
