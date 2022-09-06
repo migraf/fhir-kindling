@@ -141,7 +141,8 @@ class FhirServer:
                 base_url=self.api_address,
                 resource=resource,
                 auth=self.auth,
-                output_format=output_format
+                output_format=output_format,
+                proxies=self._proxies,
             )
         elif query_string:
             return self.raw_query(query_string, output_format)
@@ -151,7 +152,8 @@ class FhirServer:
                 base_url=self.api_address,
                 auth=self.auth,
                 query_parameters=query_parameters,
-                output_format=output_format
+                output_format=output_format,
+                proxies=self._proxies,
             )
         else:
             raise ValueError("Must provide either resource, query_parameters or a query string")
@@ -177,7 +179,8 @@ class FhirServer:
                 base_url=self.api_address,
                 resource=resource,
                 auth=self.auth,
-                output_format=output_format
+                output_format=output_format,
+                proxies=self._proxies,
             )
         elif query_string:
             query_parameters = FHIRQueryParameters.from_query_string(query_string)
@@ -185,7 +188,8 @@ class FhirServer:
                 self.api_address,
                 resource=query_parameters.resource,
                 query_parameters=query_parameters,
-                output_format=output_format
+                output_format=output_format,
+                proxies=self._proxies,
             )
             return query
 
@@ -194,7 +198,8 @@ class FhirServer:
                 base_url=self.api_address,
                 auth=self.auth,
                 query_parameters=query_parameters,
-                output_format=output_format
+                output_format=output_format,
+                proxies=self._proxies,
             )
         else:
             raise ValueError("Must provide either resource, query_parameters or a query string")
@@ -215,7 +220,8 @@ class FhirServer:
             base_url=self.api_address,
             query_parameters=query_parameters,
             output_format=output_format,
-            auth=self.auth
+            auth=self.auth,
+            proxies=self._proxies,
         )
         return query
 
@@ -238,7 +244,8 @@ class FhirServer:
             resource=query_parameters.resource,
             query_parameters=query_parameters,
             output_format=output_format,
-            auth=self.auth
+            auth=self.auth,
+            proxies=self._proxies,
         )
         return query
 
