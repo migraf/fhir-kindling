@@ -1,1 +1,1 @@
-{"kindling_get_all_sync_time": 0.2632410526275635, "fhirpy_get_all_sync_time": 0.4045884609222412, "smart_get_all_sync_time": 1.1941101551055908, "kindling_get_all_async_time": 0.2718167304992676}
+{"kindling_get_all_sync_time": 0.1856248378753662, "fhirpy_get_all_sync_time": 0.5120687484741211, "smart_get_all_sync_time": 1.1577260494232178, "kindling_get_all_async_time": 0.2772064208984375, "fhirpy_get_all_async_time": 0.34984445571899414}
