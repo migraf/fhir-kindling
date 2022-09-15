@@ -143,6 +143,7 @@ class FhirServer:
                 auth=self.auth,
                 output_format=output_format,
                 proxies=self._proxies,
+                headers=self._headers,
             )
         elif query_string:
             return self.raw_query(query_string, output_format)
@@ -154,6 +155,7 @@ class FhirServer:
                 query_parameters=query_parameters,
                 output_format=output_format,
                 proxies=self._proxies,
+                headers=self._headers,
             )
         else:
             raise ValueError("Must provide either resource, query_parameters or a query string")
@@ -222,6 +224,7 @@ class FhirServer:
             output_format=output_format,
             auth=self.auth,
             proxies=self._proxies,
+            headers=self._headers,
         )
         return query
 
