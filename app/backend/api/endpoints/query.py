@@ -21,6 +21,8 @@ async def run_query(parameters: FHIRQueryParameters):
         start_time=datetime.now()
 
     )
+
+    print(parameters)
     try:
         response = await server.query_async(query_parameters=parameters).all()
         query.end_time = datetime.now()

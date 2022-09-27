@@ -92,14 +92,13 @@ export default {
 
       const queryParameters = {
         resource: state.selectedResource,
-        fields: state.fieldParameters,
-        includes: state.includeParameters,
-        reverse_chains: state.chainParameters
+        resource_parameters: state.fieldParameters,
+        include_parameters: state.includeParameters,
+        has_parameters: state.chainParameters
       } as QueryParameters;
 
+
       const response = await runQuery(queryParameters);
-      console.log("response", response);
-      console.log(queryParameters);
     }
 
     return {
