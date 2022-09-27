@@ -4,8 +4,8 @@ import {computed, reactive, ref} from "vue";
 import FilterBuilder from "./filter/FilterBuilder.vue";
 import SearchBar from "../common/SearchBar.vue";
 import QueryStatus from "./QueryStatus.vue";
-import {FieldParameter, IncludeParameter, ReverseChainParameter} from "../../domains/query/type";
-import {urlResourceField, urlIncludeParameter} from "../../domains/query/api";
+import {FieldParameter, IncludeParameter, ReverseChainParameter, QueryParameters} from "../../domains/query/type";
+import {urlResourceField, urlIncludeParameter, runQuery} from "../../domains/query/api";
 import QueryOverview from "./QueryOverview.vue";
 import IncludeBuilder from "./include/IncludeBuilder.vue";
 
@@ -86,6 +86,22 @@ export default {
       state.fieldParameters = [];
     }
 
+    async function handleRunQuery() {
+      console.log("handleRunQuery");
+      state.status = 'queryRunning';
+
+      const queryParameters = {
+        resource: state.selectedResource,
+        fields: state.fieldParameters,
+        includes: state.includeParameters,
+        reverse_chains: state.chainParameters
+      } as QueryParameters;
+
+      const response = await runQuery(queryParameters);
+      console.log("response", response);
+      console.log(queryParameters);
+    }
+
     return {
       queryString,
       state,
@@ -98,6 +114,7 @@ export default {
       handleRemoveFilter,
       handleAddInclude,
       handleRemoveInclude,
+      handleRunQuery
     };
   },
   computed
@@ -122,6 +139,8 @@ export default {
         @select-tab="handleTabSelect"
         :filters="state.fieldParameters"
         :includes="state.includeParameters"
+        @runQuery="handleRunQuery"
+
     />
     <FilterBuilder
         v-if="state.selectedResource && state.selectedTab === 'filters'"
