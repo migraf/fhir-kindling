@@ -4,13 +4,20 @@ import {computed, reactive, ref} from "vue";
 import FilterBuilder from "./filter/FilterBuilder.vue";
 import SearchBar from "../common/SearchBar.vue";
 import QueryStatus from "./QueryStatus.vue";
-import {FieldParameter, IncludeParameter, ReverseChainParameter, QueryParameters} from "../../domains/query/type";
+import {
+  FieldParameter,
+  IncludeParameter,
+  ReverseChainParameter,
+  QueryParameters,
+  QueryResponse
+} from "../../domains/query/type";
 import {urlResourceField, urlIncludeParameter, runQuery} from "../../domains/query/api";
 import QueryOverview from "./QueryOverview.vue";
 import IncludeBuilder from "./include/IncludeBuilder.vue";
+import QueryResults from "./results/QueryResults.vue";
 
 export default {
-  components: {IncludeBuilder, QueryOverview, QueryStatus, SearchBar, FilterBuilder},
+  components: {QueryResults, IncludeBuilder, QueryOverview, QueryStatus, SearchBar, FilterBuilder},
   async setup() {
     const loading = ref(false);
     const resourceNames = await getResourceNames()
@@ -24,6 +31,7 @@ export default {
       fieldParameters: Array<FieldParameter>(),
       includeParameters: Array<IncludeParameter>(),
       chainParameters: Array<ReverseChainParameter>(),
+      response: {},
     })
 
     async function handleSelected(resource: string) {
@@ -88,7 +96,7 @@ export default {
 
     async function handleRunQuery() {
       console.log("handleRunQuery");
-      state.status = 'queryRunning';
+
 
       const queryParameters = {
         resource: state.selectedResource,
@@ -97,8 +105,12 @@ export default {
         has_parameters: state.chainParameters
       } as QueryParameters;
 
+      state.selectedTab = "results";
+      state.status = 'queryRunning';
 
-      const response = await runQuery(queryParameters);
+      state.response = await runQuery(queryParameters);
+      state.status = 'queryFinished';
+
     }
 
     return {
@@ -164,6 +176,10 @@ export default {
         :include-params="state.includeParameters"
         @addInclude="handleAddInclude"
         @removeInclude="handleRemoveInclude"
+    />
+    <QueryResults
+        v-if="state.selectedResource && state.selectedTab === 'results'"
+        :result="state.response"
     />
 
 

@@ -46,7 +46,7 @@ export interface QueryParameters {
 
 export interface ResourceResults {
     resource: string;
-    results: Object[];
+    items: Object[];
 }
 
 export interface QueryInfo {
@@ -58,6 +58,6 @@ export interface QueryInfo {
 }
 export interface QueryResponse {
     query: QueryInfo;
-    results: ResourceResults[];
+    resources: ResourceResults[];
 }
 

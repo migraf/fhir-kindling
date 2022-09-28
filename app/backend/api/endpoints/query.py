@@ -26,6 +26,7 @@ async def run_query(parameters: FHIRQueryParameters):
     try:
         response = await server.query_async(query_parameters=parameters).all()
         query.end_time = datetime.now()
+        print(response)
         return QueryResult.from_query_response(query=query, response=response)
 
     except Exception as e:

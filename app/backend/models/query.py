@@ -19,7 +19,7 @@ class Query(SQLModel):
 
 class ResourceResults(SQLModel):
     resource: str
-    results: List[Any]
+    items: List[Any]
 
 
 class QueryResult(SQLModel):
@@ -29,10 +29,10 @@ class QueryResult(SQLModel):
     @classmethod
     def from_query_response(cls, query: Query, response: QueryResponse):
         resources = [ResourceResults(resource=response.resource,
-                                     results=[r.dict(exclude_none=True) for r in response.resources])]
+                                     items=[r.dict(exclude_none=True) for r in response.resources])]
         for include in response.included_resources:
             resources.append(ResourceResults(resource=include.resource_type,
-                                             results=[r.dict(exclude_none=True) for r in include.resources]))
+                                             items=[r.dict(exclude_none=True) for r in include.resources]))
         return cls(
             query=query,
             resources=resources

@@ -32,7 +32,7 @@ function handleServerChanged(s: Server){
 
       </ServerForm>
     </div>
-    <div class="flex-col w-4/5">
+    <div class="flex-col w-4/5 h-full">
       <div class="flex-row">
         <h1 class="text-4xl font-bold text-center font-mono mb-4 mt-2">
           Kindling 🔥 Query Builder
@@ -50,23 +50,9 @@ function handleServerChanged(s: Server){
 
       </div>
     </div>
-
-
   </div>
 </template>
 
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-}
 
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
 </style>
