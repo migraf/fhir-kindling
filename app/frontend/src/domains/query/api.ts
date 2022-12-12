@@ -22,6 +22,8 @@ export function urlIncludeParameter(include: IncludeParameter): string {
 }
 
 export async function runQuery(queryParameters: QueryParameters): Promise<QueryResponse> {
+    console.log("run query");
+    console.log(queryParameters);
     const response = await  axios.post('http://localhost:8002/api/query', queryParameters);
     console.log(response.data);
     return response.data;

@@ -1,4 +1,5 @@
 import os
+import pprint
 import uuid
 
 import pytest
@@ -319,7 +320,6 @@ def test_server_add_all(fhir_server: FhirServer):
 
 def test_query_all(fhir_server: FhirServer):
     response = fhir_server.query(Patient.construct(), output_format="json").all()
-    print(response)
     assert response.response
 
 
@@ -535,10 +535,10 @@ def test_transfer(fhir_server: FhirServer):
 
     conditions_before = hapi_server.query("Condition").all().resources
 
-    response = server.transfer(hapi_server, conditions)
+    response = server.transfer(hapi_server, query_result=conditions)
 
-    print(response)
-
+    pprint.pp(response.create_responses)
+    assert len(response.create_responses) == 20
     assert response.destination_server == hapi_server.api_address
 
 

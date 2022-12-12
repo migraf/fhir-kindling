@@ -1,4 +1,5 @@
 import {ResourceField} from "../resource/type";
+import {Server} from "../server/type";
 
 export enum Operators {
     eq = "eq",
@@ -43,7 +44,20 @@ export interface QueryParameters {
     has_parameters?: ReverseChainParameter[];
 }
 
-export interface QueryResponse {
+export interface ResourceResults {
     resource: string;
+    items: Object[];
+}
+
+export interface QueryInfo {
+    server: Server;
+    query_parameters: QueryParameters;
+    start_time?: Date;
+    query_string?: string;
+    end_time?: Date;
+}
+export interface QueryResponse {
+    query: QueryInfo;
+    resources: ResourceResults[];
 }
 

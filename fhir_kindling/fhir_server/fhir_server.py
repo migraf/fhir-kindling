@@ -42,7 +42,7 @@ class FhirServer:
                  auth: httpx.Auth = None,
                  headers: dict = None,
                  proxies: Union[dict, str] = None,
-                 timeout: int = 60,
+                 timeout: int = None,
                  fhir_server_type: str = "hapi"):
         """
         Initialize a FHIR server connection
@@ -57,7 +57,7 @@ class FhirServer:
             auth: optional auth object to authenticate against a server
             headers: optional additional headers to be added to the session
             proxies: optional proxies to be added to the session
-            timeout: optional timeout for the session default is 60 seconds
+            timeout: optional timeout for the session default is None
             fhir_server_type: type of fhir server (hapi, blaze, etc.)
         """
 
@@ -141,7 +141,9 @@ class FhirServer:
                 base_url=self.api_address,
                 resource=resource,
                 auth=self.auth,
-                output_format=output_format
+                output_format=output_format,
+                proxies=self._proxies,
+                headers=self._headers,
             )
         elif query_string:
             return self.raw_query(query_string, output_format)
@@ -151,7 +153,9 @@ class FhirServer:
                 base_url=self.api_address,
                 auth=self.auth,
                 query_parameters=query_parameters,
-                output_format=output_format
+                output_format=output_format,
+                proxies=self._proxies,
+                headers=self._headers,
             )
         else:
             raise ValueError("Must provide either resource, query_parameters or a query string")
@@ -177,7 +181,8 @@ class FhirServer:
                 base_url=self.api_address,
                 resource=resource,
                 auth=self.auth,
-                output_format=output_format
+                output_format=output_format,
+                proxies=self._proxies,
             )
         elif query_string:
             query_parameters = FHIRQueryParameters.from_query_string(query_string)
@@ -185,7 +190,8 @@ class FhirServer:
                 self.api_address,
                 resource=query_parameters.resource,
                 query_parameters=query_parameters,
-                output_format=output_format
+                output_format=output_format,
+                proxies=self._proxies,
             )
             return query
 
@@ -194,7 +200,8 @@ class FhirServer:
                 base_url=self.api_address,
                 auth=self.auth,
                 query_parameters=query_parameters,
-                output_format=output_format
+                output_format=output_format,
+                proxies=self._proxies,
             )
         else:
             raise ValueError("Must provide either resource, query_parameters or a query string")
@@ -215,7 +222,9 @@ class FhirServer:
             base_url=self.api_address,
             query_parameters=query_parameters,
             output_format=output_format,
-            auth=self.auth
+            auth=self.auth,
+            proxies=self._proxies,
+            headers=self._headers,
         )
         return query
 
@@ -238,7 +247,8 @@ class FhirServer:
             resource=query_parameters.resource,
             query_parameters=query_parameters,
             output_format=output_format,
-            auth=self.auth
+            auth=self.auth,
+            proxies=self._proxies,
         )
         return query
 
@@ -378,17 +388,31 @@ class FhirServer:
         response = await self._upload_resource_async(resource)
         return ResourceCreateResponse(server_response_dict=dict(response.headers), resource=resource)
 
-    def add_all(self, resources: List[Union[Resource, dict]]) -> BundleCreateResponse:
+    def add_all(self, resources: List[Union[Resource, dict]], batch_size: int = 5000) -> BundleCreateResponse:
         """
         Upload a list of resources to the server, after packaging them into a bundle
         Args:
             resources: list of resources to upload to the server, either dictionary or FHIR resource objects
+            batch_size: maximum number of resources to upload in one bundle
 
         Returns: Bundle create response from the fhir server
 
         """
-        bundle = self._make_bundle_from_resource_list(resources)
-        response = self._upload_bundle(bundle)
+        response = None
+        if len(resources) > batch_size:
+            # split the list of resources into batches of size batch_size
+            batches = [resources[i: i + batch_size] for i in range(0, len(resources), batch_size)]
+            for batch in batches:
+                if not response:
+                    bundle = self._make_bundle_from_resource_list(batch)
+                    response = self._upload_bundle(bundle)
+                else:
+                    bundle = self._make_bundle_from_resource_list(batch)
+                    add_response = self._upload_bundle(bundle)
+                    response.create_responses.extend(add_response.create_responses)
+        else:
+            bundle = self._make_bundle_from_resource_list(resources)
+            response = self._upload_bundle(bundle)
         return response
 
     async def add_all_async(self, resources: List[Union[Resource, dict]]) -> BundleCreateResponse:
@@ -523,18 +547,30 @@ class FhirServer:
 
         return r
 
-    def transfer(self, target_server: 'FhirServer', query_result: QueryResponse) -> TransferResponse:
+    def transfer(
+            self,
+            target_server: 'FhirServer',
+            query_params: FHIRQueryParameters = None,
+            query_result: QueryResponse = None
+    ) -> TransferResponse:
         """
         Transfer resources from this server to another server while using server assigned ids and keeping referential
         integrity.
         Args:
             target_server: FhirServer to transfer to
+            query_params: FHIRQueryParameters to use to find resources to transfer
             query_result: results of the initial query against the server
 
         Returns: Transfer response for the transfer of the query result to the target server
 
         """
         # get all the referenced resources missing in the list from the source server
+        if query_result and query_params:
+            raise ValueError("Cannot specify both query and query_result")
+        # if query parameters are given execute the query against the server
+        elif query_params:
+            query_result = self.query(query_parameters=query_params).all()
+        # find missing references
         missing_references = check_missing_references(query_result.resources)
         if missing_references:
             resources = self._get_missing_resources(query_result.resources)
@@ -891,10 +927,6 @@ class FhirServer:
                     parsed_resources.append(r)
                 else:
                     print(type(r))
-
-            print(graph)
-
-            print("resources", resources)
             add_response = server.add_all(parsed_resources)
             # update dependant nodes in the graph with the obtained references
             self._update_graph_references(graph, top_nodes, add_response.references)
@@ -918,6 +950,7 @@ class FhirServer:
 
         """
         for node, reference in zip(nodes, references):
+            # Get the successors of the node that was just processed
             successors = graph.successors(node)
             for successor in successors:
                 field = graph[node][successor]["field"]
