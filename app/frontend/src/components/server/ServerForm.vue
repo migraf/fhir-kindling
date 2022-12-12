@@ -65,7 +65,7 @@ async function onSubmit() {
           <label class="block text-gray-100 text-sm font-bold mb-2" for="auth-mode">
             Authentication
           </label>
-          <div class="grid grid-flow-col grid-flow-row gap-4 auto-cols-auto flex-grow justify-between">
+          <div class="flex flex-row flex-wrap flex-grow justify-between">
             <div class="items-center">
               <input
                   :checked="formState.authMode === 'basic'"
