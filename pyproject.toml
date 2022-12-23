@@ -1,0 +1,55 @@
+[tool.poetry]
+name = "fhir-kindling"
+version = "0.9.6"
+description = "Python library for working with FHIR servers and resources."
+authors = ["Michael Graf <michael.graf3110@gmail.com>"]
+readme = "README.md"
+packages = [{include = "fhir_kindling"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+"fhir.resources" = "*"
+pendulum = "*"
+tqdm = "*"
+orjson = "*"
+PyYAML = "*"
+xmltodict = "*"
+pydantic = "*"
+networkx = "*"
+httpx = "*"
+authlib = "*"
+
+[tool.poetry.group.ds.dependencies]
+pandas = "*"
+plotly = "*"
+
+
+[tool.poetry.group.app.dependencies]
+sqlmodel = "*"
+fastapi = "*"
+uvicorn = "*"
+cachetools = "*"
+types-cachetools = "*"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+coverage = "*"
+tox = "*"
+mkdocs = "*"
+mkdocs-material = "*"
+twine = "*"
+bump2version = "*"
+notebook = "*"
+jupyter = "*"
+mkdocstrings = {extras = ["python-legacy"], version = "*"}
+flake8 = "*"
+ipython = ">=7.31.1"
+pytest-asyncio = "*"
+rise = "*"
+python-dotenv = "*"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
