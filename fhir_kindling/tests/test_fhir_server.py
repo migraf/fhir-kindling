@@ -538,7 +538,7 @@ def test_transfer(fhir_server: FhirServer):
     response = server.transfer(hapi_server, query_result=conditions)
 
     pprint.pp(response.create_responses)
-    assert len(response.create_responses) == 20
+    assert len(response.create_responses) == 30
     assert response.destination_server == hapi_server.api_address
 
 
