@@ -390,7 +390,7 @@ class FHIRQuerySync(FHIRQueryBase):
     def _setup_client(self):
         headers = self.headers if self.headers else {}
         headers["Content-Type"] = "application/fhir+json"
-        client = httpx.Client(auth=self.auth, headers=headers, proxies=self.proxies)
+        client = httpx.Client(auth=self.auth, headers=headers, proxies=self.proxies, timeout=None)
         return client
 
     def _execute_query(self,
@@ -609,7 +609,7 @@ class FHIRQueryAsync(FHIRQueryBase):
     def _setup_client(self):
         headers = self.headers if self.headers else {}
         headers["Content-Type"] = "application/fhir+json"
-        self.client = httpx.AsyncClient(auth=self.auth, headers=headers)
+        self.client = httpx.AsyncClient(auth=self.auth, headers=headers, timeout=None)
 
     async def _execute_query(self,
                              page_callback: Union[
