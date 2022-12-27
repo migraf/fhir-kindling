@@ -4,8 +4,13 @@ from fhir.resources.resource import Resource
 import pandas as pd
 
 
-def plot_resource_field(resources: List[Resource], field: str, title: str = None, plot_type: str = "bar",
-                        show: bool = True) -> go.Figure:
+def plot_resource_field(
+    resources: List[Resource],
+    field: str,
+    title: str = None,
+    plot_type: str = "bar",
+    show: bool = True,
+) -> go.Figure:
     """
     Plot a field of a resource.
 
@@ -25,17 +30,11 @@ def plot_resource_field(resources: List[Resource], field: str, title: str = None
     # convert to series and get value counts
     val_counts = pd.Series(values).value_counts()
     if plot_type == "bar":
-        figure.add_trace(go.Bar(
-            x=val_counts.index,
-            y=val_counts.values,
-            name=field
-        ))
+        figure.add_trace(go.Bar(x=val_counts.index, y=val_counts.values, name=field))
     elif plot_type == "pie":
-        figure.add_trace(go.Pie(
-            labels=val_counts.index,
-            values=val_counts.values,
-            name=field
-        ))
+        figure.add_trace(
+            go.Pie(labels=val_counts.index, values=val_counts.values, name=field)
+        )
     if show:
         figure.show()
 

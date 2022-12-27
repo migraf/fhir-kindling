@@ -14,13 +14,14 @@ def server_summary_plot(server_summary: ServerSummary, show: bool = True) -> dic
         A dict containing the plotly bar plot.
     """
 
-    sorted_resources = sorted(server_summary.available_resources, key=lambda x: x.count, reverse=True)
+    sorted_resources = sorted(
+        server_summary.available_resources, key=lambda x: x.count, reverse=True
+    )
     fig = px.bar(
         x=[r.resource for r in sorted_resources],
         y=[r.count for r in sorted_resources],
-        title="Server Resource Summary"
+        title="Server Resource Summary",
     )
     if show:
         fig.show()
     return fig.to_dict()
-

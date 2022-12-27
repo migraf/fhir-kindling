@@ -13,9 +13,9 @@ def split_cord_data():
     cord_test_data = pd.read_csv("cord/A2-1.csv")
     patients_per_station = int(len(cord_test_data) / 4)
     df_1 = cord_test_data[:patients_per_station]
-    df_2 = cord_test_data[patients_per_station:2 * patients_per_station]
-    df_3 = cord_test_data[2 * patients_per_station:3 * patients_per_station]
-    df_4 = cord_test_data[3 * patients_per_station:]
+    df_2 = cord_test_data[patients_per_station : 2 * patients_per_station]
+    df_3 = cord_test_data[2 * patients_per_station : 3 * patients_per_station]
+    df_4 = cord_test_data[3 * patients_per_station :]
 
     df_1.to_csv("../examples/cord/data_station_1.csv")
     df_2.to_csv("../examples/cord/data_station_2.csv")
@@ -33,23 +33,27 @@ def upload_cord_data(csv_file, server_address):
         condition = Condition.construct()
 
         condition.clinicalStatus = CodeableConcept(
-            coding=[Coding(
-                **{
-                    "system": "http://hl7.org/fhir/condition-clinical",
-                    "code": "active",
-                    "display": "Active"
-                }
-            )]
+            coding=[
+                Coding(
+                    **{
+                        "system": "http://hl7.org/fhir/condition-clinical",
+                        "code": "active",
+                        "display": "Active",
+                    }
+                )
+            ]
         )
 
         condition.code = CodeableConcept(
-            coding=[Coding(
-                **{
-                    "system": code_system,
-                    "code": row["AngabeDiag1"],
-                    "display": row["TextDiagnose1"],
-                }
-            ).dict()]
+            coding=[
+                Coding(
+                    **{
+                        "system": code_system,
+                        "code": row["AngabeDiag1"],
+                        "display": row["TextDiagnose1"],
+                    }
+                ).dict()
+            ]
         )
         return condition
 
@@ -59,7 +63,11 @@ def upload_cord_data(csv_file, server_address):
 
     n_patients = len(condition_resource_list)
 
-    server = FhirServer(api_address=server_address, username=os.getenv("DEMO_USER"), password=os.getenv("DEMO_PW"))
+    server = FhirServer(
+        api_address=server_address,
+        username=os.getenv("DEMO_USER"),
+        password=os.getenv("DEMO_PW"),
+    )
 
     patient_generator = PatientGenerator(n=n_patients)
     patients = patient_generator.generate()
@@ -78,7 +86,7 @@ def upload_cord_data(csv_file, server_address):
     print(response)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     load_dotenv(find_dotenv())
     data_path = "../examples/cord/data_station_1.csv"
     # split_cord_data()
@@ -86,7 +94,6 @@ if __name__ == '__main__':
     server_2_address = "https://demo.personalhealthtrain.de/demo-fhir-2"
     server_3_address = "https://demo.personalhealthtrain.de/demo-fhir-3"
     server_4_address = "https://demo.personalhealthtrain.de/demo-fhir-4"
-
 
     local_server_address = "http://127.0.0.1:8080/fhir"
 

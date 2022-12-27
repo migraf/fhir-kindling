@@ -18,8 +18,7 @@ async def run_query(parameters: FHIRQueryParameters):
     query = Query(
         server=Server(api_url=server.api_address),
         query_parameters=parameters,
-        start_time=datetime.now()
-
+        start_time=datetime.now(),
     )
 
     print(parameters)
@@ -31,4 +30,6 @@ async def run_query(parameters: FHIRQueryParameters):
 
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=400, detail=f"Error running query \n {e.args[0]}")
+        raise HTTPException(
+            status_code=400, detail=f"Error running query \n {e.args[0]}"
+        )

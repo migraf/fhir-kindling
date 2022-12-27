@@ -28,12 +28,17 @@ class QueryResult(SQLModel):
 
     @classmethod
     def from_query_response(cls, query: Query, response: QueryResponse):
-        resources = [ResourceResults(resource=response.resource,
-                                     items=[r.dict(exclude_none=True) for r in response.resources])]
+        resources = [
+            ResourceResults(
+                resource=response.resource,
+                items=[r.dict(exclude_none=True) for r in response.resources],
+            )
+        ]
         for include in response.included_resources:
-            resources.append(ResourceResults(resource=include.resource_type,
-                                             items=[r.dict(exclude_none=True) for r in include.resources]))
-        return cls(
-            query=query,
-            resources=resources
-        )
+            resources.append(
+                ResourceResults(
+                    resource=include.resource_type,
+                    items=[r.dict(exclude_none=True) for r in include.resources],
+                )
+            )
+        return cls(query=query, resources=resources)

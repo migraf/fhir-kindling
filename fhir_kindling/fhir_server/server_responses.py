@@ -12,7 +12,9 @@ class CreateResponse:
     @staticmethod
     def _process_location_header(server_create_response: dict):
         # todo check for different fhir server types
-        location_header: str = server_create_response.get("Location", server_create_response.get("location"))
+        location_header: str = server_create_response.get(
+            "Location", server_create_response.get("location")
+        )
         if not location_header:
             raise ValueError("Location field not found.")
         split_location = location_header.split("/")
@@ -31,17 +33,21 @@ class ResourceCreateResponse(CreateResponse):
 
     def __init__(self, server_response_dict: dict, resource: Resource):
         self.resource = resource
-        resource_id, location, version = self._process_location_header(server_response_dict)
+        resource_id, location, version = self._process_location_header(
+            server_response_dict
+        )
         self.location = location
         self.resource_id = resource_id
         self.resource.id = resource_id
-        self.reference = Reference(**{
-            "reference": self.resource.get_resource_type() + "/" + resource_id
-        })
+        self.reference = Reference(
+            **{"reference": self.resource.get_resource_type() + "/" + resource_id}
+        )
 
     def __repr__(self):
-        return f"<{self.__class__.__name__}(resource_id={self.resource_id}, location={self.location}," \
-               f" version={self.version})>"
+        return (
+            f"<{self.__class__.__name__}(resource_id={self.resource_id}, location={self.location},"
+            f" version={self.version})>"
+        )
 
 
 class BundleCreateResponse:
@@ -63,8 +69,10 @@ class BundleCreateResponse:
         return [r.reference for r in self.create_responses]
 
     def __repr__(self):
-        return f"BundleCreateResponse(create_responses={self.create_responses[0]}...{self.create_responses[-1]}, " \
-               f"num_resources={len(self.create_responses)})"
+        return (
+            f"BundleCreateResponse(create_responses={self.create_responses[0]}...{self.create_responses[-1]}, "
+            f"num_resources={len(self.create_responses)})"
+        )
 
 
 class TransferResponse:
@@ -73,20 +81,24 @@ class TransferResponse:
     query_parameters: FHIRQueryParameters
     create_responses: List[ResourceCreateResponse]
 
-    def __init__(self,
-                 origin_server: str,
-                 destination_server: str,
-                 create_responses: List[ResourceCreateResponse],
-                 query_parameters: FHIRQueryParameters):
+    def __init__(
+        self,
+        origin_server: str,
+        destination_server: str,
+        create_responses: List[ResourceCreateResponse],
+        query_parameters: FHIRQueryParameters,
+    ):
         self.origin_server = origin_server
         self.destination_server = destination_server
         self.create_responses = create_responses
         self.query_parameters = query_parameters
 
     def __repr__(self):
-        return f"<{self.__class__.__name__}(origin_server={self.origin_server}," \
-               f" destination_server={self.destination_server}, query_parameters={self.query_parameters}," \
-               f" create_responses={self.create_responses[0]}...{self.create_responses[-1]})"
+        return (
+            f"<{self.__class__.__name__}(origin_server={self.origin_server},"
+            f" destination_server={self.destination_server}, query_parameters={self.query_parameters},"
+            f" create_responses={self.create_responses[0]}...{self.create_responses[-1]})"
+        )
 
 
 class UpdateResponse:

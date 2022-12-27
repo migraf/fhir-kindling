@@ -17,7 +17,7 @@ def extract_query_fields(resource_name: str) -> List[ResourceField]:
             name=field.name,
             type=str(field.type_),
             description=field.field_info.description,
-            title=field.field_info.title
+            title=field.field_info.title,
         )
         query_fields.append(field)
 

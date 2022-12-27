@@ -28,7 +28,11 @@ setup(
         "Programming Language :: Python :: 3.9",
     ],
     description="CRUD Operations against FHIR servers, resource validation and synthetic FHIR resource generation.",
-    entry_points={"console_scripts": ["fhir_kindling=fhir_kindling.cli.cli:main", ], },
+    entry_points={
+        "console_scripts": [
+            "fhir_kindling=fhir_kindling.cli.cli:main",
+        ],
+    },
     long_description=readme + history,
     long_description_content_type="text/markdown",
     install_requires=[
@@ -41,11 +45,9 @@ setup(
         "orjson",
         "xmltodict",
         "pydantic",
-        "networkx"
+        "networkx",
     ],
-    extras_require={
-        'csv': ["pandas"]
-    },
+    extras_require={"csv": ["pandas"]},
     package_data={
         "": ["*.txt"],
     },
@@ -57,6 +59,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/migraf/fhir-kindling",
-    version='0.9.7',
+    version="0.9.7",
     zip_safe=False,
 )

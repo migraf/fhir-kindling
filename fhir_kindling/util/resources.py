@@ -7,7 +7,9 @@ from fhir.resources import get_fhir_model_class, FHIRAbstractModel
 from fhir.resources.fhirtypes import ResourceType
 
 
-def get_resource_fields(resource: Union[Resource, ResourceType, str, Type[FHIRAbstractModel]]) -> List[ModelField]:
+def get_resource_fields(
+    resource: Union[Resource, ResourceType, str, Type[FHIRAbstractModel]]
+) -> List[ModelField]:
     """
     Get the fields of a resource.
     Args:
@@ -42,8 +44,9 @@ def valid_resource_name(resource_name: str) -> str:
 
 
 def check_resource_contains_field(
-        resource: Union[Resource, ResourceType, str, Type[FHIRAbstractModel]],
-        field_name: str):
+    resource: Union[Resource, ResourceType, str, Type[FHIRAbstractModel]],
+    field_name: str,
+):
     """
     Checks if the given resource contains the given field.
     Args:

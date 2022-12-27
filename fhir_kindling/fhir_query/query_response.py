@@ -1,12 +1,10 @@
 import pathlib
-from typing import Union, List, Dict, Optional, Callable, Any
+from typing import Union, List, Dict, Optional
 from enum import Enum
 
 import pandas as pd
-import xmltodict
 from fhir.resources.bundle import Bundle
-from fhir.resources import FHIRAbstractModel, get_fhir_model_class
-from fhir.resources.fhirresourcemodel import FHIRResourceModel
+from fhir.resources import FHIRAbstractModel
 from pydantic import BaseModel
 import httpx
 
@@ -19,6 +17,7 @@ class OutputFormats(Enum):
     """
     Enum for the output formats.
     """
+
     JSON = "json"
     XML = "xml"
     CSV = "csv"
@@ -33,6 +32,7 @@ class IncludedResources(BaseModel):
     """
     Container for resources included in the query via the _include/_revinclude parameters.
     """
+
     resource_type: str
     resources: Optional[List[FHIRAbstractModel]] = None
 
@@ -50,13 +50,14 @@ class QueryResponse:
     Response object for the results of a FHIR query executed against a FHIR server.
     """
 
-    def __init__(self,
-                 response: Union[httpx.Response, str, dict],
-                 query_params: FHIRQueryParameters,
-                 output_format: str = "json",
-                 limit: int = None,
-                 count: int = None
-                 ):
+    def __init__(
+        self,
+        response: Union[httpx.Response, str, dict],
+        query_params: FHIRQueryParameters,
+        output_format: str = "json",
+        limit: int = None,
+        count: int = None,
+    ):
 
         self.format = output_format
         self._limit = limit
@@ -113,7 +114,9 @@ class QueryResponse:
 
             included = []
             for resource_type, resources in self._included_resources.items():
-                included.append(IncludedResources(resource_type=resource_type, resources=resources))
+                included.append(
+                    IncludedResources(resource_type=resource_type, resources=resources)
+                )
             return included
 
     def save(self, file_path: Union[str, pathlib.Path], output_format: str = "json"):
@@ -149,13 +152,17 @@ class QueryResponse:
             if self.query_params.include_parameters:
                 for included_resources in self.included_resources:
                     df = flatten_resources(included_resources.resources)
-                    included__resource_path = f"{file_path.parent}/{file_path.stem}_" \
-                                              f"included_{included_resources.resource_type}.csv"
+                    included__resource_path = (
+                        f"{file_path.parent}/{file_path.stem}_"
+                        f"included_{included_resources.resource_type}.csv"
+                    )
                     df.to_csv(included__resource_path, index=False)
             df = flatten_resources(self.resources)
             df.to_csv(file_path, index=False)
 
-    def to_dfs(self, df_format: str = "list") -> Union[List[pd.DataFrame], pd.DataFrame]:
+    def to_dfs(
+        self, df_format: str = "list"
+    ) -> Union[List[pd.DataFrame], pd.DataFrame]:
         """
         Serialize the response to a list of pandas dataframes
         Args:
@@ -196,12 +203,18 @@ class QueryResponse:
             # process included resources
             elif entry.search.mode == "include":
                 # get list of included resources based on type, if it does not return empty list
-                included_resources = self._included_resources.get(entry.resource.resource_type, [])
+                included_resources = self._included_resources.get(
+                    entry.resource.resource_type, []
+                )
                 # update the list with the entry and update the included resources dict
                 included_resources.append(entry.resource)
-                self._included_resources[entry.resource.resource_type] = included_resources
+                self._included_resources[
+                    entry.resource.resource_type
+                ] = included_resources
 
-    def _process_server_response(self, response: Union[httpx.Response, str]) -> Union[Dict, Bundle, str]:
+    def _process_server_response(
+        self, response: Union[httpx.Response, str]
+    ) -> Union[Dict, Bundle, str]:
         """
         Handle the initial response from the server and resolve pagination if necessary.
         Args:
@@ -240,6 +253,8 @@ class QueryResponse:
             return f"<QueryResponse(resource={self.resource}, format=xml)>"
         if self._included_resources:
             resources = [r.resource_type for r in self.included_resources]
-            return f"<QueryResponse(resource={self.resource}, format=json, " \
-                   f"included_resources={resources})>"
+            return (
+                f"<QueryResponse(resource={self.resource}, format=json, "
+                f"included_resources={resources})>"
+            )
         return f"<QueryResponse(resource={self.resource}, n={len(self.resources)})>"

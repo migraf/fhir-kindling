@@ -16,6 +16,7 @@ import pandas as pd
 
 N = 10000
 
+
 def generate_data(server_address: str, n_patients: int, results: dict):
     patient_generator = PatientGenerator(n=n_patients)
 
@@ -48,12 +49,14 @@ def benchmark_sync(server_address: str, results: dict):
 
     # test with fhirclient
     settings = {
-        'app_id': 'blaze_app',
-        'api_base': server_address,
+        "app_id": "blaze_app",
+        "api_base": server_address,
     }
     smart_client = client.FHIRClient(settings=settings)
     get_all_start = time.time()
-    smart_response = p.Patient.where(struct={'_count': '100000'}).perform_resources(smart_client.server)
+    smart_response = p.Patient.where(struct={"_count": "100000"}).perform_resources(
+        smart_client.server
+    )
     results["smart_get_all_sync_time"] = time.time() - get_all_start
     print("smart sync: ", len(smart_response))
 
@@ -81,15 +84,42 @@ async def benchmark_fhirpy_async(server_address: str, results: dict):
 def plot_results(results: dict):
     results_df = pd.DataFrame(
         [
-            {"library": "kindling", "time": results["kindling_get_all_sync_time"], "sync": "sync"},
-            {"library": "kindling", "time": results["kindling_get_all_async_time"], "sync": "async"},
-            {"library": "fhirpy", "time": results["fhirpy_get_all_sync_time"], "sync": "sync"},
-            {"library": "fhirpy", "time": results.get("fhirpy_get_all_async_time"), "sync": "async"},
-            {"library": "smart", "time": results["smart_get_all_sync_time"], "sync": "sync"},
+            {
+                "library": "kindling",
+                "time": results["kindling_get_all_sync_time"],
+                "sync": "sync",
+            },
+            {
+                "library": "kindling",
+                "time": results["kindling_get_all_async_time"],
+                "sync": "async",
+            },
+            {
+                "library": "fhirpy",
+                "time": results["fhirpy_get_all_sync_time"],
+                "sync": "sync",
+            },
+            {
+                "library": "fhirpy",
+                "time": results.get("fhirpy_get_all_async_time"),
+                "sync": "async",
+            },
+            {
+                "library": "smart",
+                "time": results["smart_get_all_sync_time"],
+                "sync": "sync",
+            },
             {"library": "smart", "time": None, "sync": "async"},
         ]
     )
-    fig = px.bar(results_df, x="library", y="time", title="Query Patients(n=10000)", color="sync", barmode="group")
+    fig = px.bar(
+        results_df,
+        x="library",
+        y="time",
+        title="Query Patients(n=10000)",
+        color="sync",
+        barmode="group",
+    )
     fig.update_layout(
         font_family="Courier New",
         title_font_family="Times New Roman",
@@ -98,7 +128,7 @@ def plot_results(results: dict):
     fig.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     benchmark_server = "http://localhost:9090/fhir"
 
     # generate data for benchmark and measure generation and upload time

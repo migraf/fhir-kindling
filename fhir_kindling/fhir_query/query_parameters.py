@@ -11,6 +11,7 @@ class QueryOperators(str, Enum):
     """
     Enumeration of query operators.
     """
+
     eq = "eq"
     ne = "ne"
     gt = "gt"
@@ -57,7 +58,9 @@ def check_url_param_primitives(value: str) -> Union[int, float, bool, str]:
     return value
 
 
-def parse_parameter_value(url_value: str) -> Tuple[QueryOperators, Union[int, float, bool, str, list]]:
+def parse_parameter_value(
+    url_value: str,
+) -> Tuple[QueryOperators, Union[int, float, bool, str, list]]:
     """
     Parse a query parameter value for operators and value types
 
@@ -122,7 +125,9 @@ class QuerySearchParameter(QueryParameter, ABC):
                     raise ValueError(f"Invalid value type: {type(item)}")
         else:
             if values.get("operator") in [QueryOperators.in_, QueryOperators.not_in]:
-                raise ValueError("The 'in' and 'not_in' operators can only be used with a list value.")
+                raise ValueError(
+                    "The 'in' and 'not_in' operators can only be used with a list value."
+                )
 
         return v
 
@@ -157,7 +162,9 @@ class IncludeParameter(QueryParameter):
 
         iterate = ":iterate" if self.iterate else ""
         target = f":{self.target}" if self.target else ""
-        url_param = f"{query_param}{iterate}={self.resource}:{self.search_param}{target}"
+        url_param = (
+            f"{query_param}{iterate}={self.resource}:{self.search_param}{target}"
+        )
         return url_param
 
     @classmethod
@@ -169,7 +176,8 @@ class IncludeParameter(QueryParameter):
             iterate = split_field[1] == "iterate"
             if not iterate:
                 raise ValueError(
-                    f"Invalid include iterate parameter in: {url_string}\n\t {field} must contain ':iterate'")
+                    f"Invalid include iterate parameter in: {url_string}\n\t {field} must contain ':iterate'"
+                )
         else:
             reverse = split_field[0] == "_revinclude"
             iterate = False
@@ -181,15 +189,17 @@ class IncludeParameter(QueryParameter):
         elif len(param_fields) == 3:
             resource, search_param, target = param_fields
         else:
-            raise ValueError(f"Too many fields in include parameter: {url_string} - "
-                             f"<resource>:<search_param> or <resource>:<search_param>:<target>")
+            raise ValueError(
+                f"Too many fields in include parameter: {url_string} - "
+                f"<resource>:<search_param> or <resource>:<search_param>:<target>"
+            )
 
         return cls(
             resource=resource,
             search_param=search_param,
             target=target,
             iterate=iterate,
-            reverse=reverse
+            reverse=reverse,
         )
 
 
@@ -198,6 +208,7 @@ class ReverseChainParameter(QuerySearchParameter):
     Class to represent reverse chain parameters in a fhir query for querying resources based on properties of other
     resources that refer to them.
     """
+
     resource: str
     reference_param: str
     search_param: str
@@ -225,7 +236,7 @@ class ReverseChainParameter(QuerySearchParameter):
             reference_param=reference_param,
             search_param=search_param,
             operator=operator,
-            value=value
+            value=value,
         )
 
 
@@ -233,6 +244,7 @@ class FieldParameter(QuerySearchParameter):
     """
     The Field Query Parameter class.
     """
+
     field: str
 
     class Config:
@@ -249,17 +261,14 @@ class FieldParameter(QuerySearchParameter):
     def from_url_param(cls, url_string: str) -> "FieldParameter":
         field, param = url_string.split("=")
         operator, value = parse_parameter_value(url_value=param)
-        return FieldParameter(
-            field=field,
-            operator=operator,
-            value=value
-        )
+        return FieldParameter(field=field, operator=operator, value=value)
 
 
 class FHIRQueryParameters(BaseModel):
     """
     Collection of query parameters for a fhir query.
     """
+
     resource: str
     resource_parameters: Optional[List[FieldParameter]] = None
     include_parameters: Optional[List[IncludeParameter]] = None
@@ -279,19 +288,25 @@ class FHIRQueryParameters(BaseModel):
         """
         query_string = f"/{self.resource}?"
         if self.resource_parameters:
-            resource_url_params = "&".join([param.to_url_param() for param in self.resource_parameters])
+            resource_url_params = "&".join(
+                [param.to_url_param() for param in self.resource_parameters]
+            )
             query_string += resource_url_params
         # include parameters
         if self.include_parameters:
             if self.resource_parameters:
                 query_string += "&"
-            include_url_params = "&".join([param.to_url_param() for param in self.include_parameters])
+            include_url_params = "&".join(
+                [param.to_url_param() for param in self.include_parameters]
+            )
             query_string += include_url_params
         # reverse chain parameters
         if self.has_parameters:
             if self.resource_parameters or self.include_parameters:
                 query_string += "&"
-            has_url_params = "&".join([param.to_url_param() for param in self.has_parameters])
+            has_url_params = "&".join(
+                [param.to_url_param() for param in self.has_parameters]
+            )
             query_string += has_url_params
 
         return query_string
@@ -332,5 +347,5 @@ class FHIRQueryParameters(BaseModel):
             resource=resource,
             resource_parameters=resource_parameters,
             include_parameters=include_parameters,
-            has_parameters=has_parameters
+            has_parameters=has_parameters,
         )

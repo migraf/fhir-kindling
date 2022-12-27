@@ -10,8 +10,14 @@ from fhir.resources.patient import Patient
 from fhir.resources.reference import Reference
 
 from fhir_kindling import FhirServer
-from fhir_kindling.generators import DatasetGenerator, GeneratorParameters, FieldValue, ResourceGenerator, \
-    PatientGenerator, FieldGenerator
+from fhir_kindling.generators import (
+    DatasetGenerator,
+    GeneratorParameters,
+    FieldValue,
+    ResourceGenerator,
+    PatientGenerator,
+    FieldGenerator,
+)
 
 
 def prefill():
@@ -37,15 +43,9 @@ def prefill():
     print(f"generating upload bundle for patients")
     for i, patient in enumerate(patients):
 
-        request = BundleEntryRequest(
-            method="POST",
-            url="/Patient"
-        )
+        request = BundleEntryRequest(method="POST", url="/Patient")
 
-        entry = BundleEntry(
-            request=request,
-            resource=patient
-        )
+        entry = BundleEntry(request=request, resource=patient)
         upload_bundle.entry.append(entry)
     upload_bundle = upload_bundle.validate(upload_bundle)
     json_dict = orjson.loads(upload_bundle.json(exclude_none=True))
@@ -59,18 +59,11 @@ def prefill():
         reference = "/".join(entry["response"]["location"].split("/")[-4:-2])
         print(f"reference: {reference}")
         covid_condition = Condition(
-            code=COVID_CODE,
-            subject=Reference(reference=reference)
+            code=COVID_CODE, subject=Reference(reference=reference)
         )
-        request = BundleEntryRequest(
-            method="POST",
-            url="/Condition"
-        )
+        request = BundleEntryRequest(method="POST", url="/Condition")
 
-        entry = BundleEntry(
-            request=request,
-            resource=covid_condition
-        )
+        entry = BundleEntry(request=request, resource=covid_condition)
         condition_entries.append(entry)
 
     upload_bundle.entry = condition_entries
@@ -93,11 +86,11 @@ COVID_CODE = CodeableConcept(
         Coding(
             system="http://id.who.int/icd/release/11/mms",
             code="RA01.0",
-            display="COVID-19, virus identified"
+            display="COVID-19, virus identified",
         )
     ],
-    text="COVID-19"
+    text="COVID-19",
 )
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     prefill()

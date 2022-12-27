@@ -5,10 +5,10 @@ from pandas.api.types import is_numeric_dtype, is_string_dtype, is_categorical_d
 
 
 def is_k_anonymized(
-        df: pd.DataFrame,
-        k: int = 3,
-        id_cols: List[str] = None,
-        excluded_cols: List[str] = None,
+    df: pd.DataFrame,
+    k: int = 3,
+    id_cols: List[str] = None,
+    excluded_cols: List[str] = None,
 ) -> bool:
     """
 
@@ -21,7 +21,9 @@ def is_k_anonymized(
     """
 
     for index, row in df.iterrows():
-        query = _make_k_anon_query_for_row(row, df, excluded_cols=excluded_cols, id_cols=id_cols)
+        query = _make_k_anon_query_for_row(
+            row, df, excluded_cols=excluded_cols, id_cols=id_cols
+        )
         rows = df.query(query)
         if rows.shape[0] < k:
             return False
@@ -64,8 +66,12 @@ def anonymize(df: pd.DataFrame, k: int = 3, id_cols: List[str] = None) -> pd.Dat
         print("More generalization required")
 
 
-def _make_k_anon_query_for_row(row: pd.Series, df: pd.DataFrame, excluded_cols: List[str] = None,
-                               id_cols: List[str] = None) -> str:
+def _make_k_anon_query_for_row(
+    row: pd.Series,
+    df: pd.DataFrame,
+    excluded_cols: List[str] = None,
+    id_cols: List[str] = None,
+) -> str:
     """
     Creates a query string for a given row of a dataframe to check if there are enough rows in the dataframe to satisfy
     k-anonymity
@@ -88,7 +94,7 @@ def _make_k_anon_query_for_row(row: pd.Series, df: pd.DataFrame, excluded_cols: 
             query_cols.append(f"{col} == {row[col]}")
         else:
             query_cols.append(f"{col} == '{row[col]}'")
-    query = ' & '.join(query_cols)
+    query = " & ".join(query_cols)
 
     return query
 
@@ -101,9 +107,9 @@ def generalize_datetime_column(date_col: pd.Series, level: int = 2):
     col = pd.to_datetime(date_col)
 
     if level == 2:
-        generalized_col = col.apply(lambda x: x.strftime('m-%Y'))
+        generalized_col = col.apply(lambda x: x.strftime("m-%Y"))
         return pd.to_datetime(generalized_col)
 
     elif level == 3:
-        generalized_col = col.apply(lambda x: x.strftime('%Y'))
+        generalized_col = col.apply(lambda x: x.strftime("%Y"))
         return pd.to_datetime(generalized_col)

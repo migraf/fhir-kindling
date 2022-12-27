@@ -32,7 +32,7 @@ class Store:
                 api_address=self._server.api_url,
                 username=self._server.credentials.username,
                 password=self._server.credentials.password,
-                token=self._server.credentials.token
+                token=self._server.credentials.token,
             )
         else:
             raise ValueError("Server not set")

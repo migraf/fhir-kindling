@@ -19,8 +19,12 @@ def load_environment_auth_vars() -> tuple:
     return username, password, token
 
 
-def generate_auth(username: str = None, password: str = None, token: str = None,
-                  load_env: bool = False) -> httpx.Auth:
+def generate_auth(
+    username: str = None,
+    password: str = None,
+    token: str = None,
+    load_env: bool = False,
+) -> httpx.Auth:
     """Generate authentication for the request to be sent to server. Either based on a given bearer token or using basic
     auth with username and password.
 
@@ -36,14 +40,18 @@ def generate_auth(username: str = None, password: str = None, token: str = None,
     if (not username and not password) and not token:
 
         if load_env:
-            print("No authentication given. Attempting authentication via environment variables")
+            print(
+                "No authentication given. Attempting authentication via environment variables"
+            )
             username, password, token = load_environment_auth_vars()
 
         if (not username and not password) and not token:
             raise ValueError("No authentication information given.")
 
     if (username and password) and token:
-        raise ValueError("Conflicting authentication information both token and username:password set.")
+        raise ValueError(
+            "Conflicting authentication information both token and username:password set."
+        )
 
     if username and not password:
         raise ValueError(f"Missing password for user: {username}")
@@ -68,11 +76,17 @@ def auth_info_from_env() -> Union[str, Tuple[str, str], Tuple[str, str, str]]:
     oidc_provider_url = os.getenv("OIDC_PROVIDER_URL")
 
     if username and token:
-        raise EnvironmentError("Conflicting auth information, bother username and token present.")
+        raise EnvironmentError(
+            "Conflicting auth information, bother username and token present."
+        )
     if username and client_id:
-        raise EnvironmentError("Conflicting auth information, bother username and client id present")
+        raise EnvironmentError(
+            "Conflicting auth information, bother username and client id present"
+        )
     if token and client_id:
-        raise EnvironmentError("Conflicting auth information, bother static token and client id present")
+        raise EnvironmentError(
+            "Conflicting auth information, bother static token and client id present"
+        )
 
     if username:
         password = os.getenv("FHIR_PW")
@@ -86,13 +100,19 @@ def auth_info_from_env() -> Union[str, Tuple[str, str], Tuple[str, str, str]]:
         return token
 
     if client_id and not client_secret:
-        raise EnvironmentError("Insufficient auth information, client id specified but no client secret found.")
+        raise EnvironmentError(
+            "Insufficient auth information, client id specified but no client secret found."
+        )
 
     if (client_id and client_secret) and not oidc_provider_url:
-        raise EnvironmentError("Insufficient auth information, client id and secret "
-                               "specified but no provider URL found")
+        raise EnvironmentError(
+            "Insufficient auth information, client id and secret "
+            "specified but no provider URL found"
+        )
     if client_id and client_secret and oidc_provider_url:
-        print(f"Found OIDC auth configuration for client <{client_id}> with provider {oidc_provider_url}")
+        print(
+            f"Found OIDC auth configuration for client <{client_id}> with provider {oidc_provider_url}"
+        )
         return client_id, client_secret, oidc_provider_url
 
 
@@ -101,5 +121,5 @@ class BearerAuth(httpx.Auth):
         self.token = token
 
     def auth_flow(self, request):
-        request.headers['Authorization'] = f"Bearer {self.token}"
+        request.headers["Authorization"] = f"Bearer {self.token}"
         yield request

@@ -11,8 +11,14 @@ from fhir.resources.patient import Patient
 from pydantic import ValidationError
 
 from fhir_kindling import FhirServer
-from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters, IncludeParameter, FieldParameter, \
-    ReverseChainParameter, QueryOperators, QueryParameter
+from fhir_kindling.fhir_query.query_parameters import (
+    FHIRQueryParameters,
+    IncludeParameter,
+    FieldParameter,
+    ReverseChainParameter,
+    QueryOperators,
+    QueryParameter,
+)
 
 
 @pytest.fixture
@@ -31,7 +37,7 @@ def server(api_url):
         api_address=api_url,
         client_id=os.getenv("CLIENT_ID"),
         client_secret=os.getenv("CLIENT_SECRET"),
-        oidc_provider_url=os.getenv("OIDC_PROVIDER_URL")
+        oidc_provider_url=os.getenv("OIDC_PROVIDER_URL"),
     )
     return server
 
@@ -1124,70 +1130,44 @@ def test_query_param_abstract():
 def test_field_query_param():
     resource = "Patient"
     field_param = FieldParameter(
-        **dict(
-            field="active",
-            value=True,
-            operator=QueryOperators.eq
-        )
+        **dict(field="active", value=True, operator=QueryOperators.eq)
     )
 
     assert field_param.to_url_param() == "active=true"
 
     field_param = FieldParameter(
-        **dict(
-            field="active",
-            value=["hello", "world"],
-            operator=QueryOperators.in_
-        )
+        **dict(field="active", value=["hello", "world"], operator=QueryOperators.in_)
     )
 
     assert field_param.to_url_param() == "active=hello,world"
 
     value = 7.3213
     field_param = FieldParameter(
-        **dict(
-            field="active",
-            value=value,
-            operator=QueryOperators.gt
-        )
+        **dict(field="active", value=value, operator=QueryOperators.gt)
     )
     assert field_param.to_url_param() == f"active=gt{value}"
 
     # list value arg without in operator should fail
     with pytest.raises(ValidationError):
         field_param = FieldParameter(
-            **dict(
-                field="active",
-                value=["hello", "world"],
-                operator=QueryOperators.eq
-            )
+            **dict(field="active", value=["hello", "world"], operator=QueryOperators.eq)
         )
 
     # in operator only for list value arg
     with pytest.raises(ValidationError):
         field_param = FieldParameter(
-            **dict(
-                field="active",
-                value="hello",
-                operator=QueryOperators.in_
-            )
+            **dict(field="active", value="hello", operator=QueryOperators.in_)
         )
     with pytest.raises(ValidationError):
         field_param = FieldParameter(
             **dict(
-                field="active",
-                value=[32, "sdsa".encode()],
-                operator=QueryOperators.in_
+                field="active", value=[32, "sdsa".encode()], operator=QueryOperators.in_
             )
         )
 
     # operator not included in enum
     with pytest.raises(ValidationError):
-        field_param = FieldParameter(
-            field="active",
-            operator="hello",
-            value=True
-        )
+        field_param = FieldParameter(field="active", operator="hello", value=True)
 
     # parameter generation from url snippet
 
@@ -1241,20 +1221,20 @@ def test_include_query_param():
 
     # with target
     include_param = IncludeParameter(
-        resource=resource,
-        search_param=search_param,
-        target=target
+        resource=resource, search_param=search_param, target=target
     )
-    assert include_param.to_url_param() == f"_include={resource}:{search_param}:{target}"
+    assert (
+        include_param.to_url_param() == f"_include={resource}:{search_param}:{target}"
+    )
 
     # reverse include
     include_param = IncludeParameter(
-        resource=resource,
-        search_param=search_param,
-        target=target,
-        reverse=True
+        resource=resource, search_param=search_param, target=target, reverse=True
     )
-    assert include_param.to_url_param() == f"_revinclude={resource}:{search_param}:{target}"
+    assert (
+        include_param.to_url_param()
+        == f"_revinclude={resource}:{search_param}:{target}"
+    )
 
     # include with iterate & target
     include_param = IncludeParameter(
@@ -1264,36 +1244,51 @@ def test_include_query_param():
         iterate=True,
     )
 
-    assert include_param.to_url_param() == f"_include:iterate={resource}:{search_param}:{target}"
+    assert (
+        include_param.to_url_param()
+        == f"_include:iterate={resource}:{search_param}:{target}"
+    )
 
     # parse from url snippet
 
-    include_param = IncludeParameter.from_url_param(f"_include={resource}:{search_param}")
+    include_param = IncludeParameter.from_url_param(
+        f"_include={resource}:{search_param}"
+    )
     assert include_param.resource == resource
     assert include_param.search_param == search_param
 
-    include_param = IncludeParameter.from_url_param(f"_include={resource}:{search_param}:{target}")
+    include_param = IncludeParameter.from_url_param(
+        f"_include={resource}:{search_param}:{target}"
+    )
     assert include_param.resource == resource
     assert include_param.search_param == search_param
     assert include_param.target == target
 
-    include_param = IncludeParameter.from_url_param(f"_revinclude={resource}:{search_param}:{target}")
+    include_param = IncludeParameter.from_url_param(
+        f"_revinclude={resource}:{search_param}:{target}"
+    )
     assert include_param.resource == resource
     assert include_param.search_param == search_param
     assert include_param.target == target
     assert include_param.reverse is True
 
-    include_param = IncludeParameter.from_url_param(f"_include:iterate={resource}:{search_param}:{target}")
+    include_param = IncludeParameter.from_url_param(
+        f"_include:iterate={resource}:{search_param}:{target}"
+    )
     assert include_param.resource == resource
     assert include_param.search_param == search_param
     assert include_param.target == target
     assert include_param.iterate is True
 
     with pytest.raises(ValueError):
-        include_param = IncludeParameter.from_url_param(f"_include:iterates={resource}:{search_param}:{target}")
+        include_param = IncludeParameter.from_url_param(
+            f"_include:iterates={resource}:{search_param}:{target}"
+        )
 
     with pytest.raises(ValueError):
-        include_param = IncludeParameter.from_url_param(f"_include:iterates={resource}:{search_param}:{target}:error")
+        include_param = IncludeParameter.from_url_param(
+            f"_include:iterates={resource}:{search_param}:{target}:error"
+        )
 
 
 def test_reverse_chain_parameters():
@@ -1307,7 +1302,7 @@ def test_reverse_chain_parameters():
         reference_param=reference_param,
         search_param=search_param,
         operator=QueryOperators.eq,
-        value=value
+        value=value,
     )
 
     assert chain_param.to_url_param() == query_url
@@ -1323,23 +1318,21 @@ def test_reverse_chain_parameters():
 
 
 def test_fhir_query_parameters():
-    query_params = FHIRQueryParameters(
-        resource="Condition"
-    )
+    query_params = FHIRQueryParameters(resource="Condition")
     assert query_params.to_query_string() == "/Condition?"
 
     # invalid resource name
     with pytest.raises(ValidationError):
-        query_params = FHIRQueryParameters(
-            resource="Conditionkdjsaldj"
-        )
+        query_params = FHIRQueryParameters(resource="Conditionkdjsaldj")
 
     url = "/Patient?"
     query_params = FHIRQueryParameters.from_query_string(url)
 
     assert query_params.resource == "Patient"
 
-    query_url = "/Condition?code=test&_include=Condition:patient&_has:Patient:subject:age=gt:18"
+    query_url = (
+        "/Condition?code=test&_include=Condition:patient&_has:Patient:subject:age=gt:18"
+    )
     query_params = FHIRQueryParameters.from_query_string(query_url)
 
     assert query_params.to_query_string() == query_url
@@ -1392,10 +1385,14 @@ def test_query_limit(server):
 
 def test_query_with_callback(server):
     print("callback1")
-    result = server.query("Patient").all(page_callback=lambda: print("callback"), count=50)
+    result = server.query("Patient").all(
+        page_callback=lambda: print("callback"), count=50
+    )
 
     print("callback2")
-    result = server.query("Patient").all(page_callback=lambda x: print(len(x)), count=20)
+    result = server.query("Patient").all(
+        page_callback=lambda x: print(len(x)), count=20
+    )
 
     print("callback3")
     with pytest.raises(ValueError):
@@ -1441,17 +1438,9 @@ def test_query_where(server):
 
     assert query.resource.resource_type == query_resource
 
-    param = FieldParameter(
-        field="name",
-        operator=QueryOperators.eq,
-        value="test"
-    )
+    param = FieldParameter(field="name", operator=QueryOperators.eq, value="test")
 
-    param_dict = dict(
-        field="name",
-        operator="gt",
-        value="test"
-    )
+    param_dict = dict(field="name", operator="gt", value="test")
 
     query = query.where(field_param=param)
 
@@ -1489,20 +1478,14 @@ def test_query_where(server):
         query = query.where(field="name", value="test")
 
     with pytest.raises(ValidationError):
-        param_dict = dict(
-            field="name",
-            operator="fails",
-            value="test"
-        )
+        param_dict = dict(field="name", operator="fails", value="test")
         query = query.where(filter_dict=param_dict)
 
     print(query.query_url)
 
     # execute a valid query
     valid_query_param = FieldParameter(
-        field="birthdate",
-        operator=QueryOperators.gt,
-        value="1930-01-01"
+        field="birthdate", operator=QueryOperators.gt, value="1930-01-01"
     )
     query = server.query("Patient")
     query = query.where(field_param=valid_query_param)
@@ -1533,7 +1516,7 @@ def test_query_include(server, api_url):
         resource=query_resource,
         search_param=search_param,
         target="criteria",
-        reverse=True
+        reverse=True,
     )
 
     query = query.include(include_param=include_param)
@@ -1545,7 +1528,7 @@ def test_query_include(server, api_url):
         resource=query_resource,
         search_param=search_param,
         target="hello",
-        reverse=False
+        reverse=False,
     )
 
     query = query.include(include_dict=include_dict)
@@ -1571,8 +1554,13 @@ def test_query_reverse_chain(server, api_url):
 
     query = server.query("Patient")
 
-    query = query.has(resource=has_resource, reference_param=reference_param, search_param=search_param,
-                      operator=operator, value=value)
+    query = query.has(
+        resource=has_resource,
+        reference_param=reference_param,
+        search_param=search_param,
+        operator=operator,
+        value=value,
+    )
 
     assert query
 
@@ -1581,7 +1569,7 @@ def test_query_reverse_chain(server, api_url):
         reference_param=reference_param,
         search_param=search_param,
         operator=operator,
-        value=7
+        value=7,
     )
 
     has_param_dict = dict(
@@ -1589,7 +1577,7 @@ def test_query_reverse_chain(server, api_url):
         reference_param=reference_param,
         search_param=search_param,
         operator=QueryOperators.in_,
-        value=["test1", "test2"]
+        value=["test1", "test2"],
     )
 
     query = query.has(has_param=has_param)
@@ -1667,7 +1655,9 @@ def test_query_response_save(server):
         response.save(xml_file, output_format="json")
 
     assert os.path.isfile(xml_file)
-    assert xmltodict.parse(open(xml_file, "r").read()) == xmltodict.parse(response.response)
+    assert xmltodict.parse(open(xml_file, "r").read()) == xmltodict.parse(
+        response.response
+    )
 
     os.remove(xml_file)
 

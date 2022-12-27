@@ -35,7 +35,9 @@ class FieldGenerator(BaseModel):
     def generate(self):
         if self.choices:
             if self.choice_probabilities:
-                return random.choices(self.choices, weights=self.choice_probabilities, k=1)[0]
+                return random.choices(
+                    self.choices, weights=self.choice_probabilities, k=1
+                )[0]
             else:
                 return random.choice(self.choices)
         else:

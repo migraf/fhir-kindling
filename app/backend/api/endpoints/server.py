@@ -22,5 +22,7 @@ def set_server_info(server: Server):
         assert conn.capabilities
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=400, detail=f"Error connecting to th server \n {e.args[0]}")
+        raise HTTPException(
+            status_code=400, detail=f"Error connecting to th server \n {e.args[0]}"
+        )
     return server

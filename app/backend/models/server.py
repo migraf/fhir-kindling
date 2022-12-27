@@ -10,8 +10,14 @@ class ServerCredentials(SQLModel):
 
     @root_validator
     def validate_credentials(cls, values):
-        if values["username"] is None and values["password"] is None and values["token"] is None:
-            raise ValueError("At least one of username, password or token must be provided")
+        if (
+            values["username"] is None
+            and values["password"] is None
+            and values["token"] is None
+        ):
+            raise ValueError(
+                "At least one of username, password or token must be provided"
+            )
         return values
 
 

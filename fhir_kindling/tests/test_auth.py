@@ -1,5 +1,9 @@
 import pytest
-from fhir_kindling.fhir_server.auth import generate_auth, load_environment_auth_vars, BearerAuth
+from fhir_kindling.fhir_server.auth import (
+    generate_auth,
+    load_environment_auth_vars,
+    BearerAuth,
+)
 from httpx import Auth
 from unittest import mock
 import os
@@ -25,7 +29,9 @@ def test_generate_auth():
         generate_auth(username="test")
 
 
-@mock.patch.dict(os.environ, {"FHIR_USER": "test", "FHIR_PW": "password", "FHIR_TOKEN": "fhir-token"})
+@mock.patch.dict(
+    os.environ, {"FHIR_USER": "test", "FHIR_PW": "password", "FHIR_TOKEN": "fhir-token"}
+)
 def test_load_env_var_auth():
     username, password, token = load_environment_auth_vars()
 
@@ -34,7 +40,9 @@ def test_load_env_var_auth():
     assert token == "fhir-token"
 
 
-@mock.patch.dict(os.environ, {"FHIR_USER": "test", "FHIR_PW": "password", "FHIR_TOKEN": "fhir-token"})
+@mock.patch.dict(
+    os.environ, {"FHIR_USER": "test", "FHIR_PW": "password", "FHIR_TOKEN": "fhir-token"}
+)
 def test_env_var_conflicts():
     with pytest.raises(ValueError):
         generate_auth(load_env=True)

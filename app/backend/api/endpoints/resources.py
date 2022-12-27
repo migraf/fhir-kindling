@@ -24,7 +24,6 @@ def get_resource_fields(resource_name: str):
         raise HTTPException(status_code=400, detail=e.args[0])
 
     fields = ResourceFields(
-        resource=resource_name,
-        fields=extract_query_fields(resource_name)
+        resource=resource_name, fields=extract_query_fields(resource_name)
     )
     return fields

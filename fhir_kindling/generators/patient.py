@@ -1,6 +1,5 @@
 from uuid import uuid4
 from typing import Tuple, List
-from pathlib import Path
 
 import pendulum
 import pandas as pd
@@ -14,12 +13,14 @@ from fhir_kindling.generators.names import FIRST_NAMES, LAST_NAMES
 
 
 class PatientGenerator:
-    def __init__(self,
-                 n: int,
-                 age_range: Tuple[int, int] = None,
-                 gender_distribution: Tuple[float, float, float, float] = None,
-                 organisation: Reference = None,
-                 generate_ids: bool = False):
+    def __init__(
+        self,
+        n: int,
+        age_range: Tuple[int, int] = None,
+        gender_distribution: Tuple[float, float, float, float] = None,
+        organisation: Reference = None,
+        generate_ids: bool = False,
+    ):
         self.resource_type = Patient
         self.n = n
         self.age_range = age_range
@@ -53,16 +54,16 @@ class PatientGenerator:
         first_name, last_name = name
         gender = random.choices(
             ["male", "female", "other", "unknown"],
-            weights=self.gender_distribution if self.gender_distribution else [0.45, 0.45, 0.1, 0.0], k=1)[0]
+            weights=self.gender_distribution
+            if self.gender_distribution
+            else [0.45, 0.45, 0.1, 0.0],
+            k=1,
+        )[0]
 
         name = HumanName(**{"family": last_name, "given": [first_name]})
 
         birthdate = self._generate_birthdate()
-        patient_dict = {
-            "gender": gender,
-            "name": [name],
-            "birthDate": birthdate
-        }
+        patient_dict = {"gender": gender, "name": [name], "birthDate": birthdate}
         if self.organisation:
             patient_dict["managingOrganization"] = self.organisation
 
@@ -86,25 +87,45 @@ class PatientGenerator:
                 if isinstance(self.age_range[0], int):
                     # generate age range from 18-101 years old
                     now = pendulum.now()
-                    youngest = pd.to_datetime((now - pendulum.duration(years=self.age_range[0])).to_date_string())
-                    oldest = pd.to_datetime((now - pendulum.duration(years=self.age_range[1])).to_date_string())
+                    youngest = pd.to_datetime(
+                        (
+                            now - pendulum.duration(years=self.age_range[0])
+                        ).to_date_string()
+                    )
+                    oldest = pd.to_datetime(
+                        (
+                            now - pendulum.duration(years=self.age_range[1])
+                        ).to_date_string()
+                    )
                 else:
-                    raise ValueError(f"Unsupported type ({type(self.age_range[0])}) for generating patient ages."
-                                     f"Only integers are supported.")
+                    raise ValueError(
+                        f"Unsupported type ({type(self.age_range[0])}) for generating patient ages."
+                        f"Only integers are supported."
+                    )
             else:
                 # generate age range from 18-101 years old
                 now = pendulum.now()
-                youngest = pd.to_datetime((now - pendulum.duration(years=18)).to_date_string())
-                oldest = pd.to_datetime((now - pendulum.duration(years=101)).to_date_string())
+                youngest = pd.to_datetime(
+                    (now - pendulum.duration(years=18)).to_date_string()
+                )
+                oldest = pd.to_datetime(
+                    (now - pendulum.duration(years=101)).to_date_string()
+                )
 
-            self._birthdate_range = pd.date_range(oldest, youngest, freq="D").strftime('%Y-%m-%d').tolist()
+            self._birthdate_range = (
+                pd.date_range(oldest, youngest, freq="D").strftime("%Y-%m-%d").tolist()
+            )
 
         birthdate = random.choice(self._birthdate_range)
         return birthdate
 
     def _generate_references(self) -> List[Reference]:
-        return [Reference(reference=f"Patient/{patient.id}") for patient in self.resources]
+        return [
+            Reference(reference=f"Patient/{patient.id}") for patient in self.resources
+        ]
 
     def __repr__(self):
-        return f"<PatientGenerator(n={self.n}, age_range={self.age_range}, " \
-               f"gender_distribution={self.gender_distribution}>"
+        return (
+            f"<PatientGenerator(n={self.n}, age_range={self.age_range}, "
+            f"gender_distribution={self.gender_distribution}>"
+        )

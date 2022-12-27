@@ -5,7 +5,11 @@ from dotenv import load_dotenv, find_dotenv
 from pydantic import ValidationError
 
 from fhir_kindling import FhirServer
-from fhir_kindling.generators.resource_generator import ResourceGenerator, GeneratorParameters, FieldValue
+from fhir_kindling.generators.resource_generator import (
+    ResourceGenerator,
+    GeneratorParameters,
+    FieldValue,
+)
 from fhir.resources.condition import Condition
 from fhir.resources.patient import Patient
 from fhir.resources.organization import Organization
@@ -39,7 +43,7 @@ def server(api_url):
         api_address=api_url,
         client_id=os.getenv("CLIENT_ID"),
         client_secret=os.getenv("CLIENT_SECRET"),
-        oidc_provider_url=os.getenv("OIDC_PROVIDER_URL")
+        oidc_provider_url=os.getenv("OIDC_PROVIDER_URL"),
     )
     return server
 
@@ -51,10 +55,10 @@ def covid_code():
             Coding(
                 system="http://id.who.int/icd/release/11/mms",
                 code="RA01.0",
-                display="COVID-19, virus identified"
+                display="COVID-19, virus identified",
             )
         ],
-        text="COVID-19"
+        text="COVID-19",
     )
     return covid_code
 
@@ -66,10 +70,10 @@ def vaccination_code():
             Coding(
                 system="http://id.who.int/icd/release/11/mms",
                 code="XM0GQ8",
-                display="COVID-19 vaccine, RNA based"
+                display="COVID-19 vaccine, RNA based",
             )
         ],
-        text="COVID vaccination"
+        text="COVID vaccination",
     )
     return covid_code
 
@@ -87,9 +91,11 @@ def covid_params(covid_code):
         field_generators=[
             FieldGenerator(
                 field="subject",
-                generator_function=lambda: {"reference": f"Patient/{next(patient_ids)}"}
+                generator_function=lambda: {
+                    "reference": f"Patient/{next(patient_ids)}"
+                },
             )
-        ]
+        ],
     )
 
     return params, patients, patient_ids
@@ -100,7 +106,6 @@ def test_patient_generator():
     patients = patient_generator.generate()
     assert len(patients) == 100
     assert isinstance(patients[0], Patient)
-
 
     generator = PatientGenerator(n=10, age_range=(18, 60))
     patients = generator.generate()
@@ -115,7 +120,9 @@ def test_patient_generator():
         reference="Organization/1",
     )
 
-    generator = PatientGenerator(n=10, age_range=(18, 60), organisation=organization_reference)
+    generator = PatientGenerator(
+        n=10, age_range=(18, 60), organisation=organization_reference
+    )
 
     print(generator)
     patients = generator.generate()
@@ -123,19 +130,32 @@ def test_patient_generator():
 
 
 def test_generator_field_parameters():
-    params = FieldGenerator(field="birthdate", choices=["2018-01-01", "2018-01-02"],
-                            choice_probabilities=[0.5, 0.5])
+    params = FieldGenerator(
+        field="birthdate",
+        choices=["2018-01-01", "2018-01-02"],
+        choice_probabilities=[0.5, 0.5],
+    )
     with pytest.raises(ValidationError):
-        params = FieldGenerator(field="birthdate", choices=["2018-01-01", "2018-01-02"],
-                                choice_probabilities=[0.5, 0.3, 0.2])
+        params = FieldGenerator(
+            field="birthdate",
+            choices=["2018-01-01", "2018-01-02"],
+            choice_probabilities=[0.5, 0.3, 0.2],
+        )
 
     with pytest.raises(ValidationError):
-        params = FieldGenerator(field="birthdate", choices=["2018-01-01", "2018-01-02"],
-                                choice_probabilities=[0.5, 0.6])
+        params = FieldGenerator(
+            field="birthdate",
+            choices=["2018-01-01", "2018-01-02"],
+            choice_probabilities=[0.5, 0.6],
+        )
 
     with pytest.raises(ValidationError):
-        params = FieldGenerator(field="birthdate", choices=["2018-01-01", "2018-01-02"],
-                                choice_probabilities=[0.5, 0.5], generator_function=lambda x: "2018-01-01")
+        params = FieldGenerator(
+            field="birthdate",
+            choices=["2018-01-01", "2018-01-02"],
+            choice_probabilities=[0.5, 0.5],
+            generator_function=lambda x: "2018-01-01",
+        )
 
     with pytest.raises(ValidationError):
         params = FieldGenerator(field="birthdate")
@@ -143,7 +163,9 @@ def test_generator_field_parameters():
 
 def test_field_generator():
     choices = ["2018-01-01", "2018-01-02"]
-    params = FieldGenerator(field="birthdate", choices=choices, choice_probabilities=[0.5, 0.5])
+    params = FieldGenerator(
+        field="birthdate", choices=choices, choice_probabilities=[0.5, 0.5]
+    )
     value = params.generate()
     assert value in choices
 
@@ -151,7 +173,9 @@ def test_field_generator():
     value = params.generate()
     assert value in choices
 
-    params = FieldGenerator(field="birthdate", choices=choices, choice_probabilities=[1.0, 0.0])
+    params = FieldGenerator(
+        field="birthdate", choices=choices, choice_probabilities=[1.0, 0.0]
+    )
     for i in range(100):
         value = params.generate()
         assert value == choices[0]
@@ -179,13 +203,13 @@ def test_resource_generator(covid_code):
 
     params = GeneratorParameters(
         count=100,
-        field_values=[
-
-        ],
+        field_values=[],
         field_generators=[
             # user patient reference iterator to generate subject field
-            FieldGenerator(field="subject", generator_function=lambda: next(references_iter)),
-        ]
+            FieldGenerator(
+                field="subject", generator_function=lambda: next(references_iter)
+            ),
+        ],
     )
 
     generator = ResourceGenerator("Condition", generator_parameters=params)
@@ -239,7 +263,9 @@ def test_resource_generator(covid_code):
             count=100,
             field_values=[
                 FieldValue(field="subject", value=references),
-                FieldGenerator(field="subject", generator_function=lambda: next(references_iter_2)),
+                FieldGenerator(
+                    field="subject", generator_function=lambda: next(references_iter_2)
+                ),
             ],
         )
 
@@ -261,11 +287,13 @@ def test_generate_covid_dataset(vaccination_code, covid_code, server):
     # add covid conditions to patients
     dataset_generator.add_resource(covid_generator, name="covid")
 
-    patients, patient_ids = PatientGenerator(n=count, generate_ids=True).generate(references=True)
+    patients, patient_ids = PatientGenerator(n=count, generate_ids=True).generate(
+        references=True
+    )
 
     vaccination_date_generator = FieldGenerator(
         field="occurrenceDateTime",
-        generator_function=lambda: pendulum.now().to_date_string()
+        generator_function=lambda: pendulum.now().to_date_string(),
     )
 
     first_vax_params = GeneratorParameters(
@@ -273,13 +301,15 @@ def test_generate_covid_dataset(vaccination_code, covid_code, server):
             FieldValue(field="vaccineCode", value=vaccination_code),
             FieldValue(field="status", value="completed"),
         ],
-        field_generators=[
-            vaccination_date_generator
-        ]
+        field_generators=[vaccination_date_generator],
     )
-    vaccination_generator = ResourceGenerator("Immunization", generator_parameters=first_vax_params)
+    vaccination_generator = ResourceGenerator(
+        "Immunization", generator_parameters=first_vax_params
+    )
     print(vaccination_generator)
-    dataset_generator.add_resource(vaccination_generator, name="first_vaccination", likelihood=0.8)
+    dataset_generator.add_resource(
+        vaccination_generator, name="first_vaccination", likelihood=0.8
+    )
 
     dataset = dataset_generator.generate(ids=True)
     print(dataset)

@@ -6,7 +6,9 @@ from fhir.resources import FHIRAbstractModel
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
 
 
-def flatten_resources(resources: Union[List[FHIRResourceModel], List[FHIRAbstractModel]]) -> pd.DataFrame:
+def flatten_resources(
+    resources: Union[List[FHIRResourceModel], List[FHIRAbstractModel]]
+) -> pd.DataFrame:
     """
     Flatten a list of resources of a single resource type into a dataframe.
     Args:
@@ -36,7 +38,9 @@ def flatten_resource(resource: Union[FHIRResourceModel, FHIRAbstractModel]) -> d
     return flat_dict
 
 
-def flatten_dict(d, parent_key: str = '', sep: str = '_', keys: List[str] = None) -> dict:
+def flatten_dict(
+    d, parent_key: str = "", sep: str = "_", keys: List[str] = None
+) -> dict:
     """
     Flatten a nested dictionary into a single level dictionary.
 

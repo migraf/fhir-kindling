@@ -1,5 +1,4 @@
 from typing import Union, Callable, List, Any, TypeVar
-from fhir.resources.resource import Resource
 from fhir.resources.bundle import Bundle
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from fhir.resources import FHIRAbstractModel
@@ -10,20 +9,29 @@ import collections
 
 import httpx
 from fhir_kindling.fhir_query.query_response import QueryResponse, ResponseStatusCodes
-from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters, IncludeParameter, FieldParameter, \
-    ReverseChainParameter, QueryOperators
+from fhir_kindling.fhir_query.query_parameters import (
+    FHIRQueryParameters,
+    IncludeParameter,
+    FieldParameter,
+    ReverseChainParameter,
+    QueryOperators,
+)
 
-T = TypeVar('T', bound='FHIRQueryBase')
+T = TypeVar("T", bound="FHIRQueryBase")
 
 
 class FHIRQueryBase:
-    def __init__(self,
-                 base_url: str,
-                 resource: Union[FHIRResourceModel, fhir.resources.FHIRAbstractModel, str] = None,
-                 query_parameters: FHIRQueryParameters = None,
-                 auth: httpx.Auth = None,
-                 headers: dict = None,
-                 output_format: str = "json"):
+    def __init__(
+        self,
+        base_url: str,
+        resource: Union[
+            FHIRResourceModel, fhir.resources.FHIRAbstractModel, str
+        ] = None,
+        query_parameters: FHIRQueryParameters = None,
+        auth: httpx.Auth = None,
+        headers: dict = None,
+        output_format: str = "json",
+    ):
 
         self.base_url = base_url
 
@@ -35,16 +43,24 @@ class FHIRQueryBase:
         if resource:
             if isinstance(resource, str):
                 self.resource = fhir.resources.get_fhir_model_class(resource)
-            elif isinstance(resource, FHIRResourceModel) or isinstance(resource, FHIRAbstractModel):
+            elif isinstance(resource, FHIRResourceModel) or isinstance(
+                resource, FHIRAbstractModel
+            ):
                 self.resource = resource
             else:
-                raise ValueError(f"resource must be a FHIRResourceModel or a string, given {type(resource)}")
+                raise ValueError(
+                    f"resource must be a FHIRResourceModel or a string, given {type(resource)}"
+                )
             self.resource = self.resource.construct()
-            self.query_parameters = FHIRQueryParameters(resource=self.resource.resource_type)
+            self.query_parameters = FHIRQueryParameters(
+                resource=self.resource.resource_type
+            )
 
         elif query_parameters:
             self.query_parameters = query_parameters
-            self.resource = fhir.resources.get_fhir_model_class(query_parameters.resource)
+            self.resource = fhir.resources.get_fhir_model_class(
+                query_parameters.resource
+            )
             self.resource = self.resource.construct()
         else:
             raise ValueError("Either resource or query_parameters must be set")
@@ -55,13 +71,14 @@ class FHIRQueryBase:
         self._count = None
         self._query_response: Union[Bundle, str, None] = None
 
-    def where(self: T,
-              field: str = None,
-              operator: Union[QueryOperators, str] = None,
-              value: Union[int, float, bool, str, list] = None,
-              field_param: FieldParameter = None,
-              filter_dict: dict = None
-              ) -> T:
+    def where(
+        self: T,
+        field: str = None,
+        operator: Union[QueryOperators, str] = None,
+        value: Union[int, float, bool, str, list] = None,
+        field_param: FieldParameter = None,
+        filter_dict: dict = None,
+    ) -> T:
         """
         Add search conditions regarding a specific field of the queried resource.
         Conditions can be added via FieldParameter class instance, via a dictionary or specifying condition via this
@@ -94,8 +111,12 @@ class FHIRQueryBase:
             added_query_param = FieldParameter(**filter_dict)
         elif field:
             if not (operator or operator == "") and value:
-                kv_error_message = f"\n\tField: {field}\n\tOperator: {operator}\n\tValue: {value}"
-                raise ValueError(f"Must provide operator and search value when using kv parameters.{kv_error_message}")
+                kv_error_message = (
+                    f"\n\tField: {field}\n\tOperator: {operator}\n\tValue: {value}"
+                )
+                raise ValueError(
+                    f"Must provide operator and search value when using kv parameters.{kv_error_message}"
+                )
             else:
 
                 if isinstance(operator, str):
@@ -103,11 +124,17 @@ class FHIRQueryBase:
                 if isinstance(operator, QueryOperators):
                     operator = operator
                 else:
-                    raise ValueError(f"Operator must be a string or QueryOperators. Got {operator}")
-                added_query_param = FieldParameter(field=field, operator=operator, value=value)
+                    raise ValueError(
+                        f"Operator must be a string or QueryOperators. Got {operator}"
+                    )
+                added_query_param = FieldParameter(
+                    field=field, operator=operator, value=value
+                )
 
         else:
-            raise ValueError("Must provide a valid instance of either field_param or filter_dict or the kv parameters")
+            raise ValueError(
+                "Must provide a valid instance of either field_param or filter_dict or the kv parameters"
+            )
 
         query_field_params = self.query_parameters.resource_parameters
         if isinstance(query_field_params, list) and len(query_field_params) > 0:
@@ -119,14 +146,15 @@ class FHIRQueryBase:
 
         return self
 
-    def include(self: T,
-                resource: str = None,
-                reference_param: str = None,
-                target: str = None,
-                reverse: bool = False,
-                include_dict: dict = None,
-                include_param: IncludeParameter = None
-                ) -> T:
+    def include(
+        self: T,
+        resource: str = None,
+        reference_param: str = None,
+        target: str = None,
+        reverse: bool = False,
+        include_dict: dict = None,
+        include_param: IncludeParameter = None,
+    ) -> T:
 
         """
         Specify resources related to the queried resource, which should be included in the query results.
@@ -157,11 +185,16 @@ class FHIRQueryBase:
         elif isinstance(include_param, IncludeParameter):
             added_include_param = include_param
         elif resource and reference_param:
-            added_include_param = IncludeParameter(resource=resource, search_param=reference_param, target=target,
-                                                   reverse=reverse)
+            added_include_param = IncludeParameter(
+                resource=resource,
+                search_param=reference_param,
+                target=target,
+                reverse=reverse,
+            )
         else:
             raise ValueError(
-                "Must provide a valid instance of either include_dict or include_param or the kv parameters")
+                "Must provide a valid instance of either include_dict or include_param or the kv parameters"
+            )
 
         query_include_params = self.query_parameters.include_parameters
         if isinstance(query_include_params, list) and len(query_include_params) > 0:
@@ -173,15 +206,16 @@ class FHIRQueryBase:
 
         return self
 
-    def has(self: T,
-            resource: str = None,
-            reference_param: str = None,
-            search_param: str = None,
-            operator: QueryOperators = None,
-            value: Union[int, float, bool, str, list] = None,
-            has_param_dict: dict = None,
-            has_param: ReverseChainParameter = None
-            ) -> T:
+    def has(
+        self: T,
+        resource: str = None,
+        reference_param: str = None,
+        search_param: str = None,
+        operator: QueryOperators = None,
+        value: Union[int, float, bool, str, list] = None,
+        has_param_dict: dict = None,
+        has_param: ReverseChainParameter = None,
+    ) -> T:
         """
         Specify query parameters for other resources that are referenced by the queried, only the resources whose
         referenced resources match the specified search criteria are included in the results.
@@ -203,9 +237,13 @@ class FHIRQueryBase:
         # validate method input
         if has_param_dict and has_param:
             raise ValueError("Cannot use both has_param_dict and has_param")
-        elif has_param_dict and (resource or reference_param or search_param or operator or value):
+        elif has_param_dict and (
+            resource or reference_param or search_param or operator or value
+        ):
             raise ValueError("Cannot use both has_param_dict and kv parameters")
-        elif has_param and (resource or reference_param or search_param or operator or value):
+        elif has_param and (
+            resource or reference_param or search_param or operator or value
+        ):
             raise ValueError("Cannot use both has_param and kv parameters")
 
         # parse ReverseChainParameter from method input
@@ -214,11 +252,17 @@ class FHIRQueryBase:
         elif isinstance(has_param, ReverseChainParameter):
             added_has_param = has_param
         elif resource and reference_param and search_param and operator and value:
-            added_has_param = ReverseChainParameter(resource=resource, reference_param=reference_param,
-                                                    search_param=search_param, operator=operator, value=value)
+            added_has_param = ReverseChainParameter(
+                resource=resource,
+                reference_param=reference_param,
+                search_param=search_param,
+                operator=operator,
+                value=value,
+            )
         else:
             raise ValueError(
-                "Either has_param_dict, a parameter instance or a valid set of kv parameters must be provided")
+                "Either has_param_dict, a parameter instance or a valid set of kv parameters must be provided"
+            )
 
         query_has_params = self.query_parameters.has_parameters
         if isinstance(query_has_params, list) and len(query_has_params) > 0:
@@ -270,13 +314,19 @@ class FHIRQueryBase:
         return self._make_query_string()
 
     @staticmethod
-    def _execute_callback(entries: list,
-                          callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None):
+    def _execute_callback(
+        entries: list,
+        callback: Union[
+            Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None
+        ] = None,
+    ):
         if callback:
             callback_signature = signature(callback)
 
             if len(callback_signature.parameters) > 1:
-                raise ValueError("The callback function should have either one or zero arguments")
+                raise ValueError(
+                    "The callback function should have either one or zero arguments"
+                )
 
             elif len(callback_signature.parameters) == 1:
                 callback(entries)
@@ -294,7 +344,9 @@ class FHIRQueryBase:
             rev_includes = []
             for include_param in self.query_parameters.include_parameters:
                 if include_param.reverse:
-                    rev_string = f"{include_param.resource}:{include_param.search_param}"
+                    rev_string = (
+                        f"{include_param.resource}:{include_param.search_param}"
+                    )
                     if include_param.target:
                         rev_string += f":{include_param.target}"
                     rev_includes.append(rev_string)
@@ -305,36 +357,49 @@ class FHIRQueryBase:
                     includes.append(include_string)
 
             include_repr = f", include={','.join(includes)}" if includes else ""
-            rev_include_repr = f", reverse_includes={','.join(rev_includes)}" if rev_includes else ""
+            rev_include_repr = (
+                f", reverse_includes={','.join(rev_includes)}" if rev_includes else ""
+            )
             includes_repr = include_repr + rev_include_repr
             return f"<{self.__class__.__name__}(resource={resource}{includes_repr}, url={self.query_url}>"
         else:
 
-            return f"<{self.__class__.__name__}(resource={resource}, url={self.query_url}>"
+            return (
+                f"<{self.__class__.__name__}(resource={resource}, url={self.query_url}>"
+            )
 
 
 class FHIRQuerySync(FHIRQueryBase):
-    def __init__(self,
-                 base_url: str,
-                 resource: Union[FHIRResourceModel, fhir.resources.FHIRAbstractModel, str] = None,
-                 query_parameters: FHIRQueryParameters = None,
-                 auth: httpx.Auth = None,
-                 headers: dict = None,
-                 client: httpx.Client = None,
-                 output_format: str = "json",
-                 proxies: Union[str, dict] = None,
-                 ):
+    def __init__(
+        self,
+        base_url: str,
+        resource: Union[
+            FHIRResourceModel, fhir.resources.FHIRAbstractModel, str
+        ] = None,
+        query_parameters: FHIRQueryParameters = None,
+        auth: httpx.Auth = None,
+        headers: dict = None,
+        client: httpx.Client = None,
+        output_format: str = "json",
+        proxies: Union[str, dict] = None,
+    ):
 
-        super().__init__(base_url, resource, query_parameters, auth, headers, output_format)
+        super().__init__(
+            base_url, resource, query_parameters, auth, headers, output_format
+        )
         self.proxies = proxies
         if client:
             self.client = client
         else:
             self.client = self._setup_client()
 
-    def all(self,
-            page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
-            count: int = None) -> QueryResponse:
+    def all(
+        self,
+        page_callback: Union[
+            Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None
+        ] = None,
+        count: int = None,
+    ) -> QueryResponse:
         """
         Execute the query and return all results matching the query parameters.
 
@@ -350,10 +415,14 @@ class FHIRQuerySync(FHIRQueryBase):
         self._count = count
         return self._execute_query(page_callback=page_callback, count=count)
 
-    def limit(self,
-              n: int,
-              page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
-              count: int = None) -> QueryResponse:
+    def limit(
+        self,
+        n: int,
+        page_callback: Union[
+            Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None
+        ] = None,
+        count: int = None,
+    ) -> QueryResponse:
         """
         Execute the query and return the first n results matching the query parameters.
         Args:
@@ -390,12 +459,18 @@ class FHIRQuerySync(FHIRQueryBase):
     def _setup_client(self):
         headers = self.headers if self.headers else {}
         headers["Content-Type"] = "application/fhir+json"
-        client = httpx.Client(auth=self.auth, headers=headers, proxies=self.proxies, timeout=None)
+        client = httpx.Client(
+            auth=self.auth, headers=headers, proxies=self.proxies, timeout=None
+        )
         return client
 
-    def _execute_query(self,
-                       page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
-                       count: int = None) -> QueryResponse:
+    def _execute_query(
+        self,
+        page_callback: Union[
+            Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None
+        ] = None,
+        count: int = None,
+    ) -> QueryResponse:
 
         with self._setup_client() as client:
             r = client.get(self.query_url)
@@ -409,13 +484,18 @@ class FHIRQuerySync(FHIRQueryBase):
         return response
 
     def _resolve_response_pagination(
-            self,
-            initial_response: httpx.Response,
-            page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
-            count: int = None) -> QueryResponse:
+        self,
+        initial_response: httpx.Response,
+        page_callback: Union[
+            Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None
+        ] = None,
+        count: int = None,
+    ) -> QueryResponse:
 
         if self.output_format == "json":
-            response = self._resolve_json_pagination(initial_response, page_callback, count)
+            response = self._resolve_json_pagination(
+                initial_response, page_callback, count
+            )
 
         elif self.output_format == "xml":
             response = self._resolve_xml_pagination(initial_response)
@@ -431,10 +511,13 @@ class FHIRQuerySync(FHIRQueryBase):
         )
 
     def _resolve_json_pagination(
-            self,
-            initial_response: httpx.Response,
-            page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
-            count: int = None) -> dict:
+        self,
+        initial_response: httpx.Response,
+        page_callback: Union[
+            Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None
+        ] = None,
+        count: int = None,
+    ) -> dict:
         response_json = initial_response.json()
         link = response_json.get("link", None)
         # If there is a link, get the next page otherwise return the response
@@ -456,7 +539,7 @@ class FHIRQuerySync(FHIRQueryBase):
                     self._execute_callback(response_entries, page_callback)
                 # if the limit is reached, stop resolving the pagination
                 if self._limit and len(entries) >= self._limit:
-                    response_entries = response_json["entry"][:self._limit]
+                    response_entries = response_json["entry"][: self._limit]
                     response_json["entry"] = response_entries
                     self._execute_callback(response_entries, page_callback)
                     return response_json
@@ -465,8 +548,14 @@ class FHIRQuerySync(FHIRQueryBase):
                 while response_json.get("link", None):
                     if self._limit and len(entries) >= self._limit:
                         break
-                    next_page = next((link for link in response_json["link"] if link.get("relation", None) == "next"),
-                                     None)
+                    next_page = next(
+                        (
+                            link
+                            for link in response_json["link"]
+                            if link.get("relation", None) == "next"
+                        ),
+                        None,
+                    )
                     if next_page:
                         response_json = client.get(next_page["url"]).json()
                         response_entries = response_json["entry"]
@@ -475,7 +564,7 @@ class FHIRQuerySync(FHIRQueryBase):
                     else:
                         break
 
-            response_json["entry"] = entries[:self._limit] if self._limit else entries
+            response_json["entry"] = entries[: self._limit] if self._limit else entries
             return response_json
 
     def _resolve_xml_pagination(self, server_response: httpx.Response) -> str:
@@ -487,7 +576,9 @@ class FHIRQuerySync(FHIRQueryBase):
         # if there are no entries, return the initial response
         if not entries:
             self.status_code = ResponseStatusCodes.NOT_FOUND
-            print(f"No resources match the query - query url: {self.query_parameters.to_query_string()}")
+            print(
+                f"No resources match the query - query url: {self.query_parameters.to_query_string()}"
+            )
             return server_response.text
         else:
             self.status_code = ResponseStatusCodes.OK
@@ -518,23 +609,30 @@ class FHIRQuerySync(FHIRQueryBase):
             if not next_page:
                 break
         # added the paginated resources to the initial response
-        initial_response["Bundle"]["entry"] = entries[:self._limit] if self._limit else entries
+        initial_response["Bundle"]["entry"] = (
+            entries[: self._limit] if self._limit else entries
+        )
         full_response_xml = xmltodict.unparse(initial_response, pretty=True)
         return full_response_xml
 
 
 class FHIRQueryAsync(FHIRQueryBase):
-    def __init__(self,
-                 base_url: str,
-                 resource: Union[FHIRResourceModel, fhir.resources.FHIRAbstractModel, str] = None,
-                 query_parameters: FHIRQueryParameters = None,
-                 auth: httpx.Auth = None,
-                 headers: dict = None,
-                 output_format: str = "json",
-                 client: httpx.AsyncClient = None,
-                 proxies: Union[str, dict] = None,
-                 ):
-        super().__init__(base_url, resource, query_parameters, auth, headers, output_format)
+    def __init__(
+        self,
+        base_url: str,
+        resource: Union[
+            FHIRResourceModel, fhir.resources.FHIRAbstractModel, str
+        ] = None,
+        query_parameters: FHIRQueryParameters = None,
+        auth: httpx.Auth = None,
+        headers: dict = None,
+        output_format: str = "json",
+        client: httpx.AsyncClient = None,
+        proxies: Union[str, dict] = None,
+    ):
+        super().__init__(
+            base_url, resource, query_parameters, auth, headers, output_format
+        )
         self.proxies = proxies
         # set up the async client instance
         self.client = None
@@ -543,9 +641,13 @@ class FHIRQueryAsync(FHIRQueryBase):
         else:
             self._setup_client()
 
-    async def all(self,
-                  page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
-                  count: int = None) -> QueryResponse:
+    async def all(
+        self,
+        page_callback: Union[
+            Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None
+        ] = None,
+        count: int = None,
+    ) -> QueryResponse:
         """
         Execute the query and return all results matching the query parameters.
 
@@ -562,10 +664,14 @@ class FHIRQueryAsync(FHIRQueryBase):
         response = await self._execute_query(page_callback=page_callback, count=count)
         return response
 
-    async def limit(self,
-                    n: int,
-                    page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
-                    count: int = None) -> QueryResponse:
+    async def limit(
+        self,
+        n: int,
+        page_callback: Union[
+            Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None
+        ] = None,
+        count: int = None,
+    ) -> QueryResponse:
         """
         Execute the query and return the first n results matching the query parameters.
         Args:
@@ -611,23 +717,31 @@ class FHIRQueryAsync(FHIRQueryBase):
         headers["Content-Type"] = "application/fhir+json"
         self.client = httpx.AsyncClient(auth=self.auth, headers=headers, timeout=None)
 
-    async def _execute_query(self,
-                             page_callback: Union[
-                                 Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
-                             count: int = None) -> QueryResponse:
+    async def _execute_query(
+        self,
+        page_callback: Union[
+            Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None
+        ] = None,
+        count: int = None,
+    ) -> QueryResponse:
         r = await self.client.get(self.query_url)
         r.raise_for_status()
         response = await self._resolve_response_pagination(r, page_callback, count)
         return response
 
     async def _resolve_response_pagination(
-            self,
-            initial_response: httpx.Response,
-            page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
-            count: int = None) -> QueryResponse:
+        self,
+        initial_response: httpx.Response,
+        page_callback: Union[
+            Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None
+        ] = None,
+        count: int = None,
+    ) -> QueryResponse:
 
         if self.output_format == "json":
-            response = await self._resolve_json_pagination(initial_response, page_callback, count)
+            response = await self._resolve_json_pagination(
+                initial_response, page_callback, count
+            )
 
         elif self.output_format == "xml":
             response = await self._resolve_xml_pagination(initial_response)
@@ -643,10 +757,13 @@ class FHIRQueryAsync(FHIRQueryBase):
         )
 
     async def _resolve_json_pagination(
-            self,
-            initial_response: httpx.Response,
-            page_callback: Union[Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None] = None,
-            count: int = None) -> dict:
+        self,
+        initial_response: httpx.Response,
+        page_callback: Union[
+            Callable[[List[FHIRAbstractModel]], Any], Callable[[], Any], None
+        ] = None,
+        count: int = None,
+    ) -> dict:
         response_json = initial_response.json()
         link = response_json.get("link", None)
         # If there is a link, get the next page otherwise return the response
@@ -666,7 +783,7 @@ class FHIRQueryAsync(FHIRQueryBase):
                 self._execute_callback(response_entries, page_callback)
             # if the limit is reached, stop resolving the pagination
             if self._limit and len(entries) >= self._limit:
-                response_entries = response_json["entry"][:self._limit]
+                response_entries = response_json["entry"][: self._limit]
                 response_json["entry"] = response_entries
                 self._execute_callback(response_entries, page_callback)
                 return response_json
@@ -674,7 +791,14 @@ class FHIRQueryAsync(FHIRQueryBase):
             while response_json.get("link", None):
                 if self._limit and len(entries) >= self._limit:
                     break
-                next_page = next((link for link in response_json["link"] if link.get("relation", None) == "next"), None)
+                next_page = next(
+                    (
+                        link
+                        for link in response_json["link"]
+                        if link.get("relation", None) == "next"
+                    ),
+                    None,
+                )
                 if next_page:
                     page_response = await self.client.get(next_page["url"])
                     response_json = page_response.json()
@@ -684,7 +808,7 @@ class FHIRQueryAsync(FHIRQueryBase):
                 else:
                     break
 
-            response_json["entry"] = entries[:self._limit] if self._limit else entries
+            response_json["entry"] = entries[: self._limit] if self._limit else entries
             return response_json
 
     async def _resolve_xml_pagination(self, server_response: httpx.Response) -> str:
@@ -696,7 +820,9 @@ class FHIRQueryAsync(FHIRQueryBase):
         # if there are no entries, return the initial response
         if not entries:
             self.status_code = ResponseStatusCodes.NOT_FOUND
-            print(f"No resources match the query - query url: {self.query_parameters.to_query_string()}")
+            print(
+                f"No resources match the query - query url: {self.query_parameters.to_query_string()}"
+            )
             return server_response.text
         else:
             self.status_code = ResponseStatusCodes.OK
@@ -727,6 +853,8 @@ class FHIRQueryAsync(FHIRQueryBase):
             if not next_page:
                 break
         # added the paginated resources to the initial response
-        initial_response["Bundle"]["entry"] = entries[:self._limit] if self._limit else entries
+        initial_response["Bundle"]["entry"] = (
+            entries[: self._limit] if self._limit else entries
+        )
         full_response_xml = xmltodict.unparse(initial_response, pretty=True)
         return full_response_xml
