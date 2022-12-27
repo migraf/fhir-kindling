@@ -4,7 +4,7 @@ version = "0.9.6"
 description = "Python library for working with FHIR servers and resources."
 authors = ["Michael Graf <michael.graf3110@gmail.com>"]
 readme = "README.md"
-packages = [{include = "fhir_kindling"}]
+packages = [{ include = "fhir_kindling" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -12,24 +12,23 @@ python = "^3.11"
 pendulum = "*"
 tqdm = "*"
 orjson = "*"
-PyYAML = "*"
 xmltodict = "*"
 pydantic = "*"
 networkx = "*"
 httpx = "*"
 authlib = "*"
+pandas = { version = "*", optional = true }
+plotly = { version = "*", optional = true }
+sqlmodel = { version = "*", optional = true }
+fastapi = { version = "*", optional = true }
+uvicorn = { version = "*", optional = true }
+cachetools = { version = "*", optional = true }
+types-cachetools = { version = "*", optional = true }
 
-[tool.poetry.group.ds.dependencies]
-pandas = "*"
-plotly = "*"
 
-
-[tool.poetry.group.app.dependencies]
-sqlmodel = "*"
-fastapi = "*"
-uvicorn = "*"
-cachetools = "*"
-types-cachetools = "*"
+[tool.poetry.extras]
+ds = ["pandas", "plotly"]
+app = ["fastapi", "uvicorn", "sqlmodel", "cachetools", "types-cachetools"]
 
 
 [tool.poetry.group.dev.dependencies]
@@ -42,7 +41,7 @@ twine = "*"
 bump2version = "*"
 notebook = "*"
 jupyter = "*"
-mkdocstrings = {extras = ["python-legacy"], version = "*"}
+mkdocstrings = { extras = ["python-legacy"], version = "*" }
 flake8 = "*"
 ipython = ">=7.31.1"
 pytest-asyncio = "*"
