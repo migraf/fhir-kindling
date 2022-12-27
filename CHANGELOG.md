@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.0] - 2023-
+Improve packaging with poetry and optional extras for datascience features and web app.
+Add support for Python 3.9+.
+
+### Changed
+- Improve packaging with poetry and optional extras for datascience features and web app.
+- Optional dependencies for [`ds`, `app`] can be installed using `pip install  fhir_kindling[{extra}]`.
+- Query response `.save()` method now only supports saving as XML or JSON file. To serialize resources and bundles use
+    the `flatten` function from the `serde` package. Requires installation of the `ds` extra.
+
 ## [0.9.0] - 2022-07-21
 Asynchronous API for CRUD operations against fhir servers.
 
