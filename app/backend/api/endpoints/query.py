@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from fastapi import APIRouter, HTTPException
-from fhir_kindling.fhir_query import FHIRQueryParameters, QueryResponse
+from fhir_kindling.fhir_query import FHIRQueryParameters
 from app.backend.memory_storage import store
 from app.backend.models.query import QueryResult, Query
 from app.backend.models.server import Server

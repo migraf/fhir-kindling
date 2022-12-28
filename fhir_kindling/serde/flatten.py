@@ -5,6 +5,61 @@ import pandas as pd
 from fhir.resources import FHIRAbstractModel
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
 
+from fhir_kindling.fhir_query.query_response import QueryResponse
+
+
+def flatten(
+    resources: Union[List[FHIRResourceModel], List[FHIRAbstractModel]] = None,
+    response: QueryResponse = None,
+    save: bool = False,
+    path: str = None,
+    display_progress: bool = False,
+) -> Union[pd.DataFrame, List[pd.DataFrame], None]:
+    """
+    Flatten a list of resources or a query response into a dataframe/multiple dataframes.
+    Args:
+        resources: list of resources
+        response: fhir kindling query response possibly containing multiple resources
+        save: save the output to one or multiple csv files
+        path: path to save the csv files
+        display_progress: display a progress bar
+
+    Returns: pandas dataframe with columns corresponding to the flattened resource keys
+
+    """
+    if resources and response:
+        raise ValueError("Only one of resources or response can be provided")
+    if resources:
+        return flatten_resources(resources)
+    elif response:
+        return flatten_response(response)
+    else:
+        raise ValueError("Either resources or response must be provided")
+
+
+def flatten_response(
+    response: QueryResponse,
+) -> Union[pd.DataFrame, List[pd.DataFrame]]:
+    """
+    Flatten a query response into a dataframe/multiple dataframes.
+    Args:
+        response: fhir kindling query response possibly containing multiple resources
+
+    Returns: pandas dataframe with columns corresponding to the flattened resource keys
+
+    """
+    included_resources = response.included_resources
+    # Flatten the included resources into a list of dataframes
+    if included_resources:
+        dfs = []
+        for resource in included_resources:
+            dfs.append(flatten_resources(resource.resources))
+
+        dfs.insert(0, flatten_resources(response.resources))
+        return dfs
+    else:
+        return flatten_resources(response.resources)
+
 
 def flatten_resources(
     resources: Union[List[FHIRResourceModel], List[FHIRAbstractModel]]
@@ -13,7 +68,6 @@ def flatten_resources(
     Flatten a list of resources of a single resource type into a dataframe.
     Args:
         resources: list of resources
-
     Returns: pandas dataframe with columns corresponding to the flattened resource keys
 
     """

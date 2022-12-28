@@ -146,16 +146,7 @@ class FhirServer:
         against the server
         """
 
-        if resource and query_parameters:
-            raise ValueError("Cannot specify both a resource and query parameters")
-        if query_string and query_parameters:
-            raise ValueError("Cannot specify both a query string and query parameters")
-        if resource and query_string:
-            raise ValueError("Cannot specify both a resource and query string")
-        if not resource and not query_string and not query_parameters:
-            raise ValueError(
-                "Must specify either a resource, query string or query parameters"
-            )
+        self._validate_query_input(resource, query_parameters, query_string)
 
         if resource:
             if isinstance(resource, str):
@@ -172,7 +163,7 @@ class FhirServer:
         elif query_string:
             return self.raw_query(query_string, output_format)
 
-        elif query_parameters:
+        else:
             return FHIRQuerySync(
                 base_url=self.api_address,
                 auth=self.auth,
@@ -180,10 +171,6 @@ class FhirServer:
                 output_format=output_format,
                 proxies=self._proxies,
                 headers=self._headers,
-            )
-        else:
-            raise ValueError(
-                "Must provide either resource, query_parameters or a query string"
             )
 
     def query_async(
@@ -205,6 +192,9 @@ class FhirServer:
         Returns: a FHIRQueryAsync object that can be further modified with filters and conditions before being executed
         against the server
         """
+
+        self._validate_query_input(resource, query_parameters, query_string)
+
         if resource:
             return FHIRQueryAsync(
                 base_url=self.api_address,
@@ -224,17 +214,13 @@ class FhirServer:
             )
             return query
 
-        elif query_parameters:
+        else:
             return FHIRQueryAsync(
                 base_url=self.api_address,
                 auth=self.auth,
                 query_parameters=query_parameters,
                 output_format=output_format,
                 proxies=self._proxies,
-            )
-        else:
-            raise ValueError(
-                "Must provide either resource, query_parameters or a query string"
             )
 
     def raw_query(
@@ -349,11 +335,7 @@ class FhirServer:
         get_many_transaction = self._make_get_many_transaction(str_references)
         with self._sync_client() as client:
             r = client.post(self.api_address, json=json_dict(get_many_transaction))
-            try:
-                r.raise_for_status()
-            except Exception as e:
-                print(r.text)
-                raise e
+            r.raise_for_status()
         entries = r.json()["entry"]
         resources = [
             construct_fhir_element(entry["resource"]["resourceType"], entry["resource"])
@@ -477,18 +459,35 @@ class FhirServer:
         return response
 
     async def add_all_async(
-        self, resources: List[Union[Resource, dict]]
+        self, resources: List[Union[Resource, dict]], batch_size: int = 5000
     ) -> BundleCreateResponse:
         """
         Asynchronously upload a list of resources to the server, after packaging them into a bundle
         Args:
             resources: list of resources to upload to the server, either dictionary or FHIR resource objects
+            batch_size: maximum number of resources to upload in one bundle
 
         Returns: Bundle create response from the fhir server
 
         """
-        bundle = self._make_bundle_from_resource_list(resources)
-        response = await self._upload_bundle_async(bundle)
+        response = None
+        if len(resources) > batch_size:
+            # split the list of resources into batches of size batch_size
+            batches = [
+                resources[i : i + batch_size]
+                for i in range(0, len(resources), batch_size)
+            ]
+            for batch in batches:
+                if not response:
+                    bundle = self._make_bundle_from_resource_list(batch)
+                    response = await self._upload_bundle_async(bundle)
+                else:
+                    bundle = self._make_bundle_from_resource_list(batch)
+                    add_response = await self._upload_bundle_async(bundle)
+                    response.create_responses.extend(add_response.create_responses)
+        else:
+            bundle = self._make_bundle_from_resource_list(resources)
+            response = await self._upload_bundle_async(bundle)
         return response
 
     def add_bundle(
@@ -552,11 +551,7 @@ class FhirServer:
         update_bundle = self._make_update_transaction(resources)
         with self._sync_client() as client:
             r = client.post(self.api_address, json=json_dict(update_bundle))
-            try:
-                r.raise_for_status()
-            except Exception as e:
-                print(r.text)
-                raise e
+            r.raise_for_status()
         return r.json()
 
     async def update_async(self, resources: List[Union[FHIRResourceModel, dict]]):
@@ -564,11 +559,7 @@ class FhirServer:
 
         async with self._async_client() as client:
             r = await client.post(self.api_address, json=json_dict(update_bundle))
-            try:
-                r.raise_for_status()
-            except Exception as e:
-                print(r.text)
-                raise e
+            r.raise_for_status()
         return r.json()
 
     def delete(
@@ -592,11 +583,7 @@ class FhirServer:
 
         with self._sync_client() as client:
             r = client.post(self.api_address, json=json_dict(delete_bundle))
-            try:
-                r.raise_for_status()
-            except Exception as e:
-                print(r.text)
-                raise e
+            r.raise_for_status()
         return r
 
     async def delete_async(
@@ -609,12 +596,7 @@ class FhirServer:
 
         async with self._async_client() as client:
             r = await client.post(self.api_address, json=json_dict(delete_bundle))
-            try:
-                r.raise_for_status()
-            except Exception as e:
-                print(r.text)
-                raise e
-
+            r.raise_for_status()
         return r
 
     def transfer(
@@ -948,7 +930,6 @@ class FhirServer:
             r"(?:/?|[/?]\S+)$",
             re.IGNORECASE,
         )
-
         if re.match(regex, api_address):
             if api_address[-1] == "/":
                 api_address = api_address[:-1]
@@ -1080,6 +1061,21 @@ class FhirServer:
                         graph.nodes[successor]["resource"] = resource
                     else:
                         graph.nodes[successor]["resource"][field] = reference
+
+    @staticmethod
+    def _validate_query_input(
+        resource: str, query_parameters: FHIRQueryParameters, query_string: str
+    ):
+        if resource and query_parameters:
+            raise ValueError("Cannot specify both a resource and query parameters")
+        if query_string and query_parameters:
+            raise ValueError("Cannot specify both a query string and query parameters")
+        if resource and query_string:
+            raise ValueError("Cannot specify both a resource and query string")
+        if not resource and not query_string and not query_parameters:
+            raise ValueError(
+                "Must specify either a resource, query string or query parameters"
+            )
 
     def __repr__(self):
         return f"FhirServer(api_address={self.api_address})"

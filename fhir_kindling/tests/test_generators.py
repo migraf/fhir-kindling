@@ -10,20 +10,13 @@ from fhir_kindling.generators.resource_generator import (
     GeneratorParameters,
     FieldValue,
 )
-from fhir.resources.condition import Condition
 from fhir.resources.patient import Patient
-from fhir.resources.organization import Organization
-from fhir.resources.observation import Observation
-from fhir.resources.fhirtypes import ObservationType
 from fhir.resources.codeableconcept import CodeableConcept
-from fhir.resources.immunization import Immunization
 from fhir.resources.coding import Coding
 from fhir.resources.reference import Reference
 from fhir_kindling.generators.patient import PatientGenerator
 from fhir_kindling.generators.field_generator import FieldGenerator
 from fhir_kindling.generators.dataset import DatasetGenerator
-from pprint import pp, pprint
-import datetime
 import pendulum
 
 

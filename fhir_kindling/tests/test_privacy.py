@@ -1,7 +1,5 @@
-import pytest
 import pandas as pd
-from fhir_kindling.serde import flatten_resources
-from fhir_kindling.privacy.k_anonymity import is_k_anonymized, anonymize
+from fhir_kindling.privacy.k_anonymity import is_k_anonymized
 
 
 def test_k_anonymity(fhir_server):

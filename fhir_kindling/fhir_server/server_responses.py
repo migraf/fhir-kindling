@@ -11,7 +11,6 @@ from fhir_kindling.fhir_query import FHIRQueryParameters
 class CreateResponse:
     @staticmethod
     def _process_location_header(server_create_response: dict):
-        # todo check for different fhir server types
         location_header: str = server_create_response.get(
             "Location", server_create_response.get("location")
         )

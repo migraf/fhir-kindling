@@ -1,4 +1,6 @@
 from typing import Union, Callable, List, Any, TypeVar
+
+import orjson
 from fhir.resources.bundle import Bundle
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from fhir.resources import FHIRAbstractModel
@@ -8,7 +10,11 @@ import xmltodict
 import collections
 
 import httpx
-from fhir_kindling.fhir_query.query_response import QueryResponse, ResponseStatusCodes
+from fhir_kindling.fhir_query.query_response import (
+    QueryResponse,
+    ResponseStatusCodes,
+    OutputFormats,
+)
 from fhir_kindling.fhir_query.query_parameters import (
     FHIRQueryParameters,
     IncludeParameter,
@@ -65,7 +71,12 @@ class FHIRQueryBase:
         else:
             raise ValueError("Either resource or query_parameters must be set")
 
-        self.output_format = output_format
+        try:
+            self.output_format = OutputFormats(output_format)
+        except ValueError:
+            raise ValueError(
+                f"output_format must be one of {OutputFormats.__members__.keys()}"
+            )
         self._includes = None
         self._limit = None
         self._count = None
@@ -283,7 +294,7 @@ class FHIRQueryBase:
             query_string += f"&_count={self._limit}"
         else:
             query_string += f"&_count={self._count}"
-        query_string += f"&_format={self.output_format}"
+        query_string += f"&_format={self.output_format.value}"
 
         return query_string
 
@@ -334,11 +345,7 @@ class FHIRQueryBase:
                 callback()
 
     def __repr__(self):
-        if isinstance(self.resource, str):
-            resource = self.resource
-        else:
-            resource = self.resource.resource_type
-
+        resource = self.resource.resource_type
         if self.query_parameters.include_parameters:
             includes = []
             rev_includes = []
@@ -474,11 +481,7 @@ class FHIRQuerySync(FHIRQueryBase):
 
         with self._setup_client() as client:
             r = client.get(self.query_url)
-        try:
             r.raise_for_status()
-        except Exception as e:
-            print(r.text)
-            raise e
 
         response = self._resolve_response_pagination(r, page_callback, count)
         return response
@@ -492,15 +495,13 @@ class FHIRQuerySync(FHIRQueryBase):
         count: int = None,
     ) -> QueryResponse:
 
-        if self.output_format == "json":
+        if self.output_format == OutputFormats.JSON:
             response = self._resolve_json_pagination(
                 initial_response, page_callback, count
             )
 
-        elif self.output_format == "xml":
-            response = self._resolve_xml_pagination(initial_response)
         else:
-            raise ValueError(f"Unsupported output format: {self.output_format}")
+            response = self._resolve_xml_pagination(initial_response)
 
         return QueryResponse(
             response=response,
@@ -587,10 +588,11 @@ class FHIRQuerySync(FHIRQueryBase):
         while True:
             next_page = False
             for link in response["Bundle"]["link"]:
-                if isinstance(link, collections.OrderedDict):
-                    relation_dict = dict(link["relation"])
-                else:
+                # if there is a next page, get the next page
+                if not isinstance(link, dict):
                     break
+                relation_dict = link.get("relation", None)
+
                 if relation_dict.get("@value") == "next":
                     # get url and extend with xml format
                     url = link["url"]["@value"]
@@ -738,15 +740,13 @@ class FHIRQueryAsync(FHIRQueryBase):
         count: int = None,
     ) -> QueryResponse:
 
-        if self.output_format == "json":
+        if self.output_format == OutputFormats.JSON:
             response = await self._resolve_json_pagination(
                 initial_response, page_callback, count
             )
 
-        elif self.output_format == "xml":
-            response = await self._resolve_xml_pagination(initial_response)
         else:
-            raise ValueError(f"Unsupported output format: {self.output_format}")
+            response = await self._resolve_xml_pagination(initial_response)
 
         return QueryResponse(
             response=response,
@@ -764,7 +764,7 @@ class FHIRQueryAsync(FHIRQueryBase):
         ] = None,
         count: int = None,
     ) -> dict:
-        response_json = initial_response.json()
+        response_json = orjson.loads(initial_response.content)
         link = response_json.get("link", None)
         # If there is a link, get the next page otherwise return the response
         if not link:
@@ -831,10 +831,10 @@ class FHIRQueryAsync(FHIRQueryBase):
         while True:
             next_page = False
             for link in response["Bundle"]["link"]:
-                if isinstance(link, collections.OrderedDict):
-                    relation_dict = dict(link["relation"])
-                else:
+                # if there is a next page, get the next page
+                if not isinstance(link, dict):
                     break
+                relation_dict = link.get("relation", None)
                 if relation_dict.get("@value") == "next":
                     # get url and extend with xml format
                     url = link["url"]["@value"]

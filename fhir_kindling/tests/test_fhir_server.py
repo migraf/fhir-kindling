@@ -1,15 +1,12 @@
 import os
 import pprint
-import uuid
 
 import pytest
 from fhir.resources import FHIRAbstractModel
 from unittest import mock
 
-from fhir.resources.condition import Condition
-from fhir.resources.encounter import Encounter
 from fhir.resources.reference import Reference
-from httpx import Auth, BasicAuth
+from httpx import BasicAuth
 
 from fhir_kindling import FhirServer, FHIRQuerySync
 from dotenv import load_dotenv, find_dotenv
@@ -20,7 +17,7 @@ from fhir.resources.patient import Patient
 
 from fhir_kindling.fhir_query import FHIRQueryParameters
 from fhir_kindling.generators import PatientGenerator
-from fhir_kindling.util.references import reference_graph
+from fhir_kindling.serde.json import json_dict
 
 
 @pytest.fixture
@@ -294,6 +291,25 @@ def test_fhir_server_from_env():
     #     server = FhirServer.from_env()
 
 
+def test_server_query_validation(fhir_server: FhirServer):
+    params = FHIRQueryParameters(
+        resource="Patient",
+    )
+
+    # test invalid query resource + params
+    with pytest.raises(ValueError):
+        fhir_server.query(resource="Patient", query_parameters=params)
+
+    with pytest.raises(ValueError):
+        fhir_server.query(query_string="Patient?", query_parameters=params)
+
+    with pytest.raises(ValueError):
+        fhir_server.query(query_string="Patient?", resource="Patient")
+
+    with pytest.raises(ValueError):
+        fhir_server.query()
+
+
 def test_upload_single_resource(fhir_server: FhirServer):
     from fhir.resources.organization import Organization
     from fhir.resources.address import Address
@@ -322,6 +338,10 @@ def test_server_add_all(fhir_server: FhirServer):
     add_response = fhir_server.add_all(patients)
 
     assert add_response
+
+    batched_add_response = fhir_server.add_all(patients, batch_size=10)
+
+    assert len(batched_add_response.create_responses) == 100
 
 
 def test_query_all(fhir_server: FhirServer):
@@ -352,11 +372,15 @@ def test_query_raw_string(fhir_server: FhirServer):
     query_string = "/Patient?"
     query = fhir_server.raw_query(query_string=query_string, output_format="json")
 
+    query_2 = fhir_server.query(query_string=query_string, output_format="json")
+
     assert isinstance(query, FHIRQuerySync)
 
     assert query.resource.get_resource_type() == "Patient"
 
     assert query.all().response["entry"]
+
+    assert query_2.query_parameters.resource == "Patient"
 
 
 def test_add_bundle(fhir_server: FhirServer, org_bundle):
@@ -569,13 +593,26 @@ async def test_fhir_server_add_async(fhir_server: FhirServer):
     assert patient_create
     assert patient_create.resource_id
 
+    patient_dict = json_dict(patient)
+    patient_create_dict = await fhir_server.add_async(patient_dict)
+
+    assert patient_create_dict
+
+    patient_dict["resourceType"] = None
+    with pytest.raises(ValueError):
+        await fhir_server.add_async(patient_dict)
+
 
 @pytest.mark.asyncio
 async def test_fhir_server_add_all_async(fhir_server: FhirServer):
-    patient_gen = PatientGenerator(n=10)
+    patient_gen = PatientGenerator(n=100)
     patients = patient_gen.generate()
     patients_create = await fhir_server.add_all_async(patients)
     assert patients_create
+
+    batched_add_response = await fhir_server.add_all_async(patients, batch_size=10)
+
+    assert len(batched_add_response.create_responses) == 100
 
 
 @pytest.mark.asyncio
@@ -592,6 +629,16 @@ async def test_fhir_server_query_async(fhir_server: FhirServer):
     response = await query.all()
     assert response
 
+    parameters = FHIRQueryParameters(
+        resource="Patient",
+    )
+    query = fhir_server.query_async(query_parameters=parameters)
+    response = await query.limit(10)
+    assert response
+
+    query = fhir_server.query_async(query_string="/Patient?")
+    response = await query.limit(10)
+    assert response
 
 @pytest.mark.asyncio
 async def test_add_bundle_async(fhir_server: FhirServer, org_bundle):

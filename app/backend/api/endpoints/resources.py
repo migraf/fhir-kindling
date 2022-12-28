@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 
 from app.backend.models.resource import ResourceFields
 from app.backend.src.resources import extract_query_fields
-from fhir_kindling.util.resources import get_resource_fields, valid_resource_name
+from fhir_kindling.util.resources import valid_resource_name
 from fhir_kindling.generators.names import RESOURCE_NAMES
 
 

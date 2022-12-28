@@ -93,10 +93,8 @@ def auth_info_from_env() -> Union[str, Tuple[str, str], Tuple[str, str, str]]:
         if not password:
             raise EnvironmentError(f"No password specified for user: {username}")
         else:
-            print(f"Basic auth environment info found -> ({username}:******)")
             return username, password
     if token:
-        print("Found static auth token")
         return token
 
     if client_id and not client_secret:
@@ -110,9 +108,6 @@ def auth_info_from_env() -> Union[str, Tuple[str, str], Tuple[str, str, str]]:
             "specified but no provider URL found"
         )
     if client_id and client_secret and oidc_provider_url:
-        print(
-            f"Found OIDC auth configuration for client <{client_id}> with provider {oidc_provider_url}"
-        )
         return client_id, client_secret, oidc_provider_url
 
 

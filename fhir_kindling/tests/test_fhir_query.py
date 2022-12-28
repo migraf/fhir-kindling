@@ -6,7 +6,6 @@ import os
 
 import xmltodict
 from dotenv import load_dotenv, find_dotenv
-from fhir.resources.condition import Condition
 from fhir.resources.patient import Patient
 from pydantic import ValidationError
 
@@ -19,6 +18,7 @@ from fhir_kindling.fhir_query.query_parameters import (
     QueryOperators,
     QueryParameter,
 )
+from fhir_kindling.fhir_query.fhir_query import FHIRQueryBase
 
 
 @pytest.fixture
@@ -1345,7 +1345,7 @@ Test query conditions and execution
 """
 
 
-def test_query_xml(server):
+def test_query_xml(server: FhirServer):
     resp = server.query("Patient", output_format="xml")
     result = resp.limit(100)
 
@@ -1355,15 +1355,35 @@ def test_query_xml(server):
     with pytest.raises(NotImplementedError):
         includes = result.included_resources
 
+    query = server.query("Patient", output_format="xml")
+    result = query.limit(100, count=10)
+    print(result)
+
+    # not found
+    query = server.query("BodyStructure", output_format="xml")
+    result = query.all()
+    print(result)
+
+
+def test_query_base():
+    pass
+
 
 def test_query_json(server):
     resp = server.query("Patient", output_format="json")
+    print(resp)
     result = resp.limit(100)
     assert result.response
     assert isinstance(result.response, dict)
 
     includes = result.included_resources
     assert not includes
+
+    with pytest.raises(ValueError):
+        resp = server.query(1, output_format="json2")
+
+    with pytest.raises(ValueError):
+        resp = server.query()
 
 
 def test_query_first(server):
@@ -1374,7 +1394,7 @@ def test_query_first(server):
     assert isinstance(result.resources[0], Patient)
 
 
-def test_query_limit(server):
+def test_query_limit(server: FhirServer):
     query = server.query("Patient")
     query._count = 5
     result = query.limit(20, page_callback=lambda x: print(len(x)))
@@ -1506,6 +1526,9 @@ def test_query_include(server, api_url):
 
     query = query.include(resource=query_resource, reference_param=search_param)
 
+    response = query.limit(5000)
+    print(response)
+
     assert query.query_parameters.include_parameters[0].resource == query_resource
 
     query_url = f"{api_url}/{query_resource}?_include={query_resource}:{search_param}&_count=5000&_format=json"
@@ -1634,7 +1657,7 @@ def test_query_response_include(server):
     query = query.include(resource=query_resource, reference_param=search_param)
     response = query.all()
 
-    print(query)
+    print(response)
     assert response.included_resources
     assert response.resources
     assert response.resources[0].resource_type == query_resource
@@ -1684,50 +1707,6 @@ def test_query_response_save(server):
 
     os.remove(json_file)
 
-    # save to csv
-    patient_response = server.query("Patient").all()
-    patient_response.save(csv_file, output_format="csv")
-
-    assert os.path.isfile(csv_file)
-    assert pd.read_csv(csv_file).shape[0] > 0
-
-    # os.remove(csv_file)
-
-    # save to csv with included resource
-    response.save(csv_file, output_format="csv")
-
-    assert os.path.isfile(csv_file)
-    assert pd.read_csv(csv_file).shape[0] > 0
-
-    included_patients_csv = "test_query_response_save_included_Patient.csv"
-    assert os.path.isfile(included_patients_csv)
-    assert pd.read_csv(included_patients_csv).shape[0] > 0
-
-    os.remove(csv_file)
-    os.remove(included_patients_csv)
-
-
-def test_query_response_to_dfs(server):
-    # test with included resources and json
-    query_resource = "Condition"
-    search_param = "subject"
-
-    query = server.query(query_resource)
-
-    with pytest.raises(ValueError):
-        query = query.include()
-
-    query = query.include(resource=query_resource, reference_param=search_param)
-    response = query.all()
-
-    with pytest.raises(ValueError):
-        response.to_dfs(df_format="invalid")
-
-    dfs = response.to_dfs()
-
-    assert len(dfs) > 1
-    assert dfs[0].shape[0] > 0
-
 
 @pytest.mark.asyncio
 async def test_query_async(server):
@@ -1739,6 +1718,10 @@ async def test_query_async(server):
         query = server.query_async("Patient", output_format="invalid")
         response = await query.all()
 
+    query = server.query_async("BodyStructure")
+    response = await query.all()
+    assert len(response.resources) == 0
+
 
 @pytest.mark.asyncio
 async def test_query_async_xml(server):
@@ -1748,6 +1731,14 @@ async def test_query_async_xml(server):
 
     with pytest.raises(NotImplementedError):
         resources = response.resources
+
+    # pagination
+    resp = await query.limit(100, count=10)
+    assert resp
+    # no resources found
+    query = server.query_async("BodyStructure", output_format="xml")
+    response = await query.all()
+    assert response
 
 
 @pytest.mark.asyncio

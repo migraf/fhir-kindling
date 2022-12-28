@@ -1,6 +1,5 @@
 from typing import List, Optional
 
-from pydantic.fields import ModelField
 from sqlmodel import SQLModel
 
 

@@ -2,7 +2,7 @@ import pathlib
 from typing import Union, List, Dict, Optional
 from enum import Enum
 
-import pandas as pd
+import orjson
 from fhir.resources.bundle import Bundle
 from fhir.resources import FHIRAbstractModel
 from pydantic import BaseModel
@@ -10,7 +10,6 @@ import httpx
 
 
 from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters
-from fhir_kindling.serde import flatten_resources
 
 
 class OutputFormats(Enum):
@@ -20,7 +19,6 @@ class OutputFormats(Enum):
 
     JSON = "json"
     XML = "xml"
-    CSV = "csv"
 
 
 class DataframeFormat(Enum):
@@ -54,7 +52,7 @@ class QueryResponse:
         self,
         response: Union[httpx.Response, str, dict],
         query_params: FHIRQueryParameters,
-        output_format: str = "json",
+        output_format: OutputFormats = OutputFormats.JSON,
         limit: int = None,
         count: int = None,
     ):
@@ -81,7 +79,7 @@ class QueryResponse:
             List of FHIRResourceModel objects returned by the server.
 
         """
-        if self.format == "xml":
+        if self.format == OutputFormats.XML:
             raise NotImplementedError("Resource parsing not supported for xml format")
         else:
             # return empty list if no resource matched the query
@@ -100,7 +98,7 @@ class QueryResponse:
             included in the search
 
         """
-        if self.format == "xml":
+        if self.format == OutputFormats.XML:
             raise NotImplementedError("Resource parsing not supported for xml format")
         else:
             # return empty list if no resource matched the query
@@ -124,7 +122,7 @@ class QueryResponse:
         Save the response to a file.
         Args:
             file_path: path to the file to save the response to.
-            output_format: output format one of xml|json|(csv)
+            output_format: output format one of xml|json
 
         Returns:
             None
@@ -145,45 +143,9 @@ class QueryResponse:
                 f.write(self.response)
 
         elif self.format == OutputFormats.JSON:
-            with open(file_path, "w") as f:
-                bundle = Bundle(**self.response)
-                f.write(bundle.json(indent=2))
-        elif self.format == OutputFormats.CSV:
-            if self.query_params.include_parameters:
-                for included_resources in self.included_resources:
-                    df = flatten_resources(included_resources.resources)
-                    included__resource_path = (
-                        f"{file_path.parent}/{file_path.stem}_"
-                        f"included_{included_resources.resource_type}.csv"
-                    )
-                    df.to_csv(included__resource_path, index=False)
-            df = flatten_resources(self.resources)
-            df.to_csv(file_path, index=False)
-
-    def to_dfs(
-        self, df_format: str = "list"
-    ) -> Union[List[pd.DataFrame], pd.DataFrame]:
-        """
-        Serialize the response to a list of pandas dataframes
-        Args:
-            df_format: list of dataframe (one for each resource in the response) or single dataframe
-
-        Returns:
-            List of pandas dataframes or a single dataframe containing the resources in the query
-        """
-
-        df_format = DataframeFormat(df_format)
-
-        if df_format == DataframeFormat.LIST:
-            dfs = [flatten_resources(self.resources)]
-            if self.query_params.include_parameters:
-                for included_resources in self.included_resources:
-                    dfs.append(flatten_resources(included_resources.resources))
-
-            return dfs
-
-        elif df_format == DataframeFormat.SINGLE:
-            raise NotImplementedError("Single dataframe output format not implemented")
+            with open(file_path, "wb") as f:
+                # dump the response as json using orjson and indent 2
+                f.write(orjson.dumps(self.response, option=orjson.OPT_INDENT_2))
 
     def _extract_resources(self):
         """
@@ -202,7 +164,7 @@ class QueryResponse:
 
             # process included resources
             elif entry.search.mode == "include":
-                # get list of included resources based on type, if it does not return empty list
+                # get list of included resources based on type, if it does not exist yet return empty list
                 included_resources = self._included_resources.get(
                     entry.resource.resource_type, []
                 )
@@ -226,33 +188,25 @@ class QueryResponse:
         """
 
         # if the format is xml resolve pagination and return xml string response
-        if self.format == "xml":
+        if self.format == OutputFormats.XML:
             if isinstance(response, httpx.Response):
                 response = response.content
             return response
         # otherwise, resolve json pagination and process further according to selected outcome
         else:
-            if self.format in ["json", "dict"]:
-                if isinstance(response, httpx.Response):
-                    response = response.json()
-                elif isinstance(response, dict):
-                    response = response
-                else:
-                    response = Bundle.parse_raw(response).dict()
-                return response
-            elif self.format == "bundle":
-                if isinstance(response, httpx.Response):
-                    return Bundle(**response.json())
-                elif isinstance(response, dict):
-                    return Bundle(**response)
-                else:
-                    return Bundle.parse_raw(response)
+            if isinstance(response, httpx.Response):
+                response = response.json()
+            elif isinstance(response, dict):
+                response = response
+            else:
+                response = Bundle.parse_raw(response).dict()
+            return response
 
     def __repr__(self):
-        if self.format == "xml":
+        if self.format == OutputFormats.XML:
             return f"<QueryResponse(resource={self.resource}, format=xml)>"
         if self._included_resources:
-            resources = [r.resource_type for r in self.included_resources]
+            resources = list(self._included_resources.keys())
             return (
                 f"<QueryResponse(resource={self.resource}, format=json, "
                 f"included_resources={resources})>"

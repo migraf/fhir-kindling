@@ -6,7 +6,6 @@ from sqlmodel import SQLModel
 from app.backend.models.server import Server
 from fhir_kindling.fhir_query import QueryResponse
 from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters
-from fhir.resources.fhirresourcemodel import FHIRResourceModel
 
 
 class Query(SQLModel):

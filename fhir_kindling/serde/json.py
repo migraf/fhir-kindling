@@ -9,7 +9,7 @@ def json_dict(
     resource: Union[Resource, FHIRAbstractModel] = None, json_dict: dict = None
 ) -> dict:
     if resource:
-        json_dict = orjson.loads(resource.json(exclude_none=True))
-        return json_dict
+        d = orjson.loads(resource.json(exclude_none=True))
+        return d
     elif json_dict:
         return orjson.loads(orjson.dumps(json_dict))
