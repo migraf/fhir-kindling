@@ -20,11 +20,11 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
-keywords = ["python", "fhir", "hl7", "client"]
+keywords = ["python", "fhir", "hl7", "client", "medical records", "healthcare", "data"]
 
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.7"
 "fhir.resources" = "*"
 pendulum = "*"
 tqdm = "*"

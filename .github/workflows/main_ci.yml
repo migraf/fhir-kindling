@@ -41,44 +41,29 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      #      - name: Set up Python 3.9
-      #        uses: actions/setup-python@v4
-      #        with:
-      #          python-version: 3.9
-      #          cache: "pipenv"
-      - run: pip install pipenv
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - uses: Gr1N/setup-poetry@v8
+        with:
+          poetry-version: "1.2.2"
+      - name: Install deps
+        run: poetry install --with dev --all-extras
       - run: pipenv install --dev
         name: Install dependencies
-      #      - uses: nev7n/wait_for_response@v1
-      #        name: Wait for Blaze to start
-      #        with:
-      #          url: 'http://blaze:8080/fhir'
-      #          responseCode: 200
-      #          timeout: 2000
-      #          interval: 500
-      #      - uses: nev7n/wait_for_response@v1
-      #        name: Wait for Hapi to start
-      #        with:
-      #          url: 'http://hapi:8080/fhir'
-      #          responseCode: 200
-      #          timeout: 2000
-      #          interval: 500
       - name: Prefill servers with data
         run: |
-          pipenv run pip install .
-          pipenv run pip install requests
-          pipenv run python ./testing/prefill.py
+          poetry run pip install .
+          poetry run pip install requests
+          poetry run python ./testing/prefill.py
 
       - name: Lint with flake8
         run: |
-          # stop the build if there are Python syntax errors or undefined names
-          pipenv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          pipenv run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          poetry run ruff -v .
       - name: Tests and coverage report
         run: |
-          pipenv run coverage run -m pytest fhir_kindling
-          pipenv run coverage xml
+          poetry run coverage run -m pytest fhir_kindling
+          poetry run coverage xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
@@ -88,4 +73,4 @@ jobs:
           verbose: true
 
       - name: Build and deploy documentation
-        run: pipenv run mkdocs gh-deploy --force
+        run: poetry run mkdocs gh-deploy --force

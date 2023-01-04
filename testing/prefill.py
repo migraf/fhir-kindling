@@ -34,7 +34,7 @@ def prefill():
     upload_bundle = Bundle.construct()
     upload_bundle.type = "transaction"
     upload_bundle.entry = []
-    print(f"generating upload bundle for patients")
+    print("generating upload bundle for patients")
     for i, patient in enumerate(patients):
 
         request = BundleEntryRequest(method="POST", url="/Patient")
@@ -46,7 +46,7 @@ def prefill():
     print(f"uploading server 1 ({server_1.api_address})...")
     r = requests.post(server_1.api_address, json=json_dict)
 
-    print(f"uploading conditions...")
+    print("uploading conditions...")
     condition_entries = []
     for entry in r.json()["entry"]:
         print(f"entry: {entry}")
