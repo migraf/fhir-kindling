@@ -13,6 +13,15 @@ the [pydantic](https://github.com/samuelcolvin/pydantic)
 models created by [fhir.resources](https://github.com/nazrulworld/fhir.resources). More details in
 the [Documentation](https://migraf.github.io/fhir-kindling/).
 
+## Features
+
+- Create, Read, Update, Delete resources using a FHIR server's REST API
+- Transfer resources between servers while maintaining referential integrity using server-given IDs
+- Bundle creation, validation and data management on a FHIR server via the REST API
+- Supports Hapi, Blaze and IBM FHIR servers
+- CSV serialization of query results
+- Synthetic data generation and
+
 Table of Contents
 =================
 
@@ -35,14 +44,6 @@ Table of Contents
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
 
-## Features
-
-- Create, Read, Update, Delete resources using a FHIR server's REST API
-- Transfer resources between servers while maintaining referential integrity using server-given IDs
-- Bundle creation, validation and data management on a FHIR server via the REST API
-- Supports Hapi, Blaze and IBM FHIR servers
-- CSV serialization of query results
-- Synthetic data generation and
 
 ## Installation
 

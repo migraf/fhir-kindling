@@ -24,17 +24,17 @@ keywords = ["python", "fhir", "hl7", "client", "medical records", "healthcare", 
 
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 "fhir.resources" = "*"
 pendulum = "*"
 tqdm = "*"
 orjson = "*"
 xmltodict = "*"
 pydantic = "*"
-networkx = "*"
+networkx = "^2.8.8"
 httpx = "*"
 authlib = "*"
-pandas = { version = "*", optional = true }
+pandas = { version = "^1.5.2", optional = true }
 plotly = { version = "*", optional = true }
 sqlmodel = { version = "*", optional = true }
 fastapi = { version = "*", optional = true }
@@ -50,7 +50,7 @@ all = ["pandas", "plotly", "fastapi", "uvicorn", "sqlmodel", "cachetools", "type
 
 
 [tool.poetry.group.dev.dependencies]
-pytest = "*"
+pytest = "^7.2.0"
 coverage = "*"
 tox = "*"
 mkdocs = "*"
