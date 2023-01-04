@@ -59,7 +59,7 @@ jobs:
 
       - name: Lint with ruff
         run: |
-          poetry run ruff -v .
+          poetry run ruff .
       - name: Tests and coverage report
         run: |
           poetry run coverage run -m pytest fhir_kindling

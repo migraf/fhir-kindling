@@ -8,10 +8,32 @@
 
 # :fire: FHIR Kindling
 
-CRUD library for fhir servers, with resource validation and parsing powered by
+Python client library for interacting with HL7 FHIR servers, with resource validation and parsing powered by
 the [pydantic](https://github.com/samuelcolvin/pydantic)
 models created by [fhir.resources](https://github.com/nazrulworld/fhir.resources). More details in
 the [Documentation](https://migraf.github.io/fhir-kindling/).
+
+Table of Contents
+=================
+
+* [FHIR Kindling](#fire-fhir-kindling)
+   * [Features](#features)
+   * [Installation](#installation)
+      * [Extras (optional)](#extras-optional)
+   * [Performance](#performance)
+   * [Usage](#usage)
+      * [Connecting to a FHIR server](#connecting-to-a-fhir-server)
+      * [Query resources from the server](#query-resources-from-the-server)
+         * [Basic resource query](#basic-resource-query)
+         * [Query with filters](#query-with-filters)
+         * [Including related resources in the query](#including-related-resources-in-the-query)
+         * [Query resources by reference](#query-resources-by-reference)
+      * [Add resources to the server](#add-resources-to-the-server)
+      * [Deleting/Updating resources](#deletingupdating-resources)
+      * [Transfer resources between servers](#transfer-resources-between-servers)
+   * [Credits](#credits)
+
+<!-- Created by https://github.com/ekalinin/github-markdown-toc -->
 
 ## Features
 
@@ -38,6 +60,14 @@ Fhir kindling can be used with the following extras:
 ```
 pip install fhir-kindling[ds,app] --user
 ```
+
+
+## Performance
+
+This library performs request at least 1.5 times faster than other popular python FHIR libraries.
+See [Benchmarks](benchmarks/README.md) for a more detailed description of the benchmarks.
+![Query Results](benchmarks/results/query_plot.png)
+
 
 ## Usage
 
@@ -197,11 +227,6 @@ response = server_1.transfer(server_2, conditions)
 
 ```
 
-## Performance
-
-This library performs request at least 1.5 times faster than other popular fhir libraries.
-See [Benchmarks](benchmarks/README.md) for a more detailed description of the benchmarks.
-![Query Results](benchmarks/results/query_plot.png)
 
 ## Credits
 
