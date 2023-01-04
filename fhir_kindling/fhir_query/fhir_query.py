@@ -599,6 +599,8 @@ class FHIRQuerySync(FHIRQueryBase):
                     r = self.client.get(url)
                     r.raise_for_status()
                     response = xmltodict.parse(r.text)
+                    if not response["Bundle"].get("entry", None):
+                        break
                     added_entries = response["Bundle"]["entry"]
                     entries.extend(added_entries)
                     # Stop resolving the pagination when the limit is reached
