@@ -21,17 +21,21 @@ jobs:
         env:
           hapi.fhir.default_encoding: json
           hapi.fhir.: json
-          hapi.fhir.server_address: "http://hapi:8080/fhir"
+          hapi.fhir.server_address: "http://127.0.0.1:8080/fhir"
         volumes:
           - hapi:/data/hapi
+        ports:
+          - 8080:8080
 
       blaze:
         image: "samply/blaze:latest"
         env:
           JAVA_TOOL_OPTIONS: "-Xmx2g"
-          BASE_URL: "http://blaze:8080"
+          BASE_URL: "http://127.0.0.1:8081"
         volumes:
           - blaze:/app/data
+        ports:
+          - 8081:8080
     env:
       FHIR_API_URL: http://blaze:8080/fhir
       TRANSFER_API_URL: http://hapi:8080/fhir
