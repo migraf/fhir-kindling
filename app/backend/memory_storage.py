@@ -1,5 +1,5 @@
-from fhir_kindling import FhirServer
 from app.backend.models.server import Server
+from fhir_kindling import FhirServer
 
 
 class Store:

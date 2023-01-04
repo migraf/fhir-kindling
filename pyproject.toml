@@ -1,9 +1,10 @@
 [tool.poetry]
 name = "fhir-kindling"
-version = "0.9.7"
+version = "1.0.0a0"
 description = "Python library for working with FHIR servers and resources."
 authors = ["Michael Graf <michael.graf3110@gmail.com>"]
-readme = ["README.md", "CHANGELOG.md"]
+# todo add changelog when multiple readme bug is fixed
+readme = "README.md"
 packages = [{ include = "fhir_kindling" }]
 homepage = "https://migraf.github.io/fhir-kindling/"
 repository = "https://github.com/migraf/fhir-kindling"
@@ -18,7 +19,6 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Topic :: Scientific/Engineering :: Medical Science Apps",
 ]
 keywords = ["python", "fhir", "hl7", "client"]
 
@@ -46,6 +46,7 @@ types-cachetools = { version = "*", optional = true }
 [tool.poetry.extras]
 ds = ["pandas", "plotly"]
 app = ["fastapi", "uvicorn", "sqlmodel", "cachetools", "types-cachetools"]
+all = ["pandas", "plotly", "fastapi", "uvicorn", "sqlmodel", "cachetools", "types-cachetools"]
 
 
 [tool.poetry.group.dev.dependencies]
@@ -62,6 +63,7 @@ rise = "*"
 python-dotenv = "*"
 black = "^22.12.0"
 ruff = "^0.0.195"
+pre-commit = "^2.21.0"
 
 
 [tool.ruff]
@@ -69,7 +71,7 @@ line-length = 120
 
 
 # Enable Pyflakes `E` and `F` codes by default.
-select = ["E", "F"]
+select = ["E", "F", "I001"]
 ignore = []
 per-file-ignores = { "*/__init__.py" = ["F401"] }
 

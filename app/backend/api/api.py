@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 
-from app.backend.api.endpoints import resources, server, query
-
+from app.backend.api.endpoints import query, resources, server
 
 api_router = APIRouter()
 

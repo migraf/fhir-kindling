@@ -1,6 +1,7 @@
-import pytest
 import os
-from dotenv import load_dotenv, find_dotenv
+
+import pytest
+from dotenv import find_dotenv, load_dotenv
 
 from fhir_kindling import FhirServer
 
@@ -13,17 +14,6 @@ def api_url():
     load_dotenv(find_dotenv())
 
     return os.getenv("FHIR_API_URL", "http://test.fhir.org/r4")
-
-
-@pytest.fixture(scope="module")
-def oidc_server(api_url):
-    server = FhirServer(
-        api_address=api_url,
-        client_id=os.getenv("CLIENT_ID"),
-        client_secret=os.getenv("CLIENT_SECRET"),
-        oidc_provider_url=os.getenv("OIDC_PROVIDER_URL"),
-    )
-    return server
 
 
 @pytest.fixture(scope="session")

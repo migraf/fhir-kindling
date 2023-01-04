@@ -1,13 +1,12 @@
-from uuid import uuid4
-from typing import Tuple, List
-
-import pendulum
-import pandas as pd
 import random
+from typing import List, Tuple
+from uuid import uuid4
 
-from fhir.resources.reference import Reference
-from fhir.resources.patient import Patient
+import pandas as pd
+import pendulum
 from fhir.resources.humanname import HumanName
+from fhir.resources.patient import Patient
+from fhir.resources.reference import Reference
 
 from fhir_kindling.generators.names import FIRST_NAMES, LAST_NAMES
 

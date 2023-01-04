@@ -1,13 +1,12 @@
 import pathlib
-from typing import Union, List, Dict, Optional
 from enum import Enum
+from typing import Dict, List, Optional, Union
 
-import orjson
-from fhir.resources.bundle import Bundle
-from fhir.resources import FHIRAbstractModel
-from pydantic import BaseModel
 import httpx
-
+import orjson
+from fhir.resources import FHIRAbstractModel
+from fhir.resources.bundle import Bundle
+from pydantic import BaseModel
 
 from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters
 

@@ -1,17 +1,17 @@
 import random
-from typing import List, Union, Optional, Type
+from typing import List, Optional, Type, Union
 from uuid import uuid4
 
-from fhir.resources import get_fhir_model_class, FHIRAbstractModel
+from fhir.resources import FHIRAbstractModel, get_fhir_model_class
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
+from fhir.resources.fhirtypes import ReferenceType
 from fhir.resources.patient import Patient
 from fhir.resources.reference import Reference
 from pydantic import BaseModel, Field
-from fhir.resources.fhirtypes import ReferenceType
 
 from fhir_kindling import FhirServer
-from fhir_kindling.generators.resource_generator import ResourceGenerator
 from fhir_kindling.generators.patient import PatientGenerator
+from fhir_kindling.generators.resource_generator import ResourceGenerator
 from fhir_kindling.util import get_resource_fields
 
 

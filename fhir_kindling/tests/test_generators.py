@@ -1,23 +1,23 @@
 import os
 
+import pendulum
 import pytest
-from dotenv import load_dotenv, find_dotenv
+from dotenv import find_dotenv, load_dotenv
+from fhir.resources.codeableconcept import CodeableConcept
+from fhir.resources.coding import Coding
+from fhir.resources.patient import Patient
+from fhir.resources.reference import Reference
 from pydantic import ValidationError
 
 from fhir_kindling import FhirServer
-from fhir_kindling.generators.resource_generator import (
-    ResourceGenerator,
-    GeneratorParameters,
-    FieldValue,
-)
-from fhir.resources.patient import Patient
-from fhir.resources.codeableconcept import CodeableConcept
-from fhir.resources.coding import Coding
-from fhir.resources.reference import Reference
-from fhir_kindling.generators.patient import PatientGenerator
-from fhir_kindling.generators.field_generator import FieldGenerator
 from fhir_kindling.generators.dataset import DatasetGenerator
-import pendulum
+from fhir_kindling.generators.field_generator import FieldGenerator
+from fhir_kindling.generators.patient import PatientGenerator
+from fhir_kindling.generators.resource_generator import (
+    FieldValue,
+    GeneratorParameters,
+    ResourceGenerator,
+)
 
 
 @pytest.fixture
@@ -128,22 +128,25 @@ def test_generator_field_parameters():
         choices=["2018-01-01", "2018-01-02"],
         choice_probabilities=[0.5, 0.5],
     )
+
+    assert params.field == "birthdate"
+
     with pytest.raises(ValidationError):
-        params = FieldGenerator(
+        FieldGenerator(
             field="birthdate",
             choices=["2018-01-01", "2018-01-02"],
             choice_probabilities=[0.5, 0.3, 0.2],
         )
 
     with pytest.raises(ValidationError):
-        params = FieldGenerator(
+        FieldGenerator(
             field="birthdate",
             choices=["2018-01-01", "2018-01-02"],
             choice_probabilities=[0.5, 0.6],
         )
 
     with pytest.raises(ValidationError):
-        params = FieldGenerator(
+        FieldGenerator(
             field="birthdate",
             choices=["2018-01-01", "2018-01-02"],
             choice_probabilities=[0.5, 0.5],
@@ -151,7 +154,7 @@ def test_generator_field_parameters():
         )
 
     with pytest.raises(ValidationError):
-        params = FieldGenerator(field="birthdate")
+        FieldGenerator(field="birthdate")
 
 
 def test_field_generator():

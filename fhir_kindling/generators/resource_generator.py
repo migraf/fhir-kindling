@@ -1,7 +1,8 @@
-from typing import List, Union, Optional, Any
+from typing import Any, List, Optional, Union
+from uuid import uuid4
+
 from fhir.resources import get_fhir_model_class
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
-from uuid import uuid4
 from fhir.resources.resource import Resource
 from pydantic import BaseModel
 

@@ -1,7 +1,8 @@
 from typing import List
+
+import pandas as pd
 import plotly.graph_objects as go
 from fhir.resources.resource import Resource
-import pandas as pd
 
 
 def plot_resource_field(

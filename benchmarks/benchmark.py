@@ -1,18 +1,16 @@
+import asyncio
 import json
 import os
 import time
-import asyncio
 
-from fhir_kindling.generators import PatientGenerator
-from fhir_kindling import FhirServer
-
-from fhirpy import SyncFHIRClient, AsyncFHIRClient
-from fhirclient import client
 import fhirclient.models.patient as p
-
-import plotly.express as px
 import pandas as pd
+import plotly.express as px
+from fhirclient import client
+from fhirpy import AsyncFHIRClient, SyncFHIRClient
 
+from fhir_kindling import FhirServer
+from fhir_kindling.generators import PatientGenerator
 
 N = 10000
 
@@ -151,5 +149,5 @@ if __name__ == "__main__":
     loop.run_until_complete(benchmark_kindling_async(benchmark_server, query_results))
     loop.run_until_complete(benchmark_fhirpy_async(benchmark_server, query_results))
     plot_results(query_results)
-    with open(f"results/query-results.json", "w") as f:
+    with open("results/query-results.json", "w") as f:
         json.dump(query_results, f)

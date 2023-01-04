@@ -1,7 +1,8 @@
 from typing import List
+
 import pandas as pd
+from pandas.api.types import is_categorical_dtype, is_numeric_dtype, is_string_dtype
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
-from pandas.api.types import is_numeric_dtype, is_string_dtype, is_categorical_dtype
 
 
 def is_k_anonymized(

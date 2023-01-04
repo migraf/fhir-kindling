@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
-from app.backend.models.server import Server
 from app.backend.memory_storage import store
+from app.backend.models.server import Server
 
 router = APIRouter()
 

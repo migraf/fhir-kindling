@@ -1,9 +1,9 @@
-from .fhir_query import FHIRQuerySync, FHIRQueryAsync
-from .query_response import QueryResponse
+from .fhir_query import FHIRQueryAsync, FHIRQuerySync
 from .query_parameters import (
-    QueryOperators,
     FHIRQueryParameters,
     FieldParameter,
     IncludeParameter,
+    QueryOperators,
     ReverseChainParameter,
 )
+from .query_response import QueryResponse

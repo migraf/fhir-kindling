@@ -15,6 +15,11 @@ Add support for Python 3.9+.
 - Query response `.save()` method now only supports saving as XML or JSON file. To serialize resources and bundles use
     the `flatten` function from the `serde` package. Requires installation of the `ds` extra.
 
+### Added
+
+### Removed
+- Removed `to_dfs()` method on query response object. Use `flatten` function from the `serde` package instead.
+    Requires installation of the `ds` extra.
 ## [0.9.0] - 2022-07-21
 Asynchronous API for CRUD operations against fhir servers.
 

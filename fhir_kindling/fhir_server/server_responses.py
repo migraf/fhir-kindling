@@ -1,8 +1,9 @@
 from typing import List
-from httpx import Response
-from fhir.resources.resource import Resource
+
 from fhir.resources.bundle import Bundle
 from fhir.resources.reference import Reference
+from fhir.resources.resource import Resource
+from httpx import Response
 from pydantic import BaseModel
 
 from fhir_kindling.fhir_query import FHIRQueryParameters

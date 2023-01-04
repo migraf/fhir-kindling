@@ -1,8 +1,8 @@
 from abc import ABC
-
-from pydantic import BaseModel, validator, root_validator
 from enum import Enum
-from typing import Union, Optional, List, Tuple
+from typing import List, Optional, Tuple, Union
+
+from pydantic import BaseModel, root_validator, validator
 
 from fhir_kindling.util.resources import valid_resource_name
 

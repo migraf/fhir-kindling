@@ -1,5 +1,5 @@
-from typing import Union, List
 from collections.abc import MutableMapping
+from typing import List, Union
 
 import pandas as pd
 from fhir.resources import FHIRAbstractModel

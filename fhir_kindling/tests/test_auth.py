@@ -1,12 +1,14 @@
+import os
+from unittest import mock
+
 import pytest
+from httpx import Auth
+
 from fhir_kindling.fhir_server.auth import (
+    BearerAuth,
     generate_auth,
     load_environment_auth_vars,
-    BearerAuth,
 )
-from httpx import Auth
-from unittest import mock
-import os
 
 
 def test_generate_auth():

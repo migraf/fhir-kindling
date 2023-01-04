@@ -1,10 +1,10 @@
 import os
+
 import pytest
-from dotenv import load_dotenv, find_dotenv
+from dotenv import find_dotenv, load_dotenv
 
 from fhir_kindling import FhirServer
-
-from fhir_kindling.figures import server_summary_plot, plot_resource_field
+from fhir_kindling.figures import plot_resource_field, server_summary_plot
 
 
 @pytest.fixture

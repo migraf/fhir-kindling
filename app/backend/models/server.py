@@ -1,6 +1,7 @@
 from typing import Optional
-from sqlmodel import SQLModel, Field
+
 from pydantic import root_validator
+from sqlmodel import Field, SQLModel
 
 
 class ServerCredentials(SQLModel):

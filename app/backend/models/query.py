@@ -1,5 +1,5 @@
-from typing import Optional, List, Any
 from datetime import datetime
+from typing import Any, List, Optional
 
 from sqlmodel import SQLModel
 

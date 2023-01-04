@@ -1,24 +1,21 @@
 import json
-
-import pandas as pd
-import pytest
 import os
 
+import pytest
 import xmltodict
-from dotenv import load_dotenv, find_dotenv
+from dotenv import find_dotenv, load_dotenv
 from fhir.resources.patient import Patient
 from pydantic import ValidationError
 
 from fhir_kindling import FhirServer
 from fhir_kindling.fhir_query.query_parameters import (
     FHIRQueryParameters,
-    IncludeParameter,
     FieldParameter,
-    ReverseChainParameter,
+    IncludeParameter,
     QueryOperators,
     QueryParameter,
+    ReverseChainParameter,
 )
-from fhir_kindling.fhir_query.fhir_query import FHIRQueryBase
 
 
 @pytest.fixture
@@ -1124,11 +1121,10 @@ def test_query_param_abstract():
         query_param.to_url_param()
 
     with pytest.raises(NotImplementedError):
-        param = QueryParameter.from_url_param("sdada")
+        QueryParameter.from_url_param("sdada")
 
 
 def test_field_query_param():
-    resource = "Patient"
     field_param = FieldParameter(
         **dict(field="active", value=True, operator=QueryOperators.eq)
     )
@@ -1149,17 +1145,17 @@ def test_field_query_param():
 
     # list value arg without in operator should fail
     with pytest.raises(ValidationError):
-        field_param = FieldParameter(
+        FieldParameter(
             **dict(field="active", value=["hello", "world"], operator=QueryOperators.eq)
         )
 
     # in operator only for list value arg
     with pytest.raises(ValidationError):
-        field_param = FieldParameter(
+        FieldParameter(
             **dict(field="active", value="hello", operator=QueryOperators.in_)
         )
     with pytest.raises(ValidationError):
-        field_param = FieldParameter(
+        FieldParameter(
             **dict(
                 field="active", value=[32, "sdsa".encode()], operator=QueryOperators.in_
             )
@@ -1167,7 +1163,7 @@ def test_field_query_param():
 
     # operator not included in enum
     with pytest.raises(ValidationError):
-        field_param = FieldParameter(field="active", operator="hello", value=True)
+        FieldParameter(field="active", operator="hello", value=True)
 
     # parameter generation from url snippet
 
@@ -1353,7 +1349,7 @@ def test_query_xml(server: FhirServer):
     assert isinstance(result.response, str)
 
     with pytest.raises(NotImplementedError):
-        includes = result.included_resources
+        result.included_resources
 
     query = server.query("Patient", output_format="xml")
     result = query.limit(100, count=10)
@@ -1363,10 +1359,6 @@ def test_query_xml(server: FhirServer):
     query = server.query("BodyStructure", output_format="xml")
     result = query.all()
     print(result)
-
-
-def test_query_base():
-    pass
 
 
 def test_query_json(server):
@@ -1380,10 +1372,10 @@ def test_query_json(server):
     assert not includes
 
     with pytest.raises(ValueError):
-        resp = server.query(1, output_format="json2")
+        server.query(1, output_format="json2")
 
     with pytest.raises(ValueError):
-        resp = server.query()
+        server.query()
 
 
 def test_query_first(server):
@@ -1405,14 +1397,10 @@ def test_query_limit(server: FhirServer):
 
 def test_query_with_callback(server):
     print("callback1")
-    result = server.query("Patient").all(
-        page_callback=lambda: print("callback"), count=50
-    )
+    server.query("Patient").all(page_callback=lambda: print("callback"), count=50)
 
     print("callback2")
-    result = server.query("Patient").all(
-        page_callback=lambda x: print(len(x)), count=20
-    )
+    server.query("Patient").all(page_callback=lambda x: print(len(x)), count=20)
 
     print("callback3")
     with pytest.raises(ValueError):
@@ -1666,7 +1654,6 @@ def test_query_response_include(server):
 def test_query_response_save(server):
     xml_file = "test_query_response_save.xml"
     json_file = "test_query_response_save.json"
-    csv_file = "test_query_response_save.csv"
 
     # test saving single resource and xml
     query_resource = "Condition"
@@ -1730,7 +1717,7 @@ async def test_query_async_xml(server):
     assert response
 
     with pytest.raises(NotImplementedError):
-        resources = response.resources
+        response.resources
 
     # pagination
     resp = await query.limit(100, count=10)

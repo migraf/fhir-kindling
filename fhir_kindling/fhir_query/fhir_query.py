@@ -1,26 +1,25 @@
-from typing import Union, Callable, List, Any, TypeVar
+from inspect import signature
+from typing import Any, Callable, List, TypeVar, Union
 
+import fhir.resources
+import httpx
 import orjson
+import xmltodict
+from fhir.resources import FHIRAbstractModel
 from fhir.resources.bundle import Bundle
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
-from fhir.resources import FHIRAbstractModel
-import fhir.resources
-from inspect import signature
-import xmltodict
-import collections
 
-import httpx
-from fhir_kindling.fhir_query.query_response import (
-    QueryResponse,
-    ResponseStatusCodes,
-    OutputFormats,
-)
 from fhir_kindling.fhir_query.query_parameters import (
     FHIRQueryParameters,
-    IncludeParameter,
     FieldParameter,
-    ReverseChainParameter,
+    IncludeParameter,
     QueryOperators,
+    ReverseChainParameter,
+)
+from fhir_kindling.fhir_query.query_response import (
+    OutputFormats,
+    QueryResponse,
+    ResponseStatusCodes,
 )
 
 T = TypeVar("T", bound="FHIRQueryBase")

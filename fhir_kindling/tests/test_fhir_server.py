@@ -1,20 +1,18 @@
 import os
 import pprint
-
-import pytest
-from fhir.resources import FHIRAbstractModel
 from unittest import mock
 
+import pytest
+from dotenv import find_dotenv, load_dotenv
+from fhir.resources import FHIRAbstractModel
+from fhir.resources.address import Address
+from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
+from fhir.resources.organization import Organization
+from fhir.resources.patient import Patient
 from fhir.resources.reference import Reference
 from httpx import BasicAuth
 
-from fhir_kindling import FhirServer, FHIRQuerySync
-from dotenv import load_dotenv, find_dotenv
-from fhir.resources.organization import Organization
-from fhir.resources.address import Address
-from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
-from fhir.resources.patient import Patient
-
+from fhir_kindling import FHIRQuerySync, FhirServer
 from fhir_kindling.fhir_query import FHIRQueryParameters
 from fhir_kindling.generators import PatientGenerator
 from fhir_kindling.serde.json import json_dict
@@ -311,8 +309,8 @@ def test_server_query_validation(fhir_server: FhirServer):
 
 
 def test_upload_single_resource(fhir_server: FhirServer):
-    from fhir.resources.organization import Organization
     from fhir.resources.address import Address
+    from fhir.resources.organization import Organization
 
     org = Organization.construct()
     org.name = "Test Create Org"
@@ -325,6 +323,8 @@ def test_upload_single_resource(fhir_server: FhirServer):
     response = fhir_server.add(org)
 
     response2 = fhir_server.add(org.dict())
+
+    assert response2
 
     with pytest.raises(ValueError):
         fhir_server.add({"dshadk": "sjdhka"})
@@ -564,7 +564,7 @@ def test_transfer(fhir_server: FhirServer):
     transfer_url = os.getenv("TRANSFER_API_URL", "http://localhost:9091/fhir")
     hapi_server = FhirServer(api_address=transfer_url, timeout=None)
 
-    conditions_before = hapi_server.query("Condition").all().resources
+    # conditions_before = hapi_server.query("Condition").all().resources
 
     response = server.transfer(hapi_server, query_result=conditions)
 
@@ -639,6 +639,7 @@ async def test_fhir_server_query_async(fhir_server: FhirServer):
     query = fhir_server.query_async(query_string="/Patient?")
     response = await query.limit(10)
     assert response
+
 
 @pytest.mark.asyncio
 async def test_add_bundle_async(fhir_server: FhirServer, org_bundle):

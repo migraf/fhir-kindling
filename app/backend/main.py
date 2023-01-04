@@ -1,3 +1,4 @@
+import pathlib
 from typing import Optional
 
 from fastapi import FastAPI
@@ -5,9 +6,8 @@ from sqlmodel import Field, Session, SQLModel, select
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
-from app.backend.db import engine
 from app.backend.api.api import api_router
-import pathlib
+from app.backend.db import engine
 
 
 class Hero(SQLModel, table=True):

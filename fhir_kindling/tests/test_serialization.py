@@ -1,10 +1,15 @@
 import os
 
+import pandas as pd
 import pytest
-from dotenv import load_dotenv, find_dotenv
+from dotenv import find_dotenv, load_dotenv
 
 from fhir_kindling import FhirServer
-from fhir_kindling.serde.flatten import flatten_resource, flatten_resources
+from fhir_kindling.serde.flatten import (
+    flatten_resource,
+    flatten_resources,
+    flatten_response,
+)
 
 
 @pytest.fixture
@@ -28,12 +33,33 @@ def server(api_url):
     return server
 
 
+def test_flatten(server):
+
+    query_resource = "Condition"
+    search_param = "subject"
+    query = server.query("Patient")
+    query = query.include(query_resource, search_param, reverse=True)
+    print(query.query_parameters)
+    conditions = query.all()
+    print(conditions)
+
+
+def test_flatten_response(server):
+    patients = server.query("Patient").limit(30)
+
+    patients_df = flatten_response(patients)
+    assert isinstance(patients_df, pd.DataFrame)
+    assert len(patients_df) == 30
+
+
 def test_flatten_resource(server):
     patient = server.query("Patient").limit(1).resources[0]
     flat_patient = flatten_resource(patient)
+    print(flat_patient)
 
     condition = server.query("Condition").limit(1).resources[0]
     flat_condition = flatten_resource(condition)
+    print(flat_condition)
 
     # observation = server.query("Observation").limit(1).resources[0]
     # flat_obs = flatten_resource(observation)

@@ -2,25 +2,25 @@ import os
 import uuid
 
 import pytest
+from dotenv import find_dotenv, load_dotenv
 from fhir.resources.condition import Condition
 from fhir.resources.encounter import Encounter
+from fhir.resources.observation import Observation
 from fhir.resources.organization import Organization
 from fhir.resources.patient import Patient
-from fhir.resources.observation import Observation
 
 from fhir_kindling import FhirServer
 from fhir_kindling.generators import PatientGenerator
-from fhir_kindling.util.resources import (
-    get_resource_fields,
-    check_resource_contains_field,
-)
 from fhir_kindling.util.references import (
-    extract_references,
     _resource_ids_from_query_response,
     check_missing_references,
+    extract_references,
     reference_graph,
 )
-from dotenv import load_dotenv, find_dotenv
+from fhir_kindling.util.resources import (
+    check_resource_contains_field,
+    get_resource_fields,
+)
 
 
 @pytest.fixture

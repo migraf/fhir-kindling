@@ -1,10 +1,9 @@
-from typing import Union, List, Type
+from typing import List, Type, Union
 
-from pydantic.fields import ModelField
-
-from fhir.resources.resource import Resource
-from fhir.resources import get_fhir_model_class, FHIRAbstractModel
+from fhir.resources import FHIRAbstractModel, get_fhir_model_class
 from fhir.resources.fhirtypes import ResourceType
+from fhir.resources.resource import Resource
+from pydantic.fields import ModelField
 
 
 def get_resource_fields(

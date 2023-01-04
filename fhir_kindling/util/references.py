@@ -1,12 +1,12 @@
-from typing import Union, List, Tuple
+from typing import List, Tuple, Union
 
-from fhir.resources.resource import Resource
-from fhir.resources.fhirtypes import ReferenceType
+import networkx as nx
 from fhir.resources import FHIRAbstractModel
+from fhir.resources.fhirtypes import ReferenceType
+from fhir.resources.resource import Resource
 
 from fhir_kindling.fhir_query.query_response import QueryResponse
 from fhir_kindling.util.resources import get_resource_fields
-import networkx as nx
 
 
 def extract_references(resource: Resource) -> List[Tuple[str, str, str, bool]]:
