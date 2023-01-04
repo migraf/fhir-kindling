@@ -37,8 +37,8 @@ jobs:
         ports:
           - 8081:8080
     env:
-      FHIR_API_URL: http://blaze:8080/fhir
-      TRANSFER_API_URL: http://hapi:8080/fhir
+      FHIR_API_URL: http://127.0.0.1:8080/fhir
+      TRANSFER_API_URL: http://127.0.0.1:8081/fhir
 
 
     steps:
