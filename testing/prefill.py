@@ -3,7 +3,6 @@ import time
 
 import orjson
 import requests
-from datetime import datetime, timedelta
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
@@ -19,7 +18,6 @@ from fhir_kindling.generators import (
 def check_server_status(server_1: str, server_2: str, ):
     increments = [5, 10, 30, 30, 60, 120]
     for increment in increments:
-
         try:
             print(f"checking server 1 ({server_1})...")
             r = requests.get(server_1 + "/Patient?")
