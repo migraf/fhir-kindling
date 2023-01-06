@@ -1,7 +1,9 @@
 import os
+import time
 
 import orjson
 import requests
+from datetime import datetime, timedelta
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
@@ -14,9 +16,49 @@ from fhir_kindling.generators import (
 )
 
 
+def check_server_status(server_1: str, server_2: str, ):
+    increments = [5, 10, 30]
+    for increment in increments:
+
+        try:
+            print(f"checking server 1 ({server_1})...")
+            r = requests.get(server_1)
+            print(r.text)
+            print(r.headers)
+            r.raise_for_status()
+            server_1_status = True
+        except Exception as e:
+            print("Server 1 is down")
+            print(e)
+            server_1_status = False
+
+        try:
+            print(f"checking server 2 ({server_2})...")
+            r = requests.get(server_2)
+            print(r.text)
+            print(r.headers)
+            r.raise_for_status()
+            server_2_status = True
+        except Exception as e:
+            print("Server 2 is down")
+            print(e)
+            server_2_status = False
+
+        if server_1_status and server_2_status:
+            return True
+        else:
+            print(f"waiting {increment} seconds...")
+            time.sleep(increment)
+    return False
+
+
 def prefill():
     server_1 = os.getenv("FHIR_API_URL", "http://localhost:9090/fhir")
     server_2 = os.getenv("TRANSFER_API_URL", "http://localhost:9091/fhir")
+
+    if not check_server_status(server_1, server_2):
+        print("Servers are down. Exiting...")
+        raise Exception("Servers are down. Exiting...")
 
     assert server_1
     assert server_2
@@ -36,7 +78,6 @@ def prefill():
     upload_bundle.entry = []
     print("generating upload bundle for patients")
     for i, patient in enumerate(patients):
-
         request = BundleEntryRequest(method="POST", url="/Patient")
 
         entry = BundleEntry(request=request, resource=patient)
