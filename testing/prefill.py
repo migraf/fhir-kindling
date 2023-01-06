@@ -47,6 +47,7 @@ def check_server_status(server_1: str, server_2: str, ):
         else:
             print(f"waiting {increment} seconds...")
             time.sleep(increment)
+
     return False
 
 
@@ -106,6 +107,7 @@ def prefill():
     r = requests.post(server_1.api_address, json=json_dict)
 
     r.raise_for_status()
+    time.sleep(5)
     # print(r.headers)
     # print(f"uploading server 2 ({server_2.api_address})...")
     # r = requests.post(server_2.api_address, json=json_dict)
