@@ -6,19 +6,6 @@
 ![PyPI](https://img.shields.io/pypi/v/fhir_kindling)
 
 
-<style
-  type="text/css">
-.heading {
-    font-size: 5em;
-}
-
-.header {
-    display: flex;
-    justify-content: center;
-    /*align-items: center;*/
-    /*text-align: center;*/
-}
-</style>
 <div class="header">
     <img src="./docs/logo/kindling_logo_no_bg.png" alt="logo" width=200px height=200px/>
     <h1 class="heading">FHIR Kindling</h1>
