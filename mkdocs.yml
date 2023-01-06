@@ -1,6 +1,8 @@
 site_name: FHIR Kindling
 theme:
   name: material
+  logo: 'assets/logo.png'
+  favicon: 'assets/logo.png'
   features:
     - navigation.tracking
     - navigation.expand

@@ -22,7 +22,7 @@ def check_server_status(server_1: str, server_2: str, ):
 
         try:
             print(f"checking server 1 ({server_1})...")
-            r = requests.get(server_1)
+            r = requests.get(server_1 + "/Patient?")
             print(r.text)
             print(r.headers)
             r.raise_for_status()
@@ -34,7 +34,7 @@ def check_server_status(server_1: str, server_2: str, ):
 
         try:
             print(f"checking server 2 ({server_2})...")
-            r = requests.get(server_2)
+            r = requests.get(server_2 + "/Patient?")
             print(r.text)
             print(r.headers)
             r.raise_for_status()

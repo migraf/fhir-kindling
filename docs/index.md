@@ -1,4 +1,23 @@
-# :fire: FHIR Kindling
+<style>
+.heading {
+    font-size: 4em;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+</style>
+<div class="heading">
+<img src="logo/kindling_logo_no_bg.png" alt="logo" height=300px width=300px>
+FHIR Kindling
+</div>
 
 CRUD library for fhir servers, with resource validation and parsing powered by
 [pydantic](https://github.com/samuelcolvin/pydantic)
