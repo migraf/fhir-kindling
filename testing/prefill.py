@@ -17,7 +17,7 @@ from fhir_kindling.generators import (
 
 
 def check_server_status(server_1: str, server_2: str, ):
-    increments = [5, 10, 30]
+    increments = [5, 10, 30, 30, 60, 120]
     for increment in increments:
 
         try:
