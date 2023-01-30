@@ -50,7 +50,7 @@ all = ["pandas", "plotly", "fastapi", "uvicorn", "sqlmodel", "cachetools", "type
 
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.2.0"
+pytest = "^7.2.1"
 coverage = "*"
 tox = "*"
 mkdocs = "*"
