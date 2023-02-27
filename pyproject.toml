@@ -30,7 +30,7 @@ tqdm = "*"
 orjson = "*"
 xmltodict = "*"
 pydantic = "*"
-networkx = "^2.8.8"
+networkx = "*"
 httpx = "*"
 authlib = "*"
 pandas = { version = "^1.5.2", optional = true }
@@ -52,7 +52,7 @@ pytest-asyncio = "*"
 rise = "*"
 python-dotenv = "*"
 black = "^22.12.0"
-ruff = "^0.0.195"
+ruff = "*"
 pre-commit = "^2.21.0"
 
 
