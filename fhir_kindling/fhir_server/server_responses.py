@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fhir.resources.bundle import Bundle
 from fhir.resources.reference import Reference
@@ -112,7 +112,7 @@ class ResourceSummary(BaseModel):
 
 
 class ServerSummary(BaseModel):
-    name: str
+    name: Optional[str] = None
     resources: List[ResourceSummary]
 
     @property

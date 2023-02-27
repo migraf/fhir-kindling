@@ -14,7 +14,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -36,17 +35,10 @@ httpx = "*"
 authlib = "*"
 pandas = { version = "^1.5.2", optional = true }
 plotly = { version = "*", optional = true }
-sqlmodel = { version = "*", optional = true }
-fastapi = { version = "*", optional = true }
-uvicorn = { version = "*", optional = true }
-cachetools = { version = "*", optional = true }
-types-cachetools = { version = "*", optional = true }
 
 
 [tool.poetry.extras]
 ds = ["pandas", "plotly"]
-app = ["fastapi", "uvicorn", "sqlmodel", "cachetools", "types-cachetools"]
-all = ["pandas", "plotly", "fastapi", "uvicorn", "sqlmodel", "cachetools", "types-cachetools"]
 
 
 [tool.poetry.group.dev.dependencies]
@@ -71,7 +63,7 @@ line-length = 120
 # Enable Pyflakes `E` and `F` codes by default.
 select = ["E", "F", "I001"]
 ignore = []
-per-file-ignores = { "*/__init__.py" = ["F401"] }
+per-file-ignores = { "**/__init__.py" = ["F401"] }
 
 # Exclude a variety of commonly ignored directories.
 exclude = [
