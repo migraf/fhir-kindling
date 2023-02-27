@@ -1,4 +1,4 @@
-from typing import List, Type, Union
+from typing import List, Tuple, Type, Union
 
 from fhir.resources import FHIRAbstractModel, get_fhir_model_class
 from fhir.resources.fhirtypes import ResourceType
@@ -26,7 +26,9 @@ def get_resource_fields(
     return fields
 
 
-def valid_resource_name(resource_name: str) -> str:
+def valid_resource_name(
+    resource_name: str, strict: bool = True
+) -> Union[str, Tuple[str, bool]]:
     """
     Checks if the given resource name is a valid FHIR resource name.
     Args:
@@ -37,9 +39,13 @@ def valid_resource_name(resource_name: str) -> str:
     """
     try:
         get_fhir_model_class(resource_name)
+        if strict:
+            return resource_name
+        return resource_name, True
     except KeyError:
-        raise ValueError(f"Invalid resource name: {resource_name}")
-    return resource_name
+        if strict:
+            raise ValueError(f"Invalid resource name: {resource_name}")
+        return resource_name, False
 
 
 def check_resource_contains_field(

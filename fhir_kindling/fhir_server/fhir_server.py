@@ -22,9 +22,9 @@ from fhir_kindling.fhir_server.auth import BearerAuth, auth_info_from_env
 from fhir_kindling.fhir_server.server_responses import (
     BundleCreateResponse,
     ResourceCreateResponse,
-    ServerSummary,
     TransferResponse,
 )
+from fhir_kindling.fhir_server.summary import ServerSummary, create_server_summary
 from fhir_kindling.serde.json import json_dict
 from fhir_kindling.util.references import check_missing_references, reference_graph
 from fhir_kindling.util.resources import valid_resource_name
@@ -633,13 +633,15 @@ class FhirServer:
 
         return response
 
-    def summary(self) -> ServerSummary:
+    def summary(self, display: bool = True) -> ServerSummary:
         """
         Create a summary for the server. Contains resource counts for all resources available on the server.
+        Args:
+            display: whether to display a progress bar
         Returns:
 
         """
-        summary = self._make_server_summary()
+        summary = create_server_summary(self, self.rest_resources, display)
         return summary
 
     @property
@@ -870,26 +872,6 @@ class FhirServer:
             timeout=self._timeout,
         )
         return client
-
-    def _make_server_summary(self, include_empty: bool = False) -> ServerSummary:
-        resources = []
-        summary = {"name": self.api_address}
-        with self._sync_client() as client:
-            for resource in self.rest_resources:
-                url = self.api_address + "/" + resource + "?_summary=count"
-                r = client.get(url)
-                r.raise_for_status()
-
-                if r.json()["total"] > 0 or include_empty:
-                    resource_dict = {
-                        "resource": resource,
-                        "count": r.json().get("total"),
-                    }
-                    resources.append(resource_dict)
-
-            summary["resources"] = resources
-        summary = ServerSummary(**summary)
-        return summary
 
     def _get_oidc_token(self):
         # get a new token if it is expired or not yet set

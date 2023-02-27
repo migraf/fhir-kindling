@@ -215,7 +215,7 @@ class ReverseChainParameter(QuerySearchParameter):
     operator: QueryOperators
     value: Union[int, float, list, bool, str]
 
-    _normalize_resource = validator("resource", allow_reuse=True)(valid_resource_name)
+    # _normalize_resource = validator("resource", allow_reuse=True)(valid_resource_name)
 
     class Config:
         smart_union = True
@@ -274,7 +274,7 @@ class FHIRQueryParameters(BaseModel):
     include_parameters: Optional[List[IncludeParameter]] = None
     has_parameters: Optional[List[ReverseChainParameter]] = None
 
-    _normalize_resource = validator("resource", allow_reuse=True)(valid_resource_name)
+    # _normalize_resource = validator("resource", allow_reuse=True)(valid_resource_name)
 
     @root_validator
     def validate_parameters(cls, values):

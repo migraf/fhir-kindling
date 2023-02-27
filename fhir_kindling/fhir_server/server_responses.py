@@ -1,10 +1,9 @@
-from typing import List, Optional
+from typing import List
 
 from fhir.resources.bundle import Bundle
 from fhir.resources.reference import Reference
 from fhir.resources.resource import Resource
 from httpx import Response
-from pydantic import BaseModel
 
 from fhir_kindling.fhir_query import FHIRQueryParameters
 
@@ -102,19 +101,6 @@ class TransferResponse:
 
 
 class UpdateResponse:
+    # TODO: implement
     def __init__(self, server_response: Response):
         pass
-
-
-class ResourceSummary(BaseModel):
-    resource: str
-    count: int
-
-
-class ServerSummary(BaseModel):
-    name: Optional[str] = None
-    resources: List[ResourceSummary]
-
-    @property
-    def available_resources(self) -> List[ResourceSummary]:
-        return [r for r in self.resources if r.count > 0]
