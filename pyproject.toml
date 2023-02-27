@@ -30,7 +30,7 @@ tqdm = "*"
 orjson = "*"
 xmltodict = "*"
 pydantic = "*"
-networkx = "^2.8.8"
+networkx = "^3.0"
 httpx = "*"
 authlib = "*"
 pandas = { version = "^1.5.2", optional = true }
