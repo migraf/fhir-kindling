@@ -147,8 +147,6 @@ class FhirQueryBase:
 
             if isinstance(operator, str):
                 operator = QueryOperators(operator)
-            if isinstance(operator, QueryOperators):
-                operator = operator
             else:
                 raise ValueError(
                     f"Operator must be a string or QueryOperators. Got {operator}"

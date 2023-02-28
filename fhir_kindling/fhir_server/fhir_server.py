@@ -666,8 +666,6 @@ class FhirServer:
             references=references,
         )
 
-        delete_bundle = self._make_delete_transaction(resources, references)
-
         async with self._async_client() as client:
             r = await client.post(self.api_address, json=json_dict(delete_bundle))
             r.raise_for_status()

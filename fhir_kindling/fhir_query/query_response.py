@@ -209,8 +209,6 @@ class QueryResponse:
         else:
             if isinstance(response, httpx.Response):
                 response = response.json()
-            elif isinstance(response, dict):
-                response = response
             else:
                 response = Bundle.parse_raw(response).dict()
             return response

@@ -58,7 +58,7 @@ def anonymize(df: pd.DataFrame, k: int = 3, id_cols: List[str] = None) -> pd.Dat
 
         else:
             print("Unknown column type:", df[col].dtype)
-            anon_df[col] = anon_df[col]
+            anon_df[col] = df[col]
 
     if is_k_anonymized(anon_df, k=k):
         return anon_df
