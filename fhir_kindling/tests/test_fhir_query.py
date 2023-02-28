@@ -9,7 +9,7 @@ from pydantic import ValidationError
 
 from fhir_kindling import FhirServer
 from fhir_kindling.fhir_query.query_parameters import (
-    FHIRQueryParameters,
+    FhirQueryParameters,
     FieldParameter,
     IncludeParameter,
     QueryOperators,
@@ -1314,22 +1314,22 @@ def test_reverse_chain_parameters():
 
 
 def test_fhir_query_parameters():
-    query_params = FHIRQueryParameters(resource="Condition")
+    query_params = FhirQueryParameters(resource="Condition")
     assert query_params.to_query_string() == "/Condition?"
 
     # invalid resource name
     with pytest.raises(ValidationError):
-        query_params = FHIRQueryParameters(resource="Conditionkdjsaldj")
+        query_params = FhirQueryParameters(resource="Conditionkdjsaldj")
 
     url = "/Patient?"
-    query_params = FHIRQueryParameters.from_query_string(url)
+    query_params = FhirQueryParameters.from_query_string(url)
 
     assert query_params.resource == "Patient"
 
     query_url = (
         "/Condition?code=test&_include=Condition:patient&_has:Patient:subject:age=gt:18"
     )
-    query_params = FHIRQueryParameters.from_query_string(query_url)
+    query_params = FhirQueryParameters.from_query_string(query_url)
 
     assert query_params.to_query_string() == query_url
 

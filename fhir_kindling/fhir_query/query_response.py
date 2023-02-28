@@ -8,7 +8,7 @@ from fhir.resources import FHIRAbstractModel
 from fhir.resources.bundle import Bundle
 from pydantic import BaseModel
 
-from fhir_kindling.fhir_query.query_parameters import FHIRQueryParameters
+from fhir_kindling.fhir_query.query_parameters import FhirQueryParameters
 
 
 class OutputFormats(Enum):
@@ -50,7 +50,7 @@ class QueryResponse:
     def __init__(
         self,
         response: Union[httpx.Response, str, dict],
-        query_params: FHIRQueryParameters,
+        query_params: FhirQueryParameters,
         output_format: OutputFormats = OutputFormats.JSON,
         limit: int = None,
         count: int = None,
@@ -115,6 +115,20 @@ class QueryResponse:
                     IncludedResources(resource_type=resource_type, resources=resources)
                 )
             return included
+
+    @property
+    def resource_list(self) -> List[FHIRAbstractModel]:
+        """
+        Returns a list of all resources returned by the server including the primary resources and the included
+        resources.
+        Returns:
+            List of FHIRResourceModel objects returned by the server.
+
+        """
+        resources = self.resources
+        for included in self.included_resources:
+            resources.extend(included.resources)
+        return resources
 
     def save(self, file_path: Union[str, pathlib.Path], output_format: str = "json"):
         """

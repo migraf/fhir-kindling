@@ -6,32 +6,40 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.0.0] - 2023-
-Improve packaging with poetry and optional extras for datascience features and web app.
+Improve packaging with poetry to slim down library size with optional extras for datascience features.
 Add support for Python 3.9+.
+Code base cleanup and refactoring.
 
 ### Changed
-- Improve packaging with poetry and optional extras for datascience features and web app.
-- Optional dependencies for [`ds`, `app`] can be installed using `pip install  fhir_kindling[{extra}]`.
-- Query response `.save()` method now only supports saving as XML or JSON file. To serialize resources and bundles use
+- **Breaking:** Renamed `FHIRQuery` classes to `FhirQuerySync` and `FhirQueryAsync` for naming consistency.
+- **Breaking:** Renamed `FHIRQueryParameters` class to `FhirQueryParameters` for naming consistency.
+- **Breaking:** Query response `.save()` method now only supports saving as XML or JSON file. To serialize resources and bundles use
     the `flatten` function from the `serde` package. Requires installation of the `ds` extra.
+- **Breaking:** Moved `ServerSummary` and summary functionality into separate module.
+- Improve packaging with poetry and optional extras for datascience features and web app.
+- Optional dependencies for [`ds`, `app`] can be installed using `pip install fhir_kindling[{extra}]`.
+- Split batch transactions into separate module to slim down `FhirServer` class.
 
 ### Added
+- Optional progress bar for `summary`, `get_many`, `add_all` and `transfer` methods.
+- Additional property `resource_list` on `FhirQueryResponse` to get a list of all resources from the response.
 
 ### Removed
 - Removed `to_dfs()` method on query response object. Use `flatten` function from the `serde` package instead.
     Requires installation of the `ds` extra.
+- Removed `requests-oauthlib` in favor of `authlib`.
 ## [0.9.0] - 2022-07-21
 Asynchronous API for CRUD operations against fhir servers.
 
 ### Changed
 - Switched http client library from requests [httpx](https://www.python-httpx.org/)
 - removed requests-oauthlib in favor of authlib for oauth2 authentication flow
-- `FHIRQuery` class renamed to `FHIRQuerySync` to allow for sync and async version
+- `FHIRQuery` class renamed to `FhirQuerySync` to allow for sync and async version
 - moved resolving response pagination from `QueryReponse` to the sync and async query classes
 - getting multiple resources via `server.get_many()` now uses proper batch requests
 
 ### Added
-- `FHIRQueryAsync` class for async queries against a server
+- `FhirQueryAsync` class for async queries against a server
 - asynchronous counterparts for CRUD operations in the `FHIRServer` class using the same API:
   - `query_async()`
   - `raw_query_async()`

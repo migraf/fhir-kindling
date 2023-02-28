@@ -1,6 +1,6 @@
-from .fhir_query import FHIRQueryAsync, FHIRQuerySync
+from .fhir_query import FhirQueryAsync, FhirQuerySync
 from .query_parameters import (
-    FHIRQueryParameters,
+    FhirQueryParameters,
     FieldParameter,
     IncludeParameter,
     QueryOperators,

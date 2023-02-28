@@ -10,7 +10,7 @@ from fhir.resources.bundle import Bundle
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
 
 from fhir_kindling.fhir_query.query_parameters import (
-    FHIRQueryParameters,
+    FhirQueryParameters,
     FieldParameter,
     IncludeParameter,
     QueryOperators,
@@ -22,17 +22,17 @@ from fhir_kindling.fhir_query.query_response import (
     ResponseStatusCodes,
 )
 
-T = TypeVar("T", bound="FHIRQueryBase")
+T = TypeVar("T", bound="FhirQueryBase")
 
 
-class FHIRQueryBase:
+class FhirQueryBase:
     def __init__(
         self,
         base_url: str,
         resource: Union[
             FHIRResourceModel, fhir.resources.FHIRAbstractModel, str
         ] = None,
-        query_parameters: FHIRQueryParameters = None,
+        query_parameters: FhirQueryParameters = None,
         auth: httpx.Auth = None,
         headers: dict = None,
         output_format: str = "json",
@@ -57,7 +57,7 @@ class FHIRQueryBase:
                     f"resource must be a FHIRResourceModel or a string, given {type(resource)}"
                 )
             self.resource = self.resource.construct()
-            self.query_parameters = FHIRQueryParameters(
+            self.query_parameters = FhirQueryParameters(
                 resource=self.resource.resource_type
             )
 
@@ -115,32 +115,10 @@ class FHIRQueryBase:
         # create field parameters from the different argument options
         if isinstance(field_param, FieldParameter):
             added_query_param = field_param
-
         elif isinstance(filter_dict, dict):
-            # todo allow for multiple filter_dicts/multiple parameters in dict
             added_query_param = FieldParameter(**filter_dict)
         elif field:
-            if not (operator or operator == "") and value:
-                kv_error_message = (
-                    f"\n\tField: {field}\n\tOperator: {operator}\n\tValue: {value}"
-                )
-                raise ValueError(
-                    f"Must provide operator and search value when using kv parameters.{kv_error_message}"
-                )
-            else:
-
-                if isinstance(operator, str):
-                    operator = QueryOperators(operator)
-                if isinstance(operator, QueryOperators):
-                    operator = operator
-                else:
-                    raise ValueError(
-                        f"Operator must be a string or QueryOperators. Got {operator}"
-                    )
-                added_query_param = FieldParameter(
-                    field=field, operator=operator, value=value
-                )
-
+            added_query_param = self._param_from_field(field, operator, value)
         else:
             raise ValueError(
                 "Must provide a valid instance of either field_param or filter_dict or the kv parameters"
@@ -155,6 +133,30 @@ class FHIRQueryBase:
         self.query_parameters.resource_parameters = query_field_params
 
         return self
+
+    @staticmethod
+    def _param_from_field(field, operator, value):
+        if not (operator or operator == "") and value:
+            kv_error_message = (
+                f"\n\tField: {field}\n\tOperator: {operator}\n\tValue: {value}"
+            )
+            raise ValueError(
+                f"Must provide operator and search value when using kv parameters.{kv_error_message}"
+            )
+        else:
+
+            if isinstance(operator, str):
+                operator = QueryOperators(operator)
+            if isinstance(operator, QueryOperators):
+                operator = operator
+            else:
+                raise ValueError(
+                    f"Operator must be a string or QueryOperators. Got {operator}"
+                )
+            added_query_param = FieldParameter(
+                field=field, operator=operator, value=value
+            )
+        return added_query_param
 
     def include(
         self: T,
@@ -309,7 +311,7 @@ class FHIRQueryBase:
             Query object with the query parameters set based on the raw query string
 
         """
-        query_parameters = FHIRQueryParameters.from_query_string(raw_query_string)
+        query_parameters = FhirQueryParameters.from_query_string(raw_query_string)
         self.query_parameters = query_parameters
         return self
 
@@ -375,14 +377,14 @@ class FHIRQueryBase:
             )
 
 
-class FHIRQuerySync(FHIRQueryBase):
+class FhirQuerySync(FhirQueryBase):
     def __init__(
         self,
         base_url: str,
         resource: Union[
             FHIRResourceModel, fhir.resources.FHIRAbstractModel, str
         ] = None,
-        query_parameters: FHIRQueryParameters = None,
+        query_parameters: FhirQueryParameters = None,
         auth: httpx.Auth = None,
         headers: dict = None,
         client: httpx.Client = None,
@@ -619,14 +621,14 @@ class FHIRQuerySync(FHIRQueryBase):
         return full_response_xml
 
 
-class FHIRQueryAsync(FHIRQueryBase):
+class FhirQueryAsync(FhirQueryBase):
     def __init__(
         self,
         base_url: str,
         resource: Union[
             FHIRResourceModel, fhir.resources.FHIRAbstractModel, str
         ] = None,
-        query_parameters: FHIRQueryParameters = None,
+        query_parameters: FhirQueryParameters = None,
         auth: httpx.Auth = None,
         headers: dict = None,
         output_format: str = "json",

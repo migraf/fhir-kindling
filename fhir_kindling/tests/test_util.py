@@ -10,12 +10,12 @@ from fhir.resources.organization import Organization
 from fhir.resources.patient import Patient
 
 from fhir_kindling import FhirServer
+from fhir_kindling.fhir_server.transfer import reference_graph
 from fhir_kindling.generators import PatientGenerator
 from fhir_kindling.util.references import (
     _resource_ids_from_query_response,
     check_missing_references,
     extract_references,
-    reference_graph,
 )
 from fhir_kindling.util.resources import (
     check_resource_contains_field,

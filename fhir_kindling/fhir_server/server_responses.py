@@ -5,7 +5,7 @@ from fhir.resources.reference import Reference
 from fhir.resources.resource import Resource
 from httpx import Response
 
-from fhir_kindling.fhir_query import FHIRQueryParameters
+from fhir_kindling.fhir_query import FhirQueryParameters
 
 
 class CreateResponse:
@@ -77,7 +77,7 @@ class BundleCreateResponse:
 class TransferResponse:
     origin_server: str
     destination_server: str
-    query_parameters: FHIRQueryParameters
+    query_parameters: FhirQueryParameters
     create_responses: List[ResourceCreateResponse]
 
     def __init__(
@@ -85,7 +85,7 @@ class TransferResponse:
         origin_server: str,
         destination_server: str,
         create_responses: List[ResourceCreateResponse],
-        query_parameters: FHIRQueryParameters,
+        query_parameters: FhirQueryParameters,
     ):
         self.origin_server = origin_server
         self.destination_server = destination_server

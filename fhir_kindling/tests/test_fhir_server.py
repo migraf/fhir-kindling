@@ -10,10 +10,10 @@ from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.organization import Organization
 from fhir.resources.patient import Patient
 from fhir.resources.reference import Reference
-from httpx import BasicAuth
+from httpx import BasicAuth, HTTPStatusError
 
-from fhir_kindling import FHIRQuerySync, FhirServer
-from fhir_kindling.fhir_query import FHIRQueryParameters
+from fhir_kindling import FhirQuerySync, FhirServer
+from fhir_kindling.fhir_query import FhirQueryParameters
 from fhir_kindling.generators import PatientGenerator
 from fhir_kindling.serde.json import json_dict
 
@@ -290,7 +290,7 @@ def test_fhir_server_from_env():
 
 
 def test_server_query_validation(fhir_server: FhirServer):
-    params = FHIRQueryParameters(
+    params = FhirQueryParameters(
         resource="Patient",
     )
 
@@ -351,7 +351,7 @@ def test_query_all(fhir_server: FhirServer):
 
 def test_query_with_string_resource(fhir_server: FhirServer):
     auth = fhir_server.auth
-    query = FHIRQuerySync(fhir_server.api_address, "Patient", auth=auth)
+    query = FhirQuerySync(fhir_server.api_address, "Patient", auth=auth)
 
     response = query.all()
 
@@ -374,7 +374,7 @@ def test_query_raw_string(fhir_server: FhirServer):
 
     query_2 = fhir_server.query(query_string=query_string, output_format="json")
 
-    assert isinstance(query, FHIRQuerySync)
+    assert isinstance(query, FhirQuerySync)
 
     assert query.resource.get_resource_type() == "Patient"
 
@@ -399,14 +399,13 @@ def test_delete(fhir_server: FhirServer):
     delete_response = fhir_server.delete(references=add_response.references[:50])
     print(delete_response)
 
-    delete_resource = fhir_server.delete(resources=add_response.resources[50:75])
-    print(delete_resource)
-    assert delete_resource
-    delete_resource = fhir_server.delete(
-        resources=[r.dict() for r in add_response.resources[75:]]
-    )
-    assert delete_resource
-    print(delete_resource)
+    resource_reference = add_response.references[51]
+    fhir_server.delete(resources=add_response.resources[50:75])
+
+    with pytest.raises(HTTPStatusError):
+        fhir_server.get(resource_reference)
+
+    fhir_server.delete(resources=[r.dict() for r in add_response.resources[75:]])
 
     with pytest.raises(ValueError):
         fhir_server.delete(resources=["asd"], references=["asd"])
@@ -474,7 +473,7 @@ def test_custom_auth():
 
 
 def test_query_with_params(fhir_server: FhirServer):
-    params = FHIRQueryParameters(resource="Condition")
+    params = FhirQueryParameters(resource="Condition")
     query = fhir_server.query(query_parameters=params)
     response = query.all()
 
@@ -629,7 +628,7 @@ async def test_fhir_server_query_async(fhir_server: FhirServer):
     response = await query.all()
     assert response
 
-    parameters = FHIRQueryParameters(
+    parameters = FhirQueryParameters(
         resource="Patient",
     )
     query = fhir_server.query_async(query_parameters=parameters)
@@ -690,21 +689,16 @@ async def test_delete_async(fhir_server: FhirServer):
     add_response = fhir_server.add_all(patients)
     print(add_response.references)
 
-    delete_response = await fhir_server.delete_async(
-        references=add_response.references[:50]
-    )
-    print(delete_response)
+    await fhir_server.delete_async(references=add_response.references[:50])
 
-    delete_resource = await fhir_server.delete_async(
-        resources=add_response.resources[50:75]
-    )
-    print(delete_resource)
-    assert delete_resource
-    delete_resource = await fhir_server.delete_async(
+    await fhir_server.delete_async(resources=add_response.resources[50:75])
+    await fhir_server.delete_async(
         resources=[r.dict() for r in add_response.resources[75:]]
     )
-    assert delete_resource
-    print(delete_resource)
+
+    delete_reference = add_response.references[15]
+    with pytest.raises(HTTPStatusError):
+        await fhir_server.get_async(delete_reference)
 
     with pytest.raises(ValueError):
         await fhir_server.delete_async(resources=["asd"], references=["asd"])
@@ -713,3 +707,5 @@ async def test_delete_async(fhir_server: FhirServer):
 
     with pytest.raises(ValueError):
         await fhir_server.delete_async(references=["asd"], query=["asd"])
+
+    # todo test delete with query and patients with specific attributes

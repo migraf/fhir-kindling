@@ -1,6 +1,6 @@
 import plotly.express as px
 
-from fhir_kindling.fhir_server.server_responses import ServerSummary
+from fhir_kindling.fhir_server.summary import ServerSummary
 
 
 def server_summary_plot(server_summary: ServerSummary, show: bool = True) -> dict:

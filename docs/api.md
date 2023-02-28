@@ -11,7 +11,7 @@
       show_root_full_path: False
       members_order: source
 
-::: fhir_kindling.fhir_query.fhir_query.FHIRQueryBase
+::: fhir_kindling.fhir_query.fhir_query.FhirQueryBase
     handler: python
     rendering:
       members: True
