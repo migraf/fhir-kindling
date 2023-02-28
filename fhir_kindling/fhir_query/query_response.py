@@ -188,7 +188,7 @@ class QueryResponse:
                 ] = included_resources
 
     def _process_server_response(
-        self, response: Union[httpx.Response, str]
+        self, response: Union[httpx.Response, str, dict]
     ) -> Union[Dict, Bundle, str]:
         """
         Handle the initial response from the server and resolve pagination if necessary.
@@ -207,10 +207,12 @@ class QueryResponse:
             return response
         # otherwise, resolve json pagination and process further according to selected outcome
         else:
+
             if isinstance(response, httpx.Response):
                 response = response.json()
-            else:
+            elif isinstance(response, str):
                 response = Bundle.parse_raw(response).dict()
+
             return response
 
     def __repr__(self):
