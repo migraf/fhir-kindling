@@ -1431,7 +1431,9 @@ def test_query_where(server):
     query = server.query(query_resource)
 
     with pytest.raises(ValueError):
-        query.where(field_param="jdsha", filter_dict={"jdsh": "jdsh"})
+        query.where(field_param="jdsha")
+    with pytest.raises(ValueError):
+        query.where(field_param={"jdsh": "jdsh"})
 
     with pytest.raises(ValueError):
         query.where()
@@ -1440,7 +1442,7 @@ def test_query_where(server):
         query.where(field_param="jdsha", field="dsad")
 
     with pytest.raises(ValueError):
-        query.where(field="jdsha", filter_dict={"jdsh": "jdsh"})
+        query.where(field="jdsha", field_param={"jdsh": "jdsh"})
 
     assert query.resource.resource_type == query_resource
 
@@ -1453,7 +1455,7 @@ def test_query_where(server):
     assert len(query.query_parameters.resource_parameters) == 1
     assert query.query_parameters.resource_parameters[0].field == "name"
 
-    query = query.where(filter_dict=param_dict)
+    query = query.where(field_param=param_dict)
 
     assert len(query.query_parameters.resource_parameters) == 2
     assert query.query_parameters.resource_parameters[1].field == "name"
@@ -1485,7 +1487,7 @@ def test_query_where(server):
 
     with pytest.raises(ValidationError):
         param_dict = dict(field="name", operator="fails", value="test")
-        query = query.where(filter_dict=param_dict)
+        query = query.where(field_param=param_dict)
 
     print(query.query_url)
 
@@ -1593,20 +1595,17 @@ def test_query_reverse_chain(server, api_url):
     assert query.query_parameters.has_parameters[1].resource == has_resource
     assert query.query_parameters.has_parameters[1].value == 7
 
-    query = query.has(has_param_dict=has_param_dict)
+    query = query.has(has_param=has_param_dict)
 
     assert query.query_parameters.has_parameters[2].resource == has_resource
     assert query.query_parameters.has_parameters[2].operator == QueryOperators.in_
     assert query.query_parameters.has_parameters[2].value == ["test1", "test2"]
 
     with pytest.raises(ValueError):
-        query = query.has(has_param=has_param, has_param_dict=has_param_dict)
-
-    with pytest.raises(ValueError):
         query = query.has(has_param=has_param, resource="test")
 
     with pytest.raises(ValueError):
-        query = query.has(resource="has_param", has_param_dict=has_param_dict)
+        query = query.has(resource="has_param", has_param=has_param_dict)
 
     with pytest.raises(ValueError):
         query = query.has()

@@ -260,7 +260,7 @@ You can spin up two servers (one HAPI and one Blaze FHIR) using the compose file
 cd testing
 docker compose up
 ```
-The servers will be available at `http://localhost:9000/fhir` and `http://localhost:9001/fhir` respectively.
+The servers will be available at `http://localhost:9090/fhir` and `http://localhost:9091/fhir` respectively.
 And the test should be configured to use them via the environment variables `FHIR_API_URL` and `TRANSFER_SERVER_URL` respectively.
 
 Run the tests:
