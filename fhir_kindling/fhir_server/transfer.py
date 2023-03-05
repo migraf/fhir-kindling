@@ -1,28 +1,26 @@
 from __future__ import annotations
 
-from typing import List, Union, Tuple
+from typing import TYPE_CHECKING, List, Union
 
 import networkx as nx
 from fhir.resources import FHIRAbstractModel
 from fhir.resources.resource import Resource
-from fhir_kindling.fhir_query import FhirQuerySync, FhirQueryAsync
 
-from fhir_kindling.util.references import extract_references, check_missing_references
-
-from typing import TYPE_CHECKING
+from fhir_kindling.fhir_query import FhirQuerySync
+from fhir_kindling.util.references import check_missing_references, extract_references
 
 if TYPE_CHECKING:
     from fhir_kindling.fhir_server import FhirServer
 
 
 def transfer(
-        source: "FhirServer",
-        target: "FhirServer",
-        resources: List[Union[Resource, FHIRAbstractModel]] = None,
-        query: FhirQuerySync = None,
-        get_missing: bool = True,
-        record_linkage: bool = True,
-        display: bool = True,
+    source: "FhirServer",
+    target: "FhirServer",
+    resources: List[Union[Resource, FHIRAbstractModel]] = None,
+    query: FhirQuerySync = None,
+    get_missing: bool = True,
+    record_linkage: bool = True,
+    display: bool = True,
 ):
     """
     Transfer a list of resources from one server to another.
@@ -37,14 +35,14 @@ def transfer(
         display: Whether to display a progress bar.
     """
 
-    transfer_resources = _get_transfer_resources(source, resources, query, get_missing)
+    _get_transfer_resources(source, resources, query, get_missing)
 
 
 def _get_transfer_resources(
-        source: "FhirServer",
-        resources: List[Union[Resource, FHIRAbstractModel]] = None,
-        query: FhirQuerySync = None,
-        get_missing: bool = True,
+    source: "FhirServer",
+    resources: List[Union[Resource, FHIRAbstractModel]] = None,
+    query: FhirQuerySync = None,
+    get_missing: bool = True,
 ) -> List[FHIRAbstractModel]:
 
     if resources:
@@ -69,17 +67,6 @@ def _get_transfer_resources(
             )
 
     return transfer_resources
-
-
-
-
-
-
-
-
-
-
-
 
 
 def reference_graph(resources: List[Union[Resource, FHIRAbstractModel]]) -> nx.DiGraph:

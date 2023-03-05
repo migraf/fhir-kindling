@@ -130,7 +130,9 @@ class QueryResponse:
             resources.extend(included.resources)
         return resources
 
-    def save(self, file_path: Union[str, pathlib.Path], output_format: str = "json") -> None:
+    def save(
+        self, file_path: Union[str, pathlib.Path], output_format: str = "json"
+    ) -> None:
         """
         Save the response to a file.
         Args:

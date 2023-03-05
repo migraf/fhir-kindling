@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import List, Optional, TYPE_CHECKING
+
+from typing import TYPE_CHECKING, List, Optional
 
 # from fhir_kindling.fhir_server.fhir_server import FhirServer
 import tqdm
@@ -9,6 +10,7 @@ from fhir_kindling.util.resources import valid_resource_name
 
 if TYPE_CHECKING:
     from fhir_kindling.fhir_server import FhirServer
+
 
 class ResourceSummary(BaseModel):
     resource: str

@@ -245,8 +245,9 @@ class FhirQueryBase:
         if not has_param and not (
             resource or reference_param or search_param or operator or value
         ):
-            raise ValueError("Must provide either has_param or a valid set of kv parameters")
-
+            raise ValueError(
+                "Must provide either has_param or a valid set of kv parameters"
+            )
 
         # parse ReverseChainParameter from method input
         if isinstance(has_param, dict):
