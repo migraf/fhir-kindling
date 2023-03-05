@@ -86,8 +86,7 @@ class FhirQueryBase:
         field: str = None,
         operator: Union[QueryOperators, str] = None,
         value: Union[int, float, bool, str, list] = None,
-        field_param: FieldParameter = None,
-        filter_dict: dict = None,
+        field_param: Union[FieldParameter, dict] = None,
     ) -> T:
         """
         Add search conditions regarding a specific field of the queried resource.
@@ -95,35 +94,30 @@ class FhirQueryBase:
         method's parameter arguments (field, operator, value).
         Args:
             field_param: Instance of FieldParameter defining the field to filter for.
-            filter_dict: dictionary containing the field to search for and the value to filter for.
             field: string specifier of the field to fileter for
             operator: comparison operator either as string or QueryOperators
             value: comparison value.
 
         Returns:
+            FhirQuery object with the added filter
 
         """
 
         # evaluate arguments
-        if field_param and filter_dict:
-            raise ValueError("Cannot use both field_param and filter_dict")
-        elif field_param and (field or operator or value):
+        if field_param and (field or operator or value):
             raise ValueError("Cannot use both field_param and kv parameters")
-        elif filter_dict and (field or operator or value):
-            raise ValueError("Cannot use both filter_dict and kv parameters")
+        if not field_param and not (field and operator and value):
+            raise ValueError("Either field_param or kv parameters must be set")
 
         # create field parameters from the different argument options
         if isinstance(field_param, FieldParameter):
             added_query_param = field_param
-        elif isinstance(filter_dict, dict):
-            added_query_param = FieldParameter(**filter_dict)
-        elif field:
-            added_query_param = self._param_from_field(field, operator, value)
+        elif isinstance(field_param, dict):
+            added_query_param = FieldParameter(**field_param)
         else:
-            raise ValueError(
-                "Must provide a valid instance of either field_param or filter_dict or the kv parameters"
-            )
+            added_query_param = self._param_from_field(field, operator, value)
 
+        # add the field parameter to the query parameters
         query_field_params = self.query_parameters.resource_parameters
         if isinstance(query_field_params, list) and len(query_field_params) > 0:
             query_field_params.append(added_query_param)
@@ -223,8 +217,7 @@ class FhirQueryBase:
         search_param: str = None,
         operator: QueryOperators = None,
         value: Union[int, float, bool, str, list] = None,
-        has_param_dict: dict = None,
-        has_param: ReverseChainParameter = None,
+        has_param: Union[ReverseChainParameter, dict] = None,
     ) -> T:
         """
         Specify query parameters for other resources that are referenced by the queried, only the resources whose
@@ -238,40 +231,35 @@ class FhirQueryBase:
             value: the value to compare the field to
             has_param_dict: dictionary containing the required reverse chain parameters as keys
             has_param: instance of ReverseChainParameter object
-
         Returns:
             Updated query object with an added ReverseChainParameter
 
         """
 
         # validate method input
-        if has_param_dict and has_param:
-            raise ValueError("Cannot use both has_param_dict and has_param")
-        elif has_param_dict and (
-            resource or reference_param or search_param or operator or value
-        ):
-            raise ValueError("Cannot use both has_param_dict and kv parameters")
-        elif has_param and (
+        if has_param and (
             resource or reference_param or search_param or operator or value
         ):
             raise ValueError("Cannot use both has_param and kv parameters")
 
+        if not has_param and not (
+            resource or reference_param or search_param or operator or value
+        ):
+            raise ValueError("Must provide either has_param or a valid set of kv parameters")
+
+
         # parse ReverseChainParameter from method input
-        if isinstance(has_param_dict, dict):
-            added_has_param = ReverseChainParameter(**has_param_dict)
+        if isinstance(has_param, dict):
+            added_has_param = ReverseChainParameter(**has_param)
         elif isinstance(has_param, ReverseChainParameter):
             added_has_param = has_param
-        elif resource and reference_param and search_param and operator and value:
+        else:
             added_has_param = ReverseChainParameter(
                 resource=resource,
                 reference_param=reference_param,
                 search_param=search_param,
                 operator=operator,
                 value=value,
-            )
-        else:
-            raise ValueError(
-                "Either has_param_dict, a parameter instance or a valid set of kv parameters must be provided"
             )
 
         query_has_params = self.query_parameters.has_parameters

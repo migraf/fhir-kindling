@@ -92,16 +92,16 @@ def make_transaction_entry(
     url: str = None,
     resource: Union[Resource, dict] = None,
 ) -> BundleEntry:
-    """
-    Create a transaction entry for a bundle based on the method, url, and resource.
+    """Create a transaction entry for a bundle based on the method, url, and resource.
     If only a resource is provided, the url will be constructed from the resource otherwise the given url will be used.
+
     Args:
         method: the method to use for the transaction one of GET, POST, PUT, DELETE
         url: optional relative url to use for the transaction
         resource: optional FHIR resource to use for the transaction
 
     Returns:
-        BundleEntry: the transaction entry
+        The transaction entry
     """
     if isinstance(method, str):
         method = TransactionMethod(method)

@@ -1,4 +1,6 @@
 site_name: FHIR Kindling
+repo_url: https://github.com/migraf/fhir-kindling
+edit_uri: blob/main/docs/
 theme:
   name: material
   logo: 'assets/logo.png'
@@ -19,10 +21,12 @@ site_dir: public
 
 nav:
   - Home: index.md
-  - Tutorial - User Guide:
+  - User Guide:
     - Connect to a FHIR server: connect.md
     - Query a server: query.md
-    - Adding resources to a Server: upload.md
+    - Add resources: add.md
+    - Delete resources: delete.md
+    - Update resources: update.md
     - Serde: serde.md
   - API docs: api.md
 

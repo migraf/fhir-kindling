@@ -1,4 +1,5 @@
-from typing import List, Optional
+from __future__ import annotations
+from typing import List, Optional, TYPE_CHECKING
 
 # from fhir_kindling.fhir_server.fhir_server import FhirServer
 import tqdm
@@ -6,6 +7,8 @@ from pydantic import BaseModel
 
 from fhir_kindling.util.resources import valid_resource_name
 
+if TYPE_CHECKING:
+    from fhir_kindling.fhir_server import FhirServer
 
 class ResourceSummary(BaseModel):
     resource: str
@@ -22,7 +25,7 @@ class ServerSummary(BaseModel):
 
 
 def create_server_summary(
-    server, resources: List[str], display: bool = True
+    server: "FhirServer", resources: List[str], display: bool = True
 ) -> ServerSummary:
     """
     Create a summary of the server's resources and counts.
@@ -32,7 +35,7 @@ def create_server_summary(
         display: whether to display a progress bar
 
     Returns:
-        ServerSummary object with a list of ResourceSummary objects
+        ServerSummary object containing a list of ResourceSummary objects
     """
     resource_summaries = []
     summary = {"name": server.api_address}

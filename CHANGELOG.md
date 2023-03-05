@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.0.0] - 2023-
 Improve packaging with poetry to slim down library size with optional extras for datascience features.
-Add support for Python 3.9+.
-Code base cleanup and refactoring.
+Add support for Python 3.9+. Code base cleanup and refactoring.
+Big upgrades to the [documentation](https://migraf.github.io/fhir-kindling/) 👀.
+
 
 ### Changed
 - **Breaking:** Renamed `FHIRQuery` classes to `FhirQuerySync` and `FhirQueryAsync` for naming consistency.
@@ -16,18 +17,23 @@ Code base cleanup and refactoring.
 - **Breaking:** Query response `.save()` method now only supports saving as XML or JSON file. To serialize resources and bundles use
     the `flatten` function from the `serde` package. Requires installation of the `ds` extra.
 - **Breaking:** Moved `ServerSummary` and summary functionality into separate module.
+- **Breaking:** Unified `has()` and `where()` parameter args into a single argument that accepts either a dict or a 
+    parameter object. Removed `_dict` arguments.
 - Improve packaging with poetry and optional extras for datascience features and web app.
 - Optional dependencies for [`ds`, `app`] can be installed using `pip install fhir_kindling[{extra}]`.
 - Split batch transactions into separate module to slim down `FhirServer` class.
+- Split `transfer` functionality into separate module to slim down `FhirServer` class.
 
 ### Added
 - Optional progress bar for `summary`, `get_many`, `add_all` and `transfer` methods.
-- Additional property `resource_list` on `FhirQueryResponse` to get a list of all resources from the response.
+- Additional property `resource_list` on `FhirQueryResponse` to get a list of all resources (even included ones) from the response.
 
 ### Removed
 - Removed `to_dfs()` method on query response object. Use `flatten` function from the `serde` package instead.
     Requires installation of the `ds` extra.
 - Removed `requests-oauthlib` in favor of `authlib`.
+
+
 ## [0.9.0] - 2022-07-21
 Asynchronous API for CRUD operations against fhir servers.
 

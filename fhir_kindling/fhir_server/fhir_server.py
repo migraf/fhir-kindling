@@ -147,8 +147,9 @@ class FhirServer:
             query_parameters: optionally pass in a query parameters object to use for the query
             resource: the FHIR resource to query from the server
 
-        Returns: a FhirQuerySync object that can be further modified with filters and conditions before being executed
-        against the server
+        Returns:
+            a FhirQuerySync object that can be further modified with filters and conditions before being executed
+            against the server
         """
 
         self._validate_query_input(resource, query_parameters, query_string)
@@ -194,8 +195,9 @@ class FhirServer:
             query_parameters: optionally pass in a query parameters object to use for the query
             resource: the FHIR resource to query from the server
 
-        Returns: a FhirQueryAsync object that can be further modified with filters and conditions before being executed
-        against the server
+        Returns:
+            a FhirQueryAsync object that can be further modified with filters and conditions before being executed
+            against the server
         """
 
         self._validate_query_input(resource, query_parameters, query_string)
@@ -238,7 +240,8 @@ class FhirServer:
             query_string:
             output_format:
         Returns:
-
+            a FhirQuerySync object that can be further modified with filters and conditions before being executed
+            against the server
         """
 
         query_parameters = FhirQueryParameters.from_query_string(query_string)
@@ -397,6 +400,7 @@ class FhirServer:
             resource: dictionary containing the resource or FHIR resource object to be uploaded to the server
 
         Returns:
+            CreateResponse containing the server response and the resource that was uploaded
 
         """
         # parse the resource given as dictionary into a fhir resource model
@@ -424,6 +428,7 @@ class FhirServer:
             resource: dictionary containing the resource or FHIR resource object to be uploaded to the server
 
         Returns:
+            CreateResponse containing the server response and the resource that was uploaded
 
         """
         # parse the resource given as dictionary into a fhir resource model
@@ -452,7 +457,8 @@ class FhirServer:
             batch_size: maximum number of resources to upload in one bundle
             display: whether to display a progress bar when the upload is batched
 
-        Returns: Bundle create response from the fhir server
+        Returns:
+            Bundle create response from the fhir server
 
         """
         response = None
@@ -610,7 +616,7 @@ class FhirServer:
         resources: List[Union[FHIRResourceModel, dict]] = None,
         references: List[Union[str, Reference]] = None,
         query: FhirQuerySync = None,
-    ):
+    ) -> None:
         """
         Delete resources from the server. Either resources, references or a query must be specified.
         Args:
@@ -619,7 +625,7 @@ class FhirServer:
             query: query to use to find resources to delete
 
         Returns:
-
+            None
         """
 
         self._validate_delete_args(query, references, resources)
@@ -643,7 +649,7 @@ class FhirServer:
         resources: List[Union[FHIRResourceModel, dict]] = None,
         references: List[Union[str, Reference]] = None,
         query: FhirQueryAsync = None,
-    ):
+    ) -> None:
         """
         Asynchronously delete resources from the server. Either resources, references or a query must be specified.
         Args:
@@ -652,6 +658,7 @@ class FhirServer:
             query: query to use to find resources to delete
 
         Returns:
+            None
 
         """
         self._validate_delete_args(query, references, resources)
@@ -712,6 +719,7 @@ class FhirServer:
         Args:
             display: whether to display a progress bar
         Returns:
+            ServerSummary containing resource counts for all resources available on the server
 
         """
         summary = create_server_summary(self, self.rest_resources, display)
@@ -719,12 +727,18 @@ class FhirServer:
 
     @property
     def capabilities(self) -> CapabilityStatement:
+        """
+        Get the capabilities statement for the server
+        """
         if not self._meta_data:
             self._get_meta_data()
         return CapabilityStatement(**self._meta_data)
 
     @property
     def rest_resources(self) -> List[str]:
+        """
+        Get the list of resources available on the server
+        """
         return [capa.type for capa in self.capabilities.rest[0].resource]
 
     @property

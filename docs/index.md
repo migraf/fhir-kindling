@@ -1,3 +1,8 @@
+---
+title: NAV TITLE 
+---
+#
+
 <style>
 .heading {
     font-size: 4em;
@@ -15,42 +20,51 @@
 
 </style>
 <div class="heading">
-<img src="logo/kindling_logo_no_bg.png" alt="logo" height=300px width=300px>
-FHIR Kindling
+<img src="logo/kindling_header.png" alt="logo">
 </div>
+[![CI](https://github.com/migraf/fhir-kindling/actions/workflows/main_ci.yml/badge.svg?branch=main)](https://github.com/migraf/fhir-kindling/actions/workflows/main_ci.yml)
+[![codecov](https://codecov.io/gh/migraf/fhir-kindling/branch/main/graph/badge.svg?token=FKQENFXACB)](https://codecov.io/gh/migraf/fhir-kindling)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Maintainability](https://api.codeclimate.com/v1/badges/3b83aa52724b6e75fc22/maintainability)](https://codeclimate.com/github/migraf/fhir-kindling/maintainability)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/fhir_kindling)
+![PyPI](https://img.shields.io/pypi/v/fhir_kindling)
 
-CRUD library for fhir servers, with resource validation and parsing powered by
-[pydantic](https://github.com/samuelcolvin/pydantic)
-models created in the [fhir.resources](https://github.com/nazrulworld/fhir.resources) library.
+
+Python library for interacting with [HL7 FHIR](http://hl7.org/fhir/) servers and resources. Resource validation and parsing powered by
+[pydantic](https://github.com/samuelcolvin/pydantic) and the [fhir.resources](https://github.com/nazrulworld/fhir.resources) library.
+Provides a simple interface for synchronous and asynchronous CRUD operations for resources and bundles, 
+as well as resource transfer between servers.
 
 !!!warning 
     Under construction. This documentation is not complete.
 
 ## Features
 - Connect to FHIR (Version R4) servers using different auth methods
-- CRUD operations
-- Bundle upload, download and transfer
-- Resource validation
+- Sync/async CRUD operations for bundles and resource
+- Resource transfer between servers
+- Resource/Bundle serialization to CSV
 - Resource generation for synthetic data sets
 
 ## Installation
 
-### Install via pypi
-
+### Install without any extras
+To install the package without any extra dependencies, use the following command:
 ```shell
 pip install fhir_kindling
 ```
 
-### Install from source
+### Extras (optional)
+Fhir kindling can be used with the following extras:
+#### Data science
+Install the package with the `ds` extra to get the following features:
+- `flatten` method for flattening a resource into a tabular format (pandas dataframe)
+- `flatten_bundle` method for flattening a bundle into a tabular format (pandas dataframe)
+- [Plotly](https://plotly.com/python/) based plotting methods for resources and bundles
 
 ```shell
-git clone https://github.com/migraf/fhir-kindling.git
-cd fhir_kindling
-pip install .
+pip install fhir_kindling[ds]
 ```
 
-The `fhir kindling` command should now be available in your shell (with the venv enabled) test it with
-`fhir_kindling --help`
 
 ## Quick start
 
@@ -96,6 +110,5 @@ print(query.response)
 ## Credits
 
 All the FHIR resource validation is done via the [fhir.resources](https://github.com/nazrulworld/fhir.resources)
-package. The CLI was built using [click](https://click.palletsprojects.com/en/8.0.x/). This package was created with
-Cookiecutter and the
-[audreyr/cookiecutter-pypackage](https://github.com/audreyr/cookiecutter) project template.
+package.
+
