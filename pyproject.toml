@@ -51,7 +51,7 @@ mkdocstrings = { extras = ["python-legacy"], version = "*" }
 pytest-asyncio = "*"
 rise = "*"
 python-dotenv = "*"
-black = "^22.12.0"
+black = "^23.1.0"
 ruff = "*"
 pre-commit = "^2.21.0"
 

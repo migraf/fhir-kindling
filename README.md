@@ -9,10 +9,13 @@
 
 
 
-Python client library for interacting with HL7 FHIR servers, with resource validation and parsing powered by
-the [pydantic](https://github.com/samuelcolvin/pydantic)
-models created by [fhir.resources](https://github.com/nazrulworld/fhir.resources). More details in
-the [Documentation](https://migraf.github.io/fhir-kindling/).
+Python library for interacting with [HL7 FHIR](http://hl7.org/fhir/) servers and resources. Resource validation and parsing powered by
+[pydantic](https://github.com/samuelcolvin/pydantic) and the [fhir.resources](https://github.com/nazrulworld/fhir.resources) library.
+Provides a simple interface for synchronous and asynchronous CRUD operations for resources and bundles, 
+as well as resource transfer between servers.
+Datascience features include flattening of resources and bundles into tabular format (pandas dataframe) and plotting 
+methods for resources and bundles can optionally be included with the `ds` extra.
+
 
 ## Features
 
@@ -57,19 +60,10 @@ pip install fhir-kindling --user
 ### Extras (optional)
 Fhir kindling can be used with the following extras:
 - `ds` for data science related features, such as flattening of resources into a tabular format
-- `app` installs a web app for building queries in a GUI
 
 ```
-pip install fhir-kindling[ds,app] --user
+pip install fhir-kindling[ds] --user
 ```
-
-
-## Performance
-
-This library performs request at least 1.5 times faster than other popular python FHIR libraries.
-See [Benchmarks](benchmarks/README.md) for a more detailed description of the benchmarks.
-![Query Results](benchmarks/results/query_plot.png)
-
 
 ## Usage
 
@@ -227,6 +221,51 @@ conditions = server_1.query("Condition").limit(10)
 # transfer the resources to server 2
 response = server_1.transfer(server_2, conditions)
 
+```
+
+## Performance
+
+This library performs request at least 1.5 times faster than other popular python FHIR libraries.
+See [Benchmarks](benchmarks/README.md) for a more detailed description of the benchmarks.
+![Query Results](benchmarks/results/query_plot.png)
+
+
+## Contributing
+Contributions are welcome, and they are greatly appreciated! If you want to contribute to this project, please fork the 
+repository and make changes as you'd like. Pull requests are warmly welcome. Every little bit helps, and credit will always be given.
+
+## Development
+
+To set up your environment to develop this package make sure you have [poetry](https://python-poetry.org/) installed and
+run the following commands:
+
+Install the dependencies:
+```bash
+poetry install --with dev --all-extras
+```
+
+Install pre-commit hooks:
+
+- Linting: [ruff](https://github.com/charliermarsh/ruff)
+- Formatting [black](https://black.readthedocs.io/en/stable/)
+
+```bash
+poetry run pre-commit install
+```
+
+### Tests
+To run the full test suit you need access to two FHIR servers (the second one is used for transfer tests).
+You can spin up two servers (one HAPI and one Blaze FHIR) using the compose file in the `testing` directory.
+```bash
+cd testing
+docker compose up
+```
+The servers will be available at `http://localhost:9000/fhir` and `http://localhost:9001/fhir` respectively.
+And the test should be configured to use them via the environment variables `FHIR_API_URL` and `TRANSFER_SERVER_URL` respectively.
+
+Run the tests:
+```bash
+poetry run pytest
 ```
 
 

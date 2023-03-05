@@ -34,6 +34,8 @@ Python library for interacting with [HL7 FHIR](http://hl7.org/fhir/) servers and
 [pydantic](https://github.com/samuelcolvin/pydantic) and the [fhir.resources](https://github.com/nazrulworld/fhir.resources) library.
 Provides a simple interface for synchronous and asynchronous CRUD operations for resources and bundles, 
 as well as resource transfer between servers.
+Datascience features include flattening of resources and bundles into tabular format (pandas dataframe) and plotting 
+methods for resources and bundles can optionally be included with the `ds` extra.
 
 !!!warning 
     Under construction. This documentation is not complete.
