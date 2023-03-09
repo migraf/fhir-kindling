@@ -49,16 +49,20 @@ methods for resources and bundles can optionally be included with the `ds` extra
 
 ## Installation
 
-### Install without any extras
-To install the package without any extra dependencies, use the following command:
+To install the package via pypi without any extra dependencies, use the following command:
 ```shell
 pip install fhir_kindling
+```
+
+```shell
+poetry add fhir_kindling
 ```
 
 ### Extras (optional)
 Fhir kindling can be used with the following extras:
 #### Data science
 Install the package with the `ds` extra to get the following features:
+
 - `flatten` method for flattening a resource into a tabular format (pandas dataframe)
 - `flatten_bundle` method for flattening a bundle into a tabular format (pandas dataframe)
 - [Plotly](https://plotly.com/python/) based plotting methods for resources and bundles

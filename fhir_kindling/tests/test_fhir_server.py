@@ -127,6 +127,13 @@ def test_server_summary(fhir_server: FhirServer):
     print(summary)
 
 
+@pytest.mark.asyncio
+async def test_server_summary_async(fhir_server: FhirServer):
+    summary = await fhir_server.summary_async(display=False)
+    assert summary
+    print(summary)
+
+
 def test_fhir_server_from_env():
     load_dotenv(find_dotenv())
 

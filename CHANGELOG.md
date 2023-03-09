@@ -27,6 +27,7 @@ Big upgrades to the [documentation](https://migraf.github.io/fhir-kindling/) ðŸ‘
 ### Added
 - Optional progress bar for `summary`, `get_many`, `add_all` and `transfer` methods.
 - Additional property `resource_list` on `FhirQueryResponse` to get a list of all resources (even included ones) from the response.
+- `summary_async()` method for asynchronous server summary.
 
 ### Removed
 - Removed `to_dfs()` method on query response object. Use `flatten` function from the `serde` package instead.

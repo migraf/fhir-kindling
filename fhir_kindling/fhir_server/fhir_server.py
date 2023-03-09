@@ -25,7 +25,11 @@ from fhir_kindling.fhir_server.server_responses import (
     ResourceCreateResponse,
     TransferResponse,
 )
-from fhir_kindling.fhir_server.summary import ServerSummary, create_server_summary
+from fhir_kindling.fhir_server.summary import (
+    ServerSummary,
+    create_server_summary,
+    create_server_summary_async,
+)
 from fhir_kindling.fhir_server.transactions import (
     TransactionMethod,
     TransactionType,
@@ -725,6 +729,20 @@ class FhirServer:
         summary = create_server_summary(self, self.rest_resources, display)
         return summary
 
+    async def summary_async(self, display: bool = True) -> ServerSummary:
+        """
+        Asynchronously create a summary for the server. Contains resource counts for all resources available on the
+        server.
+
+        Args:
+            display: whether to display a progress bar
+        Returns:
+            ServerSummary containing resource counts for all resources available on the server
+
+        """
+        summary = await create_server_summary_async(self, self.rest_resources, display)
+        return summary
+
     @property
     def capabilities(self) -> CapabilityStatement:
         """
@@ -813,7 +831,6 @@ class FhirServer:
 
         """
         with self._sync_client() as client:
-
             r = client.post(url=self.api_address, json=json_dict(bundle))
             try:
                 r.raise_for_status()
