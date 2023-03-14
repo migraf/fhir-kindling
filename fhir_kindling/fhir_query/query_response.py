@@ -55,7 +55,6 @@ class QueryResponse:
         limit: int = None,
         count: int = None,
     ):
-
         self.format = output_format
         self._limit = limit
         self.query_params = query_params
@@ -130,6 +129,16 @@ class QueryResponse:
             resources.extend(included.resources)
         return resources
 
+    @property
+    def total(self) -> int:
+        """
+        Returns the total number of resources returned by the query.
+        Returns:
+            Total number of resources matching the query.
+
+        """
+        return len(self.resource_list)
+
     def save(
         self, file_path: Union[str, pathlib.Path], output_format: str = "json"
     ) -> None:
@@ -172,7 +181,6 @@ class QueryResponse:
         if not self._resources:
             self._resources = []
         for entry in Bundle(**self.response).entry:
-
             # add the directly queried resource to the resources list
             if entry.resource.resource_type == self.resource:
                 self._resources.append(entry.resource)
@@ -209,7 +217,6 @@ class QueryResponse:
             return response
         # otherwise, resolve json pagination and process further according to selected outcome
         else:
-
             if isinstance(response, httpx.Response):
                 response = response.json()
             elif isinstance(response, str):
