@@ -43,14 +43,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
       - uses: actions/setup-python@v4
         with:
           python-version: "3.11"
           cache: "poetry"
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
       - name: Install deps
-        run: poetry install --with dev --all-extras
+        run: |
+          poetry lock
+          poetry install --with dev --all-extras
       - name: Prefill servers with data
         run: |
           poetry run pip install .
