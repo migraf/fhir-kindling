@@ -28,6 +28,7 @@ Big upgrades to the [documentation](https://migraf.github.io/fhir-kindling/) ðŸ‘
 - Optional progress bar for `summary`, `get_many`, `add_all` and `transfer` methods.
 - Additional property `resource_list` on `FhirQueryResponse` to get a list of all resources (even included ones) from the response.
 - `summary_async()` method for asynchronous server summary.
+- `total` property on `QueryResponse` to get the total number of resources returned by the query.
 - `record_linkage` functionality for `transfer()` method and split transfer functionality into separate module.
 
 ### Removed

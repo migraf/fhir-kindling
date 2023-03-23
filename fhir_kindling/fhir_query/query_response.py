@@ -129,6 +129,16 @@ class QueryResponse:
             resources.extend(included.resources)
         return resources
 
+    @property
+    def total(self) -> int:
+        """
+        Returns the total number of resources returned by the query.
+        Returns:
+            Total number of resources matching the query.
+
+        """
+        return len(self.resource_list)
+
     def save(
         self, file_path: Union[str, pathlib.Path], output_format: str = "json"
     ) -> None:
