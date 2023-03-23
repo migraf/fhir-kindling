@@ -1,6 +1,6 @@
 import os
 import re
-from typing import List, OrderedDict, Union
+from typing import List, Union
 
 import fhir.resources
 import httpx
@@ -13,12 +13,10 @@ from fhir.resources.capabilitystatement import CapabilityStatement
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from fhir.resources.reference import Reference
 from fhir.resources.resource import Resource
-from networkx import DiGraph
 from tqdm import tqdm
 
 from fhir_kindling.fhir_query import FhirQueryAsync, FhirQuerySync
 from fhir_kindling.fhir_query.query_parameters import FhirQueryParameters
-from fhir_kindling.fhir_query.query_response import QueryResponse
 from fhir_kindling.fhir_server.auth import BearerAuth, auth_info_from_env
 from fhir_kindling.fhir_server.server_responses import (
     BundleCreateResponse,
@@ -35,9 +33,8 @@ from fhir_kindling.fhir_server.transactions import (
     TransactionType,
     make_transaction_bundle,
 )
-from fhir_kindling.fhir_server.transfer import reference_graph
+from fhir_kindling.fhir_server.transfer import transfer
 from fhir_kindling.serde.json import json_dict
-from fhir_kindling.util.references import check_missing_references
 from fhir_kindling.util.resources import valid_resource_name
 
 
@@ -450,7 +447,7 @@ class FhirServer:
 
     def add_all(
         self,
-        resources: List[Union[Resource, dict]],
+        resources: List[Union[Resource, FHIRAbstractModel, dict]],
         batch_size: int = 5000,
         display: bool = True,
     ) -> BundleCreateResponse:
@@ -495,20 +492,21 @@ class FhirServer:
 
     async def add_all_async(
         self,
-        resources: List[Union[Resource, dict]],
+        resources: List[Union[Resource, FHIRAbstractModel, dict]],
         batch_size: int = 5000,
         display: bool = True,
     ) -> BundleCreateResponse:
         """
         Asynchronously upload a list of resources to the server, after packaging them into a bundle
+
         Args:
             resources: list of resources to upload to the server, either dictionary or FHIR resource objects
             batch_size: maximum number of resources to upload in one bundle
             display: whether to display a progress bar when the upload is batched
 
         Returns: Bundle create response from the fhir server
-
         """
+
         response = None
         if len(resources) > batch_size:
             # split the list of resources into batches of size batch_size
@@ -684,37 +682,38 @@ class FhirServer:
     def transfer(
         self,
         target_server: "FhirServer",
-        query_params: FhirQueryParameters = None,
-        query_result: QueryResponse = None,
+        query: FhirQuerySync = None,
+        resources: List[Union[Resource, FHIRAbstractModel]] = None,
+        get_missing: bool = True,
+        record_linkage: bool = True,
+        display: bool = False,
     ) -> TransferResponse:
         """
         Transfer resources from this server to another server while using server assigned ids and keeping referential
         integrity.
+
         Args:
             target_server: FhirServer to transfer to
-            query_params: FhirQueryParameters to use to find resources to transfer
-            query_result: results of the initial query against the server
+            query: FhirQuerySync to use to find resources to transfer
+            resources: list of resources to transfer
+            get_missing: whether to get missing references from the source server
+            record_linkage: whether to record the linkage between the source and target server
+            display: whether to display the progress bar
 
-        Returns: Transfer response for the transfer of the query result to the target server
+        Returns:
+            Transfer response for the transfer of the query result to the target server
 
         """
-        # get all the referenced resources missing in the list from the source server
-        if query_result and query_params:
-            raise ValueError("Cannot specify both query and query_result")
-        # if query parameters are given execute the query against the server
-        elif query_params:
-            query_result = self.query(query_parameters=query_params).all()
-        # find missing references
-        missing_references = check_missing_references(query_result.resources)
-        if missing_references:
-            resources = self._get_missing_resources(query_result.resources)
-        else:
-            resources = query_result.resources
-        # transfer the resources keeping server assigned ids and referential integrity
-        response = self._transfer_resources(
-            target_server, resources, query_result.query_params
-        )
 
+        response = transfer(
+            source=self,
+            target=target_server,
+            query=query,
+            resources=resources,
+            get_missing=get_missing,
+            record_linkage=record_linkage,
+            display=display,
+        )
         return response
 
     def summary(self, display: bool = True) -> ServerSummary:
@@ -939,117 +938,6 @@ class FhirServer:
             token = client.fetch_token(self.oidc_provider_url)
             self.token = token["access_token"]
             self.oauth_token = token
-
-    def _get_missing_resources(
-        self, resources: List[Union[Resource, FHIRAbstractModel]]
-    ):
-        missing = check_missing_references(resources)
-
-        while missing:
-            missing_resources = self.get_many(missing)
-            resources.extend(missing_resources)
-            missing = check_missing_references(resources)
-
-        return resources
-
-    def _transfer_resources(
-        self,
-        target_server: "FhirServer",
-        resources: List[FHIRAbstractModel],
-        params: FhirQueryParameters = None,
-    ) -> TransferResponse:
-        graph = reference_graph(resources)
-        print(graph)
-        create_responses = self._resolve_reference_graph(graph, target_server)
-
-        return TransferResponse(
-            origin_server=self.api_address,
-            destination_server=target_server.api_address,
-            create_responses=create_responses,
-            query_parameters=params,
-        )
-
-    def _resolve_reference_graph(
-        self, graph: DiGraph, server: "FhirServer"
-    ) -> List[ResourceCreateResponse]:
-        create_responses = []
-        nodes = graph.nodes
-        while len(nodes) > 0:
-            # find the nodes without references and add them to the target server
-            top_nodes = [
-                node for node in nodes if len(list(graph.predecessors(node))) == 0
-            ]
-            resources = [graph.nodes[node]["resource"] for node in top_nodes]
-            parsed_resources = []
-            for r in resources:
-                if isinstance(r, OrderedDict):
-                    resource_dict = dict(r)
-                    resource_type = resource_dict.get(
-                        "resourceType", resource_dict.get("resource_type")
-                    )
-                    parsed_resources.append(
-                        construct_fhir_element(resource_type, resource_dict)
-                    )
-                    parsed_resources.append(r)
-                elif isinstance(r, FHIRAbstractModel):
-                    parsed_resources.append(r)
-                else:
-                    print(type(r))
-            add_response = server.add_all(parsed_resources)
-            # update dependant nodes in the graph with the obtained references
-            self._update_graph_references(graph, top_nodes, add_response.references)
-            create_responses.extend(add_response.create_responses)
-            # remove processed nodes from the graph
-            graph.remove_nodes_from(top_nodes)
-            nodes = graph.nodes
-        return create_responses
-
-    @staticmethod
-    def _update_graph_references(graph: DiGraph, nodes, references: List[str]) -> None:
-        """
-        Update the graph with the obtained references
-        Args:
-            graph: reference graph to update
-            nodes: the unreferenced nodes
-            references: references obtained from the server after submitting the resources contained in the unreferenced
-                nodes
-
-        Returns:
-
-        """
-        for node, reference in zip(nodes, references):
-            # Get the successors of the node that was just processed
-            successors = graph.successors(node)
-            for successor in successors:
-                field = graph[node][successor]["field"]
-                list_field = graph[node][successor]["list_field"]
-                # if the reference field is a list of references, update the corresponding list item
-                if list_field:
-                    # Find the item that references the node
-                    reference_list = graph.nodes[successor]["resource"].dict()[field]
-                    reference_item = next(
-                        (
-                            item
-                            for item in reference_list
-                            if item.get("reference") == str(node)
-                        ),
-                        None,
-                    )
-                    # if the item is found replace it with the obtained reference
-                    if reference_item:
-                        index = reference_list.index(reference_item)
-                        resource = graph.nodes[successor]["resource"].dict()
-                        resource[field][index] = reference
-                        graph.nodes[successor]["resource"] = resource
-
-                # update the reference field in the dependant resource
-                else:
-                    if not isinstance(graph.nodes[successor]["resource"], dict):
-                        resource = graph.nodes[successor]["resource"].dict()
-                        resource[field] = reference
-                        graph.nodes[successor]["resource"] = resource
-                    else:
-                        graph.nodes[successor]["resource"][field] = reference
 
     @staticmethod
     def _validate_query_input(

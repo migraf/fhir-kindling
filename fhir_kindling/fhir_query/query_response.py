@@ -55,7 +55,6 @@ class QueryResponse:
         limit: int = None,
         count: int = None,
     ):
-
         self.format = output_format
         self._limit = limit
         self.query_params = query_params
@@ -172,7 +171,6 @@ class QueryResponse:
         if not self._resources:
             self._resources = []
         for entry in Bundle(**self.response).entry:
-
             # add the directly queried resource to the resources list
             if entry.resource.resource_type == self.resource:
                 self._resources.append(entry.resource)
@@ -209,7 +207,6 @@ class QueryResponse:
             return response
         # otherwise, resolve json pagination and process further according to selected outcome
         else:
-
             if isinstance(response, httpx.Response):
                 response = response.json()
             elif isinstance(response, str):

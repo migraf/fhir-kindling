@@ -38,7 +38,6 @@ def generate_auth(
         requests auth object to use in an API call
     """
     if (not username and not password) and not token:
-
         if load_env:
             print(
                 "No authentication given. Attempting authentication via environment variables"

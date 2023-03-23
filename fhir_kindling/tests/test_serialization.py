@@ -34,7 +34,6 @@ def server(api_url):
 
 
 def test_flatten(server):
-
     query_resource = "Condition"
     search_param = "subject"
     query = server.query("Patient")

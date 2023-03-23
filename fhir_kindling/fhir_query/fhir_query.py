@@ -37,7 +37,6 @@ class FhirQueryBase:
         headers: dict = None,
         output_format: str = "json",
     ):
-
         self.base_url = base_url
 
         # Set up the requests session with auth and headers
@@ -138,7 +137,6 @@ class FhirQueryBase:
                 f"Must provide operator and search value when using kv parameters.{kv_error_message}"
             )
         else:
-
             if isinstance(operator, str):
                 operator = QueryOperators(operator)
             else:
@@ -159,7 +157,6 @@ class FhirQueryBase:
         include_dict: dict = None,
         include_param: IncludeParameter = None,
     ) -> T:
-
         """
         Specify resources related to the queried resource, which should be included in the query results.
 
@@ -358,7 +355,6 @@ class FhirQueryBase:
             includes_repr = include_repr + rev_include_repr
             return f"<{self.__class__.__name__}(resource={resource}{includes_repr}, url={self.query_url}>"
         else:
-
             return (
                 f"<{self.__class__.__name__}(resource={resource}, url={self.query_url}>"
             )
@@ -378,7 +374,6 @@ class FhirQuerySync(FhirQueryBase):
         output_format: str = "json",
         proxies: Union[str, dict] = None,
     ):
-
         super().__init__(
             base_url, resource, query_parameters, auth, headers, output_format
         )
@@ -466,7 +461,6 @@ class FhirQuerySync(FhirQueryBase):
         ] = None,
         count: int = None,
     ) -> QueryResponse:
-
         with self._setup_client() as client:
             r = client.get(self.query_url)
             r.raise_for_status()
@@ -482,7 +476,6 @@ class FhirQuerySync(FhirQueryBase):
         ] = None,
         count: int = None,
     ) -> QueryResponse:
-
         if self.output_format == OutputFormats.JSON:
             response = self._resolve_json_pagination(
                 initial_response, page_callback, count
@@ -557,7 +550,6 @@ class FhirQuerySync(FhirQueryBase):
             return response_json
 
     def _resolve_xml_pagination(self, server_response: httpx.Response) -> str:
-
         # parse the xml response and extract the initial entries
         initial_response = xmltodict.parse(server_response.text)
         entries = initial_response["Bundle"].get("entry")
@@ -729,7 +721,6 @@ class FhirQueryAsync(FhirQueryBase):
         ] = None,
         count: int = None,
     ) -> QueryResponse:
-
         if self.output_format == OutputFormats.JSON:
             response = await self._resolve_json_pagination(
                 initial_response, page_callback, count
@@ -802,7 +793,6 @@ class FhirQueryAsync(FhirQueryBase):
             return response_json
 
     async def _resolve_xml_pagination(self, server_response: httpx.Response) -> str:
-
         # parse the xml response and extract the initial entries
         initial_response = xmltodict.parse(server_response.text)
         entries = initial_response["Bundle"].get("entry")

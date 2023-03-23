@@ -49,7 +49,6 @@ class PatientGenerator:
         return patients
 
     def _generate_patient_data(self, name: Tuple[str, str]) -> Patient:
-
         first_name, last_name = name
         gender = random.choices(
             ["male", "female", "other", "unknown"],

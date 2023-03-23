@@ -21,7 +21,6 @@ def extract_references(resource: Resource) -> List[Tuple[str, str, str, bool]]:
     resource_dict = resource.dict(exclude_none=True)
     references = []
     for field in fields:
-
         if field.type_ == ReferenceType:
             field_value = resource_dict.get(field.name, None)
             if field_value:
