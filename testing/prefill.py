@@ -71,6 +71,8 @@ def prefill():
     print(f"initialized server_1: {server_1}")
     print(f"initialized server_2: {server_2}")
 
+    time.sleep(5)
+
     count = 20
     patients = PatientGenerator(n=count).generate()
     print(f"generated {len(patients)} patients")
@@ -110,13 +112,6 @@ def prefill():
     r = httpx.post(server_1.api_address, json=json_dict)
 
     r.raise_for_status()
-    time.sleep(5)
-    # print(r.headers)
-    # print(f"uploading server 2 ({server_2.api_address})...")
-    # r = requests.post(server_2.api_address, json=json_dict)
-    # print(r.text)
-    # print(r.headers)
-    # r.raise_for_status()
 
 
 COVID_CODE = CodeableConcept(
