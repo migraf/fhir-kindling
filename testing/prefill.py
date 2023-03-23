@@ -89,7 +89,7 @@ def prefill():
     upload_bundle = upload_bundle.validate(upload_bundle)
     json_dict = orjson.loads(upload_bundle.json(exclude_none=True))
     print(f"uploading server 1 ({server_1.api_address})...")
-    r = httpx.post(server_1.api_address, json=json_dict)
+    r = httpx.post(server_1.api_address, json=json_dict, timeout=None)
 
     print("uploading conditions...")
     condition_entries = []
@@ -109,7 +109,7 @@ def prefill():
     upload_bundle = upload_bundle.validate(upload_bundle)
     json_dict = orjson.loads(upload_bundle.json(exclude_none=True))
     print(f"uploading conditions server 1 ({server_1.api_address})...")
-    r = httpx.post(server_1.api_address, json=json_dict)
+    r = httpx.post(server_1.api_address, json=json_dict, timeout=None)
 
     r.raise_for_status()
 
