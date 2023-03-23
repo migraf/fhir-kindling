@@ -221,7 +221,7 @@ server_2 = FhirServer(api_address="https://fhir.server/fhir")
 # query some resources from server 1
 conditions = server_1.query("Condition").limit(10)
 # transfer the resources to server 2
-response = server_1.transfer(server_2, conditions)
+response = server_1.transfer(server_2, resources=conditions.resources)
 
 ```
 
@@ -233,10 +233,10 @@ See [Benchmarks](benchmarks/README.md) for a more detailed description of the be
 
 
 ## Contributing
-Contributions are welcome, and they are greatly appreciated! If you want to contribute to this project, please fork the 
-repository and make changes as you'd like. Pull requests are warmly welcome. Every little bit helps, and credit will always be given.
+Contributions are very welcome and greatly appreciated! If you want to contribute to this project, please fork the 
+repository and make changes as you'd like. Pull requests are warmly welcome and credit will always be given.
 
-## Development
+### Development
 
 To set up your environment to develop this package make sure you have [poetry](https://python-poetry.org/) installed and
 run the following commands:
