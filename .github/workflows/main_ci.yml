@@ -38,7 +38,7 @@ jobs:
           - 8081:8080
     env:
       FHIR_API_URL: http://127.0.0.1:8080/fhir
-      TRANSFER_API_URL: http://127.0.0.1:8081/fhir
+      TRANSFER_SERVER_URL: http://127.0.0.1:8081/fhir
 
 
     steps:
@@ -57,8 +57,6 @@ jobs:
           poetry install --with dev --all-extras
       - name: Prefill servers with data
         run: |
-          poetry run pip install .
-          poetry run pip install requests
           poetry run python ./testing/prefill.py
 
       - name: Lint with ruff

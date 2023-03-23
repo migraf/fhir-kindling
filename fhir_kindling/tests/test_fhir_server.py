@@ -565,7 +565,7 @@ def test_transfer(fhir_server: FhirServer):
     api_url = os.getenv("FHIR_API_URL", "http://localhost:9090/fhir")
     server = FhirServer(api_address=api_url, timeout=None)
     conditions = server.query("Condition")
-    transfer_url = os.getenv("TRANSFER_API_URL", "http://localhost:9091/fhir")
+    transfer_url = os.getenv("TRANSFER_SERVER_URL", "http://localhost:9091/fhir")
     hapi_server = FhirServer(api_address=transfer_url, timeout=None)
 
     # conditions_before = hapi_server.query("Condition").all().resources
