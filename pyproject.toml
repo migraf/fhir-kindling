@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fhir-kindling"
-version = "1.0.0a5"
+version = "1.0.0a7"
 description = "Python library to simplify working with FHIR servers and resources."
 authors = ["Michael Graf <michael.graf3110@gmail.com>"]
 # todo add changelog when multiple readme bug is fixed
