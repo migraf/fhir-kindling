@@ -54,7 +54,7 @@ rise = "*"
 python-dotenv = "*"
 black = "^23.1.0"
 ruff = "*"
-pre-commit = "^2.21.0"
+pre-commit = "^3.2.0"
 
 
 [tool.ruff]
