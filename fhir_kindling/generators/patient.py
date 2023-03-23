@@ -4,11 +4,10 @@ from uuid import uuid4
 
 import pandas as pd
 import pendulum
+from faker import Faker
 from fhir.resources.humanname import HumanName
 from fhir.resources.patient import Patient
 from fhir.resources.reference import Reference
-
-from fhir_kindling.generators.names import FIRST_NAMES, LAST_NAMES
 
 
 class PatientGenerator:
@@ -73,10 +72,14 @@ class PatientGenerator:
 
     @staticmethod
     def _generate_patient_names(n: int):
-        first_names = random.choices(FIRST_NAMES, k=n)
-        last_names = random.choices(LAST_NAMES, k=n)
-        names = list(zip(first_names, last_names))
+        fake = Faker()
 
+        names = []
+        for _ in range(n):
+            split = fake.name().split(" ")
+            family = split[-1]
+            given = " ".join(split[:-1])
+            names.append((given, family))
         return names
 
     def _generate_birthdate(self):
