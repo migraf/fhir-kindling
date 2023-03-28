@@ -11,7 +11,7 @@
       show_root_full_path: False
       members_order: source
 
-::: fhir_kindling.fhir_query.fhir_query.FhirQuerySync
+::: fhir_kindling.fhir_query.FhirQuerySync
     handler: python
     rendering:
       members: True
@@ -22,7 +22,7 @@
       show_root_full_path: False
       members_order: source
 
-::: fhir_kindling.fhir_query.fhir_query.FhirQueryAsync
+::: fhir_kindling.fhir_query.FhirQueryAsync
     handler: python
     rendering:
       members: True
