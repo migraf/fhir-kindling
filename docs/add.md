@@ -4,7 +4,7 @@ bundles by using its REST API.
 
 !!! note
     As with all the methods of the library, there are asynchronous and synchronous versions of the methods presented here.
-    Simply add `_async` to the method name to use the asynchronous version.
+    Simply add the `await` keyword and append `_async` to the method name to use the asynchronous version.
 
 ## Uploading a single resource
 

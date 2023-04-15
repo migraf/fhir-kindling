@@ -19,6 +19,29 @@ methods for resources and bundles can optionally be included with the `ds` extra
 Check out the [documentation](https://migraf.github.io/fhir-kindling/) for more information and a detailed user guide.
 
 
+Table of Contents
+=================
+
+- [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Installation](#installation)
+    - [Extras (optional)](#extras-optional)
+  - [Usage](#usage)
+    - [Connecting to a FHIR server](#connecting-to-a-fhir-server)
+    - [Query resources from the server](#query-resources-from-the-server)
+      - [Basic resource query](#basic-resource-query)
+      - [Query with filters](#query-with-filters)
+      - [Including related resources in the query](#including-related-resources-in-the-query)
+      - [Query resources by reference](#query-resources-by-reference)
+    - [Add resources to the server](#add-resources-to-the-server)
+    - [Deleting/Updating resources](#deletingupdating-resources)
+    - [Transfer resources between servers](#transfer-resources-between-servers)
+  - [Performance](#performance)
+  - [Contributing](#contributing)
+    - [Development](#development)
+    - [Tests](#tests)
+  - [Credits](#credits)
+
 ## Features
 
 - Create, Read, Update, Delete resources using a FHIR server's REST API
@@ -28,25 +51,7 @@ Check out the [documentation](https://migraf.github.io/fhir-kindling/) for more 
 - CSV serialization of query results
 - Synthetic data generation and
 
-Table of Contents
-=================
 
-* [FHIR Kindling](#fire-fhir-kindling)
-   * [Features](#features)
-   * [Installation](#installation)
-      * [Extras (optional)](#extras-optional)
-   * [Performance](#performance)
-   * [Usage](#usage)
-      * [Connecting to a FHIR server](#connecting-to-a-fhir-server)
-      * [Query resources from the server](#query-resources-from-the-server)
-         * [Basic resource query](#basic-resource-query)
-         * [Query with filters](#query-with-filters)
-         * [Including related resources in the query](#including-related-resources-in-the-query)
-         * [Query resources by reference](#query-resources-by-reference)
-      * [Add resources to the server](#add-resources-to-the-server)
-      * [Deleting/Updating resources](#deletingupdating-resources)
-      * [Transfer resources between servers](#transfer-resources-between-servers)
-   * [Credits](#credits)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
 
