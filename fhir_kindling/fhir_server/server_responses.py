@@ -1,11 +1,10 @@
+import json
 from typing import List
 
 from fhir.resources.bundle import Bundle
 from fhir.resources.reference import Reference
 from fhir.resources.resource import Resource
 from httpx import Response
-
-from fhir_kindling.fhir_query import FhirQueryParameters
 
 
 class CreateResponse:
@@ -77,26 +76,37 @@ class BundleCreateResponse:
 class TransferResponse:
     origin_server: str
     destination_server: str
-    query_parameters: FhirQueryParameters
     create_responses: List[ResourceCreateResponse]
+    linkage: dict
+    n_transferred: int
 
     def __init__(
         self,
         origin_server: str,
         destination_server: str,
         create_responses: List[ResourceCreateResponse],
-        query_parameters: FhirQueryParameters,
+        linkage: dict = None,
     ):
         self.origin_server = origin_server
         self.destination_server = destination_server
         self.create_responses = create_responses
-        self.query_parameters = query_parameters
+        self.linkage = linkage
+        self.n_transferred = len(create_responses)
+
+    def save_linkage(self, filename: str):
+        with open(filename, "w") as f:
+            json.dump(self.linkage, f)
+
+    def __str__(self):
+        return (
+            f"TransferResponse origin({self.origin_server}) -> destination ({self.destination_server})\n"
+            f"n_transferred: {self.n_transferred}, linkage: {'stored' if self.linkage else 'not stored'}"
+        )
 
     def __repr__(self):
         return (
             f"<{self.__class__.__name__}(origin_server={self.origin_server},"
-            f" destination_server={self.destination_server}, query_parameters={self.query_parameters},"
-            f" create_responses={self.create_responses[0]}...{self.create_responses[-1]})"
+            f" destination_server={self.destination_server})"
         )
 
 

@@ -1,8 +1,8 @@
 import os
 import time
 
+import httpx
 import orjson
-import requests
 from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
@@ -23,7 +23,7 @@ def check_server_status(
     for increment in increments:
         try:
             print(f"checking server 1 ({server_1})...")
-            r = requests.get(server_1 + "/Patient?")
+            r = httpx.get(server_1 + "/Patient?")
             print(r.text)
             print(r.headers)
             r.raise_for_status()
@@ -35,7 +35,7 @@ def check_server_status(
 
         try:
             print(f"checking server 2 ({server_2})...")
-            r = requests.get(server_2 + "/Patient?")
+            r = httpx.get(server_2 + "/Patient?")
             print(r.text)
             print(r.headers)
             r.raise_for_status()
@@ -56,7 +56,7 @@ def check_server_status(
 
 def prefill():
     server_1 = os.getenv("FHIR_API_URL", "http://localhost:9090/fhir")
-    server_2 = os.getenv("TRANSFER_API_URL", "http://localhost:9091/fhir")
+    server_2 = os.getenv("TRANSFER_SERVER_URL", "http://localhost:9091/fhir")
 
     if not check_server_status(server_1, server_2):
         print("Servers are down. Exiting...")
@@ -70,6 +70,8 @@ def prefill():
 
     print(f"initialized server_1: {server_1}")
     print(f"initialized server_2: {server_2}")
+
+    time.sleep(5)
 
     count = 20
     patients = PatientGenerator(n=count).generate()
@@ -87,7 +89,7 @@ def prefill():
     upload_bundle = upload_bundle.validate(upload_bundle)
     json_dict = orjson.loads(upload_bundle.json(exclude_none=True))
     print(f"uploading server 1 ({server_1.api_address})...")
-    r = requests.post(server_1.api_address, json=json_dict)
+    r = httpx.post(server_1.api_address, json=json_dict, timeout=None)
 
     print("uploading conditions...")
     condition_entries = []
@@ -107,16 +109,9 @@ def prefill():
     upload_bundle = upload_bundle.validate(upload_bundle)
     json_dict = orjson.loads(upload_bundle.json(exclude_none=True))
     print(f"uploading conditions server 1 ({server_1.api_address})...")
-    r = requests.post(server_1.api_address, json=json_dict)
+    r = httpx.post(server_1.api_address, json=json_dict, timeout=None)
 
     r.raise_for_status()
-    time.sleep(5)
-    # print(r.headers)
-    # print(f"uploading server 2 ({server_2.api_address})...")
-    # r = requests.post(server_2.api_address, json=json_dict)
-    # print(r.text)
-    # print(r.headers)
-    # r.raise_for_status()
 
 
 COVID_CODE = CodeableConcept(

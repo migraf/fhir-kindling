@@ -27,7 +27,8 @@ nav:
     - Add resources: add.md
     - Delete resources: delete.md
     - Update resources: update.md
-    - Serde: serde.md
+    - Transfer resources: transfer.md
+    - Data Science: ds.md
   - API docs: api.md
 
 

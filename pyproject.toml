@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "fhir-kindling"
-version = "1.0.0a4"
-description = "Python library for working with FHIR servers and resources."
+version = "1.0.0"
+description = "Python library to simplify working with FHIR servers and resources."
 authors = ["Michael Graf <michael.graf3110@gmail.com>"]
 # todo add changelog when multiple readme bug is fixed
 readme = "README.md"
@@ -10,7 +10,7 @@ homepage = "https://migraf.github.io/fhir-kindling/"
 repository = "https://github.com/migraf/fhir-kindling"
 license = "MIT"
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
@@ -33,12 +33,13 @@ pydantic = "*"
 networkx = "*"
 httpx = "*"
 authlib = "*"
-pandas = { version = "^1.5.2", optional = true }
+pandas = { version = "*", optional = true }
 plotly = { version = "*", optional = true }
+faker = { version = "*", optional = true }
 
 
 [tool.poetry.extras]
-ds = ["pandas", "plotly"]
+ds = ["pandas", "plotly", "faker"]
 
 
 [tool.poetry.group.dev.dependencies]
@@ -51,9 +52,9 @@ mkdocstrings = { extras = ["python-legacy"], version = "*" }
 pytest-asyncio = "*"
 rise = "*"
 python-dotenv = "*"
-black = "^23.1.0"
+black = "*"
 ruff = "*"
-pre-commit = "^2.21.0"
+pre-commit = "*"
 
 
 [tool.ruff]

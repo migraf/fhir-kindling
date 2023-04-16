@@ -64,7 +64,6 @@ class ResourceGenerator:
     def generate(
         self, disable_validation: bool = False, generate_ids: bool = False
     ) -> Union[Resource, List[Resource]]:
-
         self.disable_validation = disable_validation
         # if field values are given parse them into parameters
         if self.n and not self.params:
@@ -125,7 +124,6 @@ class ResourceGenerator:
     def _update_with_field_generator(
         self, resource: FHIRResourceModel, field_generator: FieldGenerator
     ):
-
         value = field_generator.generate()
         resource.__setattr__(field_generator.field, value)
 
@@ -144,7 +142,6 @@ class ResourceGenerator:
             )
 
     def _parse_field_values(self):
-
         params = GeneratorParameters(count=self.n)
 
         # todo: add support for field_values as a list of dicts

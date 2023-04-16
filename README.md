@@ -13,9 +13,34 @@ Python library for interacting with [HL7 FHIR](http://hl7.org/fhir/) servers and
 [pydantic](https://github.com/samuelcolvin/pydantic) and the [fhir.resources](https://github.com/nazrulworld/fhir.resources) library.
 Provides a simple interface for synchronous and asynchronous CRUD operations for resources and bundles, 
 as well as resource transfer between servers.
-Datascience features include flattening of resources and bundles into tabular format (pandas dataframe) and plotting 
+Datascience features include flattening of resources and bundles into tabular format (pandas dataframes) and plotting 
 methods for resources and bundles can optionally be included with the `ds` extra.
 
+Check out the [documentation](https://migraf.github.io/fhir-kindling/) for more information and a detailed user guide.
+
+
+Table of Contents
+=================
+
+- [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Installation](#installation)
+    - [Extras (optional)](#extras-optional)
+  - [Usage](#usage)
+    - [Connecting to a FHIR server](#connecting-to-a-fhir-server)
+    - [Query resources from the server](#query-resources-from-the-server)
+      - [Basic resource query](#basic-resource-query)
+      - [Query with filters](#query-with-filters)
+      - [Including related resources in the query](#including-related-resources-in-the-query)
+      - [Query resources by reference](#query-resources-by-reference)
+    - [Add resources to the server](#add-resources-to-the-server)
+    - [Deleting/Updating resources](#deletingupdating-resources)
+    - [Transfer resources between servers](#transfer-resources-between-servers)
+  - [Performance](#performance)
+  - [Contributing](#contributing)
+    - [Development](#development)
+    - [Tests](#tests)
+  - [Credits](#credits)
 
 ## Features
 
@@ -26,25 +51,7 @@ methods for resources and bundles can optionally be included with the `ds` extra
 - CSV serialization of query results
 - Synthetic data generation and
 
-Table of Contents
-=================
 
-* [FHIR Kindling](#fire-fhir-kindling)
-   * [Features](#features)
-   * [Installation](#installation)
-      * [Extras (optional)](#extras-optional)
-   * [Performance](#performance)
-   * [Usage](#usage)
-      * [Connecting to a FHIR server](#connecting-to-a-fhir-server)
-      * [Query resources from the server](#query-resources-from-the-server)
-         * [Basic resource query](#basic-resource-query)
-         * [Query with filters](#query-with-filters)
-         * [Including related resources in the query](#including-related-resources-in-the-query)
-         * [Query resources by reference](#query-resources-by-reference)
-      * [Add resources to the server](#add-resources-to-the-server)
-      * [Deleting/Updating resources](#deletingupdating-resources)
-      * [Transfer resources between servers](#transfer-resources-between-servers)
-   * [Credits](#credits)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
 
@@ -219,7 +226,7 @@ server_2 = FhirServer(api_address="https://fhir.server/fhir")
 # query some resources from server 1
 conditions = server_1.query("Condition").limit(10)
 # transfer the resources to server 2
-response = server_1.transfer(server_2, conditions)
+response = server_1.transfer(server_2, resources=conditions.resources)
 
 ```
 
@@ -231,10 +238,10 @@ See [Benchmarks](benchmarks/README.md) for a more detailed description of the be
 
 
 ## Contributing
-Contributions are welcome, and they are greatly appreciated! If you want to contribute to this project, please fork the 
-repository and make changes as you'd like. Pull requests are warmly welcome. Every little bit helps, and credit will always be given.
+Contributions are very welcome and greatly appreciated! If you want to contribute to this project, please fork the 
+repository and make changes as you'd like. Pull requests are warmly welcome and credit will always be given.
 
-## Development
+### Development
 
 To set up your environment to develop this package make sure you have [poetry](https://python-poetry.org/) installed and
 run the following commands:

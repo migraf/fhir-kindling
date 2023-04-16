@@ -76,7 +76,6 @@ class DatasetGenerator:
     """
 
     def __init__(self, resource: str = "Patient", n: int = None, name: str = None):
-
         self.name = name if name else str(uuid4())
 
         if resource == "Patient":
@@ -212,7 +211,6 @@ class DatasetGenerator:
                 store.resources.append(resource.dict(exclude_none=True))
 
     def _setup_dataset(self):
-
         dataset = DataSet.construct(resources=[])
         if self.name:
             dataset.name = self.name

@@ -278,7 +278,6 @@ class FhirQueryParameters(BaseModel):
 
     @root_validator
     def validate_parameters(cls, values):
-
         valid_resource_name(values["resource"], strict=True)
         return values
 
@@ -314,7 +313,6 @@ class FhirQueryParameters(BaseModel):
 
     @classmethod
     def from_query_string(cls, query_string: str) -> "FhirQueryParameters":
-
         # split resource and query parameters
         resource, query = query_string.split("?")
 
