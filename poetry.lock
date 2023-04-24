@@ -803,14 +803,14 @@ devel = ["colorama", "json-spec", "jsonschema", "pylint", "pytest", "pytest-benc
 
 [[package]]
 name = "fhir-resources"
-version = "6.5.0"
+version = "7.0.0"
 description = "FHIR Resources as Model Class"
 category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "fhir.resources-6.5.0-py2.py3-none-any.whl", hash = "sha256:515a6cb3eadc61597fec0cb273b1ff943f76f44d2c8efefa5218f001087a95d3"},
-    {file = "fhir.resources-6.5.0.tar.gz", hash = "sha256:1d02ff2547e5b6323543c8ce9916e0c9e5536847b3b2171acb1f51a86efba16e"},
+    {file = "fhir.resources-7.0.0-py2.py3-none-any.whl", hash = "sha256:07862cff388f7d8983a10055d8afacd07e89d48b95b658cad043cf4c24bda66c"},
+    {file = "fhir.resources-7.0.0.tar.gz", hash = "sha256:202d443c81066e063c6f1762b18a9680750db9f4772de5183ed20f0622ac7026"},
 ]
 
 [package.dependencies]
