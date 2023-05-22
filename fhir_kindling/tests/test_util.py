@@ -12,6 +12,7 @@ from fhir.resources.patient import Patient
 from fhir_kindling import FhirServer
 from fhir_kindling.fhir_server.transfer import reference_graph
 from fhir_kindling.generators import PatientGenerator
+from fhir_kindling.util.benchmark import ServerBenchmark
 from fhir_kindling.util.references import (
     _resource_ids_from_query_response,
     check_missing_references,
@@ -139,3 +140,10 @@ def test_resource_contains_field(server):
     check_resource_contains_field("Patient", "birthDate")
     with pytest.raises(ValueError):
         check_resource_contains_field("Patient", "foo")
+
+
+def test_benchmark(server):
+    transfer_server = FhirServer(api_address=os.getenv("TRANSFER_API_URL"))
+    benchmark = ServerBenchmark(servers=[server, transfer_server])
+    benchmark.run()
+    benchmark.plot_results()
