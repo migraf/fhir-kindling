@@ -6,9 +6,11 @@ from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
 
 from fhir_kindling import FhirServer
+from fhir_kindling.fhir_query.query_parameters import FhirQueryParameters
 from fhir_kindling.generators import (
     PatientGenerator,
 )
+from fhir_kindling.util.benchmark.data import generate_benchmark_data
 from fhir_kindling.util.benchmark.figures import plot_benchmark_results
 
 N_ATTEMPTS = 20
@@ -32,14 +34,30 @@ class ServerBenchmark:
         servers: List[FhirServer],
         n_attempts: int = N_ATTEMPTS,
         batch_size: int = BATCH_SIZE,
+        custom_queries: Union[List[Union[str, FhirQueryParameters]], None] = None,
     ):
         self.servers = servers
         self._results = BenchmarkResults()
         self.benchmark_resources = {}
         self.n_attempts = n_attempts
         self.batch_size = batch_size
+        self.custom_queries = []
+        if custom_queries:
+            for q in custom_queries:
+                if isinstance(q, str):
+                    self.custom_queries.append(FhirQueryParameters.from_query_string(q))
+                elif isinstance(q, FhirQueryParameters):
+                    self.custom_queries.append(q)
+                else:
+                    raise ValueError(
+                        "Custom_queries must be a list of fhir query strings or FhirQueryParameters objects"
+                    )
 
-    def run(self):
+        print("generating benchmark resources")
+        generate_benchmark_data()
+        print("done")
+
+    def run_suite(self):
         for server in self.servers:
             print(f"Running benchmarks for {server.api_address}")
             self._benchmark_insert(server)
@@ -58,12 +76,17 @@ class ServerBenchmark:
     def results_df(self):
         return self._results.to_df()
 
-    def plot_results(self):
-        plot_benchmark_results(self.results)
+    def plot(self):
+        fig = plot_benchmark_results(self.results)
+        return fig
 
     def _benchmark_insert(self, server: FhirServer):
         self._benchmark_insert_single(server)
         self._benchmark_batch_insert(server)
+
+    def _benchmark_update(self, server: FhirServer):
+        self._benchmark_update_single(server)
+        self._benchmark_batch_update(server)
 
     def _benchmark_insert_single(self, server: FhirServer):
         print(f"Running single insert benchmark for {server.api_address}")
@@ -92,11 +115,11 @@ class ServerBenchmark:
 
     def _benchmark_batch_insert(self, server: FhirServer):
         print(f"Running batch insert benchmark for {server.api_address}")
-        resources = PatientGenerator(n=self.batch_size).generate()
 
         timings = []
         # run multiple attempts for inserting resources
         for _ in range(self.n_attempts):
+            resources = PatientGenerator(n=self.batch_size).generate()
             start_time = time.perf_counter()
             response = server.add_all(resources)
             elapsed_time = time.perf_counter() - start_time
@@ -125,6 +148,16 @@ class ServerBenchmark:
         self.benchmark_resources[server.api_address] = server_resources
 
     def _benchmark_query(self, server):
+        pass
+
+    def _benchmark_update(self, server: FhirServer):
+        self._benchmark_update_single(server)
+        self._benchmark_batch_update(server)
+
+    def _benchmark_update_single(self, server: FhirServer):
+        pass
+
+    def _benchmark_batch_update(self, server: FhirServer):
         pass
 
 

@@ -145,5 +145,5 @@ def test_resource_contains_field(server):
 def test_benchmark(server):
     transfer_server = FhirServer(api_address=os.getenv("TRANSFER_API_URL"))
     benchmark = ServerBenchmark(servers=[server, transfer_server])
-    benchmark.run()
-    benchmark.plot_results()
+    benchmark.run_suite()
+    benchmark.plot()
