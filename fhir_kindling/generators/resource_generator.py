@@ -50,6 +50,7 @@ class ResourceGenerator:
         self._value_iterators = {}
         # list to store the field names of all fields being generated
         self._generated_fields = set()
+        self._validated = False
 
     def required_fields(self) -> List[str]:
         required_fields = []
@@ -149,6 +150,9 @@ class ResourceGenerator:
         self.params = params
 
     def _validate_params(self):
+        # skip validation if it has been previously validated
+        if self._validated:
+            return
         # validate field values
         if self.params.field_values:
             self._validate_field_values()
@@ -159,6 +163,8 @@ class ResourceGenerator:
 
         # check that the required fields are being generated
         self._check_required_fields()
+
+        self._validated = True
 
     def _validate_field_values(self):
         field_values = self.params.field_values

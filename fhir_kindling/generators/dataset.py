@@ -2,6 +2,7 @@ import random
 from typing import List, Optional, Type, Union
 from uuid import uuid4
 
+import networkx as nx
 from fhir.resources import FHIRAbstractModel, get_fhir_model_class
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from fhir.resources.fhirtypes import ReferenceType
@@ -19,6 +20,7 @@ class DataSetResourceGenerator(BaseModel):
     name: str
     generator: ResourceGenerator
     depends_on: Optional[Union[str, List[str]]] = None
+    reference_field: Optional[Union[str, List[str]]] = None
     likelihood: float
 
     class Config:
@@ -72,17 +74,19 @@ class DataSet(BaseModel):
 
 class DatasetGenerator:
     """
-    Generates a dataset for a FHIR resource.
+    Generates a dataset of FHIR resources.
     """
 
-    def __init__(self, resource: str = "Patient", n: int = None, name: str = None):
+    def __init__(self, base_resource: str = "Patient", n: int = None, name: str = None):
         self.name = name if name else str(uuid4())
 
-        if resource == "Patient":
-            self.resource = get_fhir_model_class(resource)
+        if base_resource == "Patient":
+            self.base_resource = get_fhir_model_class(base_resource)
         else:
             raise NotImplementedError(
-                "DatasetGenerator for {} is not implemented".format(resource)
+                "DatasetGenerator not implemented with {} as a base resource".format(
+                    base_resource
+                )
             )
         self.n = n
         self.generators: List[DataSetResourceGenerator] = []
@@ -91,26 +95,59 @@ class DatasetGenerator:
         self._dataset: DataSet = None
         self._resource_types = set()
         self._reference_fields = {}
+        self._graph = nx.DiGraph()
 
-    def add_resource(
+        self.setup()
+
+    def setup(self):
+        # add base generator
+        self.add_resource_generator(
+            PatientGenerator(generate_ids=True),
+            name="base",
+            depends_on=None,
+            reference_field=None,
+            likelihood=1.0,
+        )
+
+    def add_resource_generator(
         self,
         resource_generator: ResourceGenerator,
         name: str = None,
-        depends_on: Union[str, List[str]] = None,
+        depends_on: Union[str, List[str]] = "base",
+        reference_field: str = None,
         likelihood: float = 1.0,
     ) -> "DatasetGenerator":
         if not name:
             name = str(uuid4())
         self._resource_types.add(resource_generator.resource.get_resource_type())
-        self.generators.append(
-            DataSetResourceGenerator.construct(
-                name=name,
-                generator=resource_generator,
-                depends_on=depends_on,
-                likelihood=likelihood,
-            )
+
+        generator = DataSetResourceGenerator(
+            name=name,
+            generator=resource_generator,
+            depends_on=depends_on,
+            reference_field=reference_field,
+            likelihood=likelihood,
         )
+
+        # add the generator to the graph
+
+        self.generators.append(generator)
+
         return self
+
+    def _add_generator_to_graph(self, generator: DataSetResourceGenerator):
+        self._graph.add_node(generator.name, generator=generator)
+        if generator.depends_on:
+            if isinstance(generator.depends_on, str):
+                self._graph.add_edge(
+                    generator.depends_on,
+                    generator.name,
+                    likelihood=generator.likelihood,
+                    reference_field=generator.reference_field,
+                )
+            else:
+                for dependency in generator.depends_on:
+                    self._graph.add_edge(dependency, generator.name)
 
     def generate(self, ids: bool = True) -> DataSet:
         """
@@ -158,6 +195,23 @@ class DatasetGenerator:
             )
             patients = patient_generator.generate()
             return DataSet(name=self.name, patients=patients)
+
+    def graph(self) -> nx.DiGraph:
+        if not self._graph:
+            self._graph = self._generate_resource_graph()
+        return self._graph
+
+    def _generate_resource_graph(self) -> nx.DiGraph:
+        graph = nx.DiGraph()
+        for generator in self.generators:
+            graph.add_node(generator.name)
+            if generator.depends_on:
+                if isinstance(generator.depends_on, str):
+                    graph.add_edge(generator.depends_on, generator.name)
+                else:
+                    for dependency in generator.depends_on:
+                        graph.add_edge(dependency, generator.name)
+        return graph
 
     def explain(self):
         pass

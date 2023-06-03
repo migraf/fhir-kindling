@@ -1,5 +1,5 @@
 from fhir_kindling import FhirServer
-from fhir_kindling.util.benchmark import ServerBenchmark
+from fhir_kindling.benchmark import ServerBenchmark
 
 DEFAULT_SERVERS = [
     {"name": "blaze", "api_address": "http://localhost:9090/fhir"},
@@ -16,10 +16,8 @@ def run_benchmark(servers=DEFAULT_SERVERS):
     """Run a benchmark against the given servers."""
 
     # initialize server objects
-    print("initializing servers")
     benchmark_servers = []
     for s in servers:
-        print(s)
         print(f"initializing Server {s['name']} -- {s['api_address']}")
         credentials = s.get("credentials", None)
         if credentials:
@@ -34,10 +32,12 @@ def run_benchmark(servers=DEFAULT_SERVERS):
 
     print("running benchmark")
 
-    benchmark = ServerBenchmark(servers=benchmark_servers)
-    benchmark.run_suite()
-    figure = benchmark.plot()
-    figure.show()
+    ServerBenchmark(
+        servers=benchmark_servers, server_names=[s["name"] for s in servers]
+    )
+    # benchmark.run_suite()
+    # figure = benchmark.plot()
+    # figure.show()
 
 
 if __name__ == "__main__":
