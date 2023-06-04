@@ -63,7 +63,9 @@ class ServerBenchmark:
 
         print("Setting up resource generator.")
         self.dataset = generate_benchmark_data()
-        print(self.dataset)
+        # print(self.dataset)
+        self.dataset.explain()
+
         print("done")
 
     def run_suite(self):
