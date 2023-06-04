@@ -11,6 +11,7 @@ from fhir.resources.reference import Reference
 from pydantic import BaseModel, Field
 
 from fhir_kindling import FhirServer
+from fhir_kindling.generators.base import BaseGenerator
 from fhir_kindling.generators.patient import PatientGenerator
 from fhir_kindling.generators.resource_generator import ResourceGenerator
 from fhir_kindling.util import get_resource_fields
@@ -18,7 +19,7 @@ from fhir_kindling.util import get_resource_fields
 
 class DataSetResourceGenerator(BaseModel):
     name: str
-    generator: ResourceGenerator
+    generator: BaseGenerator
     depends_on: Optional[Union[str, List[str]]] = None
     reference_field: Optional[Union[str, List[str]]] = None
     likelihood: float
@@ -102,7 +103,7 @@ class DatasetGenerator:
     def setup(self):
         # add base generator
         self.add_resource_generator(
-            PatientGenerator(generate_ids=True),
+            PatientGenerator(generate_ids=True, n=1),
             name="base",
             depends_on=None,
             reference_field=None,
