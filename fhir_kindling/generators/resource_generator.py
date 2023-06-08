@@ -6,6 +6,7 @@ from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from fhir.resources.resource import Resource
 from pydantic import BaseModel
 
+from fhir_kindling.generators.base import BaseGenerator
 from fhir_kindling.generators.field_generator import FieldGenerator
 
 
@@ -22,7 +23,7 @@ class GeneratorParameters(BaseModel):
     # todo count and list in field values of same length
 
 
-class ResourceGenerator:
+class ResourceGenerator(BaseGenerator):
     def __init__(
         self,
         resource: Union[str, Any],

@@ -36,10 +36,11 @@ authlib = "*"
 pandas = { version = "*", optional = true }
 plotly = { version = "*", optional = true }
 faker = { version = "*", optional = true }
+matplotlib = { version = "*", optional = true }
 
 
 [tool.poetry.extras]
-ds = ["pandas", "plotly", "faker"]
+ds = ["pandas", "plotly", "faker", "matplotlib"]
 
 
 [tool.poetry.group.dev.dependencies]

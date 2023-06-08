@@ -9,8 +9,10 @@ from fhir.resources.humanname import HumanName
 from fhir.resources.patient import Patient
 from fhir.resources.reference import Reference
 
+from fhir_kindling.generators.base import BaseGenerator
 
-class PatientGenerator:
+
+class PatientGenerator(BaseGenerator):
     def __init__(
         self,
         n: int,
@@ -19,7 +21,7 @@ class PatientGenerator:
         organisation: Reference = None,
         generate_ids: bool = False,
     ):
-        self.resource_type = Patient
+        self.resource = Patient
         self.n = n
         self.age_range = age_range
         self.gender_distribution = gender_distribution

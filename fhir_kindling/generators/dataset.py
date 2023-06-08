@@ -2,6 +2,7 @@ import random
 from typing import List, Optional, Type, Union
 from uuid import uuid4
 
+import matplotlib.pyplot as plt
 import networkx as nx
 from fhir.resources import FHIRAbstractModel, get_fhir_model_class
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
@@ -11,6 +12,7 @@ from fhir.resources.reference import Reference
 from pydantic import BaseModel, Field
 
 from fhir_kindling import FhirServer
+from fhir_kindling.generators.base import BaseGenerator
 from fhir_kindling.generators.patient import PatientGenerator
 from fhir_kindling.generators.resource_generator import ResourceGenerator
 from fhir_kindling.util import get_resource_fields
@@ -18,7 +20,7 @@ from fhir_kindling.util import get_resource_fields
 
 class DataSetResourceGenerator(BaseModel):
     name: str
-    generator: ResourceGenerator
+    generator: BaseGenerator
     depends_on: Optional[Union[str, List[str]]] = None
     reference_field: Optional[Union[str, List[str]]] = None
     likelihood: float
@@ -93,16 +95,16 @@ class DatasetGenerator:
         self._references = None
         self._patients = None
         self._dataset: DataSet = None
-        self._resource_types = set()
-        self._reference_fields = {}
+        self._nodes = set()
         self._graph = nx.DiGraph()
+        self._resource_types = set()
 
         self.setup()
 
     def setup(self):
         # add base generator
         self.add_resource_generator(
-            PatientGenerator(generate_ids=True),
+            PatientGenerator(generate_ids=True, n=1),
             name="base",
             depends_on=None,
             reference_field=None,
@@ -112,13 +114,17 @@ class DatasetGenerator:
     def add_resource_generator(
         self,
         resource_generator: ResourceGenerator,
-        name: str = None,
+        name: str,
         depends_on: Union[str, List[str]] = "base",
         reference_field: Union[str, List[str], None] = None,
         likelihood: float = 1.0,
     ) -> "DatasetGenerator":
-        if not name:
-            name = str(uuid4())
+        # make sure that the node names are unique
+        if name in self._nodes:
+            raise ValueError("A generator with the name {} already exists".format(name))
+        else:
+            self._nodes.add(name)
+
         self._resource_types.add(resource_generator.resource.get_resource_type())
 
         generator = DataSetResourceGenerator(
@@ -132,6 +138,7 @@ class DatasetGenerator:
         # add the generator to the graph
 
         self.generators.append(generator)
+        self._add_generator_to_graph(generator)
 
         return self
 
@@ -214,7 +221,16 @@ class DatasetGenerator:
         return graph
 
     def explain(self):
-        pass
+        figure = self.draw_graph()
+        figure.show()
+
+    def draw_graph(self):
+        graph = self.graph()
+        pos = nx.spring_layout(graph)
+        edge_labels = nx.get_edge_attributes(graph, "likelihood")
+        nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels)
+        nx.draw(graph, pos, with_labels=True)
+        return plt
 
     def _add_reference_param(self, resource: FHIRResourceModel, reference: Reference):
         # check if a reference field is present for the given resource type if not detect first required reference
