@@ -113,6 +113,8 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
     dataset.add_resource_generator(
         emergency_encounter_generator,
         "emergency-encounter",
+        depends_on="base",
+        reference_field="subject",
     )
 
     icu_encounter_period_generator = FieldGenerator(
@@ -139,6 +141,8 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
     dataset.add_resource_generator(
         icu_encounter_generator,
         "icu-encounter",
+        depends_on=["base", "emergency-encounter"],
+        reference_field="subject",
     )
 
     # generate observations

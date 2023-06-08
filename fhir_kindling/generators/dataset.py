@@ -114,7 +114,7 @@ class DatasetGenerator:
         resource_generator: ResourceGenerator,
         name: str = None,
         depends_on: Union[str, List[str]] = "base",
-        reference_field: str = None,
+        reference_field: Union[str, List[str], None] = None,
         likelihood: float = 1.0,
     ) -> "DatasetGenerator":
         if not name:
