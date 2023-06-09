@@ -61,14 +61,14 @@ class ServerBenchmark:
                         "Custom_queries must be a list of fhir query strings or FhirQueryParameters objects"
                     )
 
-        print("Setting up resource generator.")
-        self.dataset = generate_benchmark_data()
+        self.dataset_generator = generate_benchmark_data(n_patients=1000)
         # print(self.dataset)
-        self.dataset.explain()
+        self.dataset_generator.explain()
+        self.dataset_generator.generate()
 
-        print("done")
+    def run_suite(self, progress: bool = True):
+        # generate benchmark data
 
-    def run_suite(self):
         for i, server in enumerate(self.servers):
             print(f"Running benchmarks for {server.api_address}")
             self._benchmark_insert(
@@ -180,9 +180,9 @@ class ServerBenchmark:
 
 class BenchmarkOperations(str, Enum):
     INSERT = "insert"
+    GENERATE = "generate"
     QUERY = "query"
     BATCH_INSERT = "batch_insert"
-    BATCH_QUERY = "batch_query"
     UPDATE = "update"
     DELETE = "delete"
     BATCH_DELETE = "batch_delete"

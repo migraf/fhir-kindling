@@ -10,6 +10,7 @@ from fhir.resources.patient import Patient
 from fhir.resources.reference import Reference
 
 from fhir_kindling.generators.base import BaseGenerator
+from fhir_kindling.serde.json import json_dict
 
 
 class PatientGenerator(BaseGenerator):
@@ -30,14 +31,26 @@ class PatientGenerator(BaseGenerator):
         self.generate_ids = generate_ids
         self.resources = None
 
-    def generate(self, references: bool = False):
+    def generate(
+        self,
+        references: bool = False,
+        generate_ids: bool = False,
+        as_dict: bool = False,
+    ):
         patients = self._generate()
         self.resources = patients
+
+        if as_dict:
+            resources = [json_dict(patient) for patient in patients]
+        if self.n == 1:
+            if references:
+                return resources[0], self._generate_references()[0]
+            return resources[0]
 
         if references and not self.generate_ids:
             raise ValueError("Cannot generate references without generating ids")
         elif references:
-            return patients, self._generate_references()
+            return resources, self._generate_references()
 
         return patients
 

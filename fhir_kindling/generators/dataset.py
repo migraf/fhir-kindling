@@ -1,80 +1,107 @@
 import random
-from typing import List, Optional, Type, Union
+from typing import Dict, List, Optional, Type, Union
 from uuid import uuid4
 
 import matplotlib.pyplot as plt
 import networkx as nx
-from fhir.resources import FHIRAbstractModel, get_fhir_model_class
+from fhir.resources import (
+    FHIRAbstractModel,
+    construct_fhir_element,
+    get_fhir_model_class,
+)
 from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from fhir.resources.fhirtypes import ReferenceType
-from fhir.resources.patient import Patient
 from fhir.resources.reference import Reference
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from tqdm import tqdm
 
-from fhir_kindling import FhirServer
 from fhir_kindling.generators.base import BaseGenerator
 from fhir_kindling.generators.patient import PatientGenerator
 from fhir_kindling.generators.resource_generator import ResourceGenerator
 from fhir_kindling.util import get_resource_fields
 
 
-class DataSetResourceGenerator(BaseModel):
+class DataSetResourceGenerator(BaseGenerator):
     name: str
     generator: BaseGenerator
     depends_on: Optional[Union[str, List[str]]] = None
-    reference_field: Optional[Union[str, List[str]]] = None
+    reference_field: Optional[
+        Union[str, List[str], List[Union[str, None]], None]
+    ] = None
     likelihood: float
+    references: Dict[str, Reference]
 
-    class Config:
-        arbitrary_types_allowed = True
+    def __init__(
+        self,
+        name: str,
+        generator: BaseGenerator,
+        depends_on: Optional[Union[str, List[str]]] = None,
+        reference_field: Optional[
+            Union[str, List[str], List[Union[str, None]], None]
+        ] = None,
+        likelihood: float = 1.0,
+    ):
+        self.name = name
+        self.generator = generator
+        self.depends_on = depends_on
+        self.reference_field = reference_field
+        self.likelihood = likelihood
+        self.references = {}
 
+    def add_reference(self, reference_field: str, reference: Union[Reference, str]):
+        if isinstance(reference, str):
+            reference = {"reference": reference}
+        elif isinstance(reference, Reference):
+            reference = reference.dict()
+        else:
+            raise ValueError(
+                f"Reference must be a string or a Reference object, got {type(reference)}"
+            )
 
-class GeneratedResources(BaseModel):
-    resource_type: str
-    resources: List[dict] = Field(default_factory=list)
-    reference_key: Optional[str] = None
+        self.references[reference_field] = reference
 
-    class Config:
-        arbitrary_types_allowed = True
+    def generate(self):
+        # generate based on the likelihood
+        if self.likelihood < 1.0:
+            if random.random() > self.likelihood:
+                return None
+
+        base_resource_dict = self.generator.generate(generate_ids=True, as_dict=True)
+        if self.references:
+            # insert the references
+            base_resource_dict = {**base_resource_dict, **self.references}
+
+        resource = self.generator.resource(**base_resource_dict)
+
+        return resource
 
 
 class DataSet(BaseModel):
     name: str
-    patients: List[Patient]
-    resources: Optional[List[GeneratedResources]]
+    base_resource: str
+    resources: List
+    resource_types: List[str]
 
-    class Config:
-        arbitrary_types_allowed = True
+    @property
+    def n_resources(self):
+        return len(self.resources)
 
-    def upload(self, server: FhirServer) -> tuple:
-        # first upload the patients for referential integrity
-        patient_ids = [patient.id for patient in self.patients]
-        patient_response = server.add_all(self.patients)
-        # replace the initially generated reference with the server generated ones
+    def size(self, human_readable: bool = False):
+        """The size of the dataset in bytes"""
 
-        # iterate over the server generated references along with the initially generated ids
-        for reference, patient_id in zip(patient_response.references, patient_ids):
-            # iterate over all the generated resource objects
-            for generated_resources in self.resources:
-                # and their resources
-                for resource in generated_resources.resources:
-                    # replace the reference parameter with the server generated one
-                    resource_reference = resource.get(generated_resources.reference_key)
-                    if patient_id in resource_reference["reference"]:
-                        resource[generated_resources.reference_key] = {
-                            "reference": reference.reference
-                        }
-
-        # upload the resources
-        generated_resources = []
-        for generated_resources_object in self.resources:
-            generated_resources.extend(generated_resources_object.resources)
-        resource_response = server.add_all(generated_resources)
-
-        return patient_response, resource_response
+        size = sum(
+            [
+                len(resource.json(exclude_none=True, return_bytes=True))
+                for resource in self.resources
+            ]
+        )
+        if human_readable:
+            return size / 1024 / 1024
+        return size
 
 
 class DatasetGenerator:
+
     """
     Generates a dataset of FHIR resources.
     """
@@ -111,6 +138,186 @@ class DatasetGenerator:
             likelihood=1.0,
         )
 
+    def generate(self, display: bool = False) -> DataSet:
+        """
+        Generate a dataset of FHIR resources according to the given conditions
+
+        Args:
+            ids:
+
+        Returns:
+
+        """
+        resources = []
+        for _ in tqdm(range(self.n), disable=not display):
+            batch = self._generate_resources_from_graph()
+            added_resources = list(filter(lambda x: x is not None, batch.values()))
+            resources.extend(added_resources)
+
+        self._dataset = self._make_data_set(resources)
+
+        return self._dataset
+
+    def _make_data_set(self, resources: List[dict]) -> DataSet:
+        # construct fhir elements
+        fhir_resources = []
+        for resource in resources:
+            if isinstance(resource, dict):
+                resource = construct_fhir_element(resource["resourceType"], resource)
+            else:
+                fhir_resources.append(resource)
+        dataset = DataSet(
+            name=self.name,
+            base_resource=self.base_resource.get_resource_type(),
+            resources=fhir_resources,
+            resource_types=list(self._resource_types),
+        )
+
+        print(
+            "Generated dataset with {} resources and a size of {} MB".format(
+                dataset.n_resources, dataset.size(True)
+            )
+        )
+
+        self._dataset = dataset
+
+    def _generate_resources_from_graph(self):
+        """
+        Generate a set of resource based on the generator graph
+        """
+
+        result = {}
+
+        graph = self.graph()
+        # start with the base node/generator and work through the graph
+        top_list = reversed(list(nx.topological_sort(graph)))
+        for node in top_list:
+            # get the edges from the node
+            if not self._check_dependencies(node, result):
+                continue
+            # get the generator from the node data
+            generator = self._get_node_generator(node)
+
+            # get the dependencies
+            self._get_refs_for_generator(generator, result)
+
+            resource = generator.generate()
+            result[node] = resource
+            # print("Generated", node, result[node])
+        return result
+
+    def _get_refs_for_generator(
+        self, generator: DataSetResourceGenerator, result: dict
+    ) -> dict:
+        """Get the references resources for a generator from the results and insert a reference to them into
+        the reference field of the generator
+
+        Args:
+            generator: the generator to get the references for
+            result: dependencies that have already been generated
+
+        Returns:
+            None
+        """
+        if not generator.reference_field:
+            return
+
+        if isinstance(generator.reference_field, list):
+            for dep, ref_field in zip(generator.depends_on, generator.reference_field):
+                if not ref_field:
+                    continue
+                resource = result.get(dep)
+                if resource is None:
+                    raise ValueError(f"Resource {dep} is None")
+
+                ref = self._get_ref_from_resource_dict(resource)
+                generator.add_reference(reference=ref, reference_field=ref_field)
+        else:
+            resource = result.get(generator.depends_on)
+            if resource is None:
+                raise ValueError(f"Resource dependency {generator.depends_on} is None")
+            ref = self._get_ref_from_resource_dict(resource)
+            generator.add_reference(
+                reference=ref, reference_field=generator.reference_field
+            )
+
+    def _get_ref_from_resource_dict(self, resource_dict: dict) -> str:
+        """Get a reference dict from a resource dict by combining the resource type and id
+
+        Args:
+            resource_dict: dictionary representation of a fhir resource
+
+        Returns:
+            Dictionary representation of a fhir reference
+        """
+
+        if not isinstance(resource_dict, dict):
+            resource_dict = resource_dict.dict()
+        ref_string = "{}/{}".format(resource_dict["resourceType"], resource_dict["id"])
+
+        return ref_string
+
+    def _get_node_generator(self, node: str) -> DataSetResourceGenerator:
+        """
+        Get a generator by name
+
+        Args:
+            node: the name of the generator
+
+        Returns:
+            the generator
+        """
+        try:
+            generator = self.graph().nodes[node]["generator"]
+            return generator
+        except KeyError:
+            raise ValueError("No generator found for node {}".format(node))
+
+    def _check_dependencies(self, node: str, result: dict) -> bool:
+        """
+        Check if a node has any dependencies
+
+        Args:
+            node: the node to check
+        """
+
+        graph = self.graph()
+        edges = graph.edges(node, data=True)
+        if not edges:
+            return True
+
+        dependencies_exists = True
+        for edge in edges:
+            _, dependency, data = edge
+            if not result.get(dependency):
+                dependencies_exists = False
+                break
+
+        return dependencies_exists
+
+    def graph(self) -> nx.DiGraph:
+        """
+        Return a networkx graph of the descripting the resource generation process
+        """
+        if not self._graph:
+            self._graph = self._generate_resource_graph()
+        return self._graph
+
+    def explain(self):
+        figure = self.draw_graph()
+        figure.show()
+
+    def draw_graph(self):
+        """
+        Visualize the graph underlying the resource generation process
+        """
+        graph = self.graph()
+        pos = nx.spring_layout(graph)
+        edge_labels = nx.get_edge_attributes(graph, "likelihood")
+        nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels)
+        nx.draw(graph, pos, with_labels=True)
+        return plt
+
     def add_resource_generator(
         self,
         resource_generator: ResourceGenerator,
@@ -119,11 +326,33 @@ class DatasetGenerator:
         reference_field: Union[str, List[str], None] = None,
         likelihood: float = 1.0,
     ) -> "DatasetGenerator":
+        """
+        Adds a resource generator to the dataset generator.
+
+        Args:
+            resource_generator (ResourceGenerator): The resource generator to add.
+            name (str): The name of the generator.
+            depends_on (Union[str, List[str]], optional): The name(s) of the generator(s) that this generator
+            depends on. Defaults to "base".
+            reference_field (Union[str, List[str], None], optional): The name(s) of the reference field(s)
+            that this generator uses to reference other resources. Defaults to None.
+            likelihood (float, optional): The likelihood of generating this resource. Defaults to 1.0.
+
+        Returns:
+            DatasetGenerator: The dataset generator instance.
+
+        Raises:
+            ValueError: If a generator with the same name already exists.
+        """
+
         # make sure that the node names are unique
         if name in self._nodes:
             raise ValueError("A generator with the name {} already exists".format(name))
         else:
             self._nodes.add(name)
+
+        # validate the reference field
+        self._validate_depends_and_reference(depends_on, reference_field)
 
         self._resource_types.add(resource_generator.resource.get_resource_type())
 
@@ -136,101 +365,88 @@ class DatasetGenerator:
         )
 
         # add the generator to the graph
-
         self.generators.append(generator)
         self._add_generator_to_graph(generator)
 
         return self
+
+    def _validate_depends_and_reference(
+        self,
+        depends_on: Union[str, List[str]],
+        reference_field: Union[str, List[str], None],
+    ):
+        self._validate_depends(depends_on)
+
+        if reference_field:
+            if isinstance(depends_on, list) and isinstance(reference_field, list):
+                if len(depends_on) != len(reference_field):
+                    raise ValueError(
+                        "When provided as list the number of reference fields must match the number of dependencies"
+                    )
+            elif isinstance(depends_on, list) and isinstance(reference_field, str):
+                raise ValueError(
+                    "When provided as list the number of reference fields must match the number of dependencies"
+                )
+            elif isinstance(depends_on, str) and isinstance(reference_field, str):
+                pass
+            else:
+                raise ValueError(
+                    "When provided as list the number of reference fields must match the number of dependencies"
+                )
+
+    def _validate_depends(
+        self,
+        depends_on: Union[str, List[str]],
+    ):
+        graph = self.graph()
+        if depends_on:
+            if isinstance(depends_on, list):
+                for dependency in depends_on:
+                    if dependency not in graph.nodes:
+                        raise ValueError(
+                            "The dependency {} does not exist in the graph".format(
+                                dependency
+                            )
+                        )
+            else:
+                if depends_on not in graph.nodes:
+                    raise ValueError(
+                        "The dependency {} does not exist in the graph".format(
+                            depends_on
+                        )
+                    )
 
     def _add_generator_to_graph(self, generator: DataSetResourceGenerator):
         self._graph.add_node(generator.name, generator=generator)
         if generator.depends_on:
             if isinstance(generator.depends_on, str):
                 self._graph.add_edge(
-                    generator.depends_on,
                     generator.name,
+                    generator.depends_on,
                     likelihood=generator.likelihood,
                     reference_field=generator.reference_field,
                 )
+            elif isinstance(generator.depends_on, list):
+                for i, depends in enumerate(generator.depends_on):
+                    self._graph.add_edge(
+                        generator.name,
+                        depends,
+                        likelihood=generator.likelihood,
+                        reference_field=generator.reference_field[i]
+                        if generator.reference_field
+                        else None,
+                    )
             else:
-                for dependency in generator.depends_on:
-                    self._graph.add_edge(dependency, generator.name)
-
-    def generate(self, ids: bool = True) -> DataSet:
-        """
-        Generate a dataset of FHIR resources according to the given conditions
-
-        Args:
-            ids:
-
-        Returns:
-
-        """
-        if self.generators:
-            self._setup_dataset()
-            self._patients, self._references = PatientGenerator(
-                self.n, generate_ids=ids
-            ).generate(references=True)
-            for reference in self._references:
-                for generator in self.generators:
-                    # todo resolve interdependencies
-                    if random.random() > generator.likelihood:
-                        continue
-                    # generate an id to use in put request with the server
-                    resource = generator.generator.generate(
-                        disable_validation=True, generate_ids=True
-                    )
-                    self._add_reference_param(resource, reference)
-
-                    # construct the resource object
-                    resource_type = generator.generator.resource.get_resource_type()
-                    resource = get_fhir_model_class(resource_type)(**resource.dict())
-
-                    # store the generated resource
-                    self._store_generated_resource(
-                        resource, resource_type=resource_type
-                    )
-
-            # add the patient resources
-            self._dataset.patients = self._patients
-            # validate data set
-            return DataSet(**self._dataset.dict())
-
-        else:
-            patient_generator = PatientGenerator(
-                n=self.n if self.n else 100, generate_ids=ids
-            )
-            patients = patient_generator.generate()
-            return DataSet(name=self.name, patients=patients)
-
-    def graph(self) -> nx.DiGraph:
-        if not self._graph:
-            self._graph = self._generate_resource_graph()
-        return self._graph
+                raise ValueError(
+                    "depends_on must be either a string referencing a node or a list of strings "
+                    "of node references. Got {}".format(type(generator.depends_on))
+                )
 
     def _generate_resource_graph(self) -> nx.DiGraph:
         graph = nx.DiGraph()
         for generator in self.generators:
-            graph.add_node(generator.name)
-            if generator.depends_on:
-                if isinstance(generator.depends_on, str):
-                    graph.add_edge(generator.depends_on, generator.name)
-                else:
-                    for dependency in generator.depends_on:
-                        graph.add_edge(dependency, generator.name)
+            self._add_generator_to_graph(generator)
         return graph
-
-    def explain(self):
-        figure = self.draw_graph()
-        figure.show()
-
-    def draw_graph(self):
-        graph = self.graph()
-        pos = nx.spring_layout(graph)
-        edge_labels = nx.get_edge_attributes(graph, "likelihood")
-        nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels)
-        nx.draw(graph, pos, with_labels=True)
-        return plt
 
     def _add_reference_param(self, resource: FHIRResourceModel, reference: Reference):
         # check if a reference field is present for the given resource type if not detect first required reference
@@ -279,25 +495,6 @@ class DatasetGenerator:
         for store in self._dataset.resources:
             if store.resource_type == resource_type:
                 store.resources.append(resource.dict(exclude_none=True))
-
-    def _setup_dataset(self):
-        dataset = DataSet.construct(resources=[])
-        if self.name:
-            dataset.name = self.name
-        for resource in self._resource_types:
-            # find the reference field
-            reference_field = self._get_required_reference(
-                get_fhir_model_class(resource)
-            )
-            self._reference_fields[resource] = reference_field
-            # set up an initial empty resource store with
-            dataset.resources.append(
-                GeneratedResources(
-                    resource_type=resource, reference_key=reference_field
-                )
-            )
-
-        self._dataset = dataset
 
     def __repr__(self):
         return (

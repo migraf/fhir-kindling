@@ -26,7 +26,9 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         ]
     )
     covid_generator = ResourceGenerator("Condition", generator_parameters=covid_params)
-    dataset.add_resource_generator(covid_generator, name="covid")
+    dataset.add_resource_generator(
+        covid_generator, name="covid", depends_on="base", reference_field="subject"
+    )
 
     # covid vaccination(s)
 
@@ -45,10 +47,17 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         field_generators=[vaccination_date_generator],
     )
     vaccination_generator = ResourceGenerator(
-        "Immunization", generator_parameters=first_vax_params
+        "Immunization",
+        generator_parameters=first_vax_params,
     )
 
-    dataset.add_resource_generator(vaccination_generator, "vacc-mrna-1", likelihood=0.7)
+    dataset.add_resource_generator(
+        vaccination_generator,
+        "vacc-mrna-1",
+        depends_on="base",
+        likelihood=0.7,
+        reference_field="patient",
+    )
 
     # second shot
     second_vax_params = GeneratorParameters(
@@ -65,8 +74,9 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
     dataset.add_resource_generator(
         second_vaccination_generator,
         "vacc-mrna-2",
-        depends_on="vacc-mrna-1",
+        depends_on=["base", "vacc-mrna-1"],
         likelihood=0.9,
+        reference_field=["patient", None],
     )
 
     # third shot
@@ -84,10 +94,11 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
     dataset.add_resource_generator(
         third_vaccination_generator,
         "vacc-mrna-3",
-        depends_on=["vacc-mrna-1", "vacc-mrna-2"],
+        depends_on=["base", "vacc-mrna-1", "vacc-mrna-2"],
+        reference_field=["patient", None, None],
         likelihood=0.7,
     )
-
+    # generate encounters
     emergency_encounter_period_generator = FieldGenerator(
         field="period",
         generator_function=lambda: {
@@ -95,7 +106,6 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
             "end": pendulum.now().subtract(days=729).to_date_string(),
         },
     )
-    # generate encounters
 
     # emergency encounter
     emergency_encounter_params = GeneratorParameters(
@@ -128,7 +138,10 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
     # icu encounter
     icu_encounter_params = GeneratorParameters(
         field_values=[
-            FieldValue(field="type", value=Codes.ICU_ENCOUNTER.value),
+            FieldValue(field="class", value=Codes.ICU_ENCOUNTER.value),
+            FieldValue(
+                field="type", value=Codes.ICU_ENCOUNTER_TYPE.value, list_field=True
+            ),
             FieldValue(field="status", value="finished"),
         ],
         field_generators=[icu_encounter_period_generator],
@@ -142,7 +155,7 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         icu_encounter_generator,
         "icu-encounter",
         depends_on=["base", "emergency-encounter"],
-        reference_field="subject",
+        reference_field=["subject", None],
     )
 
     # generate observations
@@ -152,12 +165,14 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         field_values=[
             FieldValue(field="code", value=Codes.OXYGEN_SATURATION.value),
             FieldValue(field="status", value="final"),
-            FieldValue(field="unit", value="%"),
         ],
         field_generators=[
             FieldGenerator(
-                field="value",
-                generator_function=lambda: random.randint(90, 100),
+                field="valueQuantity",
+                generator_function=lambda: {
+                    "value": random.randint(90, 100),
+                    "unit": "%",
+                },
             ),
         ],
     )
@@ -169,6 +184,7 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         blood_oxygen_saturation_generator,
         "blood-oxygen-saturation",
         depends_on="icu-encounter",
+        reference_field="encounter",
     )
 
     # body temperature
@@ -176,12 +192,14 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         field_values=[
             FieldValue(field="code", value=Codes.BODY_TEMPERATURE.value),
             FieldValue(field="status", value="final"),
-            FieldValue(field="unit", value="°C"),
         ],
         field_generators=[
             FieldGenerator(
-                field="value",
-                generator_function=lambda: random.randint(36, 40) + random.random(),
+                field="valueQuantity",
+                generator_function=lambda: {
+                    "value": random.randint(36, 40) + random.random(),
+                    "unit": "°C",
+                },
             ),
         ],
     )
@@ -194,6 +212,7 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         body_temperature_generator,
         "body-temperature",
         depends_on="icu-encounter",
+        reference_field="encounter",
     )
 
     # respiratory rate
@@ -201,12 +220,14 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         field_values=[
             FieldValue(field="code", value=Codes.RESPIRATORY_RATE.value),
             FieldValue(field="status", value="final"),
-            FieldValue(field="unit", value="breaths/min"),
         ],
         field_generators=[
             FieldGenerator(
-                field="value",
-                generator_function=lambda: random.randint(12, 20),
+                field="valueQuantity",
+                generator_function=lambda: {
+                    "value": random.randint(12, 30),
+                    "unit": "breaths/min",
+                },
             ),
         ],
     )
@@ -219,6 +240,7 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         respiratory_rate_generator,
         "respiratory-rate",
         depends_on="icu-encounter",
+        reference_field="encounter",
     )
 
     # heart rate
@@ -226,12 +248,14 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         field_values=[
             FieldValue(field="code", value=Codes.HEART_RATE.value),
             FieldValue(field="status", value="final"),
-            FieldValue(field="unit", value="beats/min"),
         ],
         field_generators=[
             FieldGenerator(
-                field="value",
-                generator_function=lambda: random.randint(60, 100),
+                field="valueQuantity",
+                generator_function=lambda: {
+                    "value": random.randint(60, 100),
+                    "unit": "beats/min",
+                },
             ),
         ],
     )
@@ -244,6 +268,7 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         heart_rate_generator,
         name="heart-rate",
         depends_on="icu-encounter",
+        reference_field="encounter",
     )
 
     return dataset
@@ -270,35 +295,28 @@ class Codes(Enum):
         ],
         text="COVID vaccination",
     )
-    EMERGENCY_ENCOUNTER = CodeableConcept(
-        coding=[
-            Coding(
-                system="http://terminology.hl7.org/ValueSet/v3-ActEncounterCode",
-                code="EMER",
-                display="emergency",
-            )
-        ],
-        text="Emergency",
+    EMERGENCY_ENCOUNTER = Coding(
+        system="http://terminology.hl7.org/ValueSet/v3-ActEncounterCode",
+        code="EMER",
+        display="emergency",
     )
-    ICU_ENCOUNTER = CodeableConcept(
-        coding=[
-            Coding(
-                system="http://terminology.hl7.org/ValueSet/v3-ActEncounterCode",
-                code="IMP",
-                display="inpatient encounter",
-            )
-        ],
-        text="Inpatient",
+
+    ICU_ENCOUNTER = Coding(
+        system="http://terminology.hl7.org/ValueSet/v3-ActEncounterCode",
+        code="IMP",
+        display="inpatient encounter",
     )
-    ICU_ENCOUNTER_TYPE = CodeableConcept(
-        coding=[
-            Coding(
-                system="http://loinc.org",
-                code="99222",
-                display="Inpatient Hospitalization",
-            )
-        ],
-    )
+    ICU_ENCOUNTER_TYPE = [
+        CodeableConcept(
+            coding=[
+                Coding(
+                    system="http://loinc.org",
+                    code="99222",
+                    display="Inpatient Hospitalization",
+                )
+            ],
+        )
+    ]
 
     OXYGEN_SATURATION = CodeableConcept(
         coding=[

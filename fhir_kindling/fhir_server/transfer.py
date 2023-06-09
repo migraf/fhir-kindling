@@ -45,7 +45,7 @@ def transfer(
     transfer_graph = reference_graph(transfer_resources)
 
     # process the graph to create the resources on the target server
-    create_responses, linkage = _resolve_reference_graph(
+    create_responses, linkage = resolve_reference_graph(
         transfer_graph, target, record_linkage, display
     )
 
@@ -84,7 +84,7 @@ def reference_graph(resources: List[Union[Resource, FHIRAbstractModel]]) -> nx.D
     return dg
 
 
-def _resolve_reference_graph(
+def resolve_reference_graph(
     graph: nx.DiGraph,
     target: "FhirServer",
     record_linkage: bool,
