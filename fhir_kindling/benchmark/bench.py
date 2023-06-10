@@ -112,20 +112,17 @@ class ServerBenchmark:
                 elif step == BenchmarkOperations.UPDATE:
                     pass  # TODO
                 elif step == BenchmarkOperations.DELETE:
-                    pass  # TODO
+                    self._benchmark_delete(server)
 
         self._results.set_completed(True)
         self.plot().show()
+        print(self.results.results)
 
     @property
     def results(self):
         if not self._results.completed:
             raise Exception("Benchmark not completed")
         return self._results
-
-    @property
-    def results_df(self):
-        return self._results.to_df()
 
     def plot(self):
         fig = plot_benchmark_results(self.results)
@@ -212,12 +209,10 @@ class ServerBenchmark:
     def _benchmark_search(self, server: FhirServer):
         query_results = {}
         for query in self.queries:
-            print(f"Running query: {query.to_query_string()} {self.n_attempts} times")
             query_attempts = []
-            for attempt in range(self.n_attempts):
+            for _ in range(self.n_attempts):
                 start_time = time.perf_counter()
-                result = server.query(query_parameters=query).all()
-                print(f"Attempt {attempt} returned {result.total} results")
+                server.query(query_parameters=query).all()
                 elapsed_time = time.perf_counter() - start_time
                 query_attempts.append(elapsed_time)
             query_results[query.to_query_string()] = query_attempts
@@ -226,6 +221,21 @@ class ServerBenchmark:
             BenchmarkOperations.QUERY,
             server.api_address,
             results=query_results,
+        )
+
+    def _benchmark_delete(self, server: FhirServer):
+        start_time = time.perf_counter()
+        server_resource_refs = self.benchmark_resources.get(server.api_address, [])
+        if not server_resource_refs:
+            raise Exception("No resources to delete")
+        # delete all resources
+        server.delete(references=server_resource_refs)
+        elapsed_time = time.perf_counter() - start_time
+
+        self._results.add_result(
+            BenchmarkOperations.DELETE,
+            server.api_address,
+            elapsed_time,
         )
 
     def _benchmark_update_single(self, server: FhirServer):
