@@ -32,12 +32,15 @@ def run_benchmark(servers=DEFAULT_SERVERS):
 
     print("running benchmark")
 
-    ServerBenchmark(
-        servers=benchmark_servers, server_names=[s["name"] for s in servers]
+    benchmark = ServerBenchmark(
+        servers=benchmark_servers,
+        server_names=[s["name"] for s in servers],
+        dataset_size=10,
+        n_attempts=2,
     )
-    # benchmark.run_suite()
-    # figure = benchmark.plot()
-    # figure.show()
+    benchmark.run_suite()
+    figure = benchmark.plot()
+    figure.show()
 
 
 if __name__ == "__main__":
