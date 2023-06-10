@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 if TYPE_CHECKING:
-    from fhir_kindling.util.benchmark.bench import BenchmarkResults
+    from fhir_kindling.benchmark.results import BenchmarkResults
 
 
 def plot_benchmark_results(results: "BenchmarkResults") -> go.Figure:
@@ -20,13 +20,15 @@ def plot_benchmark_results(results: "BenchmarkResults") -> go.Figure:
         subplot_titles=(
             "Single Insert",
             "Batch Insert",
-            "Update Single",
-            "Update Batch",
+            "Dataset Insert" "Update Single",
+            "Search",
         ),
     )
 
     add_single_insert_traces(fig, results)
     add_batch_insert_traces(fig, results)
+    add_dataset_insert_traces(fig, results)
+    add_query_traces(fig, results)
 
     fig.update_layout(
         title_text="FHIR Server Benchmark Results",
@@ -35,8 +37,6 @@ def plot_benchmark_results(results: "BenchmarkResults") -> go.Figure:
         showlegend=True,
         legend_tracegroupgap=190,
     )
-
-    fig.show()
     return fig
 
 
@@ -66,3 +66,29 @@ def add_batch_insert_traces(fig: go.Figure, results: "BenchmarkResults"):
     for server, result in results.batch_insert.items():
         tr = go.Bar(y=result, name=server, legendgroup="2")
         fig.add_trace(tr, row=2, col=1)
+
+
+def add_dataset_insert_traces(fig: go.Figure, results: "BenchmarkResults"):
+    """Create traces for each server detailing the timings for inserting a single resource
+
+    Args:
+        fig: _description_
+        results: _description_
+    """
+    ds_fig = go.Bar(
+        y=list(results.dataset_insert.values()),
+        x=list(results.dataset_insert.keys()),
+    )
+    fig.add_trace(ds_fig, row=3, col=1)
+
+
+def add_query_traces(fig: go.Figure, results: "BenchmarkResults"):
+    query_results = results.query
+    queries = list(list(query_results.values())[0].keys())
+
+    for server, result in query_results.items():
+        # average time for each query
+        avg_times = [sum(result[q]) / len(result[q]) for q in queries]
+
+        tr = go.Bar(y=avg_times, x=queries, name=server, legendgroup="4")
+        fig.add_trace(tr, row=4, col=1)

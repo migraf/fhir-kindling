@@ -1,31 +1,24 @@
 import time
-from enum import Enum
-from typing import Any, Dict, List, Union
+from typing import Any, List, Union
 
-from fhir.resources.codeableconcept import CodeableConcept
-from fhir.resources.coding import Coding
+from tqdm import tqdm
 
 from fhir_kindling import FhirServer
+from fhir_kindling.benchmark.constants import BenchmarkOperations, DefaultQueries
 from fhir_kindling.benchmark.data import generate_benchmark_data
 from fhir_kindling.benchmark.figures import plot_benchmark_results
+from fhir_kindling.benchmark.results import BenchmarkResults
 from fhir_kindling.fhir_query.query_parameters import FhirQueryParameters
+from fhir_kindling.fhir_server.transfer import (
+    reference_graph,
+    resolve_reference_graph,
+)
 from fhir_kindling.generators import (
     PatientGenerator,
 )
 
 N_ATTEMPTS = 20
 BATCH_SIZE = 100
-
-COVID_CODE = CodeableConcept(
-    coding=[
-        Coding(
-            system="http://id.who.int/icd/release/11/mms",
-            code="RA01.0",
-            display="COVID-19, virus identified",
-        )
-    ],
-    text="COVID-19",
-)
 
 
 class ServerBenchmark:
@@ -35,7 +28,9 @@ class ServerBenchmark:
         server_names: Union[List[str], None] = None,
         n_attempts: int = N_ATTEMPTS,
         batch_size: int = BATCH_SIZE,
+        dataset_size: int = 1000,
         custom_queries: Union[List[Union[str, FhirQueryParameters]], None] = None,
+        steps: List[Union[str, BenchmarkOperations]] = None,
     ):
         self.servers = servers
 
@@ -49,35 +44,78 @@ class ServerBenchmark:
         self.benchmark_resources = {}
         self.n_attempts = n_attempts
         self.batch_size = batch_size
-        self.custom_queries = []
+        self.queries = []
+        self.dataset = None
+        self.generated_resource_refs: List[str] = []
+        # if a list of steps is provided run only these steps, otherwise run all steps
+        if steps:
+            self.steps = steps
+        else:
+            self.steps = list(BenchmarkOperations)
+
+        # if custom queries are provided use them, otherwise use the default queries
         if custom_queries:
             for q in custom_queries:
                 if isinstance(q, str):
-                    self.custom_queries.append(FhirQueryParameters.from_query_string(q))
+                    self.queries.append(FhirQueryParameters.from_query_string(q))
                 elif isinstance(q, FhirQueryParameters):
-                    self.custom_queries.append(q)
+                    self.queries.append(q)
                 else:
                     raise ValueError(
                         "Custom_queries must be a list of fhir query strings or FhirQueryParameters objects"
                     )
+        else:
+            self.queries = [
+                FhirQueryParameters.from_query_string(qs)
+                for qs in [dfq.value for dfq in DefaultQueries]
+            ]
 
-        self.dataset_generator = generate_benchmark_data(n_patients=1000)
+        self.dataset_generator = generate_benchmark_data(n_patients=dataset_size)
+
         # print(self.dataset)
-        self.dataset_generator.explain()
-        self.dataset_generator.generate()
+
+        # self.dataset_generator.explain()
+        # self.dataset_generator.generate()
 
     def run_suite(self, progress: bool = True):
         # generate benchmark data
+        if BenchmarkOperations.GENERATE in self.steps:
+            self.dataset = self.dataset_generator.generate(display=progress)
+            # remove the generate step from the list of steps to run
+            self.steps.remove(BenchmarkOperations.GENERATE)
 
-        for i, server in enumerate(self.servers):
-            print(f"Running benchmarks for {server.api_address}")
-            self._benchmark_insert(
-                server, server_name=self.server_names[i] if self.server_names else None
-            )
-            self._benchmark_query(server)
+        # run the benchmark for each server
+        for i, server in tqdm(
+            enumerate(self.servers),
+            desc=f"Running bechmarks for {len(self.servers)} servers:",
+            disable=not progress,
+            leave=False,
+        ):
+            # Iterate over the benchmark steps
+            for step in tqdm(
+                self.steps,
+                desc=f"Server {server.api_address}",
+                disable=not progress,
+                leave=False,
+            ):
+                if step == BenchmarkOperations.GENERATE:
+                    pass
+                if step == BenchmarkOperations.INSERT:
+                    self._benchmark_insert(
+                        server,
+                        server_name=self.server_names[i] if self.server_names else None,
+                    )
+                elif step == BenchmarkOperations.DATASET_INSERT:
+                    self._upload_dataset(server)
+                elif step == BenchmarkOperations.QUERY:
+                    self._benchmark_search(server)
+                elif step == BenchmarkOperations.UPDATE:
+                    pass  # TODO
+                elif step == BenchmarkOperations.DELETE:
+                    pass  # TODO
 
-        print("Benchmark complete")
         self._results.set_completed(True)
+        self.plot().show()
 
     @property
     def results(self):
@@ -93,6 +131,24 @@ class ServerBenchmark:
         fig = plot_benchmark_results(self.results)
         return fig
 
+    def _upload_dataset(self, server: FhirServer):
+        # create temp copy of dataset
+        dataset = self.dataset.copy(deep=True)
+
+        ds_graph = reference_graph(dataset.resources)
+        start_time = time.perf_counter()
+        added_resources, linkage = resolve_reference_graph(
+            ds_graph, server, True, False
+        )
+        total = time.perf_counter() - start_time
+        resource_refs = [r.reference.reference for r in added_resources]
+        self._add_resource_refs_for_tracking(server=server, refs=resource_refs)
+        self._results.add_result(
+            BenchmarkOperations.DATASET_INSERT,
+            server.api_address,
+            total,
+        )
+
     def _benchmark_insert(self, server: FhirServer, server_name: str = None):
         self._benchmark_insert_single(server, server_name)
         self._benchmark_batch_insert(server)
@@ -102,7 +158,6 @@ class ServerBenchmark:
         self._benchmark_batch_update(server)
 
     def _benchmark_insert_single(self, server: FhirServer, server_name: str = None):
-        print(f"Running single insert benchmark for {server.api_address}")
         resources = PatientGenerator(n=self.n_attempts).generate()
 
         timings = []
@@ -114,10 +169,6 @@ class ServerBenchmark:
             end_time = time.perf_counter()
             total_time = end_time - start_time
             timings.append(total_time)
-        print(
-            f"Average time inserting single resource for server({server.api_address}): "
-            f"{sum(timings) / len(timings):.4f} seconds"
-        )
         self._results.add_result(
             BenchmarkOperations.INSERT,
             server_name if server_name else server.api_address,
@@ -129,8 +180,6 @@ class ServerBenchmark:
         self.benchmark_resources[server.api_address] = added_resources
 
     def _benchmark_batch_insert(self, server: FhirServer, server_name: str = None):
-        print(f"Running batch insert benchmark for {server.api_address}")
-
         timings = []
         # run multiple attempts for inserting resources
         for _ in range(self.n_attempts):
@@ -141,13 +190,9 @@ class ServerBenchmark:
             timings.append(elapsed_time)
             # track the added resources
             self._add_resource_refs_for_tracking(
-                server, [r.reference for r in response.create_responses]
+                server, [r.reference.reference for r in response.create_responses]
             )
 
-        print(
-            f"Average time inserting batch of resources for server({server.api_address}): "
-            f"{sum(timings) / len(timings):.4f} seconds"
-        )
         self._results.add_result(
             BenchmarkOperations.BATCH_INSERT,
             server_name if server_name else server.api_address,
@@ -155,91 +200,36 @@ class ServerBenchmark:
         )
 
     def _add_resource_refs_for_tracking(
-        self, server: FhirServer, resource: Union[List[Any], Any]
+        self, server: FhirServer, refs: Union[List[Any], Any]
     ):
         server_resources = self.benchmark_resources.get(server.api_address, [])
-        if isinstance(resource, list):
-            server_resources.extend(resource)
+        if isinstance(refs, list):
+            server_resources.extend(refs)
         else:
-            server_resources.append(resource)
+            server_resources.append(refs)
         self.benchmark_resources[server.api_address] = server_resources
 
-    def _benchmark_query(self, server):
-        pass
+    def _benchmark_search(self, server: FhirServer):
+        query_results = {}
+        for query in self.queries:
+            print(f"Running query: {query.to_query_string()} {self.n_attempts} times")
+            query_attempts = []
+            for attempt in range(self.n_attempts):
+                start_time = time.perf_counter()
+                result = server.query(query_parameters=query).all()
+                print(f"Attempt {attempt} returned {result.total} results")
+                elapsed_time = time.perf_counter() - start_time
+                query_attempts.append(elapsed_time)
+            query_results[query.to_query_string()] = query_attempts
 
-    def _benchmark_update(self, server: FhirServer):
-        self._benchmark_update_single(server)
-        self._benchmark_batch_update(server)
+        self._results.add_result(
+            BenchmarkOperations.QUERY,
+            server.api_address,
+            results=query_results,
+        )
 
     def _benchmark_update_single(self, server: FhirServer):
         pass
 
     def _benchmark_batch_update(self, server: FhirServer):
         pass
-
-
-class BenchmarkOperations(str, Enum):
-    INSERT = "insert"
-    GENERATE = "generate"
-    QUERY = "query"
-    BATCH_INSERT = "batch_insert"
-    UPDATE = "update"
-    DELETE = "delete"
-    BATCH_DELETE = "batch_delete"
-
-
-class BenchmarkResults:
-    def __init__(self):
-        self.results = {}
-        self._completed = False
-
-    @property
-    def completed(self):
-        return self._completed
-
-    def set_completed(self, completed: bool):
-        self._completed = completed
-
-    @property
-    def insert_single(self) -> Union[List[float], Dict[str, List[float]]]:
-        return self.results["insert"]
-
-    @property
-    def query(self) -> Union[List[float], Dict[str, List[float]]]:
-        return self.results["query"]
-
-    @property
-    def batch_insert(self) -> Union[List[float], Dict[str, List[float]]]:
-        return self.results["batch_insert"]
-
-    @property
-    def batch_query(self) -> Union[List[float], Dict[str, List[float]]]:
-        return self.results["batch_query"]
-
-    @property
-    def update(self) -> Union[List[float], Dict[str, List[float]]]:
-        return self.results["update"]
-
-    @property
-    def delete(self) -> Union[List[float], Dict[str, List[float]]]:
-        return self.results["delete"]
-
-    @property
-    def batch_delete(self) -> Union[List[float], Dict[str, List[float]]]:
-        return self.results["batch_delete"]
-
-    def add_result(
-        self,
-        operation: Union[str, BenchmarkOperations],
-        server: str,
-        results: List[float],
-    ):
-        if isinstance(operation, str):
-            operation = BenchmarkOperations(operation)
-
-        operation_results = self.results.get(operation.value, {})
-        operation_results[server] = results
-        self.results[operation] = operation_results
-
-    def __repr__(self) -> str:
-        return f"BenchmarkResults(completed={self.completed})"

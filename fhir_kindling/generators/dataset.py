@@ -149,14 +149,14 @@ class DatasetGenerator:
 
         """
         resources = []
-        for _ in tqdm(range(self.n), disable=not display):
+        for _ in tqdm(range(self.n), disable=not display, desc="Generating dataset"):
             batch = self._generate_resources_from_graph()
             added_resources = list(filter(lambda x: x is not None, batch.values()))
             resources.extend(added_resources)
 
-        self._dataset = self._make_data_set(resources)
-
-        return self._dataset
+        dataset = self._make_data_set(resources)
+        self._dataset = dataset
+        return dataset
 
     def _make_data_set(self, resources: List[dict]) -> DataSet:
         # construct fhir elements
@@ -173,13 +173,7 @@ class DatasetGenerator:
             resource_types=list(self._resource_types),
         )
 
-        print(
-            "Generated dataset with {} resources and a size of {} MB".format(
-                dataset.n_resources, dataset.size(True)
-            )
-        )
-
-        self._dataset = dataset
+        return dataset
 
     def _generate_resources_from_graph(self):
         """

@@ -102,6 +102,7 @@ def test_patient_generator():
     patients = patient_generator.generate()
     assert len(patients) == 100
     assert isinstance(patients[0], Patient)
+    print(patients[0].id)
 
     generator = PatientGenerator(n=10, age_range=(18, 60))
     patients = generator.generate()

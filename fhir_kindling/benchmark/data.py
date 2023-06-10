@@ -303,8 +303,8 @@ class Codes(Enum):
 
     ICU_ENCOUNTER = Coding(
         system="http://terminology.hl7.org/ValueSet/v3-ActEncounterCode",
-        code="IMP",
-        display="inpatient encounter",
+        code="ACUTE",
+        display="Acute inpatient encounter",
     )
     ICU_ENCOUNTER_TYPE = [
         CodeableConcept(

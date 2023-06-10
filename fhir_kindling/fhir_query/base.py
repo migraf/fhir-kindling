@@ -271,9 +271,15 @@ class FhirQueryBase:
             self._count = 5000
 
         if self._limit and self._limit < self._count:
-            query_string += f"&_count={self._limit}"
+            if query_string[-1] == "?":
+                query_string += f"_count={self._limit}"
+            else:
+                query_string += f"&_count={self._limit}"
         else:
-            query_string += f"&_count={self._count}"
+            if query_string[-1] == "?":
+                query_string += f"_count={self._count}"
+            else:
+                query_string += f"&_count={self._count}"
         query_string += f"&_format={self.output_format.value}"
 
         return query_string

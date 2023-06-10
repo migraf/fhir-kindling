@@ -79,9 +79,8 @@ class PatientGenerator(BaseGenerator):
         if self.organisation:
             patient_dict["managingOrganization"] = self.organisation
 
-        if self.generate_ids:
-            patient_id = str(uuid4())
-            patient_dict["id"] = patient_id
+        patient_id = str(uuid4())
+        patient_dict["id"] = patient_id
 
         return Patient(**patient_dict)
 
