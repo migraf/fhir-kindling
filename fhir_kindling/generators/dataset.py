@@ -13,11 +13,14 @@ from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from fhir.resources.fhirtypes import ReferenceType
 from fhir.resources.reference import Reference
 from pydantic import BaseModel
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
+from fhir_kindling.fhir_server import FhirServer
+from fhir_kindling.fhir_server.transfer import reference_graph, resolve_reference_graph
 from fhir_kindling.generators.base import BaseGenerator
 from fhir_kindling.generators.patient import PatientGenerator
 from fhir_kindling.generators.resource_generator import ResourceGenerator
+from fhir_kindling.generators.time_series_generator import TimeSeriesGenerator
 from fhir_kindling.util import get_resource_fields
 
 
@@ -66,14 +69,49 @@ class DataSetResourceGenerator(BaseGenerator):
             if random.random() > self.likelihood:
                 return None
 
+        if isinstance(self.generator, TimeSeriesGenerator):
+            return self._generate_time_series()
+
+        elif isinstance(self.generator, ResourceGenerator) or isinstance(
+            self.generator, PatientGenerator
+        ):
+            return self._generate_single()
+
+        else:
+            raise ValueError(
+                f"Expected ResourceGenerator or TimeSeriesGenerator, got {type(self.generator)}"
+            )
+
+    def _generate_single(self):
         base_resource_dict = self.generator.generate(generate_ids=True, as_dict=True)
         if self.references:
             # insert the references
+
             base_resource_dict = {**base_resource_dict, **self.references}
 
         resource = self.generator.resource(**base_resource_dict)
-
         return resource
+
+    def _generate_time_series(self):
+        resources = self.generator.generate(generate_ids=True, as_dict=True)
+        if self.references:
+            # insert the references
+            for r in resources:
+                for field, reference in self.references.items():
+                    if isinstance(reference, str):
+                        reference = {"reference": reference}
+                    r[field] = reference
+            # resources = [{**resource, **self.references} for resource in resources]
+        if isinstance(self.generator, TimeSeriesGenerator):
+            r_type = self.generator.generator.resource
+            return [r_type(**resource) for resource in resources]
+        else:
+            raise ValueError(
+                f"TimeSeriesGenerator expected, got {type(self.generator)}"
+            )
+
+    def __repr__(self) -> str:
+        return f"<DataSetResourceGenerator {self.name}, generator={self.generator}>"
 
 
 class DataSet(BaseModel):
@@ -98,6 +136,11 @@ class DataSet(BaseModel):
         if human_readable:
             return size / 1024 / 1024
         return size
+
+    def upload(self, server: "FhirServer", display: bool = False):
+        ds_graph = reference_graph(self.resources)
+        result, _ = resolve_reference_graph(ds_graph, server, True, display=display)
+        return result
 
 
 class DatasetGenerator:
@@ -151,7 +194,16 @@ class DatasetGenerator:
         resources = []
         for _ in tqdm(range(self.n), disable=not display, desc="Generating dataset"):
             batch = self._generate_resources_from_graph()
-            added_resources = list(filter(lambda x: x is not None, batch.values()))
+            added_resources = []
+
+            for k, v in batch.items():
+                if v is None:
+                    continue
+
+                if isinstance(v, list):
+                    added_resources.extend(v)
+                else:
+                    added_resources.append(v)
             resources.extend(added_resources)
 
         dataset = self._make_data_set(resources)
@@ -180,25 +232,25 @@ class DatasetGenerator:
         Generate a set of resource based on the generator graph
         """
 
-        result = {}
+        results = {}
 
         graph = self.graph()
         # start with the base node/generator and work through the graph
         top_list = reversed(list(nx.topological_sort(graph)))
         for node in top_list:
             # get the edges from the node
-            if not self._check_dependencies(node, result):
+            if not self._check_dependencies(node, results):
                 continue
             # get the generator from the node data
             generator = self._get_node_generator(node)
 
-            # get the dependencies
-            self._get_refs_for_generator(generator, result)
+            # get the dependencies and add them to the generator
+            self._get_refs_for_generator(generator, results)
 
-            resource = generator.generate()
-            result[node] = resource
+            result = generator.generate()
+            results[node] = result
             # print("Generated", node, result[node])
-        return result
+        return results
 
     def _get_refs_for_generator(
         self, generator: DataSetResourceGenerator, result: dict
@@ -314,7 +366,7 @@ class DatasetGenerator:
 
     def add_resource_generator(
         self,
-        resource_generator: ResourceGenerator,
+        resource_generator: BaseGenerator,
         name: str,
         depends_on: Union[str, List[str]] = "base",
         reference_field: Union[str, List[str], None] = None,
@@ -348,7 +400,19 @@ class DatasetGenerator:
         # validate the reference field
         self._validate_depends_and_reference(depends_on, reference_field)
 
-        self._resource_types.add(resource_generator.resource.get_resource_type())
+        if isinstance(resource_generator, ResourceGenerator):
+            self._resource_types.add(resource_generator.resource.get_resource_type())
+        elif isinstance(resource_generator, TimeSeriesGenerator):
+            self._resource_types.add(
+                resource_generator.generator.resource.get_resource_type()
+            )
+        elif isinstance(resource_generator, PatientGenerator):
+            self._resource_types.add("Patient")
+        else:
+            raise ValueError(
+                "Resource generator must be of type ResourceGenerator or TimeSeriesGenerator"
+                "got {}".format(type(resource_generator))
+            )
 
         generator = DataSetResourceGenerator(
             name=name,

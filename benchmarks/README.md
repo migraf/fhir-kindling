@@ -1,7 +1,12 @@
-## Benchmarks
+# Benchmarks
 
+## Server Benchmarks
+Comparing the performance of fhir server implementations. Perform the benchmarks by running `python benchmarks/benchmark_servers.py`.
+
+
+## Client Benchmarks
 Comparing the library's performance with the other most popular client libraries `fhirpy` and `fhirclient`.
-Perform the benchmarks by running `python benchmarks/benchmark.py`
+Perform the benchmarks by running `python benchmarks/benchmark_clients.py`
 
 ### Environment
 
@@ -14,3 +19,4 @@ When querying `n=10000` patients from the server the following results were obse
 query at least twice as fast as the other client libraries. Comparisons for the async versions will follow.
 
 ![Query Results](results/query_plot.png)
+

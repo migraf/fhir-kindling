@@ -29,6 +29,7 @@ def plot_benchmark_results(results: "BenchmarkResults") -> go.Figure:
     add_batch_insert_traces(fig, results)
     add_dataset_insert_traces(fig, results)
     add_query_traces(fig, results)
+    add_delete_traces(fig, results)
 
     fig.update_layout(
         title_text="FHIR Server Benchmark Results",
@@ -92,3 +93,11 @@ def add_query_traces(fig: go.Figure, results: "BenchmarkResults"):
 
         tr = go.Bar(y=avg_times, x=queries, name=server, legendgroup="4")
         fig.add_trace(tr, row=4, col=1)
+
+
+def add_delete_traces(fig: go.Figure, results: "BenchmarkResults"):
+    delete_results = results.delete
+    x = list(delete_results.keys())
+    y = list(delete_results.values())
+    tr = go.Bar(y=y, x=x, name="Delete", legendgroup="5")
+    fig.add_trace(tr, row=5, col=1)

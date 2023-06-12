@@ -6,6 +6,7 @@ import pendulum
 from fhir.resources.resource import Resource
 from pendulum.datetime import DateTime
 
+from fhir_kindling.generators.base import BaseGenerator
 from fhir_kindling.generators.resource_generator import ResourceGenerator
 from fhir_kindling.serde.json import json_dict
 from fhir_kindling.util.resources import check_resource_contains_field
@@ -29,7 +30,7 @@ class TimeUnits(str, Enum):
     YEARS = "y"
 
 
-class TimeSeriesGenerator:
+class TimeSeriesGenerator(BaseGenerator):
     resource_generator: ResourceGenerator
     time_field: str
     start: DateTime
@@ -54,8 +55,78 @@ class TimeSeriesGenerator:
         self.time_field = time_field
         self.n = n
         self._prev_time: Union[DateTime, None] = None
+        self.generate_ids = True
 
         self._validate_args(freq, period, period_unit, start, end, n)
+
+    def generate(
+        self, generate_ids: bool = True, as_dict: bool = False
+    ) -> Union[List[Resource], List[dict]]:
+        self.generate_ids = generate_ids
+        if self.n is None:
+            return self._generate_by_end(as_dict=as_dict)
+        else:
+            return self._generate_by_n(as_dict=as_dict)
+
+    def _generate_by_end(self, as_dict: bool) -> List[Resource]:
+        resources = []
+        current_time = self._get_next_time()
+        while current_time < self.end:
+            model = self._generate_resource(current_time, as_dict=as_dict)
+            current_time = self._get_next_time()
+            resources.append(model)
+
+        return resources
+
+    def _generate_by_n(self, as_dict: bool) -> List[Resource]:
+        resources = []
+        for _ in range(self.n):
+            next_time = self._get_next_time()
+            model = self._generate_resource(next_time, as_dict=as_dict)
+            resources.append(model)
+        return resources
+
+    def _generate_resource(
+        self, time: DateTime, as_dict: bool
+    ) -> Union[Resource, dict]:
+        resource = json_dict(self.generator.generate(generate_ids=self.generate_ids))
+        resource[self.time_field] = time.isoformat()
+
+        if as_dict:
+            return resource
+
+        model = self.generator.resource(**resource)
+        return model
+
+    def _get_next_time(self) -> datetime:
+        """Get the next time in the series based on the frequency. Updates the internal state of the generator.
+
+        Raises:
+            ValueError: If the frequency is not valid
+
+        Returns:
+            _description
+        """
+        if not self._prev_time:
+            self._prev_time = self.start
+            return self.start
+
+        next_time = None
+        if self.freq == Frequencies.HOURLY:
+            next_time = self._prev_time.add(hours=1)
+        elif self.freq == Frequencies.DAILY:
+            next_time = self._prev_time.add(days=1)
+        elif self.freq == Frequencies.WEEKLY:
+            next_time = self._prev_time.add(weeks=1)
+        elif self.freq == Frequencies.MONTHLY:
+            next_time = self._prev_time.add(months=1)
+        elif self.freq == Frequencies.YEARLY:
+            next_time = self._prev_time.add(years=1)
+        else:
+            raise ValueError(f"Invalid frequency: {self.freq}")
+        #
+        self._prev_time = next_time
+        return next_time
 
     def _validate_args(self, freq, period, period_unit, start, end, n):
         if end is None and n is None:
@@ -102,64 +173,3 @@ class TimeSeriesGenerator:
                 raise ValueError(f"Invalid end datetime object: {type(end)}")
         else:
             self.end = None
-
-    def generate(self) -> List[Resource]:
-        if self.n is None:
-            return self._generate_by_end()
-        else:
-            return self._generate_by_n()
-
-    def _generate_by_end(self) -> List[Resource]:
-        resources = []
-        current_time = self._get_next_time()
-        while current_time < self.end:
-            model = self._generate_resource(current_time)
-            current_time = self._get_next_time()
-            resources.append(model)
-
-        return resources
-
-    def _generate_by_n(self) -> List[Resource]:
-        resources = []
-        for _ in range(self.n):
-            next_time = self._get_next_time()
-            model = self._generate_resource(next_time)
-            resources.append(model)
-        return resources
-
-    def _generate_resource(self, time: DateTime) -> Resource:
-        resource = json_dict(self.generator.generate(generate_ids=True))
-        resource[self.time_field] = time.isoformat()
-
-        model = self.generator.resource(**resource)
-        return model
-
-    def _get_next_time(self) -> datetime:
-        """Get the next time in the series based on the frequency. Updates the internal state of the generator.
-
-        Raises:
-            ValueError: If the frequency is not valid
-
-        Returns:
-            _description
-        """
-        if not self._prev_time:
-            self._prev_time = self.start
-            return self.start
-
-        next_time = None
-        if self.freq == Frequencies.HOURLY:
-            next_time = self._prev_time.add(hours=1)
-        elif self.freq == Frequencies.DAILY:
-            next_time = self._prev_time.add(days=1)
-        elif self.freq == Frequencies.WEEKLY:
-            next_time = self._prev_time.add(weeks=1)
-        elif self.freq == Frequencies.MONTHLY:
-            next_time = self._prev_time.add(months=1)
-        elif self.freq == Frequencies.YEARLY:
-            next_time = self._prev_time.add(years=1)
-        else:
-            raise ValueError(f"Invalid frequency: {self.freq}")
-        #
-        self._prev_time = next_time
-        return next_time

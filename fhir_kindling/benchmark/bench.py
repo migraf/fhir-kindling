@@ -1,7 +1,7 @@
 import time
 from typing import Any, List, Union
 
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 from fhir_kindling import FhirServer
 from fhir_kindling.benchmark.constants import BenchmarkOperations, DefaultQueries
@@ -116,7 +116,6 @@ class ServerBenchmark:
 
         self._results.set_completed(True)
         self.plot().show()
-        print(self.results.results)
 
     @property
     def results(self):

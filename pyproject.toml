@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fhir-kindling"
-version = "1.0.0b1"
+version = "1.0.0a8"
 description = "Python library to simplify working with FHIR servers and resources."
 authors = ["Michael Graf <michael.graf3110@gmail.com>"]
 # todo add changelog when multiple readme bug is fixed
@@ -45,10 +45,15 @@ pandas = { version = "*", optional = true }
 plotly = { version = "*", optional = true }
 faker = { version = "*", optional = true }
 matplotlib = { version = "*", optional = true }
+notebook = { version = "*", optional = true }
+RISE = { version = "*", optional = true }
+ipywidgets = { version = "*", optional = true }
+
 
 
 [tool.poetry.extras]
 ds = ["pandas", "plotly", "faker", "matplotlib"]
+demo = ["pandas", "plotly", "faker", "matplotlib", "notebook", "RISE", "ipywidgets"]
 
 
 [tool.poetry.group.dev.dependencies]

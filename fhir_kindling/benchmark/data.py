@@ -1,10 +1,8 @@
 import random
-from enum import Enum
 
 import pendulum
-from fhir.resources.codeableconcept import CodeableConcept
-from fhir.resources.coding import Coding
 
+from fhir_kindling.benchmark.constants import Codes
 from fhir_kindling.generators.dataset import DatasetGenerator
 from fhir_kindling.generators.field_generator import FieldGenerator
 from fhir_kindling.generators.resource_generator import (
@@ -12,12 +10,13 @@ from fhir_kindling.generators.resource_generator import (
     GeneratorParameters,
     ResourceGenerator,
 )
+from fhir_kindling.generators.time_series_generator import TimeSeriesGenerator
 
 N_BASE_RESOURCES = 100
 
 
 def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenerator:
-    dataset = DatasetGenerator("Patient", n=n_patients)
+    dataset_generator = DatasetGenerator("Patient", n=n_patients)
 
     # covid
     covid_params = GeneratorParameters(
@@ -26,7 +25,7 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         ]
     )
     covid_generator = ResourceGenerator("Condition", generator_parameters=covid_params)
-    dataset.add_resource_generator(
+    dataset_generator.add_resource_generator(
         covid_generator, name="covid", depends_on="base", reference_field="subject"
     )
 
@@ -51,7 +50,7 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         generator_parameters=first_vax_params,
     )
 
-    dataset.add_resource_generator(
+    dataset_generator.add_resource_generator(
         vaccination_generator,
         "vacc-mrna-1",
         depends_on="base",
@@ -71,7 +70,7 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         "Immunization", generator_parameters=second_vax_params
     )
 
-    dataset.add_resource_generator(
+    dataset_generator.add_resource_generator(
         second_vaccination_generator,
         "vacc-mrna-2",
         depends_on=["base", "vacc-mrna-1"],
@@ -91,7 +90,7 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         "Immunization", generator_parameters=second_vax_params
     )
 
-    dataset.add_resource_generator(
+    dataset_generator.add_resource_generator(
         third_vaccination_generator,
         "vacc-mrna-3",
         depends_on=["base", "vacc-mrna-1", "vacc-mrna-2"],
@@ -120,7 +119,7 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         "Encounter", generator_parameters=emergency_encounter_params
     )
 
-    dataset.add_resource_generator(
+    dataset_generator.add_resource_generator(
         emergency_encounter_generator,
         "emergency-encounter",
         depends_on="base",
@@ -151,7 +150,7 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         "Encounter", generator_parameters=icu_encounter_params
     )
 
-    dataset.add_resource_generator(
+    dataset_generator.add_resource_generator(
         icu_encounter_generator,
         "icu-encounter",
         depends_on=["base", "emergency-encounter"],
@@ -180,11 +179,19 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         "Observation", generator_parameters=blood_oxygen_params
     )
 
-    dataset.add_resource_generator(
-        blood_oxygen_saturation_generator,
+    bo_time_series_generator = TimeSeriesGenerator(
+        resource_generator=blood_oxygen_saturation_generator,
+        start=pendulum.now().subtract(days=720),
+        n=10,
+        time_field="effectiveDateTime",
+        freq="daily",
+    )
+
+    dataset_generator.add_resource_generator(
+        bo_time_series_generator,
         "blood-oxygen-saturation",
-        depends_on="icu-encounter",
-        reference_field="encounter",
+        depends_on="base",
+        reference_field="subject",
     )
 
     # body temperature
@@ -208,7 +215,7 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         "Observation", generator_parameters=body_temperature_params
     )
 
-    dataset.add_resource_generator(
+    dataset_generator.add_resource_generator(
         body_temperature_generator,
         "body-temperature",
         depends_on="icu-encounter",
@@ -236,7 +243,7 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         "Observation", generator_parameters=respiratory_rate_params
     )
 
-    dataset.add_resource_generator(
+    dataset_generator.add_resource_generator(
         respiratory_rate_generator,
         "respiratory-rate",
         depends_on="icu-encounter",
@@ -264,96 +271,11 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
         "Observation", generator_parameters=heart_rate_params
     )
 
-    dataset.add_resource_generator(
+    dataset_generator.add_resource_generator(
         heart_rate_generator,
         name="heart-rate",
         depends_on="icu-encounter",
         reference_field="encounter",
     )
 
-    return dataset
-
-
-class Codes(Enum):
-    COVID = CodeableConcept(
-        coding=[
-            Coding(
-                system="http://id.who.int/icd/release/11/mms",
-                code="RA01.0",
-                display="COVID-19, virus identified",
-            )
-        ],
-        text="COVID-19",
-    )
-    COVID_VACC_RNA = CodeableConcept(
-        coding=[
-            Coding(
-                system="http://id.who.int/icd/release/11/mms",
-                code="XM0GQ8",
-                display="COVID-19 vaccine, RNA based",
-            )
-        ],
-        text="COVID vaccination",
-    )
-    EMERGENCY_ENCOUNTER = Coding(
-        system="http://terminology.hl7.org/ValueSet/v3-ActEncounterCode",
-        code="EMER",
-        display="emergency",
-    )
-
-    ICU_ENCOUNTER = Coding(
-        system="http://terminology.hl7.org/ValueSet/v3-ActEncounterCode",
-        code="ACUTE",
-        display="Acute inpatient encounter",
-    )
-    ICU_ENCOUNTER_TYPE = [
-        CodeableConcept(
-            coding=[
-                Coding(
-                    system="http://loinc.org",
-                    code="99222",
-                    display="Inpatient Hospitalization",
-                )
-            ],
-        )
-    ]
-
-    OXYGEN_SATURATION = CodeableConcept(
-        coding=[
-            Coding(
-                system="http://loinc.org",
-                code="55284-4",
-                display="Oxygen saturation in Arterial blood by Pulse oximetry",
-            )
-        ],
-    )
-
-    BODY_TEMPERATURE = CodeableConcept(
-        coding=[
-            Coding(
-                system="http://loinc.org",
-                code="99836-5",
-                display="Body temperature",
-            )
-        ]
-    )
-
-    RESPIRATORY_RATE = CodeableConcept(
-        coding=[
-            Coding(
-                system="http://loinc.org",
-                code="9279-1",
-                display="Respiratory rate",
-            )
-        ]
-    )
-
-    HEART_RATE = CodeableConcept(
-        coding=[
-            Coding(
-                system="http://loinc.org",
-                code="8802-8",
-                display="Heart rate",
-            )
-        ],
-    )
+    return dataset_generator

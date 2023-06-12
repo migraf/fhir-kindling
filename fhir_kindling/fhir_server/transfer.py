@@ -6,6 +6,8 @@ import networkx as nx
 import orjson
 from fhir.resources import FHIRAbstractModel, construct_fhir_element
 from fhir.resources.resource import Resource
+from pydantic import ValidationError
+from tqdm.autonotebook import tqdm
 
 from fhir_kindling.fhir_query import FhirQuerySync
 from fhir_kindling.fhir_server.server_responses import (
@@ -96,29 +98,41 @@ def resolve_reference_graph(
     create_responses = []
     # iterate over the graph and update the references off all successors node to match the newly created resources
     # on the target server
-    while len(nodes) > 0:
-        top_nodes = [node for node in nodes if len(list(graph.predecessors(node))) == 0]
-        if display:
-            print(f"Transferring - {len(top_nodes)} resources: {top_nodes}")
 
-        # get the resources from the graph
-        resources = [_resource_from_graph_node(graph, node) for node in top_nodes]
-        # insert the resources into the target server
-        create_response = target.add_all(resources=resources)
+    with tqdm(total=len(nodes), disable=not display) as pbar:
+        while len(nodes) > 0:
+            top_nodes = [
+                node for node in nodes if len(list(graph.predecessors(node))) == 0
+            ]
 
-        # iterate through the top nodes and update the successors with the references from the target server
-        for node, reference in zip(top_nodes, create_response.references):
-            if record_linkage:
-                hash_origin = hash(node)
-                linkage[hash_origin] = reference.reference
-            _update_successors(graph, node, reference.reference)
+            # get the resources from the graph
 
-        # add the create response to the list of responses
-        create_responses.extend(create_response.create_responses)
+            resources = []
 
-        # remove the processed top nodes from the graph
-        graph.remove_nodes_from(top_nodes)
-        nodes = list(graph.nodes)
+            for node in top_nodes:
+                try:
+                    resources.append(_resource_from_graph_node(graph, node))
+                except Exception as e:
+                    print(e)
+                    print(node)
+                    raise e
+            # insert the resources into the target server
+            create_response = target.add_all(resources=resources)
+
+            # iterate through the top nodes and update the successors with the references from the target server
+            for node, reference in zip(top_nodes, create_response.references):
+                if record_linkage:
+                    hash_origin = hash(node)
+                    linkage[hash_origin] = reference.reference
+                _update_successors(graph, node, reference.reference)
+
+            # add the create response to the list of responses
+            create_responses.extend(create_response.create_responses)
+
+            # remove the processed top nodes from the graph
+            graph.remove_nodes_from(top_nodes)
+            nodes = list(graph.nodes)
+            pbar.update(len(top_nodes))
 
     return create_responses, linkage
 
@@ -173,6 +187,7 @@ def _resource_from_graph_node(graph: nx.DiGraph, node: str) -> FHIRAbstractModel
         The resource at the node.
     """
     resource = graph.nodes[node]["resource"]
+
     if resource:
         if isinstance(resource, OrderedDict) or isinstance(resource, dict):
             resource_dict = dict(resource)
@@ -180,7 +195,16 @@ def _resource_from_graph_node(graph: nx.DiGraph, node: str) -> FHIRAbstractModel
                 "resourceType", resource_dict.get("resource_type")
             )
             resource_json = orjson.dumps(resource_dict)
-            resource = construct_fhir_element(resource_type, resource_json)
+            try:
+                resource = construct_fhir_element(resource_type, resource_json)
+            except ValidationError as e:
+                print(f"Error creating resource: {e}")
+                print(f"Resource: {resource_dict}")
+                raise e
+            except Exception as e:
+                print(f"Error creating resource: {e}")
+                print(f"Resource: {resource_dict}")
+                raise e
         elif isinstance(resource, FHIRAbstractModel):
             pass
         else:
