@@ -6,12 +6,14 @@ from fhir.resources.fhirresourcemodel import FHIRResourceModel
 from fhir.resources.resource import Resource
 from pydantic import BaseModel
 
+from fhir_kindling.generators.base import BaseGenerator
 from fhir_kindling.generators.field_generator import FieldGenerator
 
 
 class FieldValue(BaseModel):
     field: str
     value: Union[Any, List[Any]]
+    list_field: bool = False
 
 
 class GeneratorParameters(BaseModel):
@@ -22,7 +24,7 @@ class GeneratorParameters(BaseModel):
     # todo count and list in field values of same length
 
 
-class ResourceGenerator:
+class ResourceGenerator(BaseGenerator):
     def __init__(
         self,
         resource: Union[str, Any],
@@ -50,6 +52,7 @@ class ResourceGenerator:
         self._value_iterators = {}
         # list to store the field names of all fields being generated
         self._generated_fields = set()
+        self._validated = False
 
     def required_fields(self) -> List[str]:
         required_fields = []
@@ -62,7 +65,10 @@ class ResourceGenerator:
         return self.resource.__fields__
 
     def generate(
-        self, disable_validation: bool = False, generate_ids: bool = False
+        self,
+        disable_validation: bool = False,
+        generate_ids: bool = False,
+        as_dict: bool = False,
     ) -> Union[Resource, List[Resource]]:
         self.disable_validation = disable_validation
         # if field values are given parse them into parameters
@@ -73,59 +79,62 @@ class ResourceGenerator:
             self._parse_field_values()
         if not self.disable_validation:
             self._validate_params()
-        resources = self._generate_resources(generate_ids)
+        resources = self._generate_resources(generate_ids=generate_ids, as_dict=as_dict)
         return resources
 
-    def _generate_resources(self, generate_ids: bool):
-        resources = []
+    def _generate_resources(self, generate_ids: bool, as_dict: bool = False):
         if self.params.count:
-            for i in range(self.params.count):
-                resource = self._generate_resource(generate_ids)
+            resources = []
+            for _ in range(self.params.count):
+                resource = self._generate_resource(generate_ids, as_dict=as_dict)
                 resources.append(resource)
             return resources
         else:
-            return self._generate_resource(generate_ids)
+            return self._generate_resource(generate_ids, as_dict=as_dict)
 
-    def _generate_resource(self, generate_id: bool) -> FHIRResourceModel:
+    def _generate_resource(
+        self, generate_id: bool, as_dict: bool = False
+    ) -> Union[FHIRResourceModel, dict]:
         # construct a resource object to hold the generated fields
         resource = self.resource.construct()
+        resource_data = {}
         # disable assignment validation
         resource.Config.validate_assignment = False
         if self.params.field_values:
             for field_value in self.params.field_values:
                 # update resource with field value
-                self._update_with_field_value(resource, field_value)
+                self._update_with_field_value(resource_data, field_value)
 
         if self.params.field_generators:
             for generator in self.params.field_generators:
                 # update resource with generated field value
-                self._update_with_field_generator(resource, generator)
+                self._update_with_field_generator(resource_data, generator)
         if generate_id:
-            resource.id = str(uuid4())
+            resource_data["id"] = str(uuid4())
 
         # validate resource when validation is enabled
-        if not self.disable_validation:
-            resource = self.resource(**resource.dict(exclude_none=True))
-
+        # if not self.disable_validation:
+        #     resource = self.resource(**resource.dict(exclude_none=True))
+        if as_dict:
+            return resource_data
+        resource = self.resource(**resource_data)
         return resource
 
-    def _update_with_field_value(
-        self, resource: FHIRResourceModel, field_value: FieldValue
-    ):
-        if isinstance(field_value.value, list):
+    def _update_with_field_value(self, resource_data: dict, field_value: FieldValue):
+        if isinstance(field_value.value, list) and not field_value.list_field:
             iterator = self._value_iterators.get(field_value.field)
             if not iterator:
                 iterator = iter(field_value.value)
                 self._value_iterators[field_value.field] = iterator
-            resource.__setattr__(field_value.field, next(iterator))
+            resource_data[field_value.field] = next(iterator)
         else:
-            resource.__setattr__(field_value.field, field_value.value)
+            resource_data[field_value.field] = field_value.value
 
     def _update_with_field_generator(
-        self, resource: FHIRResourceModel, field_generator: FieldGenerator
+        self, resource_data: dict, field_generator: FieldGenerator
     ):
         value = field_generator.generate()
-        resource.__setattr__(field_generator.field, value)
+        resource_data[field_generator.field] = value
 
     def _check_required_fields(self):
         """
@@ -149,6 +158,9 @@ class ResourceGenerator:
         self.params = params
 
     def _validate_params(self):
+        # skip validation if it has been previously validated
+        if self._validated:
+            return
         # validate field values
         if self.params.field_values:
             self._validate_field_values()
@@ -158,7 +170,9 @@ class ResourceGenerator:
             self._validate_field_generators()
 
         # check that the required fields are being generated
-        self._check_required_fields()
+        # self._check_required_fields()
+
+        self._validated = True
 
     def _validate_field_values(self):
         field_values = self.params.field_values
@@ -174,7 +188,10 @@ class ResourceGenerator:
 
             # check that the list length matches the resource count
             if isinstance(field_value.value, list):
-                if len(field_value.value) != resource_count:
+                if (
+                    len(field_value.value) != resource_count
+                    and not field_value.list_field
+                ):
                     raise ValueError(
                         f"Field value list length does not match resource count: {field_value.field}"
                         f"Items in field value list: {len(field_value.value)},"

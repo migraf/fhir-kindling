@@ -1,7 +1,11 @@
 version: '3.8'
 
 volumes:
-  benchmark_data:
+  blaze_benchmark:
+  hapi_benchmark:
+  linux_benchmark:
+  pg_data:
+
 
 services:
   blaze:
@@ -12,4 +16,84 @@ services:
     ports:
       - "9090:8080"
     volumes:
-      - benchmark_data:/app/data
+      - blaze_benchmark:/app/data
+
+  hapi:
+    image: "hapiproject/hapi:latest"
+    ports:
+      - "9091:8080"
+    volumes:
+      - hapi_benchmark:/data/hapi
+    environment:
+      hapi.fhir.default_encoding: json
+      hapi.fhir.: json
+      hapi.fhir.server_address: "http://localhost:9091/fhir"
+
+  linux:
+    image: ghcr.io/linuxforhealth/fhir-server:latest
+    environment:
+      TRACE_SPEC: "org.linuxforhealth.fhir.*=INFO"
+      TRACE_FILE: "stdout"
+    command: bash -c " java -jar /opt/fhir-server/tools/fhir-persistence-schema-*-cli.jar --db-type postgresql --prop db.host=postgres --prop db.port=5432 --prop db.database=fhirdb --prop user=fhiradmin --prop password=change-password --create-schemas && java -jar /opt/fhir-server/tools/fhir-persistence-schema-*-cli.jar --db-type postgresql --prop db.host=postgres --prop db.port=5432 --prop db.database=fhirdb --prop user=fhiradmin --prop password=change-password --prop resourceTypes=AllergyIntolerance,CarePlan,CareTeam,CodeSystem,Condition,Consent,Coverage,Device,DiagnosticReport,DocumentReference,Encounter,ExplanationOfBenefit,Goal,Group,Immunization,List,Location,Medication,MedicationAdministration,MedicationDispense,MedicationRequest,MedicationStatement,Observation,Organization,Patient,Practitioner,PractitionerRole,Procedure,Provenance,StructureDefinition,ValueSet --update-schema-fhir --grant-to fhirserver && java -jar /opt/fhir-server/tools/fhir-persistence-schema-*-cli.jar --db-type postgresql --prop db.host=postgres --prop db.port=5432 --prop db.database=fhirdb --prop user=fhiradmin --prop password=change-password --update-schema-batch --grant-to fhirbatch && /opt/ol/wlp/bin/server run"
+    volumes:
+      - type: bind
+        source: ./configs/linux4health/config
+        target: /opt/ol/wlp/usr/servers/defaultServer/config
+        read_only: true
+      - type: bind
+        source: ./configs/linux4health/configDropins
+        target: /opt/ol/wlp/usr/servers/defaultServer/configDropins/overrides
+        read_only: true
+      - type: bind
+        source: ./configs/linux4health/userlib
+        target: /opt/ol/wlp/usr/servers/defaultServer/userlib
+        read_only: true
+      - type: bind
+        source: ./configs/linux4health/openapi.json
+        target: /opt/ol/wlp/usr/servers/defaultServer/apps/expanded/fhir-openapi.war/META-INF/openapi.json
+        read_only: true
+      - type: bind
+        source: ./configs/linux4health/bulkdata
+        target: /output/bulkdata
+
+    healthcheck:
+      start_period: 32s
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      # https://docs.docker.com/compose/compose-file/#variable-substitution
+      test: curl --fail -k -u 'fhiruser:change-password' 'https://localhost:9443/fhir-server/api/v4/$$healthcheck'
+    ports:
+      - 9080:9080
+      # - 9443:9443
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:14-alpine
+    # https://dba.stackexchange.com/q/275378/46472
+    shm_size: 256MB
+    volumes:
+      - type: volume
+        source: pg_data
+        target: /var/lib/postgresql/data/
+      - type: bind
+        source: ./configs/postgres/init
+        target: /docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_DB: fhirdb
+      POSTGRES_USER: fhiradmin
+      POSTGRES_PASSWORD: change-password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d fhirdb -U fhiradmin" ]
+      start_period: 22s
+      interval: 5s
+      timeout: 4s
+      retries: 3
+    # "Larger settings for shared_buffers usually require a corresponding increase in max_wal_size, 
+    # to spread out the process of writing large quantities of new or changed data over a longer period of time."
+    command: " -c shared_buffers=2GB -c max_wal_size=3GB -c max_connections=100 -c max_prepared_transactions=100 -c max_locks_per_transaction=128 "
+    ports:
+      - 5432:5432

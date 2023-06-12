@@ -1,4 +1,6 @@
 import os
+import random
+from datetime import datetime
 
 import pendulum
 import pytest
@@ -18,6 +20,7 @@ from fhir_kindling.generators.resource_generator import (
     GeneratorParameters,
     ResourceGenerator,
 )
+from fhir_kindling.generators.time_series_generator import TimeSeriesGenerator
 
 
 @pytest.fixture
@@ -99,6 +102,7 @@ def test_patient_generator():
     patients = patient_generator.generate()
     assert len(patients) == 100
     assert isinstance(patients[0], Patient)
+    print(patients[0].id)
 
     generator = PatientGenerator(n=10, age_range=(18, 60))
     patients = generator.generate()
@@ -281,7 +285,7 @@ def test_generate_covid_dataset(vaccination_code, covid_code, server):
 
     covid_generator = ResourceGenerator("Condition", generator_parameters=covid_params)
     # add covid conditions to patients
-    dataset_generator.add_resource(covid_generator, name="covid")
+    dataset_generator.add_resource_generator(covid_generator, name="covid")
 
     patients, patient_ids = PatientGenerator(n=count, generate_ids=True).generate(
         references=True
@@ -303,7 +307,7 @@ def test_generate_covid_dataset(vaccination_code, covid_code, server):
         "Immunization", generator_parameters=first_vax_params
     )
     print(vaccination_generator)
-    dataset_generator.add_resource(
+    dataset_generator.add_resource_generator(
         vaccination_generator, name="first_vaccination", likelihood=0.8
     )
 
@@ -312,3 +316,61 @@ def test_generate_covid_dataset(vaccination_code, covid_code, server):
     # pprint(result.dict(exclude_none=True))
 
     dataset.upload(server)
+
+
+def test_time_series_generator():
+    body_temp_code = CodeableConcept(
+        coding=[
+            Coding(
+                system="http://loinc.org",
+                code="99836-5",
+                display="Body temperature",
+            )
+        ]
+    )
+
+    body_temp_params = GeneratorParameters(
+        field_values=[
+            FieldValue(field="code", value=body_temp_code),
+            FieldValue(field="status", value="final"),
+        ],
+        field_generators=[
+            FieldGenerator(
+                field="valueQuantity",
+                generator_function=lambda: {
+                    "value": random.randint(36, 40) + random.random(),
+                    "unit": "C",
+                    "system": "http://unitsofmeasure.org",
+                },
+            ),
+        ],
+    )
+
+    body_temp_generator = ResourceGenerator(
+        "Observation", generator_parameters=body_temp_params
+    )
+
+    body_temp_ts_generator = TimeSeriesGenerator(
+        resource_generator=body_temp_generator,
+        time_field="effectiveDateTime",
+        start=datetime(2021, 1, 1),
+        freq="daily",
+        n=20,
+    )
+
+    result = body_temp_ts_generator.generate()
+    print("Result generate n \n\n")
+    print(result)
+    assert len(result) == 20
+
+    body_temp_range_generator = TimeSeriesGenerator(
+        resource_generator=body_temp_generator,
+        time_field="effectiveDateTime",
+        start=datetime(2021, 1, 1),
+        end=datetime(2021, 3, 1),
+        freq="daily",
+    )
+    result = body_temp_range_generator.generate()
+
+    print("Result generate range \n\n")
+    print(result)

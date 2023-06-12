@@ -9,8 +9,11 @@ from fhir.resources.humanname import HumanName
 from fhir.resources.patient import Patient
 from fhir.resources.reference import Reference
 
+from fhir_kindling.generators.base import BaseGenerator
+from fhir_kindling.serde.json import json_dict
 
-class PatientGenerator:
+
+class PatientGenerator(BaseGenerator):
     def __init__(
         self,
         n: int,
@@ -19,7 +22,7 @@ class PatientGenerator:
         organisation: Reference = None,
         generate_ids: bool = False,
     ):
-        self.resource_type = Patient
+        self.resource = Patient
         self.n = n
         self.age_range = age_range
         self.gender_distribution = gender_distribution
@@ -28,14 +31,26 @@ class PatientGenerator:
         self.generate_ids = generate_ids
         self.resources = None
 
-    def generate(self, references: bool = False):
+    def generate(
+        self,
+        references: bool = False,
+        generate_ids: bool = False,
+        as_dict: bool = False,
+    ):
         patients = self._generate()
         self.resources = patients
+
+        if as_dict:
+            resources = [json_dict(patient) for patient in patients]
+        if self.n == 1:
+            if references:
+                return resources[0], self._generate_references()[0]
+            return resources[0]
 
         if references and not self.generate_ids:
             raise ValueError("Cannot generate references without generating ids")
         elif references:
-            return patients, self._generate_references()
+            return resources, self._generate_references()
 
         return patients
 
@@ -64,9 +79,8 @@ class PatientGenerator:
         if self.organisation:
             patient_dict["managingOrganization"] = self.organisation
 
-        if self.generate_ids:
-            patient_id = str(uuid4())
-            patient_dict["id"] = patient_id
+        patient_id = str(uuid4())
+        patient_dict["id"] = patient_id
 
         return Patient(**patient_dict)
 
