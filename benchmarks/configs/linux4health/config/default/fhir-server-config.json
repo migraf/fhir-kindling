@@ -5,7 +5,8 @@
             "conditionalDeleteMaxNumber": 100,
             "defaultPrettyPrint": true,
             "serverRegistryResourceProviderEnabled": false,
-            "ifNoneMatchReturnsNotModified": true
+            "ifNoneMatchReturnsNotModified": true,
+            "maxPageIncludeCount": 100000
         },
         "resources": {
             "open": false,

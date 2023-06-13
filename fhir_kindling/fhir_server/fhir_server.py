@@ -448,7 +448,7 @@ class FhirServer:
     def add_all(
         self,
         resources: List[Union[Resource, FHIRAbstractModel, dict]],
-        batch_size: int = 5000,
+        batch_size: int = 1000,
         display: bool = True,
     ) -> BundleCreateResponse:
         """
