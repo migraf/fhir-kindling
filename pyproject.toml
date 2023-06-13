@@ -48,7 +48,7 @@ matplotlib = { version = "*", optional = true }
 notebook = { version = "*", optional = true }
 RISE = { version = "*", optional = true }
 ipywidgets = { version = "*", optional = true }
-kaleido  = { version = "0.1.0.post1", optional = true }
+kaleido  = { version = "*", optional = true }
 
 
 

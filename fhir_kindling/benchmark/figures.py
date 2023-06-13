@@ -79,6 +79,7 @@ def add_dataset_insert_traces(fig: go.Figure, results: "BenchmarkResults"):
     ds_fig = go.Bar(
         y=list(results.dataset_insert.values()),
         x=list(results.dataset_insert.keys()),
+        name="Dataset Insert",
     )
     fig.add_trace(ds_fig, row=3, col=1)
 

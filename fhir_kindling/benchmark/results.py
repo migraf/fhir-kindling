@@ -84,6 +84,11 @@ class BenchmarkResults:
         """Return the batch delete results as a dictionary of server names to a list of batch delete times."""
         return self.results[BenchmarkOperations.BATCH_DELETE.value]
 
+    @property
+    def resources(self) -> Dict[str, Dict[str, List[float]]]:
+        """Tracks the number of resources generated, queried, updated and deleted for each server."""
+        pass
+
     def add_result(
         self,
         operation: Union[str, BenchmarkOperations],

@@ -1,6 +1,6 @@
 import os
 import time
-from typing import Any, List, Union
+from typing import Any, List, Tuple, Union
 
 import pendulum
 from tqdm.autonotebook import tqdm
@@ -24,6 +24,9 @@ BATCH_SIZE = 100
 
 
 class ServerBenchmark:
+    steps: List[BenchmarkOperations]
+    queries: List[Tuple[str, Union[str, FhirQueryParameters]]]
+
     def __init__(
         self,
         servers: List[FhirServer],
@@ -31,7 +34,9 @@ class ServerBenchmark:
         n_attempts: int = N_ATTEMPTS,
         batch_size: int = BATCH_SIZE,
         dataset_size: int = 1000,
-        custom_queries: Union[List[Union[str, FhirQueryParameters]], None] = None,
+        custom_queries: Union[
+            List[Tuple[str, Union[str, FhirQueryParameters]]], None
+        ] = None,
         steps: List[Union[str, BenchmarkOperations]] = None,
     ):
         self.servers = servers
@@ -46,18 +51,35 @@ class ServerBenchmark:
         self.benchmark_resources = {}
         self.n_attempts = n_attempts
         self.batch_size = batch_size
-        self.queries = []
         self.dataset = None
-        self.generated_resource_refs: List[str] = []
+
+        self._setup(queries=custom_queries, steps=steps)
+        self.dataset_generator = generate_benchmark_data(n_patients=dataset_size)
+
+    def _setup(
+        self,
+        queries: Union[List[Tuple[str, Union[str, FhirQueryParameters]]], None] = None,
+        steps: List[Union[str, BenchmarkOperations]] = None,
+    ):
         # if a list of steps is provided run only these steps, otherwise run all steps
         if steps:
-            self.steps = steps
+            self.steps = []
+            for s in steps:
+                if isinstance(s, str):
+                    self.steps.append(BenchmarkOperations(s))
+                elif isinstance(s, BenchmarkOperations):
+                    self.steps.append(s)
+                else:
+                    raise ValueError(
+                        "Steps must be a list of strings or BenchmarkOperations objects"
+                    )
         else:
-            self.steps = list(BenchmarkOperations)
+            self.steps = [BenchmarkOperations(step) for step in BenchmarkOperations]
 
         # if custom queries are provided use them, otherwise use the default queries
-        if custom_queries:
-            for q in custom_queries:
+        if queries:
+            self.queries = []
+            for q in queries:
                 if isinstance(q, str):
                     self.queries.append(FhirQueryParameters.from_query_string(q))
                 elif isinstance(q, FhirQueryParameters):
@@ -71,13 +93,6 @@ class ServerBenchmark:
                 FhirQueryParameters.from_query_string(qs)
                 for qs in [dfq.value for dfq in DefaultQueries]
             ]
-
-        self.dataset_generator = generate_benchmark_data(n_patients=dataset_size)
-
-        # print(self.dataset)
-
-        # self.dataset_generator.explain()
-        # self.dataset_generator.generate()
 
     def run_suite(
         self, progress: bool = True, save: bool = True, results_dir: str = None
@@ -121,21 +136,22 @@ class ServerBenchmark:
             disable=not progress,
             leave=False,
         ):
+            server_name = name if name else server.api_address
             if step == BenchmarkOperations.GENERATE:
                 pass
             if step == BenchmarkOperations.INSERT:
                 self._benchmark_insert(
                     server,
-                    server_name=name if name else server.api_address,
+                    server_name=server_name,
                 )
             elif step == BenchmarkOperations.DATASET_INSERT:
-                self._upload_dataset(server)
+                self._upload_dataset(server, server_name=server_name)
             elif step == BenchmarkOperations.QUERY:
-                self._benchmark_search(server)
+                self._benchmark_search(server, server_name=server_name)
             elif step == BenchmarkOperations.UPDATE:
                 pass  # TODO
             elif step == BenchmarkOperations.DELETE:
-                self._benchmark_delete(server)
+                self._benchmark_delete(server, server_name=server_name)
 
     @property
     def results(self):
@@ -147,7 +163,7 @@ class ServerBenchmark:
         fig = plot_benchmark_results(self.results)
         return fig
 
-    def _upload_dataset(self, server: FhirServer):
+    def _upload_dataset(self, server: FhirServer, server_name: str):
         # create temp copy of dataset
         dataset = self.dataset.copy(deep=True)
 
@@ -161,7 +177,7 @@ class ServerBenchmark:
         self._add_resource_refs_for_tracking(server=server, refs=resource_refs)
         self._results.add_result(
             BenchmarkOperations.DATASET_INSERT,
-            server.api_address,
+            server_name,
             total,
         )
 
@@ -174,15 +190,15 @@ class ServerBenchmark:
             figure_path = os.path.join(figure_path, f"benchmark_{datestring}.png")
             figure.write_image(figure_path)
 
-    def _benchmark_insert(self, server: FhirServer, server_name: str = None):
+    def _benchmark_insert(self, server: FhirServer, server_name: str):
         self._benchmark_insert_single(server, server_name)
-        self._benchmark_batch_insert(server)
+        self._benchmark_batch_insert(server, server_name)
 
     def _benchmark_update(self, server: FhirServer):
         self._benchmark_update_single(server)
         self._benchmark_batch_update(server)
 
-    def _benchmark_insert_single(self, server: FhirServer, server_name: str = None):
+    def _benchmark_insert_single(self, server: FhirServer, server_name: str):
         resources = PatientGenerator(n=self.n_attempts).generate()
 
         timings = []
@@ -196,7 +212,7 @@ class ServerBenchmark:
             timings.append(total_time)
         self._results.add_result(
             BenchmarkOperations.INSERT,
-            server_name if server_name else server.api_address,
+            server_name,
             timings,
         )
         # track added resources for each server
@@ -204,7 +220,7 @@ class ServerBenchmark:
         added_resources.extend(added_resources)
         self.benchmark_resources[server.api_address] = added_resources
 
-    def _benchmark_batch_insert(self, server: FhirServer, server_name: str = None):
+    def _benchmark_batch_insert(self, server: FhirServer, server_name: str):
         timings = []
         # run multiple attempts for inserting resources
         for _ in range(self.n_attempts):
@@ -220,7 +236,7 @@ class ServerBenchmark:
 
         self._results.add_result(
             BenchmarkOperations.BATCH_INSERT,
-            server_name if server_name else server.api_address,
+            server_name,
             timings,
         )
 
@@ -234,7 +250,7 @@ class ServerBenchmark:
             server_resources.append(refs)
         self.benchmark_resources[server.api_address] = server_resources
 
-    def _benchmark_search(self, server: FhirServer):
+    def _benchmark_search(self, server: FhirServer, server_name: str):
         query_results = {}
         for query in self.queries:
             query_attempts = []
@@ -247,11 +263,11 @@ class ServerBenchmark:
 
         self._results.add_result(
             BenchmarkOperations.QUERY,
-            server.api_address,
+            server_name,
             results=query_results,
         )
 
-    def _benchmark_delete(self, server: FhirServer):
+    def _benchmark_delete(self, server: FhirServer, server_name: str):
         start_time = time.perf_counter()
         server_resource_refs = self.benchmark_resources.get(server.api_address, [])
         if not server_resource_refs:
@@ -262,7 +278,7 @@ class ServerBenchmark:
 
         self._results.add_result(
             BenchmarkOperations.DELETE,
-            server.api_address,
+            server_name,
             elapsed_time,
         )
 
