@@ -1,6 +1,8 @@
+import os
 import time
 from typing import Any, List, Union
 
+import pendulum
 from tqdm.autonotebook import tqdm
 
 from fhir_kindling import FhirServer
@@ -77,7 +79,18 @@ class ServerBenchmark:
         # self.dataset_generator.explain()
         # self.dataset_generator.generate()
 
-    def run_suite(self, progress: bool = True):
+    def run_suite(
+        self, progress: bool = True, save: bool = True, results_dir: str = None
+    ):
+        """Run the the test suite configured for this benchmark instance.
+        By default the steps are: Dataset generation, single resource insert, batch insert,
+        dataset upload, search, update and delete.
+
+        Args:
+            progress: Wether to visualize progress using a progress bar. Defaults to True.
+            save: Save the results to file once the suite is finished. Defaults to True.
+            results_dir: Directory in which to save the results. If None defaults to current working directory.
+        """
         # generate benchmark data
         if BenchmarkOperations.GENERATE in self.steps:
             self.dataset = self.dataset_generator.generate(display=progress)
@@ -91,31 +104,38 @@ class ServerBenchmark:
             disable=not progress,
             leave=False,
         ):
-            # Iterate over the benchmark steps
-            for step in tqdm(
-                self.steps,
-                desc=f"Server {server.api_address}",
-                disable=not progress,
-                leave=False,
-            ):
-                if step == BenchmarkOperations.GENERATE:
-                    pass
-                if step == BenchmarkOperations.INSERT:
-                    self._benchmark_insert(
-                        server,
-                        server_name=self.server_names[i] if self.server_names else None,
-                    )
-                elif step == BenchmarkOperations.DATASET_INSERT:
-                    self._upload_dataset(server)
-                elif step == BenchmarkOperations.QUERY:
-                    self._benchmark_search(server)
-                elif step == BenchmarkOperations.UPDATE:
-                    pass  # TODO
-                elif step == BenchmarkOperations.DELETE:
-                    self._benchmark_delete(server)
+            name = None
+            if self.server_names:
+                name = self.server_names[i]
+            self._benchmark_server(server, progress=progress, name=name)
 
         self._results.set_completed(True)
-        self.plot().show()
+        if save:
+            self._save(path=results_dir)
+
+    def _benchmark_server(self, server: FhirServer, progress: bool, name: str = None):
+        # Iterate over the benchmark steps
+        for step in tqdm(
+            self.steps,
+            desc=f"Server {server.api_address}",
+            disable=not progress,
+            leave=False,
+        ):
+            if step == BenchmarkOperations.GENERATE:
+                pass
+            if step == BenchmarkOperations.INSERT:
+                self._benchmark_insert(
+                    server,
+                    server_name=name if name else server.api_address,
+                )
+            elif step == BenchmarkOperations.DATASET_INSERT:
+                self._upload_dataset(server)
+            elif step == BenchmarkOperations.QUERY:
+                self._benchmark_search(server)
+            elif step == BenchmarkOperations.UPDATE:
+                pass  # TODO
+            elif step == BenchmarkOperations.DELETE:
+                self._benchmark_delete(server)
 
     @property
     def results(self):
@@ -144,6 +164,15 @@ class ServerBenchmark:
             server.api_address,
             total,
         )
+
+    def _save(self, path: str = None):
+        self.results.save(path)
+        figure = self.plot()
+        if not path:
+            figure_path = os.getcwd()
+            datestring = pendulum.now().to_iso8601_string().replace(":", "_")
+            figure_path = os.path.join(figure_path, f"benchmark_{datestring}.png")
+            figure.write_image(figure_path)
 
     def _benchmark_insert(self, server: FhirServer, server_name: str = None):
         self._benchmark_insert_single(server, server_name)

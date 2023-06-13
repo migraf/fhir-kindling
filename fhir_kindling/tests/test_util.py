@@ -10,9 +10,9 @@ from fhir.resources.organization import Organization
 from fhir.resources.patient import Patient
 
 from fhir_kindling import FhirServer
+from fhir_kindling.benchmark.bench import ServerBenchmark
 from fhir_kindling.fhir_server.transfer import reference_graph
 from fhir_kindling.generators import PatientGenerator
-from fhir_kindling.util.benchmark import ServerBenchmark
 from fhir_kindling.util.references import (
     _resource_ids_from_query_response,
     check_missing_references,
@@ -144,6 +144,8 @@ def test_resource_contains_field(server):
 
 def test_benchmark(server):
     transfer_server = FhirServer(api_address=os.getenv("TRANSFER_API_URL"))
-    benchmark = ServerBenchmark(servers=[server, transfer_server])
+    benchmark = ServerBenchmark(
+        servers=[server, transfer_server], n_attempts=2, dataset_size=10
+    )
     benchmark.run_suite()
-    benchmark.plot()
+    # benchmark.plot()
