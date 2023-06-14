@@ -32,7 +32,7 @@ def test_transfer_resources(fhir_server):
     # get all conditions
     conditions = fhir_server.query("Condition").all().resource_list
 
-    target = FhirServer(api_address=os.getenv("TRANSFER_SERVER_URL"))
+    target = FhirServer(api_address=os.getenv("TRANSFER_API_URL"))
 
     response = transfer(source=fhir_server, target=target, resources=conditions)
 

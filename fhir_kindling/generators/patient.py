@@ -42,15 +42,18 @@ class PatientGenerator(BaseGenerator):
 
         if as_dict:
             resources = [json_dict(patient) for patient in patients]
-        if self.n == 1:
-            if references:
-                return resources[0], self._generate_references()[0]
-            return resources[0]
-
-        if references and not self.generate_ids:
-            raise ValueError("Cannot generate references without generating ids")
-        elif references:
-            return resources, self._generate_references()
+            if self.n == 1:
+                if references:
+                    return resources[0], self._generate_references()[0]
+                return resources[0]
+            else:
+                if references:
+                    return resources, self._generate_references()
+        else:
+            if references and not self.generate_ids:
+                raise ValueError("Cannot generate references without generating ids")
+            elif references:
+                return patients, self._generate_references()
 
         return patients
 

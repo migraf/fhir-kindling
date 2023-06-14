@@ -280,12 +280,15 @@ def test_generate_covid_dataset(vaccination_code, covid_code, server):
     covid_params = GeneratorParameters(
         field_values=[
             FieldValue(field="code", value=covid_code),
+            # FieldValue(field="subject", value={"reference": "Patient/123"})
         ]
     )
 
     covid_generator = ResourceGenerator("Condition", generator_parameters=covid_params)
     # add covid conditions to patients
-    dataset_generator.add_resource_generator(covid_generator, name="covid")
+    dataset_generator.add_resource_generator(
+        covid_generator, name="covid", depends_on="base", reference_field="subject"
+    )
 
     patients, patient_ids = PatientGenerator(n=count, generate_ids=True).generate(
         references=True
@@ -308,10 +311,14 @@ def test_generate_covid_dataset(vaccination_code, covid_code, server):
     )
     print(vaccination_generator)
     dataset_generator.add_resource_generator(
-        vaccination_generator, name="first_vaccination", likelihood=0.8
+        vaccination_generator,
+        name="first_vaccination",
+        likelihood=0.8,
+        depends_on="base",
+        reference_field="patient",
     )
 
-    dataset = dataset_generator.generate(ids=True)
+    dataset = dataset_generator.generate()
     print(dataset)
     # pprint(result.dict(exclude_none=True))
 

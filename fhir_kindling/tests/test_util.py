@@ -147,5 +147,5 @@ def test_benchmark(server):
     benchmark = ServerBenchmark(
         servers=[server, transfer_server], n_attempts=2, dataset_size=10
     )
-    benchmark.run_suite()
+    benchmark.run_suite(progress=False, save=False)
     # benchmark.plot()

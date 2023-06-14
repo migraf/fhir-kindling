@@ -126,7 +126,7 @@ def make_transaction_entry(
         if method == TransactionMethod.PUT and not resource.id:
             raise ValueError("PUT requires a resource with an id")
         if method == TransactionMethod.POST:
-            if resource.id:
+            if hasattr(resource, "id"):
                 del resource.id
         _add_resource_to_entry(entry, resource)
 
