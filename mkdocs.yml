@@ -8,6 +8,7 @@ theme:
   features:
     - navigation.tracking
     - navigation.expand
+    - content.code.copy
   palette:
     - scheme: default
       toggle:
@@ -28,6 +29,7 @@ nav:
     - Delete resources: delete.md
     - Update resources: update.md
     - Transfer resources: transfer.md
+    - Server Benchmarking: benchmark.md
     - Data Science: ds.md
   - API docs: api.md
 

@@ -39,6 +39,22 @@ class ServerBenchmark:
         ] = None,
         steps: List[Union[str, BenchmarkOperations]] = None,
     ):
+        """Initialize a benchmark object to test the performance of a set of servers.
+
+        Args:
+            servers: List of servers to benchmark.
+            server_names: Optionally provide a list of names for the servers. Which will be used in the results.
+                Defaults to the servers api address.
+            n_attempts: The number of attempts for each operation. Defaults to N_ATTEMPTS.
+            batch_size: The size of the batches for evaluating batch operations. Defaults to BATCH_SIZE.
+            dataset_size: The number of base resources in the dataset. Defaults to 1000.
+            custom_queries: A list of custom FHIR search queries to be included in the benchmark. Defaults to None.
+            steps: Select a subset of the steps to run. Defaults to None.
+
+        Raises:
+            ValueError: If the number of server names does not match the number of servers.
+            Or if steps or custom_queries are not valid.
+        """
         self.servers = servers
 
         if server_names and len(server_names) != len(servers):
@@ -61,6 +77,16 @@ class ServerBenchmark:
         queries: Union[List[Tuple[str, Union[str, FhirQueryParameters]]], None] = None,
         steps: List[Union[str, BenchmarkOperations]] = None,
     ):
+        """Set up the steps and custom queries for the benchmark.
+
+        Args:
+            queries: User submitted list of queries to include. Defaults to None.
+            steps: User submitted subset of benchmark steps to perform. Defaults to None.
+
+        Raises:
+            ValueError: If the operations/steps given are invalid
+            ValueError: If any of the queries given is invalid
+        """
         # if a list of steps is provided run only these steps, otherwise run all steps
         if steps:
             self.steps = []
@@ -129,6 +155,13 @@ class ServerBenchmark:
             self._save(path=results_dir)
 
     def _benchmark_server(self, server: FhirServer, progress: bool, name: str = None):
+        """Run the benchmark suite for a single server
+
+        Args:
+            server: The server to run the benchmark against
+            progress: Whether to display a progress bar
+            name: Optional name for the server. Defaults to None.
+        """
         # Iterate over the benchmark steps
         for step in tqdm(
             self.steps,
@@ -155,15 +188,34 @@ class ServerBenchmark:
 
     @property
     def results(self):
+        """Retunrs the results of the benchmark if the benchmark has completed.
+
+        Raises:
+            Exception: If the benchmark has not completed
+
+        Returns:
+            The results of the benchmark
+        """
         if not self._results.completed:
             raise Exception("Benchmark not completed")
         return self._results
 
     def plot(self):
+        """Plot the results of the benchmark
+
+        Returns:
+            The plotly figure displaying the results
+        """
         fig = plot_benchmark_results(self.results)
         return fig
 
     def _upload_dataset(self, server: FhirServer, server_name: str):
+        """Upload the generated dataset to the server and track the time it takes.
+
+        Args:
+            server: The server to upload to
+            server_name: Name for the server
+        """
         # create temp copy of dataset
         dataset = self.dataset.copy(deep=True)
 
@@ -182,6 +234,11 @@ class ServerBenchmark:
         )
 
     def _save(self, path: str = None):
+        """Save the benchmark results and figure to file
+
+        Args:
+            path: Where to save the resulst. Defaults to current working directory.
+        """
         self.results.save(path)
         figure = self.plot()
         if not path:
