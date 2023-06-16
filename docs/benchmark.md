@@ -6,6 +6,8 @@ To perform these tests the benchmarking tool creates a synthetic dataset with co
 The benchmarking tool then performs the operations against the server and records the time it took to complete each operation.
 Dataset size and the number of attempts made for each step in the benchmark can be configured.
 
+After the benchmark is successfully run the the results are stored as a JSON file and also plotted as a graph and saved as a PNG file.
+
 
 ## Prerequisites
 - [Docker](https://docs.docker.com/get-docker/)(for preconfigured benchmarks)
@@ -81,6 +83,16 @@ benchmark = ServerBenchmark(
 )
 
 ```
+
+## API Reference
+
+::: fhir_kindling.benchmark.bench.ServerBenchmark
+    handler: python
+    rendering:
+      members: True
+      show_source: False
+      heading_level: 3
+
 
 
 

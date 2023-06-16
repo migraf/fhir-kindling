@@ -1,5 +1,5 @@
 ---
-title: NAV TITLE 
+title: Home
 ---
 #
 
