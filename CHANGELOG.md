@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.0.0] - 2023-
+## [1.0.0] - 2023-07-09
 Improve packaging with poetry to slim down library size with optional extras for datascience features. Record linkage
 for transfer functionality. Add support for Python 3.9+. Code base cleanup and refactoring.
 Big upgrades to the [documentation](https://migraf.github.io/fhir-kindling/) ðŸ‘€.
@@ -30,6 +30,9 @@ Big upgrades to the [documentation](https://migraf.github.io/fhir-kindling/) ðŸ‘
 - `summary_async()` method for asynchronous server summary.
 - `total` property on `QueryResponse` to get the total number of resources returned by the query.
 - `record_linkage` functionality for `transfer()` method and split transfer functionality into separate module.
+- Retry functionality for the `FhirServer` class. Allowing for retrying failed requests based on the configured status codes and methods. Configurable with backoff and jitter.
+- Benchmark functionality for FhirServers that run a comprehensive set of tests against the server and measure the time it takes to complete them. Available only when the `ds` extra is installed.
+
 
 ### Removed
 - Removed `to_dfs()` method on query response object. Use `flatten` function from the `serde` package instead.

@@ -33,6 +33,8 @@ class FhirQueryBase:
         headers: dict = None,
         output_format: str = "json",
     ):
+        if base_url[-1] == "/":
+            base_url = base_url[:-1]
         self.base_url = base_url
 
         # Set up the requests session with auth and headers
@@ -265,6 +267,12 @@ class FhirQueryBase:
         return self
 
     def _make_query_string(self) -> str:
+        """
+        Make the query string from the query parameters
+
+        Returns:
+            query string
+        """
         query_string = self.base_url + self.query_parameters.to_query_string()
 
         if not self._count:

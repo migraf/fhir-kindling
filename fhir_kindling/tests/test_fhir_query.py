@@ -1421,7 +1421,7 @@ def test_set_query_string(server, api_url):
     query_string = f"/{query_resource}?_include={query_resource}:{search_param}"
 
     query.set_query_string(query_string)
-    query_url = f"{api_url}/{query_resource}?_include={query_resource}:{search_param}&_count=5000&_format=json"
+    query_url = f"{api_url}{query_resource}?_include={query_resource}:{search_param}&_count=5000&_format=json"
     assert query.query_url == query_url
 
 
@@ -1519,7 +1519,7 @@ def test_query_include(server, api_url):
 
     assert query.query_parameters.include_parameters[0].resource == query_resource
 
-    query_url = f"{api_url}/{query_resource}?_include={query_resource}:{search_param}&_count=5000&_format=json"
+    query_url = f"{api_url}{query_resource}?_include={query_resource}:{search_param}&_count=5000&_format=json"
     print(query.query_url)
     assert query.query_url == query_url
 

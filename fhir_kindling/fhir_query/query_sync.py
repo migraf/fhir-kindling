@@ -32,10 +32,29 @@ class FhirQuerySync(FhirQueryBase):
         output_format: str = "json",
         proxies: Union[str, dict] = None,
     ):
+        """Initialize an sync FHIR query object.
+
+        Args:
+            base_url: Base URL of the FHIR server to query.
+            resource: Base resource to build the query on. Defaults to None.
+            query_parameters: Query parameters object that fully describes a FHIR query. Defaults to None.
+            auth: httpx auth object to authenticate the requests. Defaults to None.
+            headers: Optional additional headers to add to the request. Defaults to None.
+            output_format: Response format of the query. Defaults to "json".
+            client: httpx Client passed from the server. Defaults to None.
+            proxies: List of proxies to use. Defaults to None.
+        """
+
         super().__init__(
-            base_url, resource, query_parameters, auth, headers, output_format
+            base_url,
+            resource,
+            query_parameters,
+            auth,
+            headers,
+            output_format,
         )
         self.proxies = proxies
+        self.client = None
         if client:
             self.client = client
         else:
@@ -99,12 +118,13 @@ class FhirQuerySync(FhirQueryBase):
 
     def count(self) -> int:
         self._count = 0
-        with self._setup_client() as client:
-            response = client.get(self._make_query_string() + "&_summary=count")
+        response = self.client.get(self._make_query_string() + "&_summary=count")
         response.raise_for_status()
         return response.json()["total"]
 
     def _setup_client(self):
+        if self.client:
+            return self.client
         headers = self.headers if self.headers else {}
         headers["Content-Type"] = "application/fhir+json"
         client = httpx.Client(
@@ -119,9 +139,8 @@ class FhirQuerySync(FhirQueryBase):
         ] = None,
         count: int = None,
     ) -> QueryResponse:
-        with self._setup_client() as client:
-            r = client.get(self.query_url)
-            r.raise_for_status()
+        r = self.client.get(self.query_url)
+        r.raise_for_status()
 
         response = self._resolve_response_pagination(r, page_callback, count)
         return response
@@ -162,47 +181,46 @@ class FhirQuerySync(FhirQueryBase):
         link = response_json.get("link", None)
         # If there is a link, get the next page otherwise return the response
 
-        with self._setup_client() as client:
-            if not link:
-                self.status_code = ResponseStatusCodes.OK
+        if not link:
+            self.status_code = ResponseStatusCodes.OK
+            return response_json
+        else:
+            entries = []
+            initial_entry = response_json.get("entry", None)
+            if not initial_entry:
+                self.status_code = ResponseStatusCodes.NOT_FOUND
                 return response_json
             else:
-                entries = []
-                initial_entry = response_json.get("entry", None)
-                if not initial_entry:
-                    self.status_code = ResponseStatusCodes.NOT_FOUND
-                    return response_json
-                else:
-                    self.status_code = ResponseStatusCodes.OK
+                self.status_code = ResponseStatusCodes.OK
+                response_entries = response_json["entry"]
+                entries.extend(response_entries)
+                self._execute_callback(response_entries, page_callback)
+            # if the limit is reached, stop resolving the pagination
+            if self._limit and len(entries) >= self._limit:
+                response_entries = response_json["entry"][: self._limit]
+                response_json["entry"] = response_entries
+                self._execute_callback(response_entries, page_callback)
+                return response_json
+            # query the linked page and add the entries to the response
+
+            while response_json.get("link", None):
+                if self._limit and len(entries) >= self._limit:
+                    break
+                next_page = next(
+                    (
+                        link
+                        for link in response_json["link"]
+                        if link.get("relation", None) == "next"
+                    ),
+                    None,
+                )
+                if next_page:
+                    response_json = self.client.get(next_page["url"]).json()
                     response_entries = response_json["entry"]
                     entries.extend(response_entries)
                     self._execute_callback(response_entries, page_callback)
-                # if the limit is reached, stop resolving the pagination
-                if self._limit and len(entries) >= self._limit:
-                    response_entries = response_json["entry"][: self._limit]
-                    response_json["entry"] = response_entries
-                    self._execute_callback(response_entries, page_callback)
-                    return response_json
-                # query the linked page and add the entries to the response
-
-                while response_json.get("link", None):
-                    if self._limit and len(entries) >= self._limit:
-                        break
-                    next_page = next(
-                        (
-                            link
-                            for link in response_json["link"]
-                            if link.get("relation", None) == "next"
-                        ),
-                        None,
-                    )
-                    if next_page:
-                        response_json = client.get(next_page["url"]).json()
-                        response_entries = response_json["entry"]
-                        entries.extend(response_entries)
-                        self._execute_callback(response_entries, page_callback)
-                    else:
-                        break
+                else:
+                    break
 
             response_json["entry"] = entries[: self._limit] if self._limit else entries
             return response_json

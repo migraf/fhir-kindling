@@ -32,8 +32,25 @@ class FhirQueryAsync(FhirQueryBase):
         client: httpx.AsyncClient = None,
         proxies: Union[str, dict] = None,
     ):
+        """Initialize an async FHIR query object.
+
+        Args:
+            base_url: Base URL of the FHIR server to query.
+            resource: Base resource to build the query on. Defaults to None.
+            query_parameters: Query parameters object that fully describes a FHIR query. Defaults to None.
+            auth: httpx auth object to authenticate the requests. Defaults to None.
+            headers: Optional additional headers to add to the request. Defaults to None.
+            output_format: Response format of the query. Defaults to "json".
+            client: httpx Client passed from the server. Defaults to None.
+            proxies: List of proxies to use. Defaults to None.
+        """
         super().__init__(
-            base_url, resource, query_parameters, auth, headers, output_format
+            base_url,
+            resource,
+            query_parameters,
+            auth,
+            headers,
+            output_format,
         )
         self.proxies = proxies
         # set up the async client instance

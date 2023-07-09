@@ -1,6 +1,6 @@
 import os
 import re
-from typing import List, Union
+from typing import Iterable, List, Union
 
 import fhir.resources
 import httpx
@@ -35,24 +35,31 @@ from fhir_kindling.fhir_server.transactions import (
 )
 from fhir_kindling.fhir_server.transfer import transfer
 from fhir_kindling.serde.json import json_dict
-from fhir_kindling.util.resources import valid_resource_name
+from fhir_kindling.util.retry_transport import RetryTransport
 
 
 class FhirServer:
     def __init__(
         self,
         api_address: str,
-        username: str = None,
-        password: str = None,
-        token: str = None,
-        client_id: str = None,
-        client_secret: str = None,
-        oidc_provider_url: str = None,
-        auth: httpx.Auth = None,
-        headers: dict = None,
-        proxies: Union[dict, str] = None,
-        timeout: int = None,
+        username: Union[str, None] = None,
+        password: Union[str, None] = None,
+        token: Union[str, None] = None,
+        client_id: Union[str, None] = None,
+        client_secret: Union[str, None] = None,
+        oidc_provider_url: Union[str, None] = None,
+        auth: Union[httpx.Auth, None] = None,
+        headers: Union[dict, None] = None,
+        proxies: Union[dict, str, None] = None,
+        timeout: Union[int, None] = None,
         fhir_server_type: str = "hapi",
+        retry_status_codes: Union[Iterable[int], None] = None,
+        retryable_methods: Union[Iterable[str], None] = None,
+        max_atttempts: int = 5,
+        max_backoff_wait: float = 60,
+        backoff_factor: float = 0.1,
+        jitter_ratio: float = 0.1,
+        respect_retry_after_header: bool = True,
     ):
         """
         Initialize a FHIR server connection
@@ -69,6 +76,9 @@ class FhirServer:
             proxies: optional proxies to be added to the session
             timeout: optional timeout for the session default is None
             fhir_server_type: type of fhir server (hapi, blaze, etc.)
+            retry_status_codes: optional list of status codes to retry on
+            max_atttempts: optional number of times to retry
+            retry_wait: optional number of seconds to wait between retries
         """
 
         # server definition values
@@ -88,6 +98,15 @@ class FhirServer:
         self.client_secret = client_secret
         self.oidc_provider_url = oidc_provider_url
         self.oauth_token: OAuth2Token = None
+
+        # retry vars
+        self.retry_status_codes = retry_status_codes
+        self.retryable_methods = retryable_methods
+        self.max_attempts = max_atttempts
+        self.max_backoff_wait = max_backoff_wait
+        self.backoff_factor = backoff_factor
+        self.jitter_ratio = jitter_ratio
+        self.respect_retry_after_header = respect_retry_after_header
 
         self._auth = auth
         self._headers = headers
@@ -154,31 +173,21 @@ class FhirServer:
         """
 
         self._validate_query_input(resource, query_parameters, query_string)
+        query_parameters = self._setup_query_parameters(
+            resource, query_string, query_parameters
+        )
 
-        if resource:
-            if isinstance(resource, str):
-                resource = valid_resource_name(resource)
-            # validate the given resource name
-            return FhirQuerySync(
-                base_url=self.api_address,
-                resource=resource,
-                auth=self.auth,
-                output_format=output_format,
-                proxies=self._proxies,
-                headers=self._headers,
-            )
-        elif query_string:
-            return self.raw_query(query_string, output_format)
+        query = FhirQuerySync(
+            base_url=self.api_address,
+            auth=self.auth,
+            query_parameters=query_parameters,
+            output_format=output_format,
+            proxies=self._proxies,
+            headers=self._headers,
+            client=self._sync_client(),
+        )
 
-        else:
-            return FhirQuerySync(
-                base_url=self.api_address,
-                auth=self.auth,
-                query_parameters=query_parameters,
-                output_format=output_format,
-                proxies=self._proxies,
-                headers=self._headers,
-            )
+        return query
 
     def query_async(
         self,
@@ -188,7 +197,8 @@ class FhirServer:
         output_format: str = "json",
     ) -> FhirQueryAsync:
         """
-        Initialize a FHIR query against the server with the given resource, query parameters or query string
+        Initialize an asynchronous FHIR query against the server with the given resource,
+        query parameters or query string
 
         Args:
             output_format: the output format to request from the fhir server (json or xml) defaults to json
@@ -202,34 +212,48 @@ class FhirServer:
         """
 
         self._validate_query_input(resource, query_parameters, query_string)
+        query_parameters = self._setup_query_parameters(
+            resource, query_string, query_parameters
+        )
 
+        query = FhirQueryAsync(
+            self.api_address,
+            auth=self.auth,
+            headers=self._headers,
+            query_parameters=query_parameters,
+            output_format=output_format,
+            proxies=self._proxies,
+            client=self._async_client(),
+        )
+
+        return query
+
+    def _setup_query_parameters(
+        self,
+        resource: Union[Resource, FHIRAbstractModel, str] = None,
+        query_string: str = None,
+        query_parameters: FhirQueryParameters = None,
+    ) -> FhirQueryParameters:
+        """Initialize a FhirQueryParameters object from the given input
+
+        Args:
+            resource: Resource to use as base either string or model. Defaults to None.
+            query_string: Query string to transform into query parameters. Defaults to None.
+            query_parameters: Query parameters object that gets returned directly. Defaults to None.
+
+        Returns:
+            _description_
+        """
         if resource:
-            return FhirQueryAsync(
-                base_url=self.api_address,
-                resource=resource,
-                auth=self.auth,
-                output_format=output_format,
-                proxies=self._proxies,
-            )
+            if isinstance(resource, str):
+                query_parameters = FhirQueryParameters(resource=resource)
+            elif isinstance(resource, (Resource, FHIRAbstractModel)):
+                query_parameters = FhirQueryParameters(resource=resource.resource_type)
+
         elif query_string:
             query_parameters = FhirQueryParameters.from_query_string(query_string)
-            query = FhirQueryAsync(
-                self.api_address,
-                resource=query_parameters.resource,
-                query_parameters=query_parameters,
-                output_format=output_format,
-                proxies=self._proxies,
-            )
-            return query
 
-        else:
-            return FhirQueryAsync(
-                base_url=self.api_address,
-                auth=self.auth,
-                query_parameters=query_parameters,
-                output_format=output_format,
-                proxies=self._proxies,
-            )
+        return query_parameters
 
     def raw_query(
         self, query_string: str, output_format: str = "json"
@@ -253,6 +277,7 @@ class FhirServer:
             auth=self.auth,
             proxies=self._proxies,
             headers=self._headers,
+            client=self._sync_client(),
         )
         return query
 
@@ -279,6 +304,7 @@ class FhirServer:
             output_format=output_format,
             auth=self.auth,
             proxies=self._proxies,
+            client=self._async_client(),
         )
         return query
 
@@ -909,22 +935,59 @@ class FhirServer:
         self._meta_data = response
 
     def _sync_client(self) -> httpx.Client:
+        """Get a synchronous httpx client
+
+        Returns:
+            _httpx.Client: synchronous httpx client
+        """
+
+        transport = self._setup_transport()
         client = httpx.Client(
             headers=self.headers,
             auth=self.auth,
             proxies=self._proxies,
             timeout=self._timeout,
+            transport=transport,
         )
         return client
 
     def _async_client(self) -> httpx.AsyncClient:
+        transport = self._setup_transport(async_transport=True)
         client = httpx.AsyncClient(
             headers=self.headers,
             auth=self.auth,
             proxies=self._proxies,
             timeout=self._timeout,
+            transport=transport,
         )
         return client
+
+    def _setup_transport(
+        self, async_transport: bool = False
+    ) -> Union[RetryTransport, httpx.AsyncHTTPTransport, httpx.HTTPTransport]:
+        """Setup the transport for the httpx client if retryable methods or status codes are set
+        for the server the requests will be retried according to the configuration
+
+        Args:
+            async_transport: if True return an async transport
+        """
+
+        if self.retry_status_codes or self.retryable_methods:
+            return RetryTransport(
+                wrapped_transport=httpx.AsyncHTTPTransport()
+                if async_transport
+                else httpx.HTTPTransport(),
+                max_attempts=self.max_attempts,
+                backoff_factor=self.backoff_factor,
+                retry_status_codes=self.retry_status_codes,
+                retryable_methods=self.retryable_methods,
+                jitter_ratio=self.jitter_ratio,
+                max_backoff_wait=self.max_backoff_wait,
+            )
+        else:
+            return (
+                httpx.AsyncHTTPTransport() if async_transport else httpx.HTTPTransport()
+            )
 
     def _get_oidc_token(self):
         # get a new token if it is expired or not yet set

@@ -61,6 +61,45 @@ from fhir_kindling import FhirServer
 fhir_server = FhirServer.from_env()
 ```
 
+## Advanced connection options
+
+### Headers & Proxies
+
+Additional headers can be added to the request by setting the `headers` parameter when initializing the server object.
+The `proxies` parameter can be used to set proxies for the requests.
+
+```python
+from fhir_kindling import FhirServer
+
+fhir_server = FhirServer(api_address="http://fhir.example.com/R4", headers={"X-My-Header": "my_value"},
+                         proxies={"http": "http://proxy.example.com:8080"})
+```
+
+
+### Retrying request
+
+By default all requests against a FHIR server that fail will raise an exception. This can be changed by setting either the
+`retry_status_codes` or `retryable_methods` when initializing the server object. The `retry_status_codes` is a list of
+status codes that should be retried. The `retryable_methods` is a list of HTTP methods that should be retried.
+
+```python
+from fhir_kindling import FhirServer
+
+fhir_server = FhirServer(api_address="http://fhir.example.com/R4", retry_status_codes=[500, 502, 503, 504])
+```
+
+#### Retry configuration
+
+The default retry configuration is to retry 5 times with an exponential backoff. This can be changed by setting additional configuration
+parameters when initializing the server object. Read more about backoff and jitter [here](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/).
+
+```python
+from fhir_kindling import FhirServer
+
+fhir_server = FhirServer(api_address="http://fhir.example.com/R4", retry_status_codes=[500, 502, 503, 504],
+                         retry_backoff_factor=0.5, retry_max_retries=10, max_backoff_wait=60)
+```
+
 
 
 

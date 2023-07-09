@@ -143,9 +143,19 @@ def test_resource_contains_field(server):
 
 
 def test_benchmark(server):
-    transfer_server = FhirServer(api_address=os.getenv("TRANSFER_API_URL"))
+    transfer_server = FhirServer(api_address=os.getenv("TRANSFER_SERVER_URL"))
     benchmark = ServerBenchmark(
         servers=[server, transfer_server], n_attempts=2, dataset_size=10
     )
     benchmark.run_suite(progress=False, save=False)
     # benchmark.plot()
+
+
+def test_retry_transport():
+    wrong_server_url = os.getenv("FHIR_API_URL") + "foo"
+    transfer_server = FhirServer(
+        api_address=wrong_server_url, retry_status_codes=[404], max_atttempts=3
+    )
+
+    with pytest.raises(Exception):
+        transfer_server.query("Patient").all()
