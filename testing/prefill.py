@@ -99,17 +99,22 @@ def prefill():
         covid_generator, name="covid", depends_on="base", reference_field="subject"
     )
 
-    dataset = dataset_generator.generate()
+    dataset_1 = dataset_generator.generate()
 
-    print(f"generated dataset: {dataset}")
+    print(f"generated dataset: {dataset_1}")
 
     # upload dataset to server 1
     print(f"uploading dataset to server 1 ({server_1.api_address})...")
-    dataset.upload(server_1)
+    dataset_1.upload(server_1)
 
     # upload to server 2
-    print(f"uploading dataset to server 2 ({server_2.api_address})...")
-    dataset.upload(server_2)
+    dataset_2 = dataset_generator.generate()
+
+    print(f"generated dataset: {dataset_2}")
+
+    # upload dataset to server 1
+    print(f"uploading dataset to server 1 ({server_1.api_address})...")
+    dataset_2.upload(server_1)
 
     # patients = PatientGenerator(n=count).generate()
     # print(f"generated {len(patients)} patients")
