@@ -116,45 +116,6 @@ def prefill():
     print(f"uploading dataset to server 1 ({server_1.api_address})...")
     dataset_2.upload(server_1)
 
-    # patients = PatientGenerator(n=count).generate()
-    # print(f"generated {len(patients)} patients")
-
-    # upload_bundle = Bundle.construct()
-    # upload_bundle.type = "transaction"
-    # upload_bundle.entry = []
-    # print("generating upload bundle for patients")
-    # for i, patient in enumerate(patients):
-    #     request = BundleEntryRequest(method="POST", url="/Patient")
-
-    #     entry = BundleEntry(request=request, resource=patient)
-    #     upload_bundle.entry.append(entry)
-    # upload_bundle = upload_bundle.validate(upload_bundle)
-    # json_dict = orjson.loads(upload_bundle.json(exclude_none=True))
-    # print(f"uploading server 1 ({server_1.api_address})...")
-    # r = httpx.post(server_1.api_address, json=json_dict, timeout=None)
-
-    # print("uploading conditions...")
-    # condition_entries = []
-    # for entry in r.json()["entry"]:
-    #     print(f"entry: {entry}")
-    #     reference = "/".join(entry["response"]["location"].split("/")[-4:-2])
-    #     print(f"reference: {reference}")
-    #     covid_condition = Condition(
-    #         code=COVID_CODE, subject=Reference(reference=reference)
-    #     )
-    #     request = BundleEntryRequest(method="POST", url="/Condition")
-
-    #     entry = BundleEntry(request=request, resource=covid_condition)
-    #     condition_entries.append(entry)
-
-    # upload_bundle.entry = condition_entries
-    # upload_bundle = upload_bundle.validate(upload_bundle)
-    # json_dict = orjson.loads(upload_bundle.json(exclude_none=True))
-    # print(f"uploading conditions server 1 ({server_1.api_address})...")
-    # r = httpx.post(server_1.api_address, json=json_dict, timeout=None)
-
-    # r.raise_for_status()
-
 
 if __name__ == "__main__":
     prefill()
