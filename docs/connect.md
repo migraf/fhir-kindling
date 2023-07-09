@@ -96,8 +96,13 @@ parameters when initializing the server object. Read more about backoff and jitt
 ```python
 from fhir_kindling import FhirServer
 
-fhir_server = FhirServer(api_address="http://fhir.example.com/R4", retry_status_codes=[500, 502, 503, 504],
-                         retry_backoff_factor=0.5, retry_max_retries=10, max_backoff_wait=60)
+fhir_server = FhirServer(
+    api_address="http://fhir.example.com/R4",
+    retry_status_codes=[500, 502, 503, 504],            
+    retry_backoff_factor=0.5, 
+    max_attempts=10, 
+    max_backoff_wait=60
+)
 ```
 
 

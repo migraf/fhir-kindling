@@ -2,16 +2,15 @@ import os
 import time
 
 import httpx
-import orjson
-from fhir.resources.bundle import Bundle, BundleEntry, BundleEntryRequest
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
-from fhir.resources.condition import Condition
-from fhir.resources.reference import Reference
 
 from fhir_kindling import FhirServer
-from fhir_kindling.generators import (
-    PatientGenerator,
+from fhir_kindling.generators.dataset import DatasetGenerator
+from fhir_kindling.generators.resource_generator import (
+    FieldValue,
+    GeneratorParameters,
+    ResourceGenerator,
 )
 
 
@@ -74,56 +73,83 @@ def prefill():
     time.sleep(5)
 
     count = 20
-    patients = PatientGenerator(n=count).generate()
-    print(f"generated {len(patients)} patients")
+    # create dataset generator
 
-    upload_bundle = Bundle.construct()
-    upload_bundle.type = "transaction"
-    upload_bundle.entry = []
-    print("generating upload bundle for patients")
-    for i, patient in enumerate(patients):
-        request = BundleEntryRequest(method="POST", url="/Patient")
+    dataset_generator = DatasetGenerator(n=count, name="prefill")
 
-        entry = BundleEntry(request=request, resource=patient)
-        upload_bundle.entry.append(entry)
-    upload_bundle = upload_bundle.validate(upload_bundle)
-    json_dict = orjson.loads(upload_bundle.json(exclude_none=True))
-    print(f"uploading server 1 ({server_1.api_address})...")
-    r = httpx.post(server_1.api_address, json=json_dict, timeout=None)
+    # add covid condition
+    COVID_CODE = CodeableConcept(
+        coding=[
+            Coding(
+                system="http://id.who.int/icd/release/11/mms",
+                code="RA01.0",
+                display="COVID-19, virus identified",
+            )
+        ],
+        text="COVID-19",
+    )
 
-    print("uploading conditions...")
-    condition_entries = []
-    for entry in r.json()["entry"]:
-        print(f"entry: {entry}")
-        reference = "/".join(entry["response"]["location"].split("/")[-4:-2])
-        print(f"reference: {reference}")
-        covid_condition = Condition(
-            code=COVID_CODE, subject=Reference(reference=reference)
-        )
-        request = BundleEntryRequest(method="POST", url="/Condition")
+    covid_params = GeneratorParameters(
+        field_values=[
+            FieldValue(field="code", value=COVID_CODE),
+        ]
+    )
+    covid_generator = ResourceGenerator("Condition", generator_parameters=covid_params)
+    dataset_generator.add_resource_generator(
+        covid_generator, name="covid", depends_on="base", reference_field="subject"
+    )
 
-        entry = BundleEntry(request=request, resource=covid_condition)
-        condition_entries.append(entry)
+    dataset = dataset_generator.generate()
 
-    upload_bundle.entry = condition_entries
-    upload_bundle = upload_bundle.validate(upload_bundle)
-    json_dict = orjson.loads(upload_bundle.json(exclude_none=True))
-    print(f"uploading conditions server 1 ({server_1.api_address})...")
-    r = httpx.post(server_1.api_address, json=json_dict, timeout=None)
+    print(f"generated dataset: {dataset}")
 
-    r.raise_for_status()
+    # upload dataset to server 1
+    print(f"uploading dataset to server 1 ({server_1.api_address})...")
+    dataset.upload(server_1)
 
+    # upload to server 2
+    print(f"uploading dataset to server 2 ({server_2.api_address})...")
+    dataset.upload(server_2)
 
-COVID_CODE = CodeableConcept(
-    coding=[
-        Coding(
-            system="http://id.who.int/icd/release/11/mms",
-            code="RA01.0",
-            display="COVID-19, virus identified",
-        )
-    ],
-    text="COVID-19",
-)
+    # patients = PatientGenerator(n=count).generate()
+    # print(f"generated {len(patients)} patients")
+
+    # upload_bundle = Bundle.construct()
+    # upload_bundle.type = "transaction"
+    # upload_bundle.entry = []
+    # print("generating upload bundle for patients")
+    # for i, patient in enumerate(patients):
+    #     request = BundleEntryRequest(method="POST", url="/Patient")
+
+    #     entry = BundleEntry(request=request, resource=patient)
+    #     upload_bundle.entry.append(entry)
+    # upload_bundle = upload_bundle.validate(upload_bundle)
+    # json_dict = orjson.loads(upload_bundle.json(exclude_none=True))
+    # print(f"uploading server 1 ({server_1.api_address})...")
+    # r = httpx.post(server_1.api_address, json=json_dict, timeout=None)
+
+    # print("uploading conditions...")
+    # condition_entries = []
+    # for entry in r.json()["entry"]:
+    #     print(f"entry: {entry}")
+    #     reference = "/".join(entry["response"]["location"].split("/")[-4:-2])
+    #     print(f"reference: {reference}")
+    #     covid_condition = Condition(
+    #         code=COVID_CODE, subject=Reference(reference=reference)
+    #     )
+    #     request = BundleEntryRequest(method="POST", url="/Condition")
+
+    #     entry = BundleEntry(request=request, resource=covid_condition)
+    #     condition_entries.append(entry)
+
+    # upload_bundle.entry = condition_entries
+    # upload_bundle = upload_bundle.validate(upload_bundle)
+    # json_dict = orjson.loads(upload_bundle.json(exclude_none=True))
+    # print(f"uploading conditions server 1 ({server_1.api_address})...")
+    # r = httpx.post(server_1.api_address, json=json_dict, timeout=None)
+
+    # r.raise_for_status()
+
 
 if __name__ == "__main__":
     prefill()
