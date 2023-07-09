@@ -32,12 +32,12 @@ keywords = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-"fhir.resources" = "^6.2.0"
+"fhir.resources" = "^6.0.0"
 pendulum = "*"
 tqdm = "*"
 orjson = "*"
 xmltodict = "*"
-pydantic = "*"
+pydantic = "^1.10.0"
 networkx = "*"
 httpx = "*"
 authlib = "*"
