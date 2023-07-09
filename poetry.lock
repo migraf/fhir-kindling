@@ -4003,4 +4003,4 @@ ds = ["faker", "kaleido", "matplotlib", "pandas", "plotly"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "23f58405c0a815e312e7db3eed3aadcee4043af77cbd3ff92e4985c185d5ce7e"
+content-hash = "a3e6f2036702b5fc7a8484a1aa6291d539ae6b998c866f78d630c3c9b940aac6"

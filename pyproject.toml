@@ -32,7 +32,7 @@ keywords = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-"fhir.resources" = "^6.0.0"
+"fhir.resources" = "^6.2.0"
 pendulum = "*"
 tqdm = "*"
 orjson = "*"
