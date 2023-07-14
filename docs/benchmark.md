@@ -26,9 +26,9 @@ Start the servers using docker compose
 docker compose up -d
 ```
 
-If not already installed, install the `fhir_kindling` with the ds extras
+If not already installed, install `fhir-kindling` with the ds extras
 ```bash
-pip install fhir_kindling[ds] --pre
+pip install fhir-kindling[ds]
 ```
 
 Or install using poetry (recommended) in the root directory of the repository
