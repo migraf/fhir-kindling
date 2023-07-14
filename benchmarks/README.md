@@ -15,7 +15,7 @@ docker compose up -d
 
 If not already installed, install the `fhir_kindling` with the ds extras
 ```bash
-pip install fhir_kindling[ds] --pre
+pip install fhir-kindling[ds]
 ```
 
 These servers are configured by default in the `benchmark_servers.py` script. If you want to add your own server, you can do so by adding it to the `servers` list in the script.
