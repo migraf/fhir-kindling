@@ -1,8 +1,8 @@
 import os
 import time
+from datetime import datetime
 from typing import Any, List, Tuple, Union
 
-import pendulum
 from tqdm.autonotebook import tqdm
 
 from fhir_kindling import FhirServer
@@ -17,6 +17,10 @@ from fhir_kindling.fhir_server.transfer import (
 )
 from fhir_kindling.generators import (
     PatientGenerator,
+)
+from fhir_kindling.util.date_utils import (
+    convert_to_local_datetime,
+    to_iso_string,
 )
 
 N_ATTEMPTS = 20
@@ -237,15 +241,22 @@ class ServerBenchmark:
         """Save the benchmark results and figure to file
 
         Args:
-            path: Where to save the resulst. Defaults to current working directory.
+            path: Where to save the results. Defaults to current working directory.
         """
-        self.results.save(path)
-        figure = self.plot()
+
+        datestring = to_iso_string(
+            datetime=convert_to_local_datetime(datetime.now())
+        )
+
         if not path:
-            figure_path = os.getcwd()
-            datestring = pendulum.now().to_iso8601_string().replace(":", "_")
-            figure_path = os.path.join(figure_path, f"benchmark_{datestring}.png")
-            figure.write_image(figure_path)
+            path = os.getcwd()
+        
+        bench_result_path = os.path.join(path, f"benchmark_{datestring}.json")
+        bench_figure_path = os.path.join(path, f"benchmark_{datestring}.png")
+        self.results.save(bench_result_path)
+        figure = self.plot()
+        figure_path = os.path.join(bench_figure_path, f"benchmark_{datestring}.png")
+        figure.write_image(figure_path)
 
     def _benchmark_insert(self, server: FhirServer, server_name: str):
         self._benchmark_insert_single(server, server_name)

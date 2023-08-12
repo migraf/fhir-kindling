@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fhir-kindling"
-version = "1.0.1"
+version = "1.0.2"
 description = "Python library to simplify working with FHIR servers and resources."
 authors = ["Michael Graf <michael.graf3110@gmail.com>"]
 # todo add changelog when multiple readme bug is fixed
@@ -33,7 +33,7 @@ keywords = [
 [tool.poetry.dependencies]
 python = "^3.8"
 "fhir.resources" = "^6.0.0"
-pendulum = "*"
+pendulum = "2.1.0"
 tqdm = "*"
 orjson = "*"
 xmltodict = "*"
@@ -59,6 +59,7 @@ demo = ["pandas", "plotly", "faker", "matplotlib", "notebook", "RISE", "ipywidge
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.0"
+pytest-cov = "*"
 coverage = "*"
 tox = "*"
 mkdocs = "*"
@@ -70,6 +71,16 @@ python-dotenv = "*"
 black = "*"
 ruff = "*"
 pre-commit = "*"
+poethepoet = "^0.21.1"
+
+
+[tool.poe.tasks]
+test = "pytest"
+test-lf = "pytest --lf"
+test-cov = "pytest --cov=fhir_kindling fhir_kindling/"
+cov-xml = "coverage xml"
+lint  = "ruff . --fix"
+format = "black ."
 
 
 [tool.ruff]

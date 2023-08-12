@@ -1,7 +1,5 @@
 import random
 
-import pendulum
-
 from fhir_kindling.benchmark.constants import Codes
 from fhir_kindling.generators.dataset import DatasetGenerator
 from fhir_kindling.generators.field_generator import FieldGenerator
@@ -11,6 +9,12 @@ from fhir_kindling.generators.resource_generator import (
     ResourceGenerator,
 )
 from fhir_kindling.generators.time_series_generator import TimeSeriesGenerator
+from fhir_kindling.util.date_utils import (
+    local_now,
+    local_now_string,
+    subtract,
+    to_iso_string,
+)
 
 N_BASE_RESOURCES = 100
 
@@ -33,7 +37,7 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
 
     vaccination_date_generator = FieldGenerator(
         field="occurrenceDateTime",
-        generator_function=lambda: pendulum.now().to_date_string(),
+        generator_function=local_now_string,
     )
 
     # first shot covid vaccine
@@ -101,8 +105,8 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
     emergency_encounter_period_generator = FieldGenerator(
         field="period",
         generator_function=lambda: {
-            "start": pendulum.now().subtract(days=730).to_date_string(),
-            "end": pendulum.now().subtract(days=729).to_date_string(),
+            "start": to_iso_string(subtract(local_now(), days=730)),
+            "end": to_iso_string(subtract(local_now(), days=729)),
         },
     )
 
@@ -129,8 +133,8 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
     icu_encounter_period_generator = FieldGenerator(
         field="period",
         generator_function=lambda: {
-            "start": pendulum.now().subtract(days=720).to_date_string(),
-            "end": pendulum.now().subtract(days=710).to_date_string(),
+            "start": to_iso_string(subtract(local_now(), days=720)),
+            "end": to_iso_string(subtract(local_now(), days=710)),
         },
     )
 
@@ -181,7 +185,7 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
 
     bo_time_series_generator = TimeSeriesGenerator(
         resource_generator=blood_oxygen_saturation_generator,
-        start=pendulum.now().subtract(days=720),
+        start=subtract(local_now(), days=730),
         n=10,
         time_field="effectiveDateTime",
         freq="daily",

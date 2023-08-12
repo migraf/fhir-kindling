@@ -2,13 +2,14 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Union
 
-import pendulum
 from fhir.resources.resource import Resource
-from pendulum.datetime import DateTime
 
 from fhir_kindling.generators.base import BaseGenerator
 from fhir_kindling.generators.resource_generator import ResourceGenerator
 from fhir_kindling.serde.json import json_dict
+from fhir_kindling.util.date_utils import (
+    add,
+)
 from fhir_kindling.util.resources import check_resource_contains_field
 
 
@@ -33,8 +34,8 @@ class TimeUnits(str, Enum):
 class TimeSeriesGenerator(BaseGenerator):
     resource_generator: ResourceGenerator
     time_field: str
-    start: DateTime
-    end: Union[DateTime, None]
+    start: datetime
+    end: Union[datetime, None]
     freq: Union[Frequencies, str]
     n: Union[int, None]
     period: Union[int, None]
@@ -44,8 +45,8 @@ class TimeSeriesGenerator(BaseGenerator):
         self,
         resource_generator: ResourceGenerator,
         time_field: str,
-        start: DateTime,
-        end: Union[DateTime, None] = None,
+        start: datetime,
+        end: Union[datetime, None] = None,
         freq: Union[Frequencies, str] = Frequencies.DAILY,
         n: Union[int, None] = None,
         period: Union[int, None] = None,
@@ -54,7 +55,7 @@ class TimeSeriesGenerator(BaseGenerator):
         self.generator = resource_generator
         self.time_field = time_field
         self.n = n
-        self._prev_time: Union[DateTime, None] = None
+        self._prev_time: Union[datetime, None] = None
         self.generate_ids = True
 
         self._validate_args(freq, period, period_unit, start, end, n)
@@ -87,7 +88,7 @@ class TimeSeriesGenerator(BaseGenerator):
         return resources
 
     def _generate_resource(
-        self, time: DateTime, as_dict: bool
+        self, time: datetime, as_dict: bool
     ) -> Union[Resource, dict]:
         resource = json_dict(self.generator.generate(generate_ids=self.generate_ids))
         resource[self.time_field] = time.isoformat()
@@ -113,15 +114,15 @@ class TimeSeriesGenerator(BaseGenerator):
 
         next_time = None
         if self.freq == Frequencies.HOURLY:
-            next_time = self._prev_time.add(hours=1)
+            next_time = add(self._prev_time, hours=1)
         elif self.freq == Frequencies.DAILY:
-            next_time = self._prev_time.add(days=1)
+            next_time = add(self._prev_time, days=1)
         elif self.freq == Frequencies.WEEKLY:
-            next_time = self._prev_time.add(weeks=1)
+            next_time = add(self._prev_time, weeks=1)
         elif self.freq == Frequencies.MONTHLY:
-            next_time = self._prev_time.add(months=1)
+            next_time = add(self._prev_time, weeks=4)
         elif self.freq == Frequencies.YEARLY:
-            next_time = self._prev_time.add(years=1)
+            next_time = add(self._prev_time, years=1)
         else:
             raise ValueError(f"Invalid frequency: {self.freq}")
         #
@@ -156,20 +157,14 @@ class TimeSeriesGenerator(BaseGenerator):
             self.period = period
             self.period_unit = period_unit
 
-    def _validate_time_input(self, start: DateTime, end: DateTime):
-        if isinstance(start, datetime):
-            self.start = pendulum.instance(start)
-        elif isinstance(start, DateTime):
-            self.start = start
-        else:
+    def _validate_time_input(self, start: datetime, end: datetime):
+        if not isinstance(start, datetime):
             raise ValueError(f"Invalid start datetime object: {type(start)}")
+        self.start = start
 
         if end:
-            if isinstance(end, datetime):
-                self.end = pendulum.instance(end)
-            elif isinstance(end, DateTime):
-                self.end = start
-            else:
+            if not isinstance(end, datetime):
                 raise ValueError(f"Invalid end datetime object: {type(end)}")
+            self.end = end
         else:
             self.end = None
