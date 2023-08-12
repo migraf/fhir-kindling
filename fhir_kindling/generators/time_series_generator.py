@@ -120,7 +120,7 @@ class TimeSeriesGenerator(BaseGenerator):
         elif self.freq == Frequencies.WEEKLY:
             next_time = add(self._prev_time, weeks=1)
         elif self.freq == Frequencies.MONTHLY:
-            next_time = add(self._prev_time, months=1)
+            next_time = add(self._prev_time, weeks=4)
         elif self.freq == Frequencies.YEARLY:
             next_time = add(self._prev_time, years=1)
         else:
