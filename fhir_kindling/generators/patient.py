@@ -3,7 +3,6 @@ from typing import List, Tuple
 from uuid import uuid4
 
 import pandas as pd
-import pendulum
 from faker import Faker
 from fhir.resources.humanname import HumanName
 from fhir.resources.patient import Patient
@@ -11,6 +10,10 @@ from fhir.resources.reference import Reference
 
 from fhir_kindling.generators.base import BaseGenerator
 from fhir_kindling.serde.json import json_dict
+from fhir_kindling.util.date_utils import (
+    local_now,
+    subtract,
+)
 
 
 class PatientGenerator(BaseGenerator):
@@ -103,16 +106,16 @@ class PatientGenerator(BaseGenerator):
         if not self._birthdate_range:
             if self.age_range:
                 if isinstance(self.age_range[0], int):
-                    # generate age range from 18-101 years old
-                    now = pendulum.now()
+                    # generate age range from youngest to oldest based on the given tuple of ages
+                    now = local_now()
                     youngest = pd.to_datetime(
                         (
-                            now - pendulum.duration(years=self.age_range[0])
+                            subtract(now, years=self.age_range[0])
                         ).to_date_string()
                     )
                     oldest = pd.to_datetime(
                         (
-                            now - pendulum.duration(years=self.age_range[1])
+                            subtract(now, years=self.age_range[0])
                         ).to_date_string()
                     )
                 else:
@@ -122,13 +125,11 @@ class PatientGenerator(BaseGenerator):
                     )
             else:
                 # generate age range from 18-101 years old
-                now = pendulum.now()
+                now = local_now()
                 youngest = pd.to_datetime(
-                    (now - pendulum.duration(years=18)).to_date_string()
-                )
+                    subtract(now, years=18).to_date_string())
                 oldest = pd.to_datetime(
-                    (now - pendulum.duration(years=101)).to_date_string()
-                )
+                    subtract(now, years=101).to_date_string())
 
             self._birthdate_range = (
                 pd.date_range(oldest, youngest, freq="D").strftime("%Y-%m-%d").tolist()

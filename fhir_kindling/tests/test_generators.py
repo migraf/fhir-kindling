@@ -2,7 +2,6 @@ import os
 import random
 from datetime import datetime
 
-import pendulum
 import pytest
 from dotenv import find_dotenv, load_dotenv
 from fhir.resources.codeableconcept import CodeableConcept
@@ -21,6 +20,7 @@ from fhir_kindling.generators.resource_generator import (
     ResourceGenerator,
 )
 from fhir_kindling.generators.time_series_generator import TimeSeriesGenerator
+from fhir_kindling.util.date_utils import local_now, to_iso_string
 
 
 @pytest.fixture
@@ -296,7 +296,7 @@ def test_generate_covid_dataset(vaccination_code, covid_code, server):
 
     vaccination_date_generator = FieldGenerator(
         field="occurrenceDateTime",
-        generator_function=lambda: pendulum.now().to_date_string(),
+        generator_function=lambda: to_iso_string(local_now())
     )
 
     first_vax_params = GeneratorParameters(

@@ -4,7 +4,8 @@ from time import sleep
 from typing import Iterable, Mapping, Union
 
 import httpx
-import pendulum
+
+from fhir_kindling.util.date_utils import convert_to_local_datetime, parse_datetime
 
 
 class RetryTransport(httpx.AsyncBaseTransport, httpx.BaseTransport):
@@ -72,10 +73,8 @@ class RetryTransport(httpx.AsyncBaseTransport, httpx.BaseTransport):
                 return float(retry_after_header)
 
             try:
-                # convert to local time with pendulum
-                parsed_date = pendulum.parse(
-                    retry_after_header
-                ).astimezone()  # converts to local time# converts to local time
+                # convert to local time
+                parsed_date = convert_to_local_datetime(parse_datetime(retry_after_header)) 
                 diff = (parsed_date - datetime.now().astimezone()).total_seconds()
                 if diff > 0:
                     return min(diff, self.max_backoff_wait)

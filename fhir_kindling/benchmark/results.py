@@ -2,9 +2,8 @@ import json
 import os
 from typing import Dict, List, Union
 
-import pendulum
-
 from fhir_kindling.benchmark.constants import BenchmarkOperations
+from fhir_kindling.util.date_utils import local_now, to_iso_string
 
 
 class BenchmarkResults:
@@ -40,7 +39,7 @@ class BenchmarkResults:
         if not path:
             path = os.getcwd()
 
-        date_string = pendulum.now().to_iso8601_string().replace(":", "_")
+        date_string = to_iso_string(local_now()).replace(":", "_")
         file_name = f"benchmark_results_{date_string}.json"
         file_path = os.path.join(path, file_name)
         with open(file_path, "w") as f:
