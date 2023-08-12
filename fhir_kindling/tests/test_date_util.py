@@ -1,10 +1,11 @@
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 from fhir_kindling.util.date_utils import (
+    convert_to_local_datetime,
     parse_datetime,
     to_iso_string,
-    convert_to_local_datetime,
 )
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 
 
 def test_parse_date():
@@ -41,5 +42,3 @@ def test_convert_to_local_datetime():
     assert local_date.day == utc_now.day
     assert local_date.hour == utc_now.hour
     assert local_date.minute == utc_now.minute
-
-
