@@ -7,6 +7,9 @@ from fhir.resources.resource import Resource
 from fhir_kindling.generators.base import BaseGenerator
 from fhir_kindling.generators.resource_generator import ResourceGenerator
 from fhir_kindling.serde.json import json_dict
+from fhir_kindling.util.date_utils import (
+    add,
+)
 from fhir_kindling.util.resources import check_resource_contains_field
 
 
@@ -111,15 +114,15 @@ class TimeSeriesGenerator(BaseGenerator):
 
         next_time = None
         if self.freq == Frequencies.HOURLY:
-            next_time = self._prev_time.add(hours=1)
+            next_time = add(self._prev_time, hours=1)
         elif self.freq == Frequencies.DAILY:
-            next_time = self._prev_time.add(days=1)
+            next_time = add(self._prev_time, days=1)
         elif self.freq == Frequencies.WEEKLY:
-            next_time = self._prev_time.add(weeks=1)
+            next_time = add(self._prev_time, weeks=1)
         elif self.freq == Frequencies.MONTHLY:
-            next_time = self._prev_time.add(months=1)
+            next_time = add(self._prev_time, months=1)
         elif self.freq == Frequencies.YEARLY:
-            next_time = self._prev_time.add(years=1)
+            next_time = add(self._prev_time, years=1)
         else:
             raise ValueError(f"Invalid frequency: {self.freq}")
         #

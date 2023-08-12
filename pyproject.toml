@@ -59,6 +59,7 @@ demo = ["pandas", "plotly", "faker", "matplotlib", "notebook", "RISE", "ipywidge
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.0"
+pytest-cov = "*"
 coverage = "*"
 tox = "*"
 mkdocs = "*"
@@ -70,6 +71,16 @@ python-dotenv = "*"
 black = "*"
 ruff = "*"
 pre-commit = "*"
+poethepoet = "^0.21.1"
+
+
+[tool.poe.tasks]
+test = "pytest"
+test-lf = "pytest --lf"
+test-cov = "pytest --cov=fhir_kindling fhir_kindling/"
+cov-xml = "coverage xml"
+lint  = "ruff . --fix"
+format = "black ."
 
 
 [tool.ruff]

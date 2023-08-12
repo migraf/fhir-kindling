@@ -9,7 +9,12 @@ from fhir_kindling.generators.resource_generator import (
     ResourceGenerator,
 )
 from fhir_kindling.generators.time_series_generator import TimeSeriesGenerator
-from fhir_kindling.util.date_utils import local_now, local_now_string, subtract, to_iso_string
+from fhir_kindling.util.date_utils import (
+    local_now,
+    local_now_string,
+    subtract,
+    to_iso_string,
+)
 
 N_BASE_RESOURCES = 100
 
@@ -32,7 +37,7 @@ def generate_benchmark_data(n_patients: int = N_BASE_RESOURCES) -> DatasetGenera
 
     vaccination_date_generator = FieldGenerator(
         field="occurrenceDateTime",
-        generator_function=local_now_string(),
+        generator_function=local_now_string,
     )
 
     # first shot covid vaccine

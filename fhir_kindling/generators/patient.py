@@ -109,14 +109,10 @@ class PatientGenerator(BaseGenerator):
                     # generate age range from youngest to oldest based on the given tuple of ages
                     now = local_now()
                     youngest = pd.to_datetime(
-                        (
-                            subtract(now, years=self.age_range[0])
-                        ).to_date_string()
+                        (subtract(now, years=self.age_range[0])).isoformat()
                     )
                     oldest = pd.to_datetime(
-                        (
-                            subtract(now, years=self.age_range[0])
-                        ).to_date_string()
+                        (subtract(now, years=self.age_range[0])).isoformat()
                     )
                 else:
                     raise ValueError(
@@ -126,10 +122,12 @@ class PatientGenerator(BaseGenerator):
             else:
                 # generate age range from 18-101 years old
                 now = local_now()
-                youngest = pd.to_datetime(
-                    subtract(now, years=18).to_date_string())
-                oldest = pd.to_datetime(
-                    subtract(now, years=101).to_date_string())
+                youngest = pd.to_datetime(subtract(now, years=18).isoformat())
+                oldest = pd.to_datetime(subtract(now, years=101).isoformat())
+
+            # convert to utc time
+            youngest = youngest.tz_localize(None)
+            oldest = oldest.tz_localize(None)
 
             self._birthdate_range = (
                 pd.date_range(oldest, youngest, freq="D").strftime("%Y-%m-%d").tolist()

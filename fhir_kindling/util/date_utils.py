@@ -2,6 +2,16 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 
+def format_date(date: datetime) -> str:
+    """
+    Format a datetime object as a string
+    :param date: datetime object
+    :return: string in ISO 8601 format
+    """
+
+    return date.isoformat()
+
+
 def local_now() -> datetime:
     """
     Get the current datetime in local time
