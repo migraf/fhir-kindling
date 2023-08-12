@@ -1,0 +1,1331 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../connect/">
+      
+      
+        <link rel="next" href="../add/">
+      
+      <link rel="icon" href="../assets/logo.png">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.1.21">
+    
+    
+      
+        <title>Query a server - FHIR Kindling</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.eebd395e.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ecc896b0.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#quick-start" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="FHIR Kindling" class="md-header__button md-logo" aria-label="FHIR Kindling" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            FHIR Kindling
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Query a server
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+          
+            
+            
+            
+            <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+            
+              <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+              </label>
+            
+          
+            
+            
+            
+            <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+            
+              <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+              </label>
+            
+          
+        </form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/migraf/fhir-kindling" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="FHIR Kindling" class="md-nav__button md-logo" aria-label="FHIR Kindling" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    FHIR Kindling
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/migraf/fhir-kindling" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          User Guide
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          User Guide
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../connect/" class="md-nav__link">
+        Connect to a FHIR server
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Query a server
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Query a server
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    Quick start
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-a-query" class="md-nav__link">
+    Building a query
+  </a>
+  
+    <nav class="md-nav" aria-label="Building a query">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ways-to-define-a-query" class="md-nav__link">
+    Ways to define a query
+  </a>
+  
+    <nav class="md-nav" aria-label="Ways to define a query">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#specify-base-resource" class="md-nav__link">
+    Specify base resource
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#passing-an-existing-query-string" class="md-nav__link">
+    Passing an existing query string
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#passing-fhirqueryparameters" class="md-nav__link">
+    Passing FhirQueryParameters
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-conditions-to-a-query" class="md-nav__link">
+    Add conditions to a query
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#include-related-resources" class="md-nav__link">
+    Include related resources
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filter-based-on-related-resources" class="md-nav__link">
+    Filter based on related resources
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#executing-the-query" class="md-nav__link">
+    Executing the query
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#working-with-the-response" class="md-nav__link">
+    Working with the response
+  </a>
+  
+    <nav class="md-nav" aria-label="Working with the response">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#saving-the-response-to-a-file" class="md-nav__link">
+    Saving the response to a file
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#get-resources-by-reference" class="md-nav__link">
+    Get resources by reference
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#query-api" class="md-nav__link">
+    Query API
+  </a>
+  
+    <nav class="md-nav" aria-label="Query API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fhir_kindling.fhir_server.fhir_server.FhirServer" class="md-nav__link">
+    fhir_kindling.fhir_server.fhir_server.FhirServer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fhir_kindling.fhir_server.fhir_server.FhirServer.get" class="md-nav__link">
+    get()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fhir_kindling.fhir_server.fhir_server.FhirServer.get_many" class="md-nav__link">
+    get_many()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fhir_kindling.fhir_server.fhir_server.FhirServer.query" class="md-nav__link">
+    query()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fhir_kindling.fhir_server.fhir_server.FhirServer.query_async" class="md-nav__link">
+    query_async()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../add/" class="md-nav__link">
+        Add resources
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../delete/" class="md-nav__link">
+        Delete resources
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../update/" class="md-nav__link">
+        Update resources
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../transfer/" class="md-nav__link">
+        Transfer resources
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmark/" class="md-nav__link">
+        Server Benchmarking
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ds/" class="md-nav__link">
+        Data Science
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        API docs
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    Quick start
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-a-query" class="md-nav__link">
+    Building a query
+  </a>
+  
+    <nav class="md-nav" aria-label="Building a query">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ways-to-define-a-query" class="md-nav__link">
+    Ways to define a query
+  </a>
+  
+    <nav class="md-nav" aria-label="Ways to define a query">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#specify-base-resource" class="md-nav__link">
+    Specify base resource
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#passing-an-existing-query-string" class="md-nav__link">
+    Passing an existing query string
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#passing-fhirqueryparameters" class="md-nav__link">
+    Passing FhirQueryParameters
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-conditions-to-a-query" class="md-nav__link">
+    Add conditions to a query
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#include-related-resources" class="md-nav__link">
+    Include related resources
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filter-based-on-related-resources" class="md-nav__link">
+    Filter based on related resources
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#executing-the-query" class="md-nav__link">
+    Executing the query
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#working-with-the-response" class="md-nav__link">
+    Working with the response
+  </a>
+  
+    <nav class="md-nav" aria-label="Working with the response">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#saving-the-response-to-a-file" class="md-nav__link">
+    Saving the response to a file
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#get-resources-by-reference" class="md-nav__link">
+    Get resources by reference
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#query-api" class="md-nav__link">
+    Query API
+  </a>
+  
+    <nav class="md-nav" aria-label="Query API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fhir_kindling.fhir_server.fhir_server.FhirServer" class="md-nav__link">
+    fhir_kindling.fhir_server.fhir_server.FhirServer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fhir_kindling.fhir_server.fhir_server.FhirServer.get" class="md-nav__link">
+    get()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fhir_kindling.fhir_server.fhir_server.FhirServer.get_many" class="md-nav__link">
+    get_many()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fhir_kindling.fhir_server.fhir_server.FhirServer.query" class="md-nav__link">
+    query()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fhir_kindling.fhir_server.fhir_server.FhirServer.query_async" class="md-nav__link">
+    query_async()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>Query a server</h1>
+
+<p>Querying a FHIR server a FHIR server for resources is done using the <code>query()</code> method of the <code>FhirServer</code> class.
+As with all methods of the <code>FhirServer</code> class, the <code>query()</code> method can be used in both synchronous and asynchronous (<code>query_async</code>)
+modes.</p>
+<h2 id="quick-start">Quick start</h2>
+<p>Use the <code>query()</code> (or <code>query_async()</code>) method with the name of the resource to query a FHIR server for the resources of that type.
+This will return a <code>Query</code> object which can be used to further refine the query and execute it against the server.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fhir_kindling</span> <span class="kn">import</span> <span class="n">FhirServer</span>
+
+<span class="c1"># Initialize the client and query instance with a string defining the name of the resource</span>
+<span class="n">server</span> <span class="o">=</span> <span class="n">FhirServer</span><span class="p">(</span><span class="n">api_address</span><span class="o">=</span><span class="s2">&quot;http://fhirtest.uhn.ca/R4&quot;</span><span class="p">)</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">resource</span><span class="o">=</span><span class="s2">&quot;Patient&quot;</span><span class="p">)</span>
+<span class="c1"># optionally add conditions by which to filter the requested resources</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">where</span><span class="p">({</span><span class="s2">&quot;active&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+
+<span class="c1"># Finally execute the query against the server and return the query results</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+<span class="c1"># In asynchronous mode, the query is create using query_async and executed with the `await` keyword</span>
+<span class="n">async_query</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">query_async</span><span class="p">(</span><span class="n">resource</span><span class="o">=</span><span class="s2">&quot;Patient&quot;</span><span class="p">)</span>
+<span class="n">async_results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">async_query</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="building-a-query">Building a query</h2>
+<p>This section will walk you through the different ways of creating and modifying a query using the kindling library.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Remember to use the <code>query_async()</code> method in an asynchronous context. Everything else works exactly the same.</p>
+</div>
+<h3 id="ways-to-define-a-query">Ways to define a query</h3>
+<p>Fhir kindling supports three ways of defining a query:</p>
+<ul>
+<li><a href="#specify-base-resource">iteratively building the query</a> by starting with base resource and using the 
+  <code>query(resource=xxx)</code>, <code>where()</code>, <code>include()</code> and <code>has()</code> methods</li>
+<li><a href="#passing-an-existing-query-string">passing an existing FHIR REST API query string</a> to the <code>query(query_string=xxx)</code> method as a string</li>
+<li><a href="#passing-fhirqueryparameters">passing FhirQueryParameters</a> to the <code>query(query_parameters=xxxx)</code> method</li>
+</ul>
+<h4 id="specify-base-resource">Specify base resource</h4>
+<p>The resource to be queried can be specified using the <code>resource</code> parameter of the <code>query()</code> method. This parameter can be
+either a string or a pydantic model from the <a href="https://github.com/nazrulworld/fhir.resources">fhir.resources</a> library.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fhir_kindling</span> <span class="kn">import</span> <span class="n">FhirServer</span>
+<span class="kn">from</span> <span class="nn">fhir.resources.patient</span> <span class="kn">import</span> <span class="n">Patient</span>
+
+<span class="n">server</span> <span class="o">=</span> <span class="n">FhirServer</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;http://fhirtest.uhn.ca/R4&quot;</span><span class="p">)</span>
+<span class="c1"># the resource can be specified as a string</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">resource</span><span class="o">=</span><span class="s2">&quot;Patient&quot;</span><span class="p">)</span>
+<span class="c1"># or as a pydantic model</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">resource</span><span class="o">=</span><span class="n">Patient</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="passing-an-existing-query-string">Passing an existing query string</h4>
+<p>An existing query string can be passed to the <code>query()</code> method using the <code>query_string</code> parameter. The query string should be a
+valid FHIR REST API query string i.e. <code>/Patient?birthDate=gt2000</code>. For more information on how to construct a query string, see the 
+<a href="https://www.hl7.org/fhir/search.html">FHIR search specification</a>. And will be parsed into a <code>FhirQueryParameters</code> object.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fhir_kindling</span> <span class="kn">import</span> <span class="n">FhirServer</span>
+
+<span class="n">server</span> <span class="o">=</span> <span class="n">FhirServer</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;http://fhirtest.uhn.ca/R4&quot;</span><span class="p">)</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query_string</span><span class="o">=</span><span class="s2">&quot;/Patient?birthDate=gt2000&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="passing-fhirqueryparameters">Passing FhirQueryParameters</h4>
+<p>A <code>FhirQueryParameters</code> object can be passed to the <code>query()</code> method using the <code>query_parameters</code> parameter. This object can be
+constructed manually or by using the <code>FhirQueryParameters.from_query_string()</code> method.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fhir_kindling</span> <span class="kn">import</span> <span class="n">FhirServer</span>
+<span class="kn">from</span> <span class="nn">fhir_kindling.fhir_query</span> <span class="kn">import</span> <span class="n">FhirQueryParameters</span>
+
+<span class="n">server</span> <span class="o">=</span> <span class="n">FhirServer</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;http://fhirtest.uhn.ca/R4&quot;</span><span class="p">)</span>
+<span class="c1"># construct the query parameters manually</span>
+<span class="n">query_parameters</span> <span class="o">=</span> <span class="n">FhirQueryParameters</span><span class="p">(</span><span class="n">resource</span><span class="o">=</span><span class="s2">&quot;Patient&quot;</span><span class="p">)</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query_parameters</span><span class="o">=</span><span class="n">query_parameters</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="add-conditions-to-a-query">Add conditions to a query</h3>
+<p>FHIR queries can be further refined by adding conditions to the query. These conditions are specified using the <code>where()</code> method and are 
+evaluated against the fields of the main resource. For detailed documentation on how FHIR Search works, see the 
+<a href="https://www.hl7.org/fhir/search.html">FHIR search specification</a>.
+Conditions can be added in two ways:</p>
+<ul>
+<li>Using the arguments of the <code>where()</code> method: <code>where(field=value1, operator=gt, value=value2)</code></li>
+<li>Passing <code>FieldParameter</code> as an object or a dictionary to the <code>where()</code> method: <code>where(field_param=FieldParameter(...))</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># server and query initialized the same way as in the previous examples</span>
+<span class="kn">from</span> <span class="nn">fhir_kindling.fhir_query</span> <span class="kn">import</span> <span class="n">FieldParameter</span>
+
+<span class="c1"># three ways of adding filter conditions</span>
+<span class="c1"># adding filter conditions using kv arguments</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="s2">&quot;birthDate&quot;</span><span class="p">,</span> <span class="n">operator</span><span class="o">=</span><span class="s2">&quot;gt&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;1990&quot;</span><span class="p">)</span>
+<span class="c1"># or using a FieldParameter object</span>
+<span class="n">param</span> <span class="o">=</span> <span class="n">FieldParameter</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="s2">&quot;birthDate&quot;</span><span class="p">,</span> <span class="n">operator</span><span class="o">=</span><span class="s2">&quot;gt&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;1990&quot;</span><span class="p">)</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">field_param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
+<span class="c1"># or using a dictionary</span>
+<span class="n">param_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;birthDate&quot;</span><span class="p">,</span> <span class="s2">&quot;operator&quot;</span><span class="p">:</span> <span class="s2">&quot;gt&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;1990&quot;</span><span class="p">}</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">field_param</span><span class="o">=</span><span class="n">param_dict</span><span class="p">)</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To see the current state of the query check either the <code>query_string</code> or <code>query_parameters</code> attributes of the <code>FhirQuery</code> object.</p>
+</div>
+<h3 id="include-related-resources">Include related resources</h3>
+<p>Related resources can be included in the response by using the <code>include()</code> method. For more information on how relations
+work in the FHIR specification, see the <a href="https://www.hl7.org/fhir/search.html#include">FHIR search specification</a>.</p>
+<p>Regular include i.e. include <code>Condition</code> resources related to the <code>Patient</code> resource:
+<div class="highlight"><pre><span></span><code><span class="c1"># server initialized the same way as in the previous examples</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">resource</span><span class="o">=</span><span class="s2">&quot;Patient&quot;</span><span class="p">)</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="n">resource</span><span class="o">=</span><span class="s2">&quot;Condition&quot;</span><span class="p">,</span> <span class="n">reference_param</span><span class="o">=</span><span class="s2">&quot;subject&quot;</span><span class="p">)</span>
+</code></pre></div></p>
+<p>An example for reverse include would be to include the <code>Organization</code> resource related to the <code>Patient</code> resource.
+I.e. like this:
+<div class="highlight"><pre><span></span><code><span class="c1"># server initialized the same way as in the previous examples</span>
+
+<span class="n">query</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">resource</span><span class="o">=</span><span class="s2">&quot;Patient&quot;</span><span class="p">)</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="n">resource</span><span class="o">=</span><span class="s2">&quot;Organization&quot;</span><span class="p">,</span> <span class="n">reference_param</span><span class="o">=</span><span class="s2">&quot;managingOrganization&quot;</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div></p>
+<h3 id="filter-based-on-related-resources">Filter based on related resources</h3>
+<p>To filter based on related resources, the <code>has()</code> method can be used. This could mean for example querying only for 
+patients that have a specific Condition. For more information on how this works, see the
+<a href="https://www.hl7.org/fhir/search.html#has">FHIR search specification</a>. 
+Once again this method can be used in two ways:</p>
+<ul>
+<li>Using the arguments of the <code>has()</code> method: <code>has(resource=xxx, reference_param=yyy, search_param=zzz, operator=eq, value=aaa)</code></li>
+<li>Passing <code>ReverseChainParameter</code> as an object or a dictionary to the <code>has()</code> method: <code>has(has_param=HasParameter(...))</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># server + query initialized the same way as in the previous examples</span>
+<span class="kn">from</span> <span class="nn">fhir_kindling.fhir_query</span> <span class="kn">import</span> <span class="n">ReverseChainParameter</span>
+<span class="c1"># using kv arguments</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="n">resource</span><span class="o">=</span><span class="s2">&quot;Condition&quot;</span><span class="p">,</span> <span class="n">reference_param</span><span class="o">=</span><span class="s2">&quot;subject&quot;</span><span class="p">,</span> <span class="n">search_param</span><span class="o">=</span><span class="s2">&quot;code&quot;</span><span class="p">,</span> <span class="n">operator</span><span class="o">=</span><span class="s2">&quot;eq&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;123&quot;</span><span class="p">)</span>
+
+<span class="c1"># using a ReverseChainParameter object</span>
+<span class="n">param</span> <span class="o">=</span> <span class="n">ReverseChainParameter</span><span class="p">(</span><span class="n">resource</span><span class="o">=</span><span class="s2">&quot;Condition&quot;</span><span class="p">,</span> <span class="n">reference_param</span><span class="o">=</span><span class="s2">&quot;subject&quot;</span><span class="p">,</span> <span class="n">search_param</span><span class="o">=</span><span class="s2">&quot;code&quot;</span><span class="p">,</span> <span class="n">operator</span><span class="o">=</span><span class="s2">&quot;eq&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;123&quot;</span><span class="p">)</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="n">has_param</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="executing-the-query">Executing the query</h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Remember to add the <code>await</code> keyword when the query was created using the <code>query_async()</code> method.</p>
+</div>
+<p>The query is executed against the server using on of the following methods:</p>
+<ul>
+<li><code>all()</code> - returns all resources matching the query</li>
+<li><code>first()</code> - returns the first resource matching the query</li>
+<li><code>limit(n=k)</code> - returns the first <code>k</code> resources matching the query</li>
+<li><code>count()</code> - returns the number of resources matching the query</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># query initialized the same way as in the previous examples</span>
+
+<span class="c1"># get all resources matching the query</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<span class="c1"># In asynchronous mode, the query is create using query_async and executed with the `await` keyword</span>
+<span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">query</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+<span class="c1"># limit the number of returned resources</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="c1"># get the first resource</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="c1"># count the number of resources matching the query</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="working-with-the-response">Working with the response</h2>
+<p>If the query succeeded, the response will a <code>QueryResponse</code> object. This object contains the following attributes:</p>
+<ul>
+<li><code>status_code</code> - the status code of the response</li>
+<li><code>resources</code> - a list of resources of the main resource type matching the query</li>
+<li><code>included_resources</code> - If the query was configured to include related resources, these are returned in this 
+   attribute. List of object containing included resources separated by resource type.</li>
+<li><code>total</code> - the total number of resources matching the query</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># query initialized the same way as in the previous examples</span>
+
+<span class="c1"># get all resources matching the query</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">resources</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">included_resources</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="saving-the-response-to-a-file">Saving the response to a file</h3>
+<p>The response can be saved to disk as a bundle using the <code>save()</code> method. The method accepts the following parameters:</p>
+<ul>
+<li><code>file_path</code> - the path to the file to save the response to</li>
+<li><code>output_format</code> - the format to save the response in. Can be either <code>json</code> or <code>xml</code>. Default is <code>json</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># query initialized the same way as in the previous examples</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<span class="c1"># save the response to a file</span>
+<span class="n">response</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="s2">&quot;response.json&quot;</span><span class="p">)</span>
+<span class="c1"># save the response to a file in xml format</span>
+<span class="n">response</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="s2">&quot;response.xml&quot;</span><span class="p">,</span> <span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;xml&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="get-resources-by-reference">Get resources by reference</h2>
+<p>Resources can be retrieved by their reference using the <code>get()</code> and <code>get_many()</code> methods. Given a reference or a list
+of references, the method will return the corresponding resource or list of resources.</p>
+<p>Getting a single resource:
+<div class="highlight"><pre><span></span><code><span class="c1"># server initialized the same way as in the previous examples</span>
+
+<span class="c1"># a single reference</span>
+<span class="n">patient_ref</span> <span class="o">=</span> <span class="s2">&quot;Patient/123&quot;</span>
+<span class="c1"># returns a single resource</span>
+<span class="n">patient</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">patient_ref</span><span class="p">)</span>
+
+<span class="c1"># get many resources</span>
+<span class="n">patient_refs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Patient/123&quot;</span><span class="p">,</span> <span class="s2">&quot;Patient/456&quot;</span><span class="p">]</span>
+<span class="c1"># returns a list of resources</span>
+<span class="n">patients</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">get_many</span><span class="p">(</span><span class="n">patient_refs</span><span class="p">)</span>
+</code></pre></div></p>
+<h2 id="query-api">Query API</h2>
+
+
+  <div class="doc doc-object doc-class">
+
+<a id="fhir_kindling.fhir_server.fhir_server.FhirServer"></a>
+    <div class="doc doc-contents first">
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="fhir_kindling.fhir_server.fhir_server.FhirServer.get" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reference</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Get a resource from the server specified by the given reference {ResourceType}/{id}</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>reference</code></td>
+        <td><code>Union[str, fhir.resources.reference.Reference]</code></td>
+        <td><p>reference to the resource, either a Reference object or a string of the form {ResourceType}/{id}</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>FHIRAbstractModel</code></td>
+      <td><p>the resource from the server specified by the reference</p></td>
+    </tr>
+  </tbody>
+</table>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="fhir_kindling.fhir_server.fhir_server.FhirServer.get_many" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_many</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">references</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Get a list of resources from the server specified by the given references</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>references</code></td>
+        <td><code>List[Union[str, fhir.resources.reference.Reference]]</code></td>
+        <td><p>list of references to the resources, either a Reference object or a string of the form
+<code>{ResourceType}/{id}</code></p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>List[fhir.resources.core.fhirabstractmodel.FHIRAbstractModel]</code></td>
+      <td><p>list of resources corresponding to the references</p></td>
+    </tr>
+  </tbody>
+</table>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="fhir_kindling.fhir_server.fhir_server.FhirServer.query" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">query_string</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">query_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_format</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Initialize a FHIR query against the server with the given resource, query parameters or query string</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>output_format</code></td>
+        <td><code>str</code></td>
+        <td><p>the output format to request from the fhir server (json or xml) defaults to json</p></td>
+        <td><code>&#39;json&#39;</code></td>
+      </tr>
+      <tr>
+        <td><code>query_string</code></td>
+        <td><code>str</code></td>
+        <td><p>preformatted query string to execute against the servers REST API</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>query_parameters</code></td>
+        <td><code>FhirQueryParameters</code></td>
+        <td><p>optionally pass in a query parameters object to use for the query</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>resource</code></td>
+        <td><code>Union[fhir.resources.resource.Resource, fhir.resources.core.fhirabstractmodel.FHIRAbstractModel, str]</code></td>
+        <td><p>the FHIR resource to query from the server</p></td>
+        <td><code>None</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>FhirQuerySync</code></td>
+      <td><p>a FhirQuerySync object that can be further modified with filters and conditions before being executed
+against the server</p></td>
+    </tr>
+  </tbody>
+</table>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="fhir_kindling.fhir_server.fhir_server.FhirServer.query_async" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">query_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">query_string</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">query_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_format</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Initialize an asynchronous FHIR query against the server with the given resource,
+query parameters or query string</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>output_format</code></td>
+        <td><code>str</code></td>
+        <td><p>the output format to request from the fhir server (json or xml) defaults to json</p></td>
+        <td><code>&#39;json&#39;</code></td>
+      </tr>
+      <tr>
+        <td><code>query_string</code></td>
+        <td><code>str</code></td>
+        <td><p>preformatted query string to execute against the servers REST API</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>query_parameters</code></td>
+        <td><code>FhirQueryParameters</code></td>
+        <td><p>optionally pass in a query parameters object to use for the query</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>resource</code></td>
+        <td><code>Union[fhir.resources.resource.Resource, fhir.resources.core.fhirabstractmodel.FHIRAbstractModel, str]</code></td>
+        <td><p>the FHIR resource to query from the server</p></td>
+        <td><code>None</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>FhirQueryAsync</code></td>
+      <td><p>a FhirQueryAsync object that can be further modified with filters and conditions before being executed
+against the server</p></td>
+    </tr>
+  </tbody>
+</table>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.expand", "content.code.copy"], "search": "../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.220ee61c.min.js"></script>
+      
+    
+  </body>
+</html>
