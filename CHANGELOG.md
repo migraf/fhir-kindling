@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [1.0.2] - 2023-08-12
+
+### Changed
+Removed pendulum dependency and replaced it with datetime. This should make the library more compatible with other libraries
+
+
 ## [1.0.0] - 2023-07-09
 Improve packaging with poetry to slim down library size with optional extras for datascience features. Record linkage
 for transfer functionality. Add support for Python 3.9+. Code base cleanup and refactoring.
