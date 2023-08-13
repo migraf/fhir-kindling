@@ -38,7 +38,7 @@ def run_benchmark(servers=DEFAULT_SERVERS):
         dataset_size=10,
         n_attempts=2,
     )
-    benchmark.run_suite()
+    benchmark.run_suite(save=True, progress=True)
 
 
 if __name__ == "__main__":

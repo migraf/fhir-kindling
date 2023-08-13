@@ -670,7 +670,12 @@ class FhirServer:
 
         with self._sync_client() as client:
             r = client.post(self.api_address, json=json_dict(delete_bundle))
-            r.raise_for_status()
+            try:
+                r.raise_for_status()
+            except httpx.HTTPError as e:
+                # if the bundle contains a resource that doesn't exist on the server, ignore the error
+                print(r.text)
+                raise e
 
     async def delete_async(
         self,

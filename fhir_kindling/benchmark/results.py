@@ -1,9 +1,125 @@
 import json
 import os
-from typing import Dict, List, Union
+from datetime import datetime
+from typing import Dict, List, Optional, Union
+
+from pydantic import BaseModel, Field
 
 from fhir_kindling.benchmark.constants import BenchmarkOperations
 from fhir_kindling.util.date_utils import local_now, to_iso_string
+
+
+class BenchmarkOperationResult(BaseModel):
+    """Object to store the results of a single benchmark operation."""
+
+    operation: BenchmarkOperations
+    attempts: Optional[List[float]] = None
+    success: Optional[bool] = False
+    start_time: datetime = Field(default_factory=local_now)
+    end_time: Union[datetime, None]
+    duration: Optional[float]
+    error: Optional[str] = None
+
+    class Config:
+        json_encoders = {
+            datetime: lambda v: to_iso_string(v),
+        }
+        use_enum_values = True
+
+
+class SearchQueryResult(BaseModel):
+    query_string: str
+    result_count: int
+    attempts: Optional[List[float]] = None
+
+
+class SearchOperationResult(BenchmarkOperationResult):
+    operation: BenchmarkOperations = BenchmarkOperations.SEARCH
+    query_results: List[SearchQueryResult]
+
+
+class ServerBenchmarkResult(BaseModel):
+    """Object to store the results of a single benchmark operation."""
+
+    name: Optional[str] = None
+    api_address: str
+    completed: bool = False
+    start_time: datetime = Field(default_factory=local_now)
+    end_time: Optional[datetime]
+    duration: Optional[float]
+    operations: List[BenchmarkOperations]
+    dataset_insert: Optional[BenchmarkOperationResult]
+    single_insert: Optional[BenchmarkOperationResult]
+    batch_insert: Optional[BenchmarkOperationResult]
+    single_delete: Optional[BenchmarkOperationResult]
+    batch_delete: Optional[BenchmarkOperationResult]
+    search: Optional[SearchOperationResult]
+
+    class Config:
+        json_encoders = {
+            datetime: lambda v: to_iso_string(v),
+        }
+        use_enum_values = True
+
+
+class GeneratedResourceCount(BaseModel):
+    """Object to store the results of a single benchmark operation."""
+
+    resource_type: str
+    count: int
+
+
+class DataGenerationResult(BenchmarkOperationResult):
+    operation: BenchmarkOperations = BenchmarkOperations.GENERATE
+    resources_generated: List[GeneratedResourceCount]
+    total_resources_generated: int
+
+
+class BenchmarkResult(BaseModel):
+    """Object to store the results of a full benchmark."""
+
+    start_time: datetime = Field(default_factory=local_now)
+    completed: bool = False
+    end_time: Optional[datetime]
+    duration: Optional[float]
+    data_generation_result: Optional[DataGenerationResult]
+    server_results: List[ServerBenchmarkResult]
+
+    class Config:
+        json_encoders = {
+            datetime: lambda v: to_iso_string(v),
+        }
+
+    def get_server_result(
+        self, server_name: str = None, api_address: str = None
+    ) -> Optional[ServerBenchmarkResult]:
+        """Return the server result for a given server name or api address."""
+        for server_result in self.server_results:
+            if server_result.name == server_name:
+                return server_result
+            if server_result.api_address == api_address:
+                return server_result
+        return None
+
+    def save(self, path: str = None):
+        """Save the results of the benchmark as a json file.
+
+        Args:
+            path: Directory to save the results. If None defaults to current working directory
+            figure: Whether to save the figure as a png file. Defaults to True.
+
+        Returns:
+            None
+        """
+
+        if not self.completed:
+            raise ValueError(
+                "Benchmark results not completed yet and can not be saved."
+            )
+        if not path:
+            path = os.getcwd().join(f"benchmark_results_{self.start_time}.json")
+        with open(path, "w") as f:
+            f.write(self.json(indent=2))
 
 
 class BenchmarkResults:
@@ -38,11 +154,7 @@ class BenchmarkResults:
 
         if not path:
             path = os.getcwd()
-
-        date_string = to_iso_string(local_now()).replace(":", "_")
-        file_name = f"benchmark_results_{date_string}.json"
-        file_path = os.path.join(path, file_name)
-        with open(file_path, "w") as f:
+        with open(path, "w") as f:
             json.dump(self.results, f, indent=2)
 
     @property
@@ -56,7 +168,7 @@ class BenchmarkResults:
         """
         Return the query results as a dictionary of server names to a list of queries and their execution times.
         """
-        return self.results[BenchmarkOperations.QUERY.value]
+        return self.results[BenchmarkOperations.SEARCH.value]
 
     @property
     def batch_insert(self) -> Union[List[float], Dict[str, List[float]]]:

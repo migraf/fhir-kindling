@@ -6,30 +6,38 @@ from typing import Any, List, Tuple, Union
 from tqdm.autonotebook import tqdm
 
 from fhir_kindling import FhirServer
-from fhir_kindling.benchmark.constants import BenchmarkOperations, DefaultQueries
+from fhir_kindling.benchmark.benchmark_server import run_server_benchmark
+from fhir_kindling.benchmark.constants import (
+    BATCH_SIZE,
+    N_ATTEMPTS,
+    BenchmarkOperations,
+    DefaultQueries,
+)
 from fhir_kindling.benchmark.data import generate_benchmark_data
 from fhir_kindling.benchmark.figures import plot_benchmark_results
-from fhir_kindling.benchmark.results import BenchmarkResults
+from fhir_kindling.benchmark.results import (
+    BenchmarkOperationResult,
+    BenchmarkResult,
+    DataGenerationResult,
+    GeneratedResourceCount,
+)
 from fhir_kindling.fhir_query.query_parameters import FhirQueryParameters
 from fhir_kindling.fhir_server.transfer import (
     reference_graph,
     resolve_reference_graph,
 )
-from fhir_kindling.generators import (
-    PatientGenerator,
-)
+from fhir_kindling.generators.dataset import DataSet
 from fhir_kindling.util.date_utils import (
     convert_to_local_datetime,
+    local_now,
     to_iso_string,
 )
-
-N_ATTEMPTS = 20
-BATCH_SIZE = 100
 
 
 class ServerBenchmark:
     steps: List[BenchmarkOperations]
-    queries: List[Tuple[str, Union[str, FhirQueryParameters]]]
+    queries: List[Tuple[str, FhirQueryParameters]]
+    _result: BenchmarkResult
 
     def __init__(
         self,
@@ -53,7 +61,8 @@ class ServerBenchmark:
             batch_size: The size of the batches for evaluating batch operations. Defaults to BATCH_SIZE.
             dataset_size: The number of base resources in the dataset. Defaults to 1000.
             custom_queries: A list of custom FHIR search queries to be included in the benchmark. Defaults to None.
-            steps: Select a subset of the steps to run. Defaults to None.
+            steps: Select a subset of the steps to run. If no st. E.g.
+                ["data_generation", "single_insert", "search"]
 
         Raises:
             ValueError: If the number of server names does not match the number of servers.
@@ -67,7 +76,7 @@ class ServerBenchmark:
                 "When providing server_names, must provide one for each server"
             )
         self.server_names = server_names
-        self._results = BenchmarkResults()
+        self._result = None
         self.benchmark_resources = {}
         self.n_attempts = n_attempts
         self.batch_size = batch_size
@@ -106,27 +115,15 @@ class ServerBenchmark:
         else:
             self.steps = [BenchmarkOperations(step) for step in BenchmarkOperations]
 
+        self._order_benchmark_steps()
+
         # if custom queries are provided use them, otherwise use the default queries
-        if queries:
-            self.queries = []
-            for q in queries:
-                if isinstance(q, str):
-                    self.queries.append(FhirQueryParameters.from_query_string(q))
-                elif isinstance(q, FhirQueryParameters):
-                    self.queries.append(q)
-                else:
-                    raise ValueError(
-                        "Custom_queries must be a list of fhir query strings or FhirQueryParameters objects"
-                    )
-        else:
-            self.queries = [
-                FhirQueryParameters.from_query_string(qs)
-                for qs in [dfq.value for dfq in DefaultQueries]
-            ]
+
+        self.queries = self._setup_queries(queries)
 
     def run_suite(
         self, progress: bool = True, save: bool = True, results_dir: str = None
-    ):
+    ) -> BenchmarkResult:
         """Run the the test suite configured for this benchmark instance.
         By default the steps are: Dataset generation, single resource insert, batch insert,
         dataset upload, search, update and delete.
@@ -136,10 +133,17 @@ class ServerBenchmark:
             save: Save the results to file once the suite is finished. Defaults to True.
             results_dir: Directory in which to save the results. If None defaults to current working directory.
         """
-        # generate benchmark data
+
+        benchmark_result = BenchmarkResult(server_results=[])
+
+        # generate benchmark data if the benchmark data generation step is included
         if BenchmarkOperations.GENERATE in self.steps:
-            self.dataset = self.dataset_generator.generate(display=progress)
-            # remove the generate step from the list of steps to run
+            dataset, data_generation_result = self._run_dateset_generator(
+                progress=progress
+            )
+            benchmark_result.data_generation_result = data_generation_result
+            self.dataset = dataset
+            # remove the data generation step from the steps to run
             self.steps.remove(BenchmarkOperations.GENERATE)
 
         # run the benchmark for each server
@@ -147,51 +151,54 @@ class ServerBenchmark:
             enumerate(self.servers),
             desc=f"Running bechmarks for {len(self.servers)} servers:",
             disable=not progress,
-            leave=False,
         ):
             name = None
             if self.server_names:
                 name = self.server_names[i]
-            self._benchmark_server(server, progress=progress, name=name)
+            server_result = run_server_benchmark(self, server, name, progress=progress)
+            benchmark_result.server_results.append(server_result)
 
-        self._results.set_completed(True)
+        benchmark_result.completed = True
+        benchmark_result.end_time = local_now()
+        benchmark_result.duration = (
+            benchmark_result.end_time - benchmark_result.start_time
+        ).total_seconds()
+        self._result = benchmark_result
+
         if save:
             self._save(path=results_dir)
 
-    def _benchmark_server(self, server: FhirServer, progress: bool, name: str = None):
-        """Run the benchmark suite for a single server
+        return self._result
+
+    def _run_dateset_generator(
+        self, progress: bool
+    ) -> Tuple[DataSet, DataGenerationResult]:
+        """Run the dataset generator and return the generated dataset.
 
         Args:
-            server: The server to run the benchmark against
             progress: Whether to display a progress bar
-            name: Optional name for the server. Defaults to None.
+
         """
-        # Iterate over the benchmark steps
-        for step in tqdm(
-            self.steps,
-            desc=f"Server {server.api_address}",
-            disable=not progress,
-            leave=False,
-        ):
-            server_name = name if name else server.api_address
-            if step == BenchmarkOperations.GENERATE:
-                pass
-            if step == BenchmarkOperations.INSERT:
-                self._benchmark_insert(
-                    server,
-                    server_name=server_name,
-                )
-            elif step == BenchmarkOperations.DATASET_INSERT:
-                self._upload_dataset(server, server_name=server_name)
-            elif step == BenchmarkOperations.QUERY:
-                self._benchmark_search(server, server_name=server_name)
-            elif step == BenchmarkOperations.UPDATE:
-                pass  # TODO
-            elif step == BenchmarkOperations.DELETE:
-                self._benchmark_delete(server, server_name=server_name)
+        start = local_now()
+        dataset = self.dataset_generator.generate(display=progress)
+        end = local_now()
+
+        result = DataGenerationResult(
+            start=start,
+            end=end,
+            duration=(end - start).total_seconds(),
+            success=True,
+            total_resources_generated=dataset.n_resources,
+            resources_generated=[
+                GeneratedResourceCount(resource_type=k, count=v)
+                for k, v in dataset.resource_counts.items()
+            ],
+        )
+
+        return dataset, result
 
     @property
-    def results(self):
+    def result(self) -> BenchmarkResult:
         """Retunrs the results of the benchmark if the benchmark has completed.
 
         Raises:
@@ -200,9 +207,9 @@ class ServerBenchmark:
         Returns:
             The results of the benchmark
         """
-        if not self._results.completed:
+        if self._result is None:
             raise Exception("Benchmark not completed")
-        return self._results
+        return self._result
 
     def plot(self):
         """Plot the results of the benchmark
@@ -210,16 +217,22 @@ class ServerBenchmark:
         Returns:
             The plotly figure displaying the results
         """
-        fig = plot_benchmark_results(self.results)
+        fig = plot_benchmark_results(self.result)
         return fig
 
-    def _upload_dataset(self, server: FhirServer, server_name: str):
+    def _upload_dataset(
+        self, server: FhirServer, server_name: str
+    ) -> BenchmarkOperationResult:
         """Upload the generated dataset to the server and track the time it takes.
 
         Args:
             server: The server to upload to
             server_name: Name for the server
         """
+
+        dataset_upload_result = BenchmarkOperationResult(
+            operation=BenchmarkOperations.DATASET_INSERT,
+        )
         # create temp copy of dataset
         dataset = self.dataset.copy(deep=True)
 
@@ -230,12 +243,15 @@ class ServerBenchmark:
         )
         total = time.perf_counter() - start_time
         resource_refs = [r.reference.reference for r in added_resources]
-        self._add_resource_refs_for_tracking(server=server, refs=resource_refs)
-        self._results.add_result(
-            BenchmarkOperations.DATASET_INSERT,
-            server_name,
-            total,
-        )
+        self.add_resource_refs_for_tracking(server=server, refs=resource_refs)
+
+        dataset_upload_result.success = True
+        dataset_upload_result.attempts = [total]
+        dataset_upload_result.end_time = local_now()
+        dataset_upload_result.duration = (
+            dataset_upload_result.end_time - dataset_upload_result.start_time
+        ).total_seconds()
+        return dataset_upload_result
 
     def _save(self, path: str = None):
         """Save the benchmark results and figure to file
@@ -244,71 +260,18 @@ class ServerBenchmark:
             path: Where to save the results. Defaults to current working directory.
         """
 
-        datestring = to_iso_string(
-            datetime=convert_to_local_datetime(datetime.now())
-        )
+        datestring = to_iso_string(datetime=convert_to_local_datetime(datetime.now()))
 
         if not path:
             path = os.getcwd()
-        
+
         bench_result_path = os.path.join(path, f"benchmark_{datestring}.json")
         bench_figure_path = os.path.join(path, f"benchmark_{datestring}.png")
-        self.results.save(bench_result_path)
+        self._result.save(bench_result_path)
         figure = self.plot()
-        figure_path = os.path.join(bench_figure_path, f"benchmark_{datestring}.png")
-        figure.write_image(figure_path)
+        figure.write_image(bench_figure_path)
 
-    def _benchmark_insert(self, server: FhirServer, server_name: str):
-        self._benchmark_insert_single(server, server_name)
-        self._benchmark_batch_insert(server, server_name)
-
-    def _benchmark_update(self, server: FhirServer):
-        self._benchmark_update_single(server)
-        self._benchmark_batch_update(server)
-
-    def _benchmark_insert_single(self, server: FhirServer, server_name: str):
-        resources = PatientGenerator(n=self.n_attempts).generate()
-
-        timings = []
-        added_resources = []
-        for resource in resources:
-            start_time = time.perf_counter()
-            result = server.add(resource)
-            added_resources.append(result.reference)
-            end_time = time.perf_counter()
-            total_time = end_time - start_time
-            timings.append(total_time)
-        self._results.add_result(
-            BenchmarkOperations.INSERT,
-            server_name,
-            timings,
-        )
-        # track added resources for each server
-        added_resources = self.benchmark_resources.get(server.api_address, [])
-        added_resources.extend(added_resources)
-        self.benchmark_resources[server.api_address] = added_resources
-
-    def _benchmark_batch_insert(self, server: FhirServer, server_name: str):
-        timings = []
-        # run multiple attempts for inserting resources
-        for _ in range(self.n_attempts):
-            resources = PatientGenerator(n=self.batch_size).generate()
-            start_time = time.perf_counter()
-            response = server.add_all(resources)
-            elapsed_time = time.perf_counter() - start_time
-            timings.append(elapsed_time)
-            # track the added resources
-            self._add_resource_refs_for_tracking(
-                server, [r.reference.reference for r in response.create_responses]
-            )
-
-        self._results.add_result(
-            BenchmarkOperations.BATCH_INSERT,
-            server_name,
-            timings,
-        )
-
-    def _add_resource_refs_for_tracking(
+    def add_resource_refs_for_tracking(
         self, server: FhirServer, refs: Union[List[Any], Any]
     ):
         server_resources = self.benchmark_resources.get(server.api_address, [])
@@ -330,28 +293,50 @@ class ServerBenchmark:
             query_results[query.to_query_string()] = query_attempts
 
         self._results.add_result(
-            BenchmarkOperations.QUERY,
+            BenchmarkOperations.SEARCH,
             server_name,
             results=query_results,
         )
 
-    def _benchmark_delete(self, server: FhirServer, server_name: str):
-        start_time = time.perf_counter()
-        server_resource_refs = self.benchmark_resources.get(server.api_address, [])
-        if not server_resource_refs:
-            raise Exception("No resources to delete")
-        # delete all resources
-        server.delete(references=server_resource_refs)
-        elapsed_time = time.perf_counter() - start_time
+    def _order_benchmark_steps(self):
+        """Order the benchmark steps based on the dependencies between them"""
+        # order the steps
+        # (if dataset upload is included, it must be run before search)
+        # delete operations must be run last
+        if BenchmarkOperations.DATASET_INSERT in self.steps:
+            self.steps.remove(BenchmarkOperations.DATASET_INSERT)
+            self.steps.insert(0, BenchmarkOperations.DATASET_INSERT)
 
-        self._results.add_result(
-            BenchmarkOperations.DELETE,
-            server_name,
-            elapsed_time,
-        )
+        if BenchmarkOperations.DELETE in self.steps:
+            self.steps.remove(BenchmarkOperations.DELETE)
+            self.steps.append(BenchmarkOperations.DELETE)
 
-    def _benchmark_update_single(self, server: FhirServer):
-        pass
+        if BenchmarkOperations.BATCH_DELETE in self.steps:
+            self.steps.remove(BenchmarkOperations.BATCH_DELETE)
+            self.steps.append(BenchmarkOperations.BATCH_DELETE)
 
-    def _benchmark_batch_update(self, server: FhirServer):
-        pass
+    def _setup_queries(
+        self,
+        queries: Union[List[Tuple[str, Union[str, FhirQueryParameters]]], None] = None,
+    ) -> List[Tuple[str, FhirQueryParameters]]:
+        """Setup the queries to be used for benchmarking"""
+        # if no queries are specified, generate a default set of queries
+
+        benchmark_queries = []
+        if queries:
+            for name, q in queries:
+                if isinstance(q, str):
+                    benchmark_queries.append(
+                        (name, FhirQueryParameters.from_query_string(q))
+                    )
+                elif isinstance(q, FhirQueryParameters):
+                    benchmark_queries.append((name, q))
+                else:
+                    raise ValueError(
+                        "Custom_queries must be a list of fhir query strings or FhirQueryParameters objects"
+                    )
+        else:
+            for query in DefaultQueries:
+                benchmark_queries.append((str(query), query.value))
+
+        return benchmark_queries

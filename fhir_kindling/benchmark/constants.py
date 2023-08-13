@@ -3,13 +3,16 @@ from enum import Enum
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
 
+N_ATTEMPTS = 20
+BATCH_SIZE = 100
+
 
 class BenchmarkOperations(str, Enum):
     GENERATE = "generate"
     INSERT = "insert"
     BATCH_INSERT = "batch_insert"
     DATASET_INSERT = "dataset_insert"
-    QUERY = "query"
+    SEARCH = "query"
     UPDATE = "update"
     DELETE = "delete"
     BATCH_DELETE = "batch_delete"

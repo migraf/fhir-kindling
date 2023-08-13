@@ -18,9 +18,10 @@ def plot_benchmark_results(results: "BenchmarkResults") -> go.Figure:
         rows=5,
         cols=1,
         subplot_titles=(
-            "Single Insert",
+            "Resources Overview" "Single Insert",
             "Batch Insert",
-            "Dataset Insert" "Update Single",
+            "Dataset Insert",
+            "Update Single",
             "Search",
         ),
     )
@@ -39,6 +40,17 @@ def plot_benchmark_results(results: "BenchmarkResults") -> go.Figure:
         legend_tracegroupgap=190,
     )
     return fig
+
+
+def add_resource_overview_trace(fig: go.Figure, results: "BenchmarkResults"):
+    """Generate a pie chart with the number of resources generated, queried, updated and deleted for the benchmark
+     and add it as a trace to the figure.
+
+    Args:
+        fig: Output figure
+        results: The benchmark results
+    """
+    pass
 
 
 def add_single_insert_traces(fig: go.Figure, results: "BenchmarkResults"):

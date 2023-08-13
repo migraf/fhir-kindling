@@ -119,6 +119,7 @@ class DataSet(BaseModel):
     base_resource: str
     resources: List
     resource_types: List[str]
+    resource_counts: Dict[str, int]
 
     @property
     def n_resources(self):
@@ -213,16 +214,23 @@ class DatasetGenerator:
     def _make_data_set(self, resources: List[dict]) -> DataSet:
         # construct fhir elements
         fhir_resources = []
+
+        resource_counts = dict()
         for resource in resources:
             if isinstance(resource, dict):
                 resource = construct_fhir_element(resource["resourceType"], resource)
             else:
                 fhir_resources.append(resource)
+
+            type_count = resource_counts.get(resource.resource_type, 0)
+            resource_counts[resource.resource_type] = type_count + 1
+
         dataset = DataSet(
             name=self.name,
             base_resource=self.base_resource.get_resource_type(),
             resources=fhir_resources,
             resource_types=list(self._resource_types),
+            resource_counts=resource_counts,
         )
 
         return dataset
