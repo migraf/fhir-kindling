@@ -1,5 +1,5 @@
 import os
-import time
+import uuid
 from datetime import datetime
 from typing import Any, List, Tuple, Union
 
@@ -14,18 +14,12 @@ from fhir_kindling.benchmark.constants import (
     DefaultQueries,
 )
 from fhir_kindling.benchmark.data import generate_benchmark_data
-from fhir_kindling.benchmark.figures import plot_benchmark_results
 from fhir_kindling.benchmark.results import (
-    BenchmarkOperationResult,
     BenchmarkResult,
     DataGenerationResult,
     GeneratedResourceCount,
 )
 from fhir_kindling.fhir_query.query_parameters import FhirQueryParameters
-from fhir_kindling.fhir_server.transfer import (
-    reference_graph,
-    resolve_reference_graph,
-)
 from fhir_kindling.generators.dataset import DataSet
 from fhir_kindling.util.date_utils import (
     convert_to_local_datetime,
@@ -37,7 +31,7 @@ from fhir_kindling.util.date_utils import (
 class ServerBenchmark:
     steps: List[BenchmarkOperations]
     queries: List[Tuple[str, FhirQueryParameters]]
-    _result: BenchmarkResult
+    result: BenchmarkResult
 
     def __init__(
         self,
@@ -75,8 +69,10 @@ class ServerBenchmark:
                 f"Invalid server names len={len(server_names)}, and len server = {len(servers)} "
                 "When providing server_names, must provide one for each server"
             )
+        if server_names is None:
+            server_names = [str(uuid.uuid4())[:8] for _ in servers]
         self.server_names = server_names
-        self._result = None
+        self.result = None
         self.benchmark_resources = {}
         self.n_attempts = n_attempts
         self.batch_size = batch_size
@@ -116,9 +112,6 @@ class ServerBenchmark:
             self.steps = [BenchmarkOperations(step) for step in BenchmarkOperations]
 
         self._order_benchmark_steps()
-
-        # if custom queries are provided use them, otherwise use the default queries
-
         self.queries = self._setup_queries(queries)
 
     def run_suite(
@@ -163,12 +156,12 @@ class ServerBenchmark:
         benchmark_result.duration = (
             benchmark_result.end_time - benchmark_result.start_time
         ).total_seconds()
-        self._result = benchmark_result
+        self.result = benchmark_result
 
         if save:
             self._save(path=results_dir)
 
-        return self._result
+        return self.result
 
     def _run_dateset_generator(
         self, progress: bool
@@ -184,8 +177,8 @@ class ServerBenchmark:
         end = local_now()
 
         result = DataGenerationResult(
-            start=start,
-            end=end,
+            start_time=start,
+            end_time=end,
             duration=(end - start).total_seconds(),
             success=True,
             total_resources_generated=dataset.n_resources,
@@ -197,61 +190,14 @@ class ServerBenchmark:
 
         return dataset, result
 
-    @property
-    def result(self) -> BenchmarkResult:
-        """Retunrs the results of the benchmark if the benchmark has completed.
-
-        Raises:
-            Exception: If the benchmark has not completed
-
-        Returns:
-            The results of the benchmark
-        """
-        if self._result is None:
-            raise Exception("Benchmark not completed")
-        return self._result
-
     def plot(self):
         """Plot the results of the benchmark
 
         Returns:
             The plotly figure displaying the results
         """
-        fig = plot_benchmark_results(self.result)
+        fig = self.result.plot_results()
         return fig
-
-    def _upload_dataset(
-        self, server: FhirServer, server_name: str
-    ) -> BenchmarkOperationResult:
-        """Upload the generated dataset to the server and track the time it takes.
-
-        Args:
-            server: The server to upload to
-            server_name: Name for the server
-        """
-
-        dataset_upload_result = BenchmarkOperationResult(
-            operation=BenchmarkOperations.DATASET_INSERT,
-        )
-        # create temp copy of dataset
-        dataset = self.dataset.copy(deep=True)
-
-        ds_graph = reference_graph(dataset.resources)
-        start_time = time.perf_counter()
-        added_resources, linkage = resolve_reference_graph(
-            ds_graph, server, True, False
-        )
-        total = time.perf_counter() - start_time
-        resource_refs = [r.reference.reference for r in added_resources]
-        self.add_resource_refs_for_tracking(server=server, refs=resource_refs)
-
-        dataset_upload_result.success = True
-        dataset_upload_result.attempts = [total]
-        dataset_upload_result.end_time = local_now()
-        dataset_upload_result.duration = (
-            dataset_upload_result.end_time - dataset_upload_result.start_time
-        ).total_seconds()
-        return dataset_upload_result
 
     def _save(self, path: str = None):
         """Save the benchmark results and figure to file
@@ -267,7 +213,7 @@ class ServerBenchmark:
 
         bench_result_path = os.path.join(path, f"benchmark_{datestring}.json")
         bench_figure_path = os.path.join(path, f"benchmark_{datestring}.png")
-        self._result.save(bench_result_path)
+        self.result.save(bench_result_path)
         figure = self.plot()
         figure.write_image(bench_figure_path)
 
@@ -280,23 +226,6 @@ class ServerBenchmark:
         else:
             server_resources.append(refs)
         self.benchmark_resources[server.api_address] = server_resources
-
-    def _benchmark_search(self, server: FhirServer, server_name: str):
-        query_results = {}
-        for query in self.queries:
-            query_attempts = []
-            for _ in range(self.n_attempts):
-                start_time = time.perf_counter()
-                server.query(query_parameters=query).all()
-                elapsed_time = time.perf_counter() - start_time
-                query_attempts.append(elapsed_time)
-            query_results[query.to_query_string()] = query_attempts
-
-        self._results.add_result(
-            BenchmarkOperations.SEARCH,
-            server_name,
-            results=query_results,
-        )
 
     def _order_benchmark_steps(self):
         """Order the benchmark steps based on the dependencies between them"""
@@ -337,6 +266,8 @@ class ServerBenchmark:
                     )
         else:
             for query in DefaultQueries:
-                benchmark_queries.append((str(query), query.value))
+                benchmark_queries.append(
+                    (str(query), FhirQueryParameters.from_query_string(query.value))
+                )
 
         return benchmark_queries

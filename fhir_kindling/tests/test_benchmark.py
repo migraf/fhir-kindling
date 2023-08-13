@@ -29,7 +29,10 @@ def benchmark_results(server) -> BenchmarkResult:
 def test_benchmark(server):
     transfer_server = FhirServer(api_address=os.getenv("TRANSFER_SERVER_URL"))
     benchmark = ServerBenchmark(
-        servers=[server, transfer_server], n_attempts=3, dataset_size=10
+        servers=[server, transfer_server],
+        server_names=["blaze", "hapi"],
+        n_attempts=3,
+        dataset_size=10,
     )
 
     # TODO remove
@@ -40,9 +43,18 @@ def test_benchmark(server):
     with tempfile.TemporaryDirectory() as tmpdirname:
         benchmark.run_suite(progress=False, save=True, results_dir=results_dir)
 
-        fig = benchmark.plot()
-
         # check that two files were created
         assert len(os.listdir(tmpdirname)) == 2
 
-        fig.show()
+
+def test_benchmark_results_load():
+    results_dir = "/home/micha/projects/kindling/fhir-kindling/testing/benchmark_2023-08-13T19:15:09.720210+02:00.json"
+    benchmark_result = BenchmarkResult.load(results_dir)
+    assert benchmark_result
+    print(benchmark_result)
+
+
+def test_benchmark_figures():
+    results_dir = "/home/micha/projects/kindling/fhir-kindling/testing/benchmark_2023-08-13T19:15:09.720210+02:00.json"
+    benchmark_result = BenchmarkResult.load(results_dir)
+    benchmark_result.plot_results()
