@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.0] - 2023-08-12
+Updated and improved the server benchmarking functionality.
+
+### Changed
+- benchmark results are now stored as json files with the current day in the filename in a given directory
+- Result loading and saving is now handled by the `BenchmarkResult` class
+- Plots for the individual steps each have their own method
+
+### Removed
+
+Benchmark figures are not saved automatically anymore. Use the `save_figures` method on the `BenchmarkResult` class to save them.
+
 
 ## [1.0.2] - 2023-08-12
 

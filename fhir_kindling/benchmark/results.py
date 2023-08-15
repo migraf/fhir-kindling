@@ -7,7 +7,10 @@ import plotly.graph_objects as go
 from pydantic import BaseModel, Field
 
 from fhir_kindling.benchmark.constants import BenchmarkOperations
-from fhir_kindling.benchmark.figures import plot_benchmark_results
+from fhir_kindling.benchmark.figures import (
+    plot_benchmark_results,
+    plot_benchmark_time_line,
+)
 from fhir_kindling.util.date_utils import local_now, to_iso_string
 
 
@@ -44,7 +47,7 @@ class SearchOperationResult(BenchmarkOperationResult):
 class ServerBenchmarkResult(BaseModel):
     """Object to store the results of a single benchmark operation."""
 
-    name: Optional[str] = None
+    name: str
     api_address: str
     completed: bool = False
     start_time: datetime = Field(default_factory=local_now)
@@ -56,6 +59,8 @@ class ServerBenchmarkResult(BaseModel):
     batch_insert: Optional[BenchmarkOperationResult]
     single_delete: Optional[BenchmarkOperationResult]
     batch_delete: Optional[BenchmarkOperationResult]
+    single_update: Optional[BenchmarkOperationResult]
+    batch_update: Optional[BenchmarkOperationResult]
     search: Optional[SearchOperationResult]
 
     class Config:
@@ -80,9 +85,11 @@ class ServerBenchmarkResult(BaseModel):
             self.dataset_insert,
             self.single_insert,
             self.batch_insert,
+            self.search,
+            self.single_update,
+            self.batch_update,
             self.single_delete,
             self.batch_delete,
-            self.search,
         ]
 
     def _make_time_line_entry(
@@ -103,6 +110,7 @@ class ServerBenchmarkResult(BaseModel):
             operation=operation_value,
             start=result.start_time,
             end=result.end_time,
+            duration=result.duration,
         )
 
 
@@ -162,8 +170,8 @@ class BenchmarkResult(BaseModel):
             )
         if not path:
             path = os.getcwd().join(f"benchmark_results_{self.start_time}.json")
-        with open(path, "w") as f:
-            f.write(self.json(indent=2))
+        with open(path, "wb") as f:
+            f.write(self.json(indent=2).encode("utf-8"))
 
     @classmethod
     def load(cls, path: str):
@@ -177,6 +185,16 @@ class BenchmarkResult(BaseModel):
         """
         with open(path, "r") as f:
             return cls.parse_raw(f.read())
+
+    def timeline_plot(self, show: bool = False) -> go.Figure:
+        """Plot the timeline of the benchmark."""
+        figure = plot_benchmark_time_line(self)
+        if show:
+            figure.show()
+        return figure
+
+    def dataset_plot(self, show: bool = False) -> go.Figure:
+        pass
 
     def plot_results(self, show: bool = False) -> go.Figure:
         """Plot the results of the benchmark."""

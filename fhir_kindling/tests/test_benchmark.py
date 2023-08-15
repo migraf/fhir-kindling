@@ -21,9 +21,19 @@ def server():
     return server
 
 
-def benchmark_results(server) -> BenchmarkResult:
+@pytest.fixture
+def benchmark_result(server) -> BenchmarkResult:
     transfer_server = FhirServer(api_address=os.getenv("TRANSFER_SERVER_URL"))
-    ServerBenchmark(servers=[server, transfer_server], n_attempts=2, dataset_size=10)
+    benchmark = ServerBenchmark(
+        servers=[server, transfer_server],
+        server_names=["blaze", "hapi"],
+        n_attempts=2,
+        dataset_size=10,
+    )
+
+    benchmark_result = benchmark.run_suite(progress=False, save=False)
+
+    return benchmark_result
 
 
 def test_benchmark(server):
@@ -37,24 +47,28 @@ def test_benchmark(server):
 
     # TODO remove
 
-    results_dir = "/home/micha/projects/kindling/fhir-kindling/testing"
-
     # create a temporary directory to store the benchmark results
     with tempfile.TemporaryDirectory() as tmpdirname:
-        benchmark.run_suite(progress=False, save=True, results_dir=results_dir)
+        benchmark.run_suite(progress=False, save=True, results_dir=tmpdirname)
 
         # check that two files were created
         assert len(os.listdir(tmpdirname)) == 2
 
 
-def test_benchmark_results_load():
-    results_dir = "/home/micha/projects/kindling/fhir-kindling/testing/benchmark_2023-08-13T19:15:09.720210+02:00.json"
-    benchmark_result = BenchmarkResult.load(results_dir)
-    assert benchmark_result
-    print(benchmark_result)
+def test_benchmark_result_save_load(benchmark_result):
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        benchmark_file = os.path.join(tmpdirname, "benchmark_result.json")
+        benchmark_result.save(benchmark_file)
+
+        benchmark_result_loaded = BenchmarkResult.load(benchmark_file)
+
+        assert benchmark_result == benchmark_result_loaded
+
+    benchmark_result.save("benchmark_result.json")
 
 
-def test_benchmark_figures():
-    results_dir = "/home/micha/projects/kindling/fhir-kindling/testing/benchmark_2023-08-13T19:15:09.720210+02:00.json"
-    benchmark_result = BenchmarkResult.load(results_dir)
-    benchmark_result.plot_results()
+def test_benchmark_figures(benchmark_result):
+    figure = benchmark_result.plot_results()
+    assert figure is not None
+
+    figure.show()

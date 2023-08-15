@@ -14,6 +14,7 @@ class BenchmarkOperations(str, Enum):
     DATASET_INSERT = "dataset_insert"
     SEARCH = "query"
     UPDATE = "update"
+    BATCH_UPDATE = "batch_update"
     DELETE = "delete"
     BATCH_DELETE = "batch_delete"
 

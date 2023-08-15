@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 if TYPE_CHECKING:
     from fhir_kindling.benchmark.results import BenchmarkResult
@@ -24,7 +25,6 @@ def plot_benchmark_time_line(results: "BenchmarkResult") -> go.Figure:
         timeline_df = pd.concat(
             [timeline_df, server_result.to_timeline_df()], ignore_index=True
         )
-    print(timeline_df)
 
     fig = px.timeline(
         timeline_df,
@@ -32,7 +32,23 @@ def plot_benchmark_time_line(results: "BenchmarkResult") -> go.Figure:
         x_end="end",
         y="actor",
         color="actor",
+        hover_name="operation",
+        hover_data={
+            "duration": ":.2f",
+        },
     )
+
+    # update the layout
+    fig.update_layout(
+        title_text="Benchmark Timeline",
+        height=300,
+        width=1000,
+        # center title
+        title_x=0.5,
+    )
+
+    # dont show y axis labels
+    fig.update_yaxes(showticklabels=False, visible=False)
 
     return fig
 
@@ -40,6 +56,29 @@ def plot_benchmark_time_line(results: "BenchmarkResult") -> go.Figure:
 def plot_benchmark_results(results: "BenchmarkResult") -> go.Figure:
     timeline = plot_benchmark_time_line(results)
     timeline.show()
+
+    figure = setup_subplots(results)
+
+    for trace in timeline.data:
+        figure.add_trace(timeline.data[0], row=1, col=1)
+    return figure
+
+
+def setup_subplots(results: "BenchmarkResult") -> go.Figure:
+    fig = make_subplots(
+        rows=5,
+        cols=1,
+        subplot_titles=(
+            "Resources Overview",
+            "Single Insert",
+            "Batch Insert",
+            "Dataset Insert",
+            "Update Single",
+            "Search",
+        ),
+    )
+
+    return fig
 
 
 # def plot_benchmark_results(results: "BenchmarkResult") -> go.Figure:

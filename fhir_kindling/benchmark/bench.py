@@ -145,10 +145,9 @@ class ServerBenchmark:
             desc=f"Running bechmarks for {len(self.servers)} servers:",
             disable=not progress,
         ):
-            name = None
-            if self.server_names:
-                name = self.server_names[i]
-            server_result = run_server_benchmark(self, server, name, progress=progress)
+            server_result = run_server_benchmark(
+                self, server, self.server_names[i], progress=progress
+            )
             benchmark_result.server_results.append(server_result)
 
         benchmark_result.completed = True

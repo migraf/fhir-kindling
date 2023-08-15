@@ -27,7 +27,7 @@ def run_server_benchmark(
     progress: bool = False,
 ) -> ServerBenchmarkResult:
     server_result = ServerBenchmarkResult(
-        server_name=server_name,
+        name=server_name,
         api_address=server.api_address,
         completed=False,
         operations=benchmark.steps,
@@ -46,7 +46,9 @@ def run_server_benchmark(
         elif step == BenchmarkOperations.SEARCH:
             server_result.search = benchmark_search(benchmark, server)
         elif step == BenchmarkOperations.UPDATE:
-            pass  # TODO
+            server_result.single_update = _benchmark_update_single(benchmark, server)
+        elif step == BenchmarkOperations.BATCH_UPDATE:
+            server_result.batch_update = _benchmark_update_batch(benchmark, server)
         elif step == BenchmarkOperations.DELETE:
             server_result.single_delete = _benchmark_delete_single(benchmark, server)
         elif step == BenchmarkOperations.BATCH_DELETE:
@@ -196,6 +198,82 @@ def _benchmark_delete_batch(
     )
 
     return delete_batch_result
+
+
+def _benchmark_update_single(
+    benchmark: "ServerBenchmark",
+    server: FhirServer,
+) -> BenchmarkOperationResult:
+    update_single_result = BenchmarkOperationResult(
+        operation=BenchmarkOperations.UPDATE,
+    )
+
+    generator = PatientGenerator(n=benchmark.n_attempts)
+    timings = []
+    generated_resources = []
+    for resource in generator.generate():
+        server_resource = server.add(resource).resource
+        generated_resources.append(server_resource.relative_path)
+        # update the resource
+        server_resource.birthDate = "2023-01-01"
+        start_time = time.perf_counter()
+        server.update([resource])
+        elapsed_time = time.perf_counter() - start_time
+        timings.append(elapsed_time)
+
+    benchmark.add_resource_refs_for_tracking(
+        server,
+        generated_resources,
+    )
+
+    # update the results with timings
+    _update_operation_result_on_finish(
+        operation_result=update_single_result,
+        attempts=timings,
+    )
+
+    return update_single_result
+
+
+def _benchmark_update_batch(
+    benchmark: "ServerBenchmark",
+    server: FhirServer,
+) -> BenchmarkOperationResult:
+    update_batch_result = BenchmarkOperationResult(
+        operation=BenchmarkOperations.BATCH_UPDATE,
+    )
+
+    generator = PatientGenerator(n=benchmark.batch_size)
+
+    timings = []
+    for _ in range(benchmark.n_attempts):
+        # create resources to update
+        resources = generator.generate()
+        create_response = server.add_all(resources)
+        server_resource_refs = [
+            r.reference.reference for r in create_response.create_responses
+        ]
+        benchmark.add_resource_refs_for_tracking(
+            server,
+            server_resource_refs,
+        )
+        updated_resources = []
+        for resource in create_response.resources:
+            resource.birthDate = "2023-01-01"
+            updated_resources.append(resource)
+
+        start_time = time.perf_counter()
+        server.update(updated_resources)
+        elapsed_time = time.perf_counter() - start_time
+        timings.append(elapsed_time)
+
+    # update the results with timings
+    _update_operation_result_on_finish(
+        operation_result=update_batch_result,
+        attempts=timings,
+    )
+
+    return update_batch_result
 
 
 def _upload_dataset(
