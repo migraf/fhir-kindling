@@ -1,0 +1,350 @@
+{
+  "start_time": "2023-08-14T09:00:57.148646+02:00",
+  "completed": true,
+  "end_time": "2023-08-14T09:01:13.631694+02:00",
+  "duration": 16.483048,
+  "data_generation_result": {
+    "operation": "generate",
+    "attempts": null,
+    "success": true,
+    "start_time": "2023-08-14T09:00:57.148654+02:00",
+    "end_time": "2023-08-14T09:00:57.293451+02:00",
+    "duration": 0.144797,
+    "error": null,
+    "resources_generated": [
+      {
+        "resource_type": "Patient",
+        "count": 10
+      },
+      {
+        "resource_type": "Encounter",
+        "count": 20
+      },
+      {
+        "resource_type": "Immunization",
+        "count": 16
+      },
+      {
+        "resource_type": "Observation",
+        "count": 130
+      },
+      {
+        "resource_type": "Condition",
+        "count": 10
+      }
+    ],
+    "total_resources_generated": 186
+  },
+  "server_results": [
+    {
+      "name": "blaze",
+      "api_address": "http://127.0.0.1:9090/fhir",
+      "completed": true,
+      "start_time": "2023-08-14T09:00:57.293613+02:00",
+      "end_time": "2023-08-14T09:01:04.270113+02:00",
+      "duration": 6.9765,
+      "operations": [
+        "dataset_insert",
+        "insert",
+        "batch_insert",
+        "query",
+        "update",
+        "batch_update",
+        "delete",
+        "batch_delete"
+      ],
+      "dataset_insert": {
+        "operation": "dataset_insert",
+        "attempts": [
+          0.308731003999128
+        ],
+        "success": true,
+        "start_time": "2023-08-14T09:00:57.293670+02:00",
+        "end_time": "2023-08-14T09:00:57.629955+02:00",
+        "duration": 0.336285,
+        "error": null
+      },
+      "single_insert": {
+        "operation": "insert",
+        "attempts": [
+          0.053687514999182895,
+          0.05383595600142144
+        ],
+        "success": true,
+        "start_time": "2023-08-14T09:00:57.630663+02:00",
+        "end_time": "2023-08-14T09:00:57.760289+02:00",
+        "duration": 0.129626,
+        "error": null
+      },
+      "batch_insert": {
+        "operation": "batch_insert",
+        "attempts": [
+          0.08475944900419563,
+          0.08504179499868769
+        ],
+        "success": true,
+        "start_time": "2023-08-14T09:00:57.760332+02:00",
+        "end_time": "2023-08-14T09:00:58.001800+02:00",
+        "duration": 0.241468,
+        "error": null
+      },
+      "single_delete": {
+        "operation": "delete",
+        "attempts": [
+          0.054993853002088144,
+          0.05356560999643989
+        ],
+        "success": true,
+        "start_time": "2023-08-14T09:01:04.161486+02:00",
+        "end_time": "2023-08-14T09:01:04.270075+02:00",
+        "duration": 0.108589,
+        "error": null
+      },
+      "batch_delete": null,
+      "single_update": {
+        "operation": "update",
+        "attempts": [
+          0.05439590400055749,
+          0.05812887199863326
+        ],
+        "success": true,
+        "start_time": "2023-08-14T09:01:03.515476+02:00",
+        "end_time": "2023-08-14T09:01:03.757465+02:00",
+        "duration": 0.241989,
+        "error": null
+      },
+      "batch_update": {
+        "operation": "batch_update",
+        "attempts": [
+          0.08349273200292373,
+          0.08879720800177893
+        ],
+        "success": true,
+        "start_time": "2023-08-14T09:01:03.757904+02:00",
+        "end_time": "2023-08-14T09:01:04.160615+02:00",
+        "duration": 0.402711,
+        "error": null
+      },
+      "search": {
+        "operation": "query",
+        "attempts": null,
+        "success": true,
+        "start_time": "2023-08-14T09:00:58.002262+02:00",
+        "end_time": "2023-08-14T09:01:03.515440+02:00",
+        "duration": 5.513178,
+        "error": null,
+        "query_results": [
+          {
+            "name": "DefaultQueries.PATIENTS",
+            "query_string": "/Patient?",
+            "result_count": 5136,
+            "attempts": [
+              0.9695610839989968,
+              0.8996287359987036
+            ]
+          },
+          {
+            "name": "DefaultQueries.PATIENT_BY_BIRTHDATE",
+            "query_string": "/Patient?birthdate=lt2020&birthdate=gt1970",
+            "result_count": 1143,
+            "attempts": [
+              0.2780124830023851,
+              0.2349745250030537
+            ]
+          },
+          {
+            "name": "DefaultQueries.PATIENTS_WITH_OBSERVATIONS",
+            "query_string": "/Patient?_revinclude=Observation:subject",
+            "result_count": 6236,
+            "attempts": [
+              1.2759114359942032,
+              1.294573250997928
+            ]
+          },
+          {
+            "name": "DefaultQueries.PATIENTS_WITH_EMERGENCY_ENCOUNTER",
+            "query_string": "/Patient?_revinclude=Immunization:patient&_has:Encounter:subject:class=EMER",
+            "result_count": 286,
+            "attempts": [
+              0.12825636000343366,
+              0.10402942799555603
+            ]
+          },
+          {
+            "name": "DefaultQueries.IMMUNIZATION_FOR_COVID_PATIENTS",
+            "query_string": "/Patient?_revinclude=Immunization:patient&_has:Condition:subject:code=RA01.0",
+            "result_count": 286,
+            "attempts": [
+              0.10830582500057062,
+              0.10684081700310344
+            ]
+          },
+          {
+            "name": "DefaultQueries.PATIENTS_BY_OBSERVATION_VALUE",
+            "query_string": "/Observation?component-code-value-quantity=http://loinc.org|9279-1$lt20&_include=Observation:subject",
+            "result_count": 0,
+            "attempts": [
+              0.05452193599921884,
+              0.0583128209982533
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "hapi",
+      "api_address": "http://127.0.0.1:9091/fhir",
+      "completed": true,
+      "start_time": "2023-08-14T09:01:04.270146+02:00",
+      "end_time": "2023-08-14T09:01:13.631681+02:00",
+      "duration": 9.361535,
+      "operations": [
+        "dataset_insert",
+        "insert",
+        "batch_insert",
+        "query",
+        "update",
+        "batch_update",
+        "delete",
+        "batch_delete"
+      ],
+      "dataset_insert": {
+        "operation": "dataset_insert",
+        "attempts": [
+          0.7714659849953023
+        ],
+        "success": true,
+        "start_time": "2023-08-14T09:01:04.270250+02:00",
+        "end_time": "2023-08-14T09:01:05.072821+02:00",
+        "duration": 0.802571,
+        "error": null
+      },
+      "single_insert": {
+        "operation": "insert",
+        "attempts": [
+          0.10018810499605024,
+          0.07145666599535616
+        ],
+        "success": true,
+        "start_time": "2023-08-14T09:01:05.073654+02:00",
+        "end_time": "2023-08-14T09:01:05.268263+02:00",
+        "duration": 0.194609,
+        "error": null
+      },
+      "batch_insert": {
+        "operation": "batch_insert",
+        "attempts": [
+          0.22639078099746257,
+          0.25320053799805464
+        ],
+        "success": true,
+        "start_time": "2023-08-14T09:01:05.268308+02:00",
+        "end_time": "2023-08-14T09:01:05.809257+02:00",
+        "duration": 0.540949,
+        "error": null
+      },
+      "single_delete": {
+        "operation": "delete",
+        "attempts": [
+          0.07459791000292171,
+          0.10453360300016357
+        ],
+        "success": true,
+        "start_time": "2023-08-14T09:01:13.452494+02:00",
+        "end_time": "2023-08-14T09:01:13.631643+02:00",
+        "duration": 0.179149,
+        "error": null
+      },
+      "batch_delete": null,
+      "single_update": {
+        "operation": "update",
+        "attempts": [
+          0.0795535569995991,
+          0.08171006200427655
+        ],
+        "success": true,
+        "start_time": "2023-08-14T09:01:11.998947+02:00",
+        "end_time": "2023-08-14T09:01:12.331871+02:00",
+        "duration": 0.332924,
+        "error": null
+      },
+      "batch_update": {
+        "operation": "batch_update",
+        "attempts": [
+          0.27022189799754415,
+          0.26353119400300784
+        ],
+        "success": true,
+        "start_time": "2023-08-14T09:01:12.332387+02:00",
+        "end_time": "2023-08-14T09:01:13.451826+02:00",
+        "duration": 1.119439,
+        "error": null
+      },
+      "search": {
+        "operation": "query",
+        "attempts": null,
+        "success": true,
+        "start_time": "2023-08-14T09:01:05.809811+02:00",
+        "end_time": "2023-08-14T09:01:11.998914+02:00",
+        "duration": 6.189103,
+        "error": null,
+        "query_results": [
+          {
+            "name": "DefaultQueries.PATIENTS",
+            "query_string": "/Patient?",
+            "result_count": 4624,
+            "attempts": [
+              1.062205180998717,
+              1.0377164100063965
+            ]
+          },
+          {
+            "name": "DefaultQueries.PATIENT_BY_BIRTHDATE",
+            "query_string": "/Patient?birthdate=lt2020&birthdate=gt1970",
+            "result_count": 1063,
+            "attempts": [
+              0.33981565100111766,
+              0.25881791199935833
+            ]
+          },
+          {
+            "name": "DefaultQueries.PATIENTS_WITH_OBSERVATIONS",
+            "query_string": "/Patient?_revinclude=Observation:subject",
+            "result_count": 5624,
+            "attempts": [
+              1.4121078300013323,
+              1.498595918994397
+            ]
+          },
+          {
+            "name": "DefaultQueries.PATIENTS_WITH_EMERGENCY_ENCOUNTER",
+            "query_string": "/Patient?_revinclude=Immunization:patient&_has:Encounter:subject:class=EMER",
+            "result_count": 260,
+            "attempts": [
+              0.12986057400121354,
+              0.11447852000128478
+            ]
+          },
+          {
+            "name": "DefaultQueries.IMMUNIZATION_FOR_COVID_PATIENTS",
+            "query_string": "/Patient?_revinclude=Immunization:patient&_has:Condition:subject:code=RA01.0",
+            "result_count": 260,
+            "attempts": [
+              0.1136317480049911,
+              0.11427947100310121
+            ]
+          },
+          {
+            "name": "DefaultQueries.PATIENTS_BY_OBSERVATION_VALUE",
+            "query_string": "/Observation?component-code-value-quantity=http://loinc.org|9279-1$lt20&_include=Observation:subject",
+            "result_count": 0,
+            "attempts": [
+              0.0539318800001638,
+              0.05352422400028445
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

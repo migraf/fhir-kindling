@@ -16,7 +16,10 @@ from pydantic import BaseModel
 from tqdm.autonotebook import tqdm
 
 from fhir_kindling.fhir_server import FhirServer
-from fhir_kindling.fhir_server.transfer import reference_graph, resolve_reference_graph
+from fhir_kindling.fhir_server.ops.transfer import (
+    reference_graph,
+    resolve_reference_graph,
+)
 from fhir_kindling.generators.base import BaseGenerator
 from fhir_kindling.generators.patient import PatientGenerator
 from fhir_kindling.generators.resource_generator import ResourceGenerator

@@ -8,8 +8,12 @@ from pydantic import BaseModel, Field
 
 from fhir_kindling.benchmark.constants import BenchmarkOperations
 from fhir_kindling.benchmark.figures import (
-    plot_benchmark_results,
+    plot_benchmark_dataset,
+    plot_benchmark_delete,
+    plot_benchmark_insert,
+    plot_benchmark_search,
     plot_benchmark_time_line,
+    plot_benchmark_update,
 )
 from fhir_kindling.util.date_utils import local_now, to_iso_string
 
@@ -79,6 +83,15 @@ class ServerBenchmarkResult(BaseModel):
 
         return pd.DataFrame(timeline_list)
 
+    def get_operation(
+        self, operation: BenchmarkOperations
+    ) -> Optional[BenchmarkOperationResult]:
+        """Return the operation result for a given operation."""
+        for operation_result in self.operation_list:
+            if operation_result.operation == operation:
+                return operation_result
+        return None
+
     @property
     def operation_list(self) -> List[BenchmarkOperationResult]:
         return [
@@ -134,6 +147,7 @@ class BenchmarkResult(BaseModel):
     completed: bool = False
     end_time: Optional[datetime]
     duration: Optional[float]
+    operations: List[BenchmarkOperations]
     data_generation_result: Optional[DataGenerationResult]
     server_results: List[ServerBenchmarkResult]
 
@@ -153,6 +167,15 @@ class BenchmarkResult(BaseModel):
                 return server_result
         return None
 
+    def get_operation_for_server(
+        self, server_name: str, operation: BenchmarkOperations
+    ) -> Optional[BenchmarkOperationResult]:
+        """Return the operation result for a given server name and operation."""
+        server_result = self.get_server_result(server_name=server_name)
+        if server_result:
+            return server_result.get_operation(operation)
+        return None
+
     def save(self, path: str = None):
         """Save the results of the benchmark as a json file.
 
@@ -169,9 +192,43 @@ class BenchmarkResult(BaseModel):
                 "Benchmark results not completed yet and can not be saved."
             )
         if not path:
-            path = os.getcwd().join(f"benchmark_results_{self.start_time}.json")
+            date_string = self.start_time.strftime("%Y-%m-%d_%H-%M-%S")
+            path = os.getcwd().join(f"benchmark_results_{date_string}.json")
         with open(path, "wb") as f:
             f.write(self.json(indent=2).encode("utf-8"))
+
+    def save_plots(
+        self, storage_dir: str = None, return_storage_dir: bool = False
+    ) -> Union[str, None]:
+        """Save the available plots of the benchmark as png files.
+
+        Args:
+            storage_dir: Directory to save the results. If None defaults to current working directory
+            return_storage_dir: Whether to return the storage directory for the images
+
+        Returns:
+            None
+        """
+
+        dir_date_string = self.start_time.strftime("%Y-%m-%d_%H-%M-%S")
+        dir_name = f"benchmark_figures_{dir_date_string}"
+        if not storage_dir:
+            plot_dir = os.getcwd().join(dir_name)
+        else:
+            if not os.path.exists(storage_dir):
+                raise ValueError(f"Path {dir} does not exist.")
+            plot_dir = os.path.join(storage_dir, dir_name)
+            os.mkdir(plot_dir)
+
+        if not self.completed:
+            raise ValueError(
+                "Benchmark results not completed yet and can not be saved."
+            )
+
+        self._save_plots(plot_dir)
+
+        if return_storage_dir:
+            return plot_dir
 
     @classmethod
     def load(cls, path: str):
@@ -194,11 +251,56 @@ class BenchmarkResult(BaseModel):
         return figure
 
     def dataset_plot(self, show: bool = False) -> go.Figure:
-        pass
-
-    def plot_results(self, show: bool = False) -> go.Figure:
-        """Plot the results of the benchmark."""
-        figure = plot_benchmark_results(self)
+        figure = plot_benchmark_dataset(self)
         if show:
             figure.show()
         return figure
+
+    def insert_plot(self, show: bool = False) -> go.Figure:
+        figure = plot_benchmark_insert(self)
+        if show:
+            figure.show()
+        return figure
+
+    def update_plot(self, show: bool = False) -> go.Figure:
+        figure = plot_benchmark_update(self)
+        if show:
+            figure.show()
+        return figure
+
+    def delete_plot(self, show: bool = False) -> go.Figure:
+        figure = plot_benchmark_delete(self)
+        if show:
+            figure.show()
+        return figure
+
+    def search_plot(self, show: bool = False) -> go.Figure:
+        figure = plot_benchmark_search(self)
+        if show:
+            figure.show()
+        return figure
+
+    def _save_plots(self, plot_dir: os.PathLike):
+        if not os.path.exists(plot_dir):
+            os.mkdir(plot_dir)
+
+        ops = set(self.operations)
+        for op in ops:
+            if op == BenchmarkOperations.INSERT:
+                insert_figure = self.insert_plot()
+                insert_figure.write_image(os.path.join(plot_dir, "insert.png"))
+            elif op == BenchmarkOperations.UPDATE:
+                update_figure = self.update_plot()
+                update_figure.write_image(os.path.join(plot_dir, "update.png"))
+            elif op == BenchmarkOperations.DELETE:
+                delete_figure = self.delete_plot()
+                delete_figure.write_image(os.path.join(plot_dir, "delete.png"))
+            elif op == BenchmarkOperations.SEARCH:
+                search_figure = self.search_plot()
+                search_figure.write_image(os.path.join(plot_dir, "search.png"))
+            elif op == BenchmarkOperations.GENERATE:
+                generate_figure = self.dataset_plot()
+                generate_figure.write_image(os.path.join(plot_dir, "dataset.png"))
+
+        timeline_figure = self.timeline_plot()
+        timeline_figure.write_image(os.path.join(plot_dir, "timeline.png"))

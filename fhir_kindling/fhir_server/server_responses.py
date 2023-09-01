@@ -1,6 +1,9 @@
 import json
-from typing import List
+from collections import OrderedDict
+from dataclasses import dataclass
+from typing import List, Union
 
+import fhir.resources
 from fhir.resources.bundle import Bundle
 from fhir.resources.reference import Reference
 from fhir.resources.resource import Resource
@@ -30,7 +33,14 @@ class ResourceCreateResponse(CreateResponse):
     reference: Reference = None
 
     def __init__(self, server_response_dict: dict, resource: Resource):
-        self.resource = resource
+        if isinstance(resource, OrderedDict):
+            # intialize a new resource from the resource dict
+            self.resource = fhir.resources.construct_fhir_element(
+                resource["resourceType"], resource
+            )
+        else:
+            self.resource = resource
+
         resource_id, location, version = self._process_location_header(
             server_response_dict
         )
@@ -114,3 +124,13 @@ class UpdateResponse:
     # TODO: implement
     def __init__(self, server_response: Response):
         pass
+
+
+@dataclass
+class DeleteResponse:
+    server: str
+    resource_ids: List[str]
+
+    def add_resource_ids(self, resources: List[Union[Resource, dict]]):
+        resource_ids = [r["id"] if isinstance(r, dict) else r.id for r in resources]
+        self.resource_ids.extend(resource_ids)

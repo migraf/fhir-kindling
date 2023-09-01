@@ -18,22 +18,25 @@ from tqdm import tqdm
 from fhir_kindling.fhir_query import FhirQueryAsync, FhirQuerySync
 from fhir_kindling.fhir_query.query_parameters import FhirQueryParameters
 from fhir_kindling.fhir_server.auth import BearerAuth, auth_info_from_env
-from fhir_kindling.fhir_server.server_responses import (
-    BundleCreateResponse,
-    ResourceCreateResponse,
-    TransferResponse,
-)
-from fhir_kindling.fhir_server.summary import (
+from fhir_kindling.fhir_server.ops.delete import delete as delete_method
+from fhir_kindling.fhir_server.ops.delete import delete_async as delete_method_async
+from fhir_kindling.fhir_server.ops.summary import (
     ServerSummary,
     create_server_summary,
     create_server_summary_async,
+)
+from fhir_kindling.fhir_server.ops.transfer import transfer
+from fhir_kindling.fhir_server.server_responses import (
+    BundleCreateResponse,
+    DeleteResponse,
+    ResourceCreateResponse,
+    TransferResponse,
 )
 from fhir_kindling.fhir_server.transactions import (
     TransactionMethod,
     TransactionType,
     make_transaction_bundle,
 )
-from fhir_kindling.fhir_server.transfer import transfer
 from fhir_kindling.serde.json import json_dict
 from fhir_kindling.util.retry_transport import RetryTransport
 
@@ -409,9 +412,9 @@ class FhirServer:
 
         async with self._async_client() as client:
             response = await client.post(
-                self.api_address, json=get_many_transaction.dict(exclude_none=True)
+                self.api_address, json=json_dict(get_many_transaction)
             )
-
+        print(response.json())
         # construct the list of resources from the server response
         resources = [
             construct_fhir_element(entry["resource"]["resourceType"], entry["resource"])
@@ -644,7 +647,7 @@ class FhirServer:
         resources: List[Union[FHIRResourceModel, dict]] = None,
         references: List[Union[str, Reference]] = None,
         query: FhirQuerySync = None,
-    ) -> None:
+    ) -> DeleteResponse:
         """
         Delete resources from the server. Either resources, references or a query must be specified.
         Args:
@@ -656,33 +659,17 @@ class FhirServer:
             None
         """
 
-        self._validate_delete_args(query, references, resources)
-
-        # if a query is specified, get the resources to delete
-        if query:
-            resp = query.all()
-            resources = resp.resource_list
-        delete_bundle = make_transaction_bundle(
-            method=TransactionMethod.DELETE,
-            resources=resources,
-            references=references,
+        response = delete_method(
+            server=self, resources=resources, references=references, query=query
         )
-
-        with self._sync_client() as client:
-            r = client.post(self.api_address, json=json_dict(delete_bundle))
-            try:
-                r.raise_for_status()
-            except httpx.HTTPError as e:
-                # if the bundle contains a resource that doesn't exist on the server, ignore the error
-                print(r.text)
-                raise e
+        return response
 
     async def delete_async(
         self,
         resources: List[Union[FHIRResourceModel, dict]] = None,
         references: List[Union[str, Reference]] = None,
         query: FhirQueryAsync = None,
-    ) -> None:
+    ) -> DeleteResponse:
         """
         Asynchronously delete resources from the server. Either resources, references or a query must be specified.
         Args:
@@ -694,21 +681,10 @@ class FhirServer:
             None
 
         """
-        self._validate_delete_args(query, references, resources)
-        # if a query is specified, get the resources to delete
-        if query:
-            resp = await query.all()
-            resources = resp.resource_list
-
-        delete_bundle = make_transaction_bundle(
-            method=TransactionMethod.DELETE,
-            resources=resources,
-            references=references,
+        response = await delete_method_async(
+            server=self, resources=resources, references=references, query=query
         )
-
-        async with self._async_client() as client:
-            r = await client.post(self.api_address, json=json_dict(delete_bundle))
-            r.raise_for_status()
+        return response
 
     def transfer(
         self,

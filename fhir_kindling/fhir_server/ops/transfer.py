@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, OrderedDict, Tuple, Union
+from typing import TYPE_CHECKING, List, Tuple, Union
 
 import networkx as nx
 import orjson
-from fhir.resources import FHIRAbstractModel, construct_fhir_element
+from fhir.resources import FHIRAbstractModel
 from fhir.resources.resource import Resource
-from pydantic import ValidationError
 from tqdm.autonotebook import tqdm
 
 from fhir_kindling.fhir_query import FhirQuerySync
@@ -17,6 +16,7 @@ from fhir_kindling.fhir_server.server_responses import (
 from fhir_kindling.util.references import (
     check_missing_references,
     reference_graph,
+    resource_from_graph_node,
 )
 
 if TYPE_CHECKING:
@@ -80,14 +80,12 @@ def resolve_reference_graph(
             top_nodes = [
                 node for node in nodes if len(list(graph.predecessors(node))) == 0
             ]
-
             # get the resources from the graph
-
             resources = []
 
             for node in top_nodes:
                 try:
-                    resources.append(_resource_from_graph_node(graph, node))
+                    resources.append(resource_from_graph_node(graph, node))
                 except Exception as e:
                     print(e)
                     print(node)
@@ -149,45 +147,6 @@ def _update_successors(graph: nx.DiGraph, node: str, reference: str):
                 graph.nodes[successor]["resource"] = resource
             else:
                 graph.nodes[successor]["resource"][field] = reference
-
-
-def _resource_from_graph_node(graph: nx.DiGraph, node: str) -> FHIRAbstractModel:
-    """
-    Get a resource from a graph node.
-
-    Args:
-        graph: The graph to get the resource from.
-        node: The node to get the resource from.
-
-    Returns:
-        The resource at the node.
-    """
-    resource = graph.nodes[node]["resource"]
-
-    if resource:
-        if isinstance(resource, OrderedDict) or isinstance(resource, dict):
-            resource_dict = dict(resource)
-            resource_type = resource_dict.get(
-                "resourceType", resource_dict.get("resource_type")
-            )
-            resource_json = orjson.dumps(resource_dict)
-            try:
-                resource = construct_fhir_element(resource_type, resource_json)
-            except ValidationError as e:
-                print(f"Error creating resource: {e}")
-                print(f"Resource: {resource_dict}")
-                raise e
-            except Exception as e:
-                print(f"Error creating resource: {e}")
-                print(f"Resource: {resource_dict}")
-                raise e
-        elif isinstance(resource, FHIRAbstractModel):
-            pass
-        else:
-            raise ValueError(f"Unknown resource type: {type(resource)}")
-        return resource
-    else:
-        raise ValueError(f"Resource not found for node {node}")
 
 
 def _get_transfer_resources(

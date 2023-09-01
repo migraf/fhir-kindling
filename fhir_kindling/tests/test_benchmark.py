@@ -32,6 +32,7 @@ def benchmark_result(server) -> BenchmarkResult:
     )
 
     benchmark_result = benchmark.run_suite(progress=False, save=False)
+    benchmark_result.save("benchmark_result.json")
 
     return benchmark_result
 
@@ -45,14 +46,12 @@ def test_benchmark(server):
         dataset_size=10,
     )
 
-    # TODO remove
-
     # create a temporary directory to store the benchmark results
     with tempfile.TemporaryDirectory() as tmpdirname:
         benchmark.run_suite(progress=False, save=True, results_dir=tmpdirname)
 
         # check that two files were created
-        assert len(os.listdir(tmpdirname)) == 2
+        assert len(os.listdir(tmpdirname)) == 1
 
 
 def test_benchmark_result_save_load(benchmark_result):
@@ -64,11 +63,23 @@ def test_benchmark_result_save_load(benchmark_result):
 
         assert benchmark_result == benchmark_result_loaded
 
-    benchmark_result.save("benchmark_result.json")
 
+def test_benchmark_figures(benchmark_result: BenchmarkResult):
+    timeline_figure = benchmark_result.timeline_plot()
+    assert timeline_figure is not None
 
-def test_benchmark_figures(benchmark_result):
-    figure = benchmark_result.plot_results()
-    assert figure is not None
+    fig = benchmark_result.insert_plot()
+    assert fig is not None
+    benchmark_result.update_plot()
+    assert fig is not None
 
-    figure.show()
+    dataset_figure = benchmark_result.dataset_plot()
+
+    assert dataset_figure is not None
+
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        figure_dir = os.path.join(tmpdirname, "figures")
+        os.mkdir(figure_dir)
+        figure_dir = benchmark_result.save_plots(figure_dir)
+
+        assert len(os.listdir(figure_dir)) >= 1

@@ -1,7 +1,8 @@
-from typing import List, Tuple, Union
+from typing import List, OrderedDict, Tuple, Union
 
 import networkx as nx
-from fhir.resources import FHIRAbstractModel
+import orjson
+from fhir.resources import FHIRAbstractModel, construct_fhir_element
 from fhir.resources.fhirtypes import ReferenceType
 from fhir.resources.resource import Resource
 
@@ -89,6 +90,41 @@ def reference_graph(resources: List[Union[Resource, FHIRAbstractModel]]) -> nx.D
                 reference_path, path, field=reference[0], list_field=reference[3]
             )
     return dg
+
+
+def resource_from_graph_node(graph: nx.DiGraph, node: str) -> FHIRAbstractModel:
+    """
+    Get a resource from a graph node.
+
+    Args:
+        graph: The graph to get the resource from.
+        node: The node to get the resource from.
+
+    Returns:
+        The resource at the node.
+    """
+    resource = graph.nodes[node]["resource"]
+
+    if resource:
+        if isinstance(resource, OrderedDict) or isinstance(resource, dict):
+            resource_dict = dict(resource)
+            resource_type = resource_dict.get(
+                "resourceType", resource_dict.get("resource_type")
+            )
+            resource_json = orjson.dumps(resource_dict)
+            try:
+                resource = construct_fhir_element(resource_type, resource_json)
+            except Exception as e:
+                print(f"Error creating resource: {e}")
+                print(f"Resource: {resource_dict}")
+                raise e
+        elif isinstance(resource, FHIRAbstractModel):
+            pass
+        else:
+            raise ValueError(f"Unknown resource type: {type(resource)}")
+        return resource
+    else:
+        raise ValueError(f"Resource not found for node {node}")
 
 
 def _get_missing_references(references: dict, resource_ids: dict) -> List[str]:

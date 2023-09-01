@@ -127,7 +127,7 @@ class ServerBenchmark:
             results_dir: Directory in which to save the results. If None defaults to current working directory.
         """
 
-        benchmark_result = BenchmarkResult(server_results=[])
+        benchmark_result = BenchmarkResult(server_results=[], operations=self.steps)
 
         # generate benchmark data if the benchmark data generation step is included
         if BenchmarkOperations.GENERATE in self.steps:
@@ -189,15 +189,6 @@ class ServerBenchmark:
 
         return dataset, result
 
-    def plot(self):
-        """Plot the results of the benchmark
-
-        Returns:
-            The plotly figure displaying the results
-        """
-        fig = self.result.plot_results()
-        return fig
-
     def _save(self, path: str = None):
         """Save the benchmark results and figure to file
 
@@ -205,16 +196,15 @@ class ServerBenchmark:
             path: Where to save the results. Defaults to current working directory.
         """
 
-        datestring = to_iso_string(datetime=convert_to_local_datetime(datetime.now()))
+        datestring = to_iso_string(
+            datetime=convert_to_local_datetime(datetime.now())
+        ).replace(":", "-")
 
         if not path:
             path = os.getcwd()
 
         bench_result_path = os.path.join(path, f"benchmark_{datestring}.json")
-        bench_figure_path = os.path.join(path, f"benchmark_{datestring}.png")
         self.result.save(bench_result_path)
-        figure = self.plot()
-        figure.write_image(bench_figure_path)
 
     def add_resource_refs_for_tracking(
         self, server: FhirServer, refs: Union[List[Any], Any]

@@ -1,7 +1,7 @@
 import os
 
 from fhir_kindling import FhirServer
-from fhir_kindling.fhir_server.transfer import reference_graph, transfer
+from fhir_kindling.fhir_server.ops.transfer import reference_graph, transfer
 
 
 def test_reference_graph(fhir_server):

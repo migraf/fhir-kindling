@@ -1,9 +1,11 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+
+from fhir_kindling.benchmark.constants import BenchmarkOperations
 
 if TYPE_CHECKING:
     from fhir_kindling.benchmark.results import BenchmarkResult
@@ -53,138 +55,165 @@ def plot_benchmark_time_line(results: "BenchmarkResult") -> go.Figure:
     return fig
 
 
-def plot_benchmark_results(results: "BenchmarkResult") -> go.Figure:
-    timeline = plot_benchmark_time_line(results)
-    timeline.show()
-
-    figure = setup_subplots(results)
-
-    for trace in timeline.data:
-        figure.add_trace(timeline.data[0], row=1, col=1)
-    return figure
-
-
-def setup_subplots(results: "BenchmarkResult") -> go.Figure:
+def plot_benchmark_dataset(results: "BenchmarkResult") -> go.Figure:
     fig = make_subplots(
-        rows=5,
-        cols=1,
-        subplot_titles=(
-            "Resources Overview",
-            "Single Insert",
-            "Batch Insert",
-            "Dataset Insert",
-            "Update Single",
-            "Search",
-        ),
+        rows=1,
+        cols=2,
+        subplot_titles=["Resources Generated", "Dataset Upload Time"],
+    )
+
+    # bar chart for resources generated
+    labels = [
+        r.resource_type for r in results.data_generation_result.resources_generated
+    ]
+    values = [r.count for r in results.data_generation_result.resources_generated]
+
+    resource_generated_bar_chart = go.Bar(
+        x=labels,
+        y=values,
+    )
+
+    fig.add_trace(
+        resource_generated_bar_chart,
+        row=1,
+        col=1,
+    )
+
+    # bar chart for dataset upload
+    names = [sr.name for sr in results.server_results]
+    dataset_upload_time = [sr.dataset_insert.duration for sr in results.server_results]
+
+    dataset_upload_bar_chart = go.Bar(
+        x=names,
+        y=dataset_upload_time,
+    )
+
+    fig.add_trace(
+        dataset_upload_bar_chart,
+        row=1,
+        col=2,
+    )
+
+    # update the layout
+    fig.update_layout(
+        title_text="Benchmark Dataset",
+        height=400,
+        width=1000,
+        # center title
+        title_x=0.5,
+        showlegend=False,
     )
 
     return fig
 
 
-# def plot_benchmark_results(results: "BenchmarkResult") -> go.Figure:
-#     """Create a multi-panel plotly figure that depicts the results of the benchmark. The figure displays
-#     the timings for different crud & query operations and compares the timings across the different servers.
+def plot_benchmark_insert(results: "BenchmarkResult") -> go.Figure:
+    fig = single_and_batch_plot(
+        results,
+        BenchmarkOperations.INSERT,
+        BenchmarkOperations.BATCH_INSERT,
+        "Benchmark Update",
+        ["Single Update", "Batch Update"],
+    )
 
-#     Args:
-#         results: benchmark results
-#     """
-#     fig = make_subplots(
-#         rows=5,
-#         cols=1,
-#         subplot_titles=(
-#             "Resources Overview" "Single Insert",
-#             "Batch Insert",
-#             "Dataset Insert",
-#             "Update Single",
-#             "Search",
-#         ),
-#     )
-
-#     add_single_insert_traces(fig, results)
-#     add_batch_insert_traces(fig, results)
-#     add_dataset_insert_traces(fig, results)
-#     add_query_traces(fig, results)
-#     add_delete_traces(fig, results)
-
-#     fig.update_layout(
-#         title_text="FHIR Server Benchmark Results",
-#         height=1200,
-#         width=1000,
-#         showlegend=True,
-#         legend_tracegroupgap=190,
-#     )
-#     return fig
+    return fig
 
 
-# def add_resource_overview_trace(fig: go.Figure, results: "BenchmarkResults"):
-#     """Generate a pie chart with the number of resources generated, queried, updated and deleted for the benchmark
-#      and add it as a trace to the figure.
+def plot_benchmark_update(results: "BenchmarkResult") -> go.Figure:
+    fig = single_and_batch_plot(
+        results,
+        BenchmarkOperations.UPDATE,
+        BenchmarkOperations.BATCH_UPDATE,
+        "Benchmark Update",
+        ["Single Update", "Batch Update"],
+    )
 
-#     Args:
-#         fig: Output figure
-#         results: The benchmark results
-#     """
-#     pass
-
-
-# def add_single_insert_traces(fig: go.Figure, results: "BenchmarkResults"):
-#     """Create traces for each server detailing the timings for inserting a single resource
-
-#     Args:
-#         results: the results in which the data is stored
-
-#     Returns:
-#         List of plotly bar charts that depict the timings for each server
-#     """
-#     for server, result in results.insert_single.items():
-#         tr = go.Bar(y=result, name=server, legendgroup="1")
-#         fig.add_trace(tr, row=1, col=1)
+    return fig
 
 
-# def add_batch_insert_traces(fig: go.Figure, results: "BenchmarkResults"):
-#     """Create traces for each server detailing the timings for inserting a single resource
+def plot_benchmark_delete(results: "BenchmarkResult") -> go.Figure:
+    fig = single_and_batch_plot(
+        results,
+        BenchmarkOperations.DELETE,
+        BenchmarkOperations.BATCH_DELETE,
+        "Benchmark Delete",
+        ["Single Delete", "Batch Delete"],
+    )
 
-#     Args:
-#         results: the results in which the data is stored
+    fig = make_subplots(
+        rows=1,
+        cols=2,
+        subplot_titles=["Single Delete", "Batch Delete"],
+    )
 
-#     Returns:
-#         List of plotly bar charts that depict the timings for each server
-#     """
-#     for server, result in results.batch_insert.items():
-#         tr = go.Bar(y=result, name=server, legendgroup="2")
-#         fig.add_trace(tr, row=2, col=1)
-
-
-# def add_dataset_insert_traces(fig: go.Figure, results: "BenchmarkResults"):
-#     """Create traces for each server detailing the timings for inserting a single resource
-
-#     Args:
-#         fig: _description_
-#         results: _description_
-#     """
-#     ds_fig = go.Bar(
-#         y=list(results.dataset_insert.values()),
-#         x=list(results.dataset_insert.keys()),
-#         name="Dataset Insert",
-#     )
-#     fig.add_trace(ds_fig, row=3, col=1)
+    return fig
 
 
-# def add_query_traces(fig: go.Figure, results: "BenchmarkResults"):
-#     query_results = results.query
-#     queries = list(list(query_results.values())[0].keys())
+def plot_benchmark_search(results: "BenchmarkResult") -> go.Figure:
+    # todo implement this
 
-#     for server, result in query_results.items():
-#         # average time for each query
-#         avg_times = [sum(result[q]) / len(result[q]) for q in queries]
+    fig = make_subplots(
+        rows=1,
+        cols=2,
+        subplot_titles=["Single Delete", "Batch Delete"],
+    )
 
-#         tr = go.Bar(y=avg_times, x=queries, name=server, legendgroup="4")
-#         fig.add_trace(tr, row=4, col=1)
+    return fig
 
 
-# def add_delete_traces(fig: go.Figure, results: "BenchmarkResults"):
-#     delete_results = results.delete
-#     x = list(delete_results.keys())
-#     y = list(delete_results.values())
-#     tr = go.Bar(y=y, x=x, name="Delete", legendgroup="5")
-#     fig.add_trace(tr, row=5, col=1)
+def single_and_batch_plot(
+    results: "BenchmarkResult",
+    single_op: BenchmarkOperations,
+    batch_op: BenchmarkOperations,
+    plot_title: str,
+    subplot_titles: List[str],
+) -> go.Figure:
+    fig = make_subplots(
+        rows=1,
+        cols=2,
+        subplot_titles=subplot_titles,
+    )
+
+    for server_result in results.server_results:
+        single_result = results.get_operation_for_server(server_result.name, single_op)
+        if single_result:
+            single_chart = make_line_chart_from_attempts(
+                single_result.attempts, server_result.name
+            )
+            fig.add_trace(
+                single_chart,
+                row=1,
+                col=1,
+            )
+
+        batch_result = results.get_operation_for_server(server_result.name, batch_op)
+        if batch_result:
+            batch_chart = make_line_chart_from_attempts(
+                batch_result.attempts, server_result.name
+            )
+            fig.add_trace(
+                batch_chart,
+                row=1,
+                col=2,
+            )
+
+    # update the layout
+    fig.update_layout(
+        title_text=plot_title,
+        height=400,
+        width=1000,
+        # center title
+        title_x=0.5,
+    )
+    return fig
+
+
+def make_line_chart_from_attempts(attempts: List[float], name: str) -> go.Figure:
+    trace = go.Scatter(
+        x=list(range(len(attempts))),
+        y=attempts,
+        mode="lines+markers",
+        name=name,
+    )
+
+    return trace

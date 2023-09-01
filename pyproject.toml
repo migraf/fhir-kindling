@@ -74,12 +74,15 @@ poethepoet = "^0.21.1"
 
 
 [tool.poe.tasks]
-test = "pytest"
-test-lf = "pytest --lf"
-test-cov = "pytest --cov=fhir_kindling fhir_kindling/"
-cov-xml = "coverage xml"
+test = "poetry run pytest"
+test-lf = "poetry run pytest --lf"
+test-cov = "poetry run pytest --cov=fhir_kindling fhir_kindling/"
+cov-xml = "poetry run coverage xml -o cov.xml"
+report = "poetry run coverage report"
 lint  = "ruff . --fix"
 format = "black ."
+start-test-server = "dcupd -f ./testing/docker-compose.yml"
+stop-test-server = "dcdn -f ./testing/docker-compose.yml"
 
 
 [tool.ruff]

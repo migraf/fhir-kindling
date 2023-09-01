@@ -12,7 +12,10 @@ from fhir_kindling.benchmark.results import (
     BenchmarkOperationResult,
     ServerBenchmarkResult,
 )
-from fhir_kindling.fhir_server.transfer import reference_graph, resolve_reference_graph
+from fhir_kindling.fhir_server.ops.transfer import (
+    reference_graph,
+    resolve_reference_graph,
+)
 from fhir_kindling.generators.patient import PatientGenerator
 from fhir_kindling.util.date_utils import local_now
 
@@ -52,9 +55,7 @@ def run_server_benchmark(
         elif step == BenchmarkOperations.DELETE:
             server_result.single_delete = _benchmark_delete_single(benchmark, server)
         elif step == BenchmarkOperations.BATCH_DELETE:
-            # TODO fix batch delete with reverse reference graph
-            # server_result.batch_delete = _benchmark_delete_batch(benchmark, server)
-            pass
+            server_result.batch_delete = _benchmark_delete_batch(benchmark, server)
 
     server_result.completed = True
     server_result.end_time = local_now()
