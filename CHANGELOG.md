@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.3] - 2023-09-13
+
+Re-enable authentification against a server using OpenID Connect. Remove authlib dependency in favor of a simple custom OpenID connect implementation.
+You can now authenticate against a server by providing a client id and secret and a token endpoint. The library will then fetch an access token and use it for all requests.
+
+### Added
+- OpenID Connect with client credentials auth flow for authenticating against the server
+
 
 ## [1.0.2] - 2023-08-12
 

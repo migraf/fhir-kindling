@@ -4,11 +4,46 @@ from unittest import mock
 import pytest
 from httpx import Auth
 
+from fhir_kindling import FhirServer
 from fhir_kindling.fhir_server.auth import (
     BearerAuth,
+    OIDCAuth,
     generate_auth,
     load_environment_auth_vars,
 )
+
+
+def test_oidc_auth():
+    client_id = os.getenv("KINDLING_CLIENT_ID")
+    client_secret = os.getenv("KINDLING_CLIENT_SECRET")
+    oidc_provider_url = os.getenv("OIDC_PROVIDER_URL")
+    oidc_auth = OIDCAuth(
+        oidc_provider_url=oidc_provider_url,
+        client_id=client_id,
+        client_secret=client_secret,
+    )
+
+    assert isinstance(oidc_auth, OIDCAuth)
+    token = oidc_auth.get_token()
+    assert isinstance(token, str)
+
+
+def test_query_with_oidc_auth():
+    client_id = os.getenv("KINDLING_CLIENT_ID")
+    client_secret = os.getenv("KINDLING_CLIENT_SECRET")
+    oidc_provider_url = os.getenv("OIDC_PROVIDER_URL")
+    # oidc_server_url = os.getenv("OIDC_SERVER_URL")
+    oidc_server_url = "http://127.0.0.1:9092/fhir"
+    oidc_server = FhirServer(
+        api_address=oidc_server_url,
+        client_id=client_id,
+        client_secret=client_secret,
+        oidc_provider_url=oidc_provider_url,
+    )
+
+    assert isinstance(oidc_server, FhirServer)
+    response = oidc_server.query("Patient").all()
+    assert response
 
 
 def test_generate_auth():
