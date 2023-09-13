@@ -39,7 +39,6 @@ xmltodict = "*"
 pydantic = "^1.10.0"
 networkx = "*"
 httpx = "*"
-authlib = "*"
 pandas = { version = "*", optional = true }
 plotly = { version = "*", optional = true }
 faker = { version = "*", optional = true }

@@ -4,9 +4,6 @@ from typing import Iterable, List, Union
 
 import fhir.resources
 import httpx
-from authlib.integrations.httpx_client import OAuth2Client
-from authlib.oauth2.rfc6749 import OAuth2Token
-from authlib.oauth2.rfc7523 import ClientSecretJWT
 from fhir.resources import FHIRAbstractModel, construct_fhir_element
 from fhir.resources.bundle import Bundle, BundleEntry
 from fhir.resources.capabilitystatement import CapabilityStatement
@@ -17,7 +14,7 @@ from tqdm import tqdm
 
 from fhir_kindling.fhir_query import FhirQueryAsync, FhirQuerySync
 from fhir_kindling.fhir_query.query_parameters import FhirQueryParameters
-from fhir_kindling.fhir_server.auth import BearerAuth, auth_info_from_env
+from fhir_kindling.fhir_server.auth import BearerAuth, OIDCAuth, auth_info_from_env
 from fhir_kindling.fhir_server.server_responses import (
     BundleCreateResponse,
     ResourceCreateResponse,
@@ -97,7 +94,7 @@ class FhirServer:
         self.client_id = client_id
         self.client_secret = client_secret
         self.oidc_provider_url = oidc_provider_url
-        self.oauth_token: OAuth2Token = None
+        self.oauth_token: dict = None
 
         # retry vars
         self.retry_status_codes = retry_status_codes
@@ -799,6 +796,12 @@ class FhirServer:
             return httpx.BasicAuth(username=self.username, password=self.password)
         elif self.token:
             return BearerAuth(self.token)
+        elif self.client_id and self.client_secret and self.oidc_provider_url:
+            oidc_auth = OIDCAuth(
+                self.client_id, self.client_secret, self.oidc_provider_url
+            )
+            token = oidc_auth.get_token()
+            return BearerAuth(token)
 
     @staticmethod
     def _validate_api_address(api_address: str) -> str:
@@ -988,19 +991,6 @@ class FhirServer:
             return (
                 httpx.AsyncHTTPTransport() if async_transport else httpx.HTTPTransport()
             )
-
-    def _get_oidc_token(self):
-        # get a new token if it is expired or not yet set
-        if not self.oauth_token or self.oauth_token.is_expired():
-            client = OAuth2Client(
-                client_id=self.client_id,
-                client_secret=self.client_secret,
-                token_endpoint_auth_method="client_secret_jwt",
-            )
-            client.register_client_auth_method(ClientSecretJWT(self.oidc_provider_url))
-            token = client.fetch_token(self.oidc_provider_url)
-            self.token = token["access_token"]
-            self.oauth_token = token
 
     @staticmethod
     def _validate_query_input(

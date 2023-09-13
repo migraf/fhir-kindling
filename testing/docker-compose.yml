@@ -3,6 +3,7 @@ version: '3.8'
 volumes:
   testing-blaze:
   testing-hapi:
+  oidc-blaze-data:
 
 services:
   blaze:
@@ -28,4 +29,29 @@ services:
       hapi.fhir.default_encoding: json
       hapi.fhir.: json
       hapi.fhir.server_address: "http://localhost:9091/fhir"
+  
+  keycloak:
+    image: "quay.io/keycloak/keycloak:latest"
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_IMPORT: /tmp/realm.json
+    ports:
+    - "8090:8080"
+    volumes:
+    - "./realm.json:/opt/keycloak/data/import/blaze-realm.json"
+    command: start-dev --import-realm
+
+  blaze-oidc:
+    image: "samply/blaze:latest"
+    environment:
+      BASE_URL: "http://localhost:9092"
+      JAVA_TOOL_OPTIONS: "-Xmx2g"
+      OPENID_PROVIDER_URL: "http://keycloak:8080/realms/blaze"
+    ports:
+    - "9092:8080"
+    volumes:
+    - "oidc-blaze-data:/app/data"
+    depends_on:
+    - keycloak
 
