@@ -36,7 +36,7 @@ python = "^3.8"
 tqdm = "*"
 orjson = "*"
 xmltodict = "*"
-pydantic = "^1.10.0"
+pydantic = ">=1.10,<3.0"
 networkx = "*"
 httpx = "*"
 pandas = { version = "*", optional = true }
