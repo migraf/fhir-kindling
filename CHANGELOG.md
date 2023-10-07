@@ -17,6 +17,14 @@ Updated and improved the server benchmarking functionality.
 
 Benchmark figures are not saved automatically anymore. Use the `save_figures` method on the `BenchmarkResult` class to save them.
 
+## [1.0.3] - 2023-09-13
+
+Re-enable authentification against a server using OpenID Connect. Remove authlib dependency in favor of a simple custom OpenID connect implementation.
+You can now authenticate against a server by providing a client id and secret and a token endpoint. The library will then fetch an access token and use it for all requests.
+
+### Added
+- OpenID Connect with client credentials auth flow for authenticating against the server
+
 
 ## [1.0.2] - 2023-08-12
 
