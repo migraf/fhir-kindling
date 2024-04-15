@@ -1,0 +1,250 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IMessageHeader implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  eventCoding: Coding
+  eventCanonical: canonical  _eventCanonical: ElementBase
+  destination: [MessageHeaderDestination]
+  sender: Reference
+  author: Reference
+  source: MessageHeaderSource!
+  responsible: Reference
+  reason: CodeableConcept
+  response: MessageHeaderResponse
+  focus: [Reference]
+  definition: canonical  _definition: ElementBase
+}
+
+type MessageHeader implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  eventCoding: Coding
+  eventCanonical: canonical  _eventCanonical: ElementBase
+  destination: [MessageHeaderDestination]
+  sender: Reference
+  author: Reference
+  source: MessageHeaderSource!
+  responsible: Reference
+  reason: CodeableConcept
+  response: MessageHeaderResponse
+  focus: [Reference]
+  definition: canonical  _definition: ElementBase
+}
+
+type MessageHeaderDestination {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  endpointUrl: url  _endpointUrl: ElementBase
+  endpointReference: Reference
+  name: String  _name: ElementBase
+  target: Reference
+  receiver: Reference
+}
+
+type MessageHeaderSource {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  endpointUrl: url  _endpointUrl: ElementBase
+  endpointReference: Reference
+  name: String  _name: ElementBase
+  software: String  _software: ElementBase
+  version: String  _version: ElementBase
+  contact: ContactPoint
+}
+
+type MessageHeaderResponse {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: Identifier!
+  code: code  _code: ElementBase
+  details: Reference
+}
+
+input MessageHeaderInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  eventCoding: CodingInput
+  eventCanonical: canonical  _eventCanonical: ElementBaseInput
+  destination: [MessageHeaderDestinationInputInput]
+  sender: ReferenceInput
+  author: ReferenceInput
+  source: MessageHeaderSourceInputInput!
+  responsible: ReferenceInput
+  reason: CodeableConceptInput
+  response: MessageHeaderResponseInputInput
+  focus: [ReferenceInput]
+  definition: canonical  _definition: ElementBaseInput
+}
+
+input MessageHeaderDestinationInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  endpointUrl: url  _endpointUrl: ElementBaseInput
+  endpointReference: ReferenceInput
+  name: String  _name: ElementBaseInput
+  target: ReferenceInput
+  receiver: ReferenceInput
+}
+
+input MessageHeaderSourceInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  endpointUrl: url  _endpointUrl: ElementBaseInput
+  endpointReference: ReferenceInput
+  name: String  _name: ElementBaseInput
+  software: String  _software: ElementBaseInput
+  version: String  _version: ElementBaseInput
+  contact: ContactPointInput
+}
+
+input MessageHeaderResponseInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: IdentifierInput!
+  code: code  _code: ElementBaseInput
+  details: ReferenceInput
+}
+
+type MessageHeaderReadType {
+  MessageHeader(id: ID!): MessageHeader
+}
+
+type MessageHeaderListType {
+  MessageHeaderList(_filter: String
+    author: [reference]
+    code: [token]
+    destination: [String]
+    event: [token]
+    focus: [reference]
+    receiver: [reference]
+    response_id: [token]
+    responsible: [reference]
+    sender: [reference]
+    source: [String]
+    target: [reference]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [MessageHeader]
+}
+
+type MessageHeaderConnectionType {
+  MessageHeaderConection(_filter: String
+    author: [reference]
+    code: [token]
+    destination: [String]
+    event: [token]
+    focus: [reference]
+    receiver: [reference]
+    response_id: [token]
+    responsible: [reference]
+    sender: [reference]
+    source: [String]
+    target: [reference]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): MessageHeaderConnection
+}
+
+type MessageHeaderConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [MessageHeaderEdge]
+}
+
+type MessageHeaderEdge {
+  mode: String
+  score: Float
+  resource: MessageHeader
+}
+
+type MessageHeaderCreateType {
+  MessageHeaderCreate(resource: MessageHeaderInput): MessageHeaderCreation
+}
+
+type MessageHeaderCreation {
+  location: String
+  resource: MessageHeader
+  information: OperationOutcome
+}
+
+type MessageHeaderUpdateType {
+  MessageHeaderUpdate(id: ID, resource: MessageHeaderInput): MessageHeaderUpdate
+}
+
+type MessageHeaderUpdate {
+  resource: MessageHeader
+  information: OperationOutcome
+}
+
+type MessageHeaderDeleteType {
+  MessageHeaderDelete(id: ID): MessageHeaderDelete
+}
+
+type MessageHeaderDelete {
+  information: OperationOutcome
+}
+

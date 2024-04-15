@@ -1,0 +1,499 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IConceptMap implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  url: uri  _url: ElementBase
+  identifier: [Identifier]
+  version: String  _version: ElementBase
+  versionAlgorithmString: String  _versionAlgorithmString: ElementBase
+  versionAlgorithmCoding: Coding
+  name: String  _name: ElementBase
+  title: String  _title: ElementBase
+  status: code  _status: ElementBase
+  experimental: Boolean  _experimental: ElementBase
+  date: dateTime  _date: ElementBase
+  publisher: String  _publisher: ElementBase
+  contact: [ContactDetail]
+  description: markdown  _description: ElementBase
+  useContext: [UsageContext]
+  jurisdiction: [CodeableConcept]
+  purpose: markdown  _purpose: ElementBase
+  copyright: markdown  _copyright: ElementBase
+  copyrightLabel: String  _copyrightLabel: ElementBase
+  approvalDate: date  _approvalDate: ElementBase
+  lastReviewDate: date  _lastReviewDate: ElementBase
+  effectivePeriod: Period
+  topic: [CodeableConcept]
+  author: [ContactDetail]
+  editor: [ContactDetail]
+  reviewer: [ContactDetail]
+  endorser: [ContactDetail]
+  relatedArtifact: [RelatedArtifact]
+  property: [ConceptMapProperty]
+  additionalAttribute: [ConceptMapAdditionalAttribute]
+  sourceScopeUri: uri  _sourceScopeUri: ElementBase
+  sourceScopeCanonical: canonical  _sourceScopeCanonical: ElementBase
+  targetScopeUri: uri  _targetScopeUri: ElementBase
+  targetScopeCanonical: canonical  _targetScopeCanonical: ElementBase
+  group: [ConceptMapGroup]
+}
+
+type ConceptMap implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  url: uri  _url: ElementBase
+  identifier: [Identifier]
+  version: String  _version: ElementBase
+  versionAlgorithmString: String  _versionAlgorithmString: ElementBase
+  versionAlgorithmCoding: Coding
+  name: String  _name: ElementBase
+  title: String  _title: ElementBase
+  status: code  _status: ElementBase
+  experimental: Boolean  _experimental: ElementBase
+  date: dateTime  _date: ElementBase
+  publisher: String  _publisher: ElementBase
+  contact: [ContactDetail]
+  description: markdown  _description: ElementBase
+  useContext: [UsageContext]
+  jurisdiction: [CodeableConcept]
+  purpose: markdown  _purpose: ElementBase
+  copyright: markdown  _copyright: ElementBase
+  copyrightLabel: String  _copyrightLabel: ElementBase
+  approvalDate: date  _approvalDate: ElementBase
+  lastReviewDate: date  _lastReviewDate: ElementBase
+  effectivePeriod: Period
+  topic: [CodeableConcept]
+  author: [ContactDetail]
+  editor: [ContactDetail]
+  reviewer: [ContactDetail]
+  endorser: [ContactDetail]
+  relatedArtifact: [RelatedArtifact]
+  property: [ConceptMapProperty]
+  additionalAttribute: [ConceptMapAdditionalAttribute]
+  sourceScopeUri: uri  _sourceScopeUri: ElementBase
+  sourceScopeCanonical: canonical  _sourceScopeCanonical: ElementBase
+  targetScopeUri: uri  _targetScopeUri: ElementBase
+  targetScopeCanonical: canonical  _targetScopeCanonical: ElementBase
+  group: [ConceptMapGroup]
+}
+
+type ConceptMapProperty {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  code: code  _code: ElementBase
+  uri: uri  _uri: ElementBase
+  description: String  _description: ElementBase
+  type: code  _type: ElementBase
+  system: canonical  _system: ElementBase
+}
+
+type ConceptMapAdditionalAttribute {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  code: code  _code: ElementBase
+  uri: uri  _uri: ElementBase
+  description: String  _description: ElementBase
+  type: code  _type: ElementBase
+}
+
+type ConceptMapGroup {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  source: canonical  _source: ElementBase
+  target: canonical  _target: ElementBase
+  element: [ConceptMapGroupElement]!
+  unmapped: ConceptMapGroupUnmapped
+}
+
+type ConceptMapGroupElement {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  code: code  _code: ElementBase
+  display: String  _display: ElementBase
+  valueSet: canonical  _valueSet: ElementBase
+  noMap: Boolean  _noMap: ElementBase
+  target: [ConceptMapGroupElementTarget]
+}
+
+type ConceptMapGroupElementTarget {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  code: code  _code: ElementBase
+  display: String  _display: ElementBase
+  valueSet: canonical  _valueSet: ElementBase
+  relationship: code  _relationship: ElementBase
+  comment: String  _comment: ElementBase
+  property: [ConceptMapProperty]
+  dependsOn: [ConceptMapGroupElementTargetDependsOn]
+  product: [ConceptMapGroupElementTargetDependsOn]
+}
+
+type ConceptMapGroupElementTargetDependsOn {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  attribute: code  _attribute: ElementBase
+  valueCode: code  _valueCode: ElementBase
+  valueCoding: Coding
+  valueString: String  _valueString: ElementBase
+  valueBoolean: Boolean  _valueBoolean: ElementBase
+  valueQuantity: Quantity
+  valueSet: canonical  _valueSet: ElementBase
+}
+
+type ConceptMapGroupUnmapped {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  mode: code  _mode: ElementBase
+  code: code  _code: ElementBase
+  display: String  _display: ElementBase
+  valueSet: canonical  _valueSet: ElementBase
+  relationship: code  _relationship: ElementBase
+  otherMap: canonical  _otherMap: ElementBase
+}
+
+input ConceptMapInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  url: uri  _url: ElementBaseInput
+  identifier: [IdentifierInput]
+  version: String  _version: ElementBaseInput
+  versionAlgorithmString: String  _versionAlgorithmString: ElementBaseInput
+  versionAlgorithmCoding: CodingInput
+  name: String  _name: ElementBaseInput
+  title: String  _title: ElementBaseInput
+  status: code  _status: ElementBaseInput
+  experimental: Boolean  _experimental: ElementBaseInput
+  date: dateTime  _date: ElementBaseInput
+  publisher: String  _publisher: ElementBaseInput
+  contact: [ContactDetailInput]
+  description: markdown  _description: ElementBaseInput
+  useContext: [UsageContextInput]
+  jurisdiction: [CodeableConceptInput]
+  purpose: markdown  _purpose: ElementBaseInput
+  copyright: markdown  _copyright: ElementBaseInput
+  copyrightLabel: String  _copyrightLabel: ElementBaseInput
+  approvalDate: date  _approvalDate: ElementBaseInput
+  lastReviewDate: date  _lastReviewDate: ElementBaseInput
+  effectivePeriod: PeriodInput
+  topic: [CodeableConceptInput]
+  author: [ContactDetailInput]
+  editor: [ContactDetailInput]
+  reviewer: [ContactDetailInput]
+  endorser: [ContactDetailInput]
+  relatedArtifact: [RelatedArtifactInput]
+  property: [ConceptMapPropertyInputInput]
+  additionalAttribute: [ConceptMapAdditionalAttributeInputInput]
+  sourceScopeUri: uri  _sourceScopeUri: ElementBaseInput
+  sourceScopeCanonical: canonical  _sourceScopeCanonical: ElementBaseInput
+  targetScopeUri: uri  _targetScopeUri: ElementBaseInput
+  targetScopeCanonical: canonical  _targetScopeCanonical: ElementBaseInput
+  group: [ConceptMapGroupInputInput]
+}
+
+input ConceptMapPropertyInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  code: code  _code: ElementBaseInput
+  uri: uri  _uri: ElementBaseInput
+  description: String  _description: ElementBaseInput
+  type: code  _type: ElementBaseInput
+  system: canonical  _system: ElementBaseInput
+}
+
+input ConceptMapAdditionalAttributeInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  code: code  _code: ElementBaseInput
+  uri: uri  _uri: ElementBaseInput
+  description: String  _description: ElementBaseInput
+  type: code  _type: ElementBaseInput
+}
+
+input ConceptMapGroupInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  source: canonical  _source: ElementBaseInput
+  target: canonical  _target: ElementBaseInput
+  element: [ConceptMapGroupInputElementInputInput]!
+  unmapped: ConceptMapGroupInputUnmappedInputInput
+}
+
+input ConceptMapGroupInputElementInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  code: code  _code: ElementBaseInput
+  display: String  _display: ElementBaseInput
+  valueSet: canonical  _valueSet: ElementBaseInput
+  noMap: Boolean  _noMap: ElementBaseInput
+  target: [ConceptMapGroupInputElementInputTargetInputInput]
+}
+
+input ConceptMapGroupInputElementInputTargetInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  code: code  _code: ElementBaseInput
+  display: String  _display: ElementBaseInput
+  valueSet: canonical  _valueSet: ElementBaseInput
+  relationship: code  _relationship: ElementBaseInput
+  comment: String  _comment: ElementBaseInput
+  property: [ConceptMapPropertyInputInput]
+  dependsOn: [ConceptMapGroupInputElementInputTargetInputDependsOnInputInput]
+  product: [ConceptMapGroupInputElementInputTargetInputDependsOnInputInput]
+}
+
+input ConceptMapGroupInputElementInputTargetInputDependsOnInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  attribute: code  _attribute: ElementBaseInput
+  valueCode: code  _valueCode: ElementBaseInput
+  valueCoding: CodingInput
+  valueString: String  _valueString: ElementBaseInput
+  valueBoolean: Boolean  _valueBoolean: ElementBaseInput
+  valueQuantity: QuantityInput
+  valueSet: canonical  _valueSet: ElementBaseInput
+}
+
+input ConceptMapGroupInputUnmappedInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  mode: code  _mode: ElementBaseInput
+  code: code  _code: ElementBaseInput
+  display: String  _display: ElementBaseInput
+  valueSet: canonical  _valueSet: ElementBaseInput
+  relationship: code  _relationship: ElementBaseInput
+  otherMap: canonical  _otherMap: ElementBaseInput
+}
+
+type ConceptMapReadType {
+  ConceptMap(id: ID!): ConceptMap
+}
+
+type ConceptMapListType {
+  ConceptMapList(_filter: String
+    context: [token]
+    context_quantity: [quantity]
+    context_type: [token]
+    context_type_quantity: [composite]
+    context_type_value: [composite]
+    date: [date]
+    derived_from: [reference]
+    description: [String]
+    effective: [date]
+    identifier: [token]
+    jurisdiction: [token]
+    mapping_property: [uri]
+    name: [String]
+    other_map: [reference]
+    predecessor: [reference]
+    publisher: [String]
+    source_code: [token]
+    source_group_system: [reference]
+    source_scope: [reference]
+    source_scope_uri: [uri]
+    status: [token]
+    target_code: [token]
+    target_group_system: [reference]
+    target_scope: [reference]
+    target_scope_uri: [uri]
+    title: [String]
+    topic: [token]
+    url: [uri]
+    version: [token]
+    composed_of: [reference]
+    depends_on: [reference]
+    derived_from: [reference]
+    effective: [date]
+    predecessor: [reference]
+    successor: [reference]
+    topic: [token]
+    context: [token]
+    context_quantity: [quantity]
+    context_reference: [reference]
+    context_type: [token]
+    context_type_quantity: [composite]
+    context_type_value: [composite]
+    date: [date]
+    description: [String]
+    identifier: [token]
+    jurisdiction: [token]
+    name: [String]
+    publisher: [String]
+    status: [token]
+    title: [String]
+    url: [uri]
+    version: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [ConceptMap]
+}
+
+type ConceptMapConnectionType {
+  ConceptMapConection(_filter: String
+    context: [token]
+    context_quantity: [quantity]
+    context_type: [token]
+    context_type_quantity: [composite]
+    context_type_value: [composite]
+    date: [date]
+    derived_from: [reference]
+    description: [String]
+    effective: [date]
+    identifier: [token]
+    jurisdiction: [token]
+    mapping_property: [uri]
+    name: [String]
+    other_map: [reference]
+    predecessor: [reference]
+    publisher: [String]
+    source_code: [token]
+    source_group_system: [reference]
+    source_scope: [reference]
+    source_scope_uri: [uri]
+    status: [token]
+    target_code: [token]
+    target_group_system: [reference]
+    target_scope: [reference]
+    target_scope_uri: [uri]
+    title: [String]
+    topic: [token]
+    url: [uri]
+    version: [token]
+    composed_of: [reference]
+    depends_on: [reference]
+    derived_from: [reference]
+    effective: [date]
+    predecessor: [reference]
+    successor: [reference]
+    topic: [token]
+    context: [token]
+    context_quantity: [quantity]
+    context_reference: [reference]
+    context_type: [token]
+    context_type_quantity: [composite]
+    context_type_value: [composite]
+    date: [date]
+    description: [String]
+    identifier: [token]
+    jurisdiction: [token]
+    name: [String]
+    publisher: [String]
+    status: [token]
+    title: [String]
+    url: [uri]
+    version: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): ConceptMapConnection
+}
+
+type ConceptMapConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [ConceptMapEdge]
+}
+
+type ConceptMapEdge {
+  mode: String
+  score: Float
+  resource: ConceptMap
+}
+
+type ConceptMapCreateType {
+  ConceptMapCreate(resource: ConceptMapInput): ConceptMapCreation
+}
+
+type ConceptMapCreation {
+  location: String
+  resource: ConceptMap
+  information: OperationOutcome
+}
+
+type ConceptMapUpdateType {
+  ConceptMapUpdate(id: ID, resource: ConceptMapInput): ConceptMapUpdate
+}
+
+type ConceptMapUpdate {
+  resource: ConceptMap
+  information: OperationOutcome
+}
+
+type ConceptMapDeleteType {
+  ConceptMapDelete(id: ID): ConceptMapDelete
+}
+
+type ConceptMapDelete {
+  information: OperationOutcome
+}
+

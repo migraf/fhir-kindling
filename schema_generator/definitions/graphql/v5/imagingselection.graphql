@@ -1,0 +1,276 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IImagingSelection implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  status: code  _status: ElementBase
+  subject: Reference
+  issued: instant  _issued: ElementBase
+  performer: [ImagingSelectionPerformer]
+  basedOn: [Reference]
+  category: [CodeableConcept]
+  code: CodeableConcept!
+  studyUid: ID  _studyUid: ElementBase
+  derivedFrom: [Reference]
+  endpoint: [Reference]
+  seriesUid: ID  _seriesUid: ElementBase
+  seriesNumber: unsignedInt  _seriesNumber: ElementBase
+  frameOfReferenceUid: ID  _frameOfReferenceUid: ElementBase
+  bodySite: CodeableReference
+  focus: [Reference]
+  instance: [ImagingSelectionInstance]
+}
+
+type ImagingSelection implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  status: code  _status: ElementBase
+  subject: Reference
+  issued: instant  _issued: ElementBase
+  performer: [ImagingSelectionPerformer]
+  basedOn: [Reference]
+  category: [CodeableConcept]
+  code: CodeableConcept!
+  studyUid: ID  _studyUid: ElementBase
+  derivedFrom: [Reference]
+  endpoint: [Reference]
+  seriesUid: ID  _seriesUid: ElementBase
+  seriesNumber: unsignedInt  _seriesNumber: ElementBase
+  frameOfReferenceUid: ID  _frameOfReferenceUid: ElementBase
+  bodySite: CodeableReference
+  focus: [Reference]
+  instance: [ImagingSelectionInstance]
+}
+
+type ImagingSelectionPerformer {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  function: CodeableConcept
+  actor: Reference
+}
+
+type ImagingSelectionInstance {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  uid: ID  _uid: ElementBase
+  number: unsignedInt  _number: ElementBase
+  sopClass: Coding
+  subset: [String]  _subset: [ElementBase]
+  imageRegion2D: [ImagingSelectionInstanceImageRegion2D]
+  imageRegion3D: [ImagingSelectionInstanceImageRegion3D]
+}
+
+type ImagingSelectionInstanceImageRegion2D {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  regionType: code  _regionType: ElementBase
+  coordinate: [decimal]  _coordinate: [ElementBase]
+}
+
+type ImagingSelectionInstanceImageRegion3D {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  regionType: code  _regionType: ElementBase
+  coordinate: [decimal]  _coordinate: [ElementBase]
+}
+
+input ImagingSelectionInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: [IdentifierInput]
+  status: code  _status: ElementBaseInput
+  subject: ReferenceInput
+  issued: instant  _issued: ElementBaseInput
+  performer: [ImagingSelectionPerformerInputInput]
+  basedOn: [ReferenceInput]
+  category: [CodeableConceptInput]
+  code: CodeableConceptInput!
+  studyUid: ID  _studyUid: ElementBaseInput
+  derivedFrom: [ReferenceInput]
+  endpoint: [ReferenceInput]
+  seriesUid: ID  _seriesUid: ElementBaseInput
+  seriesNumber: unsignedInt  _seriesNumber: ElementBaseInput
+  frameOfReferenceUid: ID  _frameOfReferenceUid: ElementBaseInput
+  bodySite: CodeableReferenceInput
+  focus: [ReferenceInput]
+  instance: [ImagingSelectionInstanceInputInput]
+}
+
+input ImagingSelectionPerformerInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  function: CodeableConceptInput
+  actor: ReferenceInput
+}
+
+input ImagingSelectionInstanceInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  uid: ID  _uid: ElementBaseInput
+  number: unsignedInt  _number: ElementBaseInput
+  sopClass: CodingInput
+  subset: [String]  _subset: [ElementBaseInput]
+  imageRegion2D: [ImagingSelectionInstanceInputImageRegion2DInputInput]
+  imageRegion3D: [ImagingSelectionInstanceInputImageRegion3DInputInput]
+}
+
+input ImagingSelectionInstanceInputImageRegion2DInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  regionType: code  _regionType: ElementBaseInput
+  coordinate: [decimal]  _coordinate: [ElementBaseInput]
+}
+
+input ImagingSelectionInstanceInputImageRegion3DInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  regionType: code  _regionType: ElementBaseInput
+  coordinate: [decimal]  _coordinate: [ElementBaseInput]
+}
+
+type ImagingSelectionReadType {
+  ImagingSelection(id: ID!): ImagingSelection
+}
+
+type ImagingSelectionListType {
+  ImagingSelectionList(_filter: String
+    based_on: [reference]
+    body_site: [token]
+    body_structure: [reference]
+    code: [token]
+    derived_from: [reference]
+    identifier: [token]
+    issued: [date]
+    patient: [reference]
+    status: [token]
+    study_uid: [token]
+    subject: [reference]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [ImagingSelection]
+}
+
+type ImagingSelectionConnectionType {
+  ImagingSelectionConection(_filter: String
+    based_on: [reference]
+    body_site: [token]
+    body_structure: [reference]
+    code: [token]
+    derived_from: [reference]
+    identifier: [token]
+    issued: [date]
+    patient: [reference]
+    status: [token]
+    study_uid: [token]
+    subject: [reference]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): ImagingSelectionConnection
+}
+
+type ImagingSelectionConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [ImagingSelectionEdge]
+}
+
+type ImagingSelectionEdge {
+  mode: String
+  score: Float
+  resource: ImagingSelection
+}
+
+type ImagingSelectionCreateType {
+  ImagingSelectionCreate(resource: ImagingSelectionInput): ImagingSelectionCreation
+}
+
+type ImagingSelectionCreation {
+  location: String
+  resource: ImagingSelection
+  information: OperationOutcome
+}
+
+type ImagingSelectionUpdateType {
+  ImagingSelectionUpdate(id: ID, resource: ImagingSelectionInput): ImagingSelectionUpdate
+}
+
+type ImagingSelectionUpdate {
+  resource: ImagingSelection
+  information: OperationOutcome
+}
+
+type ImagingSelectionDeleteType {
+  ImagingSelectionDelete(id: ID): ImagingSelectionDelete
+}
+
+type ImagingSelectionDelete {
+  information: OperationOutcome
+}
+

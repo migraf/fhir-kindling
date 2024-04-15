@@ -1,0 +1,260 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IAllergyIntolerance implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  clinicalStatus: CodeableConcept
+  verificationStatus: CodeableConcept
+  type: CodeableConcept
+  category: [code]  _category: [ElementBase]
+  criticality: code  _criticality: ElementBase
+  code: CodeableConcept
+  patient: Reference!
+  encounter: Reference
+  onsetDateTime: dateTime  _onsetDateTime: ElementBase
+  onsetAge: Age
+  onsetPeriod: Period
+  onsetRange: Range
+  onsetString: String  _onsetString: ElementBase
+  recordedDate: dateTime  _recordedDate: ElementBase
+  participant: [AllergyIntoleranceParticipant]
+  lastOccurrence: dateTime  _lastOccurrence: ElementBase
+  note: [Annotation]
+  reaction: [AllergyIntoleranceReaction]
+}
+
+type AllergyIntolerance implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  clinicalStatus: CodeableConcept
+  verificationStatus: CodeableConcept
+  type: CodeableConcept
+  category: [code]  _category: [ElementBase]
+  criticality: code  _criticality: ElementBase
+  code: CodeableConcept
+  patient: Reference!
+  encounter: Reference
+  onsetDateTime: dateTime  _onsetDateTime: ElementBase
+  onsetAge: Age
+  onsetPeriod: Period
+  onsetRange: Range
+  onsetString: String  _onsetString: ElementBase
+  recordedDate: dateTime  _recordedDate: ElementBase
+  participant: [AllergyIntoleranceParticipant]
+  lastOccurrence: dateTime  _lastOccurrence: ElementBase
+  note: [Annotation]
+  reaction: [AllergyIntoleranceReaction]
+}
+
+type AllergyIntoleranceParticipant {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  function: CodeableConcept
+  actor: Reference!
+}
+
+type AllergyIntoleranceReaction {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  substance: CodeableConcept
+  manifestation: [CodeableReference]!
+  description: String  _description: ElementBase
+  onset: dateTime  _onset: ElementBase
+  severity: code  _severity: ElementBase
+  exposureRoute: CodeableConcept
+  note: [Annotation]
+}
+
+input AllergyIntoleranceInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: [IdentifierInput]
+  clinicalStatus: CodeableConceptInput
+  verificationStatus: CodeableConceptInput
+  type: CodeableConceptInput
+  category: [code]  _category: [ElementBaseInput]
+  criticality: code  _criticality: ElementBaseInput
+  code: CodeableConceptInput
+  patient: ReferenceInput!
+  encounter: ReferenceInput
+  onsetDateTime: dateTime  _onsetDateTime: ElementBaseInput
+  onsetAge: AgeInput
+  onsetPeriod: PeriodInput
+  onsetRange: RangeInput
+  onsetString: String  _onsetString: ElementBaseInput
+  recordedDate: dateTime  _recordedDate: ElementBaseInput
+  participant: [AllergyIntoleranceParticipantInputInput]
+  lastOccurrence: dateTime  _lastOccurrence: ElementBaseInput
+  note: [AnnotationInput]
+  reaction: [AllergyIntoleranceReactionInputInput]
+}
+
+input AllergyIntoleranceParticipantInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  function: CodeableConceptInput
+  actor: ReferenceInput!
+}
+
+input AllergyIntoleranceReactionInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  substance: CodeableConceptInput
+  manifestation: [CodeableReferenceInput]!
+  description: String  _description: ElementBaseInput
+  onset: dateTime  _onset: ElementBaseInput
+  severity: code  _severity: ElementBaseInput
+  exposureRoute: CodeableConceptInput
+  note: [AnnotationInput]
+}
+
+type AllergyIntoleranceReadType {
+  AllergyIntolerance(id: ID!): AllergyIntolerance
+}
+
+type AllergyIntoleranceListType {
+  AllergyIntoleranceList(_filter: String
+    category: [token]
+    clinical_status: [token]
+    code: [token]
+    criticality: [token]
+    date: [date]
+    identifier: [token]
+    last_date: [date]
+    manifestation_code: [token]
+    manifestation_reference: [reference]
+    participant: [reference]
+    patient: [reference]
+    route: [token]
+    severity: [token]
+    type: [token]
+    verification_status: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [AllergyIntolerance]
+}
+
+type AllergyIntoleranceConnectionType {
+  AllergyIntoleranceConection(_filter: String
+    category: [token]
+    clinical_status: [token]
+    code: [token]
+    criticality: [token]
+    date: [date]
+    identifier: [token]
+    last_date: [date]
+    manifestation_code: [token]
+    manifestation_reference: [reference]
+    participant: [reference]
+    patient: [reference]
+    route: [token]
+    severity: [token]
+    type: [token]
+    verification_status: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): AllergyIntoleranceConnection
+}
+
+type AllergyIntoleranceConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [AllergyIntoleranceEdge]
+}
+
+type AllergyIntoleranceEdge {
+  mode: String
+  score: Float
+  resource: AllergyIntolerance
+}
+
+type AllergyIntoleranceCreateType {
+  AllergyIntoleranceCreate(resource: AllergyIntoleranceInput): AllergyIntoleranceCreation
+}
+
+type AllergyIntoleranceCreation {
+  location: String
+  resource: AllergyIntolerance
+  information: OperationOutcome
+}
+
+type AllergyIntoleranceUpdateType {
+  AllergyIntoleranceUpdate(id: ID, resource: AllergyIntoleranceInput): AllergyIntoleranceUpdate
+}
+
+type AllergyIntoleranceUpdate {
+  resource: AllergyIntolerance
+  information: OperationOutcome
+}
+
+type AllergyIntoleranceDeleteType {
+  AllergyIntoleranceDelete(id: ID): AllergyIntoleranceDelete
+}
+
+type AllergyIntoleranceDelete {
+  information: OperationOutcome
+}
+

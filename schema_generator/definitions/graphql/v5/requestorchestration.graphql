@@ -1,0 +1,407 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IRequestOrchestration implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  instantiatesCanonical: [canonical]  _instantiatesCanonical: [ElementBase]
+  instantiatesUri: [uri]  _instantiatesUri: [ElementBase]
+  basedOn: [Reference]
+  replaces: [Reference]
+  groupIdentifier: Identifier
+  status: code  _status: ElementBase
+  intent: code  _intent: ElementBase
+  priority: code  _priority: ElementBase
+  code: CodeableConcept
+  subject: Reference
+  encounter: Reference
+  authoredOn: dateTime  _authoredOn: ElementBase
+  author: Reference
+  reason: [CodeableReference]
+  goal: [Reference]
+  note: [Annotation]
+  action: [RequestOrchestrationAction]
+}
+
+type RequestOrchestration implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  instantiatesCanonical: [canonical]  _instantiatesCanonical: [ElementBase]
+  instantiatesUri: [uri]  _instantiatesUri: [ElementBase]
+  basedOn: [Reference]
+  replaces: [Reference]
+  groupIdentifier: Identifier
+  status: code  _status: ElementBase
+  intent: code  _intent: ElementBase
+  priority: code  _priority: ElementBase
+  code: CodeableConcept
+  subject: Reference
+  encounter: Reference
+  authoredOn: dateTime  _authoredOn: ElementBase
+  author: Reference
+  reason: [CodeableReference]
+  goal: [Reference]
+  note: [Annotation]
+  action: [RequestOrchestrationAction]
+}
+
+type RequestOrchestrationAction {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  linkId: String  _linkId: ElementBase
+  prefix: String  _prefix: ElementBase
+  title: String  _title: ElementBase
+  description: markdown  _description: ElementBase
+  textEquivalent: markdown  _textEquivalent: ElementBase
+  priority: code  _priority: ElementBase
+  code: [CodeableConcept]
+  documentation: [RelatedArtifact]
+  goal: [Reference]
+  condition: [RequestOrchestrationActionCondition]
+  input: [RequestOrchestrationActionInput]
+  output: [RequestOrchestrationActionOutput]
+  relatedAction: [RequestOrchestrationActionRelatedAction]
+  timingDateTime: dateTime  _timingDateTime: ElementBase
+  timingAge: Age
+  timingPeriod: Period
+  timingDuration: Duration
+  timingRange: Range
+  timingTiming: Timing
+  location: CodeableReference
+  participant: [RequestOrchestrationActionParticipant]
+  type: CodeableConcept
+  groupingBehavior: code  _groupingBehavior: ElementBase
+  selectionBehavior: code  _selectionBehavior: ElementBase
+  requiredBehavior: code  _requiredBehavior: ElementBase
+  precheckBehavior: code  _precheckBehavior: ElementBase
+  cardinalityBehavior: code  _cardinalityBehavior: ElementBase
+  resource: Reference
+  definitionCanonical: canonical  _definitionCanonical: ElementBase
+  definitionUri: uri  _definitionUri: ElementBase
+  transform: canonical  _transform: ElementBase
+  dynamicValue: [RequestOrchestrationActionDynamicValue]
+  action: [RequestOrchestrationAction]
+}
+
+type RequestOrchestrationActionCondition {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  kind: code  _kind: ElementBase
+  expression: Expression
+}
+
+type RequestOrchestrationActionInput {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  title: String  _title: ElementBase
+  requirement: DataRequirement
+  relatedData: ID  _relatedData: ElementBase
+}
+
+type RequestOrchestrationActionOutput {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  title: String  _title: ElementBase
+  requirement: DataRequirement
+  relatedData: String  _relatedData: ElementBase
+}
+
+type RequestOrchestrationActionRelatedAction {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  targetId: ID  _targetId: ElementBase
+  relationship: code  _relationship: ElementBase
+  endRelationship: code  _endRelationship: ElementBase
+  offsetDuration: Duration
+  offsetRange: Range
+}
+
+type RequestOrchestrationActionParticipant {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  type: code  _type: ElementBase
+  typeCanonical: canonical  _typeCanonical: ElementBase
+  typeReference: Reference
+  role: CodeableConcept
+  function: CodeableConcept
+  actorCanonical: canonical  _actorCanonical: ElementBase
+}
+
+type RequestOrchestrationActionDynamicValue {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  path: String  _path: ElementBase
+  expression: Expression
+}
+
+input RequestOrchestrationInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: [IdentifierInput]
+  instantiatesCanonical: [canonical]  _instantiatesCanonical: [ElementBaseInput]
+  instantiatesUri: [uri]  _instantiatesUri: [ElementBaseInput]
+  basedOn: [ReferenceInput]
+  replaces: [ReferenceInput]
+  groupIdentifier: IdentifierInput
+  status: code  _status: ElementBaseInput
+  intent: code  _intent: ElementBaseInput
+  priority: code  _priority: ElementBaseInput
+  code: CodeableConceptInput
+  subject: ReferenceInput
+  encounter: ReferenceInput
+  authoredOn: dateTime  _authoredOn: ElementBaseInput
+  author: ReferenceInput
+  reason: [CodeableReferenceInput]
+  goal: [ReferenceInput]
+  note: [AnnotationInput]
+  action: [RequestOrchestrationActionInputInput]
+}
+
+input RequestOrchestrationActionInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  linkId: String  _linkId: ElementBaseInput
+  prefix: String  _prefix: ElementBaseInput
+  title: String  _title: ElementBaseInput
+  description: markdown  _description: ElementBaseInput
+  textEquivalent: markdown  _textEquivalent: ElementBaseInput
+  priority: code  _priority: ElementBaseInput
+  code: [CodeableConceptInput]
+  documentation: [RelatedArtifactInput]
+  goal: [ReferenceInput]
+  condition: [RequestOrchestrationActionInputConditionInputInput]
+  input: [RequestOrchestrationActionInputInputInputInput]
+  output: [RequestOrchestrationActionInputOutputInputInput]
+  relatedAction: [RequestOrchestrationActionInputRelatedActionInputInput]
+  timingDateTime: dateTime  _timingDateTime: ElementBaseInput
+  timingAge: AgeInput
+  timingPeriod: PeriodInput
+  timingDuration: DurationInput
+  timingRange: RangeInput
+  timingTiming: TimingInput
+  location: CodeableReferenceInput
+  participant: [RequestOrchestrationActionInputParticipantInputInput]
+  type: CodeableConceptInput
+  groupingBehavior: code  _groupingBehavior: ElementBaseInput
+  selectionBehavior: code  _selectionBehavior: ElementBaseInput
+  requiredBehavior: code  _requiredBehavior: ElementBaseInput
+  precheckBehavior: code  _precheckBehavior: ElementBaseInput
+  cardinalityBehavior: code  _cardinalityBehavior: ElementBaseInput
+  resource: ReferenceInput
+  definitionCanonical: canonical  _definitionCanonical: ElementBaseInput
+  definitionUri: uri  _definitionUri: ElementBaseInput
+  transform: canonical  _transform: ElementBaseInput
+  dynamicValue: [RequestOrchestrationActionInputDynamicValueInputInput]
+  action: [RequestOrchestrationActionInputInput]
+}
+
+input RequestOrchestrationActionInputConditionInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  kind: code  _kind: ElementBaseInput
+  expression: ExpressionInput
+}
+
+input RequestOrchestrationActionInputInputInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  title: String  _title: ElementBaseInput
+  requirement: DataRequirementInput
+  relatedData: ID  _relatedData: ElementBaseInput
+}
+
+input RequestOrchestrationActionInputOutputInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  title: String  _title: ElementBaseInput
+  requirement: DataRequirementInput
+  relatedData: String  _relatedData: ElementBaseInput
+}
+
+input RequestOrchestrationActionInputRelatedActionInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  targetId: ID  _targetId: ElementBaseInput
+  relationship: code  _relationship: ElementBaseInput
+  endRelationship: code  _endRelationship: ElementBaseInput
+  offsetDuration: DurationInput
+  offsetRange: RangeInput
+}
+
+input RequestOrchestrationActionInputParticipantInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  type: code  _type: ElementBaseInput
+  typeCanonical: canonical  _typeCanonical: ElementBaseInput
+  typeReference: ReferenceInput
+  role: CodeableConceptInput
+  function: CodeableConceptInput
+  actorCanonical: canonical  _actorCanonical: ElementBaseInput
+}
+
+input RequestOrchestrationActionInputDynamicValueInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  path: String  _path: ElementBaseInput
+  expression: ExpressionInput
+}
+
+type RequestOrchestrationReadType {
+  RequestOrchestration(id: ID!): RequestOrchestration
+}
+
+type RequestOrchestrationListType {
+  RequestOrchestrationList(_filter: String
+    author: [reference]
+    authored: [date]
+    based_on: [reference]
+    code: [token]
+    encounter: [reference]
+    group_identifier: [token]
+    identifier: [token]
+    instantiates_canonical: [reference]
+    instantiates_uri: [uri]
+    intent: [token]
+    participant: [reference]
+    patient: [reference]
+    priority: [token]
+    status: [token]
+    subject: [reference]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [RequestOrchestration]
+}
+
+type RequestOrchestrationConnectionType {
+  RequestOrchestrationConection(_filter: String
+    author: [reference]
+    authored: [date]
+    based_on: [reference]
+    code: [token]
+    encounter: [reference]
+    group_identifier: [token]
+    identifier: [token]
+    instantiates_canonical: [reference]
+    instantiates_uri: [uri]
+    intent: [token]
+    participant: [reference]
+    patient: [reference]
+    priority: [token]
+    status: [token]
+    subject: [reference]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): RequestOrchestrationConnection
+}
+
+type RequestOrchestrationConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [RequestOrchestrationEdge]
+}
+
+type RequestOrchestrationEdge {
+  mode: String
+  score: Float
+  resource: RequestOrchestration
+}
+
+type RequestOrchestrationCreateType {
+  RequestOrchestrationCreate(resource: RequestOrchestrationInput): RequestOrchestrationCreation
+}
+
+type RequestOrchestrationCreation {
+  location: String
+  resource: RequestOrchestration
+  information: OperationOutcome
+}
+
+type RequestOrchestrationUpdateType {
+  RequestOrchestrationUpdate(id: ID, resource: RequestOrchestrationInput): RequestOrchestrationUpdate
+}
+
+type RequestOrchestrationUpdate {
+  resource: RequestOrchestration
+  information: OperationOutcome
+}
+
+type RequestOrchestrationDeleteType {
+  RequestOrchestrationDelete(id: ID): RequestOrchestrationDelete
+}
+
+type RequestOrchestrationDelete {
+  information: OperationOutcome
+}
+

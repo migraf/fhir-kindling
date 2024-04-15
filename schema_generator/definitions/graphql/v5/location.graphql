@@ -1,0 +1,237 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface ILocation implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  status: code  _status: ElementBase
+  operationalStatus: Coding
+  name: String  _name: ElementBase
+  alias: [String]  _alias: [ElementBase]
+  description: markdown  _description: ElementBase
+  mode: code  _mode: ElementBase
+  type: [CodeableConcept]
+  contact: [ExtendedContactDetail]
+  address: Address
+  form: CodeableConcept
+  position: LocationPosition
+  managingOrganization: Reference
+  partOf: Reference
+  characteristic: [CodeableConcept]
+  hoursOfOperation: [Availability]
+  virtualService: [VirtualServiceDetail]
+  endpoint: [Reference]
+}
+
+type Location implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  status: code  _status: ElementBase
+  operationalStatus: Coding
+  name: String  _name: ElementBase
+  alias: [String]  _alias: [ElementBase]
+  description: markdown  _description: ElementBase
+  mode: code  _mode: ElementBase
+  type: [CodeableConcept]
+  contact: [ExtendedContactDetail]
+  address: Address
+  form: CodeableConcept
+  position: LocationPosition
+  managingOrganization: Reference
+  partOf: Reference
+  characteristic: [CodeableConcept]
+  hoursOfOperation: [Availability]
+  virtualService: [VirtualServiceDetail]
+  endpoint: [Reference]
+}
+
+type LocationPosition {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  longitude: decimal  _longitude: ElementBase
+  latitude: decimal  _latitude: ElementBase
+  altitude: decimal  _altitude: ElementBase
+}
+
+input LocationInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: [IdentifierInput]
+  status: code  _status: ElementBaseInput
+  operationalStatus: CodingInput
+  name: String  _name: ElementBaseInput
+  alias: [String]  _alias: [ElementBaseInput]
+  description: markdown  _description: ElementBaseInput
+  mode: code  _mode: ElementBaseInput
+  type: [CodeableConceptInput]
+  contact: [ExtendedContactDetailInput]
+  address: AddressInput
+  form: CodeableConceptInput
+  position: LocationPositionInputInput
+  managingOrganization: ReferenceInput
+  partOf: ReferenceInput
+  characteristic: [CodeableConceptInput]
+  hoursOfOperation: [AvailabilityInput]
+  virtualService: [VirtualServiceDetailInput]
+  endpoint: [ReferenceInput]
+}
+
+input LocationPositionInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  longitude: decimal  _longitude: ElementBaseInput
+  latitude: decimal  _latitude: ElementBaseInput
+  altitude: decimal  _altitude: ElementBaseInput
+}
+
+type LocationReadType {
+  Location(id: ID!): Location
+}
+
+type LocationListType {
+  LocationList(_filter: String
+    address: [String]
+    address_city: [String]
+    address_country: [String]
+    address_postalcode: [String]
+    address_state: [String]
+    address_use: [token]
+    characteristic: [token]
+    contains: [special]
+    endpoint: [reference]
+    identifier: [token]
+    name: [String]
+    near: [special]
+    operational_status: [token]
+    organization: [reference]
+    partof: [reference]
+    status: [token]
+    type: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [Location]
+}
+
+type LocationConnectionType {
+  LocationConection(_filter: String
+    address: [String]
+    address_city: [String]
+    address_country: [String]
+    address_postalcode: [String]
+    address_state: [String]
+    address_use: [token]
+    characteristic: [token]
+    contains: [special]
+    endpoint: [reference]
+    identifier: [token]
+    name: [String]
+    near: [special]
+    operational_status: [token]
+    organization: [reference]
+    partof: [reference]
+    status: [token]
+    type: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): LocationConnection
+}
+
+type LocationConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [LocationEdge]
+}
+
+type LocationEdge {
+  mode: String
+  score: Float
+  resource: Location
+}
+
+type LocationCreateType {
+  LocationCreate(resource: LocationInput): LocationCreation
+}
+
+type LocationCreation {
+  location: String
+  resource: Location
+  information: OperationOutcome
+}
+
+type LocationUpdateType {
+  LocationUpdate(id: ID, resource: LocationInput): LocationUpdate
+}
+
+type LocationUpdate {
+  resource: Location
+  information: OperationOutcome
+}
+
+type LocationDeleteType {
+  LocationDelete(id: ID): LocationDelete
+}
+
+type LocationDelete {
+  information: OperationOutcome
+}
+

@@ -1,0 +1,172 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface ISubscriptionStatus implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  status: code  _status: ElementBase
+  type: code  _type: ElementBase
+  eventsSinceSubscriptionStart: integer64  _eventsSinceSubscriptionStart: ElementBase
+  notificationEvent: [SubscriptionStatusNotificationEvent]
+  subscription: Reference!
+  topic: canonical  _topic: ElementBase
+  error: [CodeableConcept]
+}
+
+type SubscriptionStatus implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  status: code  _status: ElementBase
+  type: code  _type: ElementBase
+  eventsSinceSubscriptionStart: integer64  _eventsSinceSubscriptionStart: ElementBase
+  notificationEvent: [SubscriptionStatusNotificationEvent]
+  subscription: Reference!
+  topic: canonical  _topic: ElementBase
+  error: [CodeableConcept]
+}
+
+type SubscriptionStatusNotificationEvent {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  eventNumber: integer64  _eventNumber: ElementBase
+  timestamp: instant  _timestamp: ElementBase
+  focus: Reference
+  additionalContext: [Reference]
+}
+
+input SubscriptionStatusInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  status: code  _status: ElementBaseInput
+  type: code  _type: ElementBaseInput
+  eventsSinceSubscriptionStart: integer64  _eventsSinceSubscriptionStart: ElementBaseInput
+  notificationEvent: [SubscriptionStatusNotificationEventInputInput]
+  subscription: ReferenceInput!
+  topic: canonical  _topic: ElementBaseInput
+  error: [CodeableConceptInput]
+}
+
+input SubscriptionStatusNotificationEventInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  eventNumber: integer64  _eventNumber: ElementBaseInput
+  timestamp: instant  _timestamp: ElementBaseInput
+  focus: ReferenceInput
+  additionalContext: [ReferenceInput]
+}
+
+type SubscriptionStatusReadType {
+  SubscriptionStatus(id: ID!): SubscriptionStatus
+}
+
+type SubscriptionStatusListType {
+  SubscriptionStatusList(_filter: String
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [SubscriptionStatus]
+}
+
+type SubscriptionStatusConnectionType {
+  SubscriptionStatusConection(_filter: String
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): SubscriptionStatusConnection
+}
+
+type SubscriptionStatusConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [SubscriptionStatusEdge]
+}
+
+type SubscriptionStatusEdge {
+  mode: String
+  score: Float
+  resource: SubscriptionStatus
+}
+
+type SubscriptionStatusCreateType {
+  SubscriptionStatusCreate(resource: SubscriptionStatusInput): SubscriptionStatusCreation
+}
+
+type SubscriptionStatusCreation {
+  location: String
+  resource: SubscriptionStatus
+  information: OperationOutcome
+}
+
+type SubscriptionStatusUpdateType {
+  SubscriptionStatusUpdate(id: ID, resource: SubscriptionStatusInput): SubscriptionStatusUpdate
+}
+
+type SubscriptionStatusUpdate {
+  resource: SubscriptionStatus
+  information: OperationOutcome
+}
+
+type SubscriptionStatusDeleteType {
+  SubscriptionStatusDelete(id: ID): SubscriptionStatusDelete
+}
+
+type SubscriptionStatusDelete {
+  information: OperationOutcome
+}
+

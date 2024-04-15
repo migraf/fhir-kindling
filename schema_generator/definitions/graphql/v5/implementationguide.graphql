@@ -1,0 +1,458 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IImplementationGuide implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  url: uri  _url: ElementBase
+  identifier: [Identifier]
+  version: String  _version: ElementBase
+  versionAlgorithmString: String  _versionAlgorithmString: ElementBase
+  versionAlgorithmCoding: Coding
+  name: String  _name: ElementBase
+  title: String  _title: ElementBase
+  status: code  _status: ElementBase
+  experimental: Boolean  _experimental: ElementBase
+  date: dateTime  _date: ElementBase
+  publisher: String  _publisher: ElementBase
+  contact: [ContactDetail]
+  description: markdown  _description: ElementBase
+  useContext: [UsageContext]
+  jurisdiction: [CodeableConcept]
+  purpose: markdown  _purpose: ElementBase
+  copyright: markdown  _copyright: ElementBase
+  copyrightLabel: String  _copyrightLabel: ElementBase
+  packageId: ID  _packageId: ElementBase
+  license: code  _license: ElementBase
+  fhirVersion: [code]  _fhirVersion: [ElementBase]
+  dependsOn: [ImplementationGuideDependsOn]
+  global: [ImplementationGuideGlobal]
+  definition: ImplementationGuideDefinition
+  manifest: ImplementationGuideManifest
+}
+
+type ImplementationGuide implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  url: uri  _url: ElementBase
+  identifier: [Identifier]
+  version: String  _version: ElementBase
+  versionAlgorithmString: String  _versionAlgorithmString: ElementBase
+  versionAlgorithmCoding: Coding
+  name: String  _name: ElementBase
+  title: String  _title: ElementBase
+  status: code  _status: ElementBase
+  experimental: Boolean  _experimental: ElementBase
+  date: dateTime  _date: ElementBase
+  publisher: String  _publisher: ElementBase
+  contact: [ContactDetail]
+  description: markdown  _description: ElementBase
+  useContext: [UsageContext]
+  jurisdiction: [CodeableConcept]
+  purpose: markdown  _purpose: ElementBase
+  copyright: markdown  _copyright: ElementBase
+  copyrightLabel: String  _copyrightLabel: ElementBase
+  packageId: ID  _packageId: ElementBase
+  license: code  _license: ElementBase
+  fhirVersion: [code]  _fhirVersion: [ElementBase]
+  dependsOn: [ImplementationGuideDependsOn]
+  global: [ImplementationGuideGlobal]
+  definition: ImplementationGuideDefinition
+  manifest: ImplementationGuideManifest
+}
+
+type ImplementationGuideDependsOn {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  uri: canonical  _uri: ElementBase
+  packageId: ID  _packageId: ElementBase
+  version: String  _version: ElementBase
+  reason: markdown  _reason: ElementBase
+}
+
+type ImplementationGuideGlobal {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  type: code  _type: ElementBase
+  profile: canonical  _profile: ElementBase
+}
+
+type ImplementationGuideDefinition {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  grouping: [ImplementationGuideDefinitionGrouping]
+  resource: [ImplementationGuideDefinitionResource]
+  page: ImplementationGuideDefinitionPage
+  parameter: [ImplementationGuideDefinitionParameter]
+  template: [ImplementationGuideDefinitionTemplate]
+}
+
+type ImplementationGuideDefinitionGrouping {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  name: String  _name: ElementBase
+  description: markdown  _description: ElementBase
+}
+
+type ImplementationGuideDefinitionResource {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  reference: Reference!
+  fhirVersion: [code]  _fhirVersion: [ElementBase]
+  name: String  _name: ElementBase
+  description: markdown  _description: ElementBase
+  isExample: Boolean  _isExample: ElementBase
+  profile: [canonical]  _profile: [ElementBase]
+  groupingId: ID  _groupingId: ElementBase
+}
+
+type ImplementationGuideDefinitionPage {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  sourceUrl: url  _sourceUrl: ElementBase
+  sourceString: String  _sourceString: ElementBase
+  sourceMarkdown: markdown  _sourceMarkdown: ElementBase
+  name: url  _name: ElementBase
+  title: String  _title: ElementBase
+  generation: code  _generation: ElementBase
+  page: [ImplementationGuideDefinitionPage]
+}
+
+type ImplementationGuideDefinitionParameter {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  code: Coding!
+  value: String  _value: ElementBase
+}
+
+type ImplementationGuideDefinitionTemplate {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  code: code  _code: ElementBase
+  source: String  _source: ElementBase
+  scope: String  _scope: ElementBase
+}
+
+type ImplementationGuideManifest {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  rendering: url  _rendering: ElementBase
+  resource: [ImplementationGuideDefinitionResource]!
+  page: [ImplementationGuideDefinitionPage]
+  image: [String]  _image: [ElementBase]
+  other: [String]  _other: [ElementBase]
+}
+
+input ImplementationGuideInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  url: uri  _url: ElementBaseInput
+  identifier: [IdentifierInput]
+  version: String  _version: ElementBaseInput
+  versionAlgorithmString: String  _versionAlgorithmString: ElementBaseInput
+  versionAlgorithmCoding: CodingInput
+  name: String  _name: ElementBaseInput
+  title: String  _title: ElementBaseInput
+  status: code  _status: ElementBaseInput
+  experimental: Boolean  _experimental: ElementBaseInput
+  date: dateTime  _date: ElementBaseInput
+  publisher: String  _publisher: ElementBaseInput
+  contact: [ContactDetailInput]
+  description: markdown  _description: ElementBaseInput
+  useContext: [UsageContextInput]
+  jurisdiction: [CodeableConceptInput]
+  purpose: markdown  _purpose: ElementBaseInput
+  copyright: markdown  _copyright: ElementBaseInput
+  copyrightLabel: String  _copyrightLabel: ElementBaseInput
+  packageId: ID  _packageId: ElementBaseInput
+  license: code  _license: ElementBaseInput
+  fhirVersion: [code]  _fhirVersion: [ElementBaseInput]
+  dependsOn: [ImplementationGuideDependsOnInputInput]
+  global: [ImplementationGuideGlobalInputInput]
+  definition: ImplementationGuideDefinitionInputInput
+  manifest: ImplementationGuideManifestInputInput
+}
+
+input ImplementationGuideDependsOnInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  uri: canonical  _uri: ElementBaseInput
+  packageId: ID  _packageId: ElementBaseInput
+  version: String  _version: ElementBaseInput
+  reason: markdown  _reason: ElementBaseInput
+}
+
+input ImplementationGuideGlobalInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  type: code  _type: ElementBaseInput
+  profile: canonical  _profile: ElementBaseInput
+}
+
+input ImplementationGuideDefinitionInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  grouping: [ImplementationGuideDefinitionInputGroupingInputInput]
+  resource: [ImplementationGuideDefinitionInputResourceInputInput]
+  page: ImplementationGuideDefinitionInputPageInputInput
+  parameter: [ImplementationGuideDefinitionInputParameterInputInput]
+  template: [ImplementationGuideDefinitionInputTemplateInputInput]
+}
+
+input ImplementationGuideDefinitionInputGroupingInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  name: String  _name: ElementBaseInput
+  description: markdown  _description: ElementBaseInput
+}
+
+input ImplementationGuideDefinitionInputResourceInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  reference: ReferenceInput!
+  fhirVersion: [code]  _fhirVersion: [ElementBaseInput]
+  name: String  _name: ElementBaseInput
+  description: markdown  _description: ElementBaseInput
+  isExample: Boolean  _isExample: ElementBaseInput
+  profile: [canonical]  _profile: [ElementBaseInput]
+  groupingId: ID  _groupingId: ElementBaseInput
+}
+
+input ImplementationGuideDefinitionInputPageInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  sourceUrl: url  _sourceUrl: ElementBaseInput
+  sourceString: String  _sourceString: ElementBaseInput
+  sourceMarkdown: markdown  _sourceMarkdown: ElementBaseInput
+  name: url  _name: ElementBaseInput
+  title: String  _title: ElementBaseInput
+  generation: code  _generation: ElementBaseInput
+  page: [ImplementationGuideDefinitionInputPageInputInput]
+}
+
+input ImplementationGuideDefinitionInputParameterInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  code: CodingInput!
+  value: String  _value: ElementBaseInput
+}
+
+input ImplementationGuideDefinitionInputTemplateInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  code: code  _code: ElementBaseInput
+  source: String  _source: ElementBaseInput
+  scope: String  _scope: ElementBaseInput
+}
+
+input ImplementationGuideManifestInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  rendering: url  _rendering: ElementBaseInput
+  resource: [ImplementationGuideDefinitionInputResourceInputInput]!
+  page: [ImplementationGuideDefinitionInputPageInputInput]
+  image: [String]  _image: [ElementBaseInput]
+  other: [String]  _other: [ElementBaseInput]
+}
+
+type ImplementationGuideReadType {
+  ImplementationGuide(id: ID!): ImplementationGuide
+}
+
+type ImplementationGuideListType {
+  ImplementationGuideList(_filter: String
+    context: [token]
+    context_quantity: [quantity]
+    context_type: [token]
+    context_type_quantity: [composite]
+    context_type_value: [composite]
+    date: [date]
+    depends_on: [reference]
+    description: [String]
+    experimental: [token]
+    global: [reference]
+    identifier: [token]
+    jurisdiction: [token]
+    name: [String]
+    publisher: [String]
+    resource: [reference]
+    status: [token]
+    title: [String]
+    url: [uri]
+    version: [token]
+    context: [token]
+    context_quantity: [quantity]
+    context_reference: [reference]
+    context_type: [token]
+    context_type_quantity: [composite]
+    context_type_value: [composite]
+    date: [date]
+    description: [String]
+    identifier: [token]
+    jurisdiction: [token]
+    name: [String]
+    publisher: [String]
+    status: [token]
+    title: [String]
+    url: [uri]
+    version: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [ImplementationGuide]
+}
+
+type ImplementationGuideConnectionType {
+  ImplementationGuideConection(_filter: String
+    context: [token]
+    context_quantity: [quantity]
+    context_type: [token]
+    context_type_quantity: [composite]
+    context_type_value: [composite]
+    date: [date]
+    depends_on: [reference]
+    description: [String]
+    experimental: [token]
+    global: [reference]
+    identifier: [token]
+    jurisdiction: [token]
+    name: [String]
+    publisher: [String]
+    resource: [reference]
+    status: [token]
+    title: [String]
+    url: [uri]
+    version: [token]
+    context: [token]
+    context_quantity: [quantity]
+    context_reference: [reference]
+    context_type: [token]
+    context_type_quantity: [composite]
+    context_type_value: [composite]
+    date: [date]
+    description: [String]
+    identifier: [token]
+    jurisdiction: [token]
+    name: [String]
+    publisher: [String]
+    status: [token]
+    title: [String]
+    url: [uri]
+    version: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): ImplementationGuideConnection
+}
+
+type ImplementationGuideConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [ImplementationGuideEdge]
+}
+
+type ImplementationGuideEdge {
+  mode: String
+  score: Float
+  resource: ImplementationGuide
+}
+
+type ImplementationGuideCreateType {
+  ImplementationGuideCreate(resource: ImplementationGuideInput): ImplementationGuideCreation
+}
+
+type ImplementationGuideCreation {
+  location: String
+  resource: ImplementationGuide
+  information: OperationOutcome
+}
+
+type ImplementationGuideUpdateType {
+  ImplementationGuideUpdate(id: ID, resource: ImplementationGuideInput): ImplementationGuideUpdate
+}
+
+type ImplementationGuideUpdate {
+  resource: ImplementationGuide
+  information: OperationOutcome
+}
+
+type ImplementationGuideDeleteType {
+  ImplementationGuideDelete(id: ID): ImplementationGuideDelete
+}
+
+type ImplementationGuideDelete {
+  information: OperationOutcome
+}
+

@@ -2,7 +2,6 @@ import json
 import os
 
 from dotenv import find_dotenv, load_dotenv
-
 from fhir_kindling import FhirServer
 from fhir_kindling.fhir_query.query_parameters import FhirQueryParameters
 

@@ -6,11 +6,10 @@ import time
 import fhirclient.models.patient as p
 import pandas as pd
 import plotly.express as px
-from fhirclient import client
-from fhirpy import AsyncFHIRClient, SyncFHIRClient
-
 from fhir_kindling import FhirServer
 from fhir_kindling.generators import PatientGenerator
+from fhirclient import client
+from fhirpy import AsyncFHIRClient, SyncFHIRClient
 
 N = 10000
 

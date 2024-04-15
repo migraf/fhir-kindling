@@ -1,0 +1,291 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IImagingStudy implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  status: code  _status: ElementBase
+  modality: [CodeableConcept]
+  subject: Reference!
+  encounter: Reference
+  started: dateTime  _started: ElementBase
+  basedOn: [Reference]
+  partOf: [Reference]
+  referrer: Reference
+  endpoint: [Reference]
+  numberOfSeries: unsignedInt  _numberOfSeries: ElementBase
+  numberOfInstances: unsignedInt  _numberOfInstances: ElementBase
+  procedure: [CodeableReference]
+  location: Reference
+  reason: [CodeableReference]
+  note: [Annotation]
+  description: String  _description: ElementBase
+  series: [ImagingStudySeries]
+}
+
+type ImagingStudy implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  status: code  _status: ElementBase
+  modality: [CodeableConcept]
+  subject: Reference!
+  encounter: Reference
+  started: dateTime  _started: ElementBase
+  basedOn: [Reference]
+  partOf: [Reference]
+  referrer: Reference
+  endpoint: [Reference]
+  numberOfSeries: unsignedInt  _numberOfSeries: ElementBase
+  numberOfInstances: unsignedInt  _numberOfInstances: ElementBase
+  procedure: [CodeableReference]
+  location: Reference
+  reason: [CodeableReference]
+  note: [Annotation]
+  description: String  _description: ElementBase
+  series: [ImagingStudySeries]
+}
+
+type ImagingStudySeries {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  uid: ID  _uid: ElementBase
+  number: unsignedInt  _number: ElementBase
+  modality: CodeableConcept!
+  description: String  _description: ElementBase
+  numberOfInstances: unsignedInt  _numberOfInstances: ElementBase
+  endpoint: [Reference]
+  bodySite: CodeableReference
+  laterality: CodeableConcept
+  specimen: [Reference]
+  started: dateTime  _started: ElementBase
+  performer: [ImagingStudySeriesPerformer]
+  instance: [ImagingStudySeriesInstance]
+}
+
+type ImagingStudySeriesPerformer {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  function: CodeableConcept
+  actor: Reference!
+}
+
+type ImagingStudySeriesInstance {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  uid: ID  _uid: ElementBase
+  sopClass: Coding!
+  number: unsignedInt  _number: ElementBase
+  title: String  _title: ElementBase
+}
+
+input ImagingStudyInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: [IdentifierInput]
+  status: code  _status: ElementBaseInput
+  modality: [CodeableConceptInput]
+  subject: ReferenceInput!
+  encounter: ReferenceInput
+  started: dateTime  _started: ElementBaseInput
+  basedOn: [ReferenceInput]
+  partOf: [ReferenceInput]
+  referrer: ReferenceInput
+  endpoint: [ReferenceInput]
+  numberOfSeries: unsignedInt  _numberOfSeries: ElementBaseInput
+  numberOfInstances: unsignedInt  _numberOfInstances: ElementBaseInput
+  procedure: [CodeableReferenceInput]
+  location: ReferenceInput
+  reason: [CodeableReferenceInput]
+  note: [AnnotationInput]
+  description: String  _description: ElementBaseInput
+  series: [ImagingStudySeriesInputInput]
+}
+
+input ImagingStudySeriesInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  uid: ID  _uid: ElementBaseInput
+  number: unsignedInt  _number: ElementBaseInput
+  modality: CodeableConceptInput!
+  description: String  _description: ElementBaseInput
+  numberOfInstances: unsignedInt  _numberOfInstances: ElementBaseInput
+  endpoint: [ReferenceInput]
+  bodySite: CodeableReferenceInput
+  laterality: CodeableConceptInput
+  specimen: [ReferenceInput]
+  started: dateTime  _started: ElementBaseInput
+  performer: [ImagingStudySeriesInputPerformerInputInput]
+  instance: [ImagingStudySeriesInputInstanceInputInput]
+}
+
+input ImagingStudySeriesInputPerformerInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  function: CodeableConceptInput
+  actor: ReferenceInput!
+}
+
+input ImagingStudySeriesInputInstanceInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  uid: ID  _uid: ElementBaseInput
+  sopClass: CodingInput!
+  number: unsignedInt  _number: ElementBaseInput
+  title: String  _title: ElementBaseInput
+}
+
+type ImagingStudyReadType {
+  ImagingStudy(id: ID!): ImagingStudy
+}
+
+type ImagingStudyListType {
+  ImagingStudyList(_filter: String
+    based_on: [reference]
+    body_site: [token]
+    body_structure: [reference]
+    dicom_class: [token]
+    encounter: [reference]
+    endpoint: [reference]
+    identifier: [token]
+    instance: [token]
+    modality: [token]
+    patient: [reference]
+    performer: [reference]
+    reason: [token]
+    referrer: [reference]
+    series: [token]
+    started: [date]
+    status: [token]
+    subject: [reference]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [ImagingStudy]
+}
+
+type ImagingStudyConnectionType {
+  ImagingStudyConection(_filter: String
+    based_on: [reference]
+    body_site: [token]
+    body_structure: [reference]
+    dicom_class: [token]
+    encounter: [reference]
+    endpoint: [reference]
+    identifier: [token]
+    instance: [token]
+    modality: [token]
+    patient: [reference]
+    performer: [reference]
+    reason: [token]
+    referrer: [reference]
+    series: [token]
+    started: [date]
+    status: [token]
+    subject: [reference]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): ImagingStudyConnection
+}
+
+type ImagingStudyConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [ImagingStudyEdge]
+}
+
+type ImagingStudyEdge {
+  mode: String
+  score: Float
+  resource: ImagingStudy
+}
+
+type ImagingStudyCreateType {
+  ImagingStudyCreate(resource: ImagingStudyInput): ImagingStudyCreation
+}
+
+type ImagingStudyCreation {
+  location: String
+  resource: ImagingStudy
+  information: OperationOutcome
+}
+
+type ImagingStudyUpdateType {
+  ImagingStudyUpdate(id: ID, resource: ImagingStudyInput): ImagingStudyUpdate
+}
+
+type ImagingStudyUpdate {
+  resource: ImagingStudy
+  information: OperationOutcome
+}
+
+type ImagingStudyDeleteType {
+  ImagingStudyDelete(id: ID): ImagingStudyDelete
+}
+
+type ImagingStudyDelete {
+  information: OperationOutcome
+}
+

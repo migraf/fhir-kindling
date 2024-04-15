@@ -1,0 +1,207 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IInventoryReport implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  status: code  _status: ElementBase
+  countType: code  _countType: ElementBase
+  operationType: CodeableConcept
+  operationTypeReason: CodeableConcept
+  reportedDateTime: dateTime  _reportedDateTime: ElementBase
+  reporter: Reference
+  reportingPeriod: Period
+  inventoryListing: [InventoryReportInventoryListing]
+  note: [Annotation]
+}
+
+type InventoryReport implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  status: code  _status: ElementBase
+  countType: code  _countType: ElementBase
+  operationType: CodeableConcept
+  operationTypeReason: CodeableConcept
+  reportedDateTime: dateTime  _reportedDateTime: ElementBase
+  reporter: Reference
+  reportingPeriod: Period
+  inventoryListing: [InventoryReportInventoryListing]
+  note: [Annotation]
+}
+
+type InventoryReportInventoryListing {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  location: Reference
+  itemStatus: CodeableConcept
+  countingDateTime: dateTime  _countingDateTime: ElementBase
+  item: [InventoryReportInventoryListingItem]
+}
+
+type InventoryReportInventoryListingItem {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  category: CodeableConcept
+  quantity: Quantity!
+  item: CodeableReference!
+}
+
+input InventoryReportInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: [IdentifierInput]
+  status: code  _status: ElementBaseInput
+  countType: code  _countType: ElementBaseInput
+  operationType: CodeableConceptInput
+  operationTypeReason: CodeableConceptInput
+  reportedDateTime: dateTime  _reportedDateTime: ElementBaseInput
+  reporter: ReferenceInput
+  reportingPeriod: PeriodInput
+  inventoryListing: [InventoryReportInventoryListingInputInput]
+  note: [AnnotationInput]
+}
+
+input InventoryReportInventoryListingInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  location: ReferenceInput
+  itemStatus: CodeableConceptInput
+  countingDateTime: dateTime  _countingDateTime: ElementBaseInput
+  item: [InventoryReportInventoryListingInputItemInputInput]
+}
+
+input InventoryReportInventoryListingInputItemInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  category: CodeableConceptInput
+  quantity: QuantityInput!
+  item: CodeableReferenceInput!
+}
+
+type InventoryReportReadType {
+  InventoryReport(id: ID!): InventoryReport
+}
+
+type InventoryReportListType {
+  InventoryReportList(_filter: String
+    identifier: [token]
+    item: [token]
+    item_reference: [reference]
+    status: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [InventoryReport]
+}
+
+type InventoryReportConnectionType {
+  InventoryReportConection(_filter: String
+    identifier: [token]
+    item: [token]
+    item_reference: [reference]
+    status: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): InventoryReportConnection
+}
+
+type InventoryReportConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [InventoryReportEdge]
+}
+
+type InventoryReportEdge {
+  mode: String
+  score: Float
+  resource: InventoryReport
+}
+
+type InventoryReportCreateType {
+  InventoryReportCreate(resource: InventoryReportInput): InventoryReportCreation
+}
+
+type InventoryReportCreation {
+  location: String
+  resource: InventoryReport
+  information: OperationOutcome
+}
+
+type InventoryReportUpdateType {
+  InventoryReportUpdate(id: ID, resource: InventoryReportInput): InventoryReportUpdate
+}
+
+type InventoryReportUpdate {
+  resource: InventoryReport
+  information: OperationOutcome
+}
+
+type InventoryReportDeleteType {
+  InventoryReportDelete(id: ID): InventoryReportDelete
+}
+
+type InventoryReportDelete {
+  information: OperationOutcome
+}
+

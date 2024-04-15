@@ -1,0 +1,255 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface INutritionProduct implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  code: CodeableConcept
+  status: code  _status: ElementBase
+  category: [CodeableConcept]
+  manufacturer: [Reference]
+  nutrient: [NutritionProductNutrient]
+  ingredient: [NutritionProductIngredient]
+  knownAllergen: [CodeableReference]
+  characteristic: [NutritionProductCharacteristic]
+  instance: [NutritionProductInstance]
+  note: [Annotation]
+}
+
+type NutritionProduct implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  code: CodeableConcept
+  status: code  _status: ElementBase
+  category: [CodeableConcept]
+  manufacturer: [Reference]
+  nutrient: [NutritionProductNutrient]
+  ingredient: [NutritionProductIngredient]
+  knownAllergen: [CodeableReference]
+  characteristic: [NutritionProductCharacteristic]
+  instance: [NutritionProductInstance]
+  note: [Annotation]
+}
+
+type NutritionProductNutrient {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  item: CodeableReference
+  amount: [Ratio]
+}
+
+type NutritionProductIngredient {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  item: CodeableReference!
+  amount: [Ratio]
+}
+
+type NutritionProductCharacteristic {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  type: CodeableConcept!
+  valueCodeableConcept: CodeableConcept
+  valueString: String  _valueString: ElementBase
+  valueQuantity: Quantity
+  valueBase64Binary: base64Binary  _valueBase64Binary: ElementBase
+  valueAttachment: Attachment
+  valueBoolean: Boolean  _valueBoolean: ElementBase
+}
+
+type NutritionProductInstance {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  quantity: Quantity
+  identifier: [Identifier]
+  name: String  _name: ElementBase
+  lotNumber: String  _lotNumber: ElementBase
+  expiry: dateTime  _expiry: ElementBase
+  useBy: dateTime  _useBy: ElementBase
+  biologicalSourceEvent: Identifier
+}
+
+input NutritionProductInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  code: CodeableConceptInput
+  status: code  _status: ElementBaseInput
+  category: [CodeableConceptInput]
+  manufacturer: [ReferenceInput]
+  nutrient: [NutritionProductNutrientInputInput]
+  ingredient: [NutritionProductIngredientInputInput]
+  knownAllergen: [CodeableReferenceInput]
+  characteristic: [NutritionProductCharacteristicInputInput]
+  instance: [NutritionProductInstanceInputInput]
+  note: [AnnotationInput]
+}
+
+input NutritionProductNutrientInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  item: CodeableReferenceInput
+  amount: [RatioInput]
+}
+
+input NutritionProductIngredientInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  item: CodeableReferenceInput!
+  amount: [RatioInput]
+}
+
+input NutritionProductCharacteristicInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  type: CodeableConceptInput!
+  valueCodeableConcept: CodeableConceptInput
+  valueString: String  _valueString: ElementBaseInput
+  valueQuantity: QuantityInput
+  valueBase64Binary: base64Binary  _valueBase64Binary: ElementBaseInput
+  valueAttachment: AttachmentInput
+  valueBoolean: Boolean  _valueBoolean: ElementBaseInput
+}
+
+input NutritionProductInstanceInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  quantity: QuantityInput
+  identifier: [IdentifierInput]
+  name: String  _name: ElementBaseInput
+  lotNumber: String  _lotNumber: ElementBaseInput
+  expiry: dateTime  _expiry: ElementBaseInput
+  useBy: dateTime  _useBy: ElementBaseInput
+  biologicalSourceEvent: IdentifierInput
+}
+
+type NutritionProductReadType {
+  NutritionProduct(id: ID!): NutritionProduct
+}
+
+type NutritionProductListType {
+  NutritionProductList(_filter: String
+    code: [token]
+    identifier: [token]
+    lot_number: [token]
+    serial_number: [token]
+    status: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [NutritionProduct]
+}
+
+type NutritionProductConnectionType {
+  NutritionProductConection(_filter: String
+    code: [token]
+    identifier: [token]
+    lot_number: [token]
+    serial_number: [token]
+    status: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): NutritionProductConnection
+}
+
+type NutritionProductConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [NutritionProductEdge]
+}
+
+type NutritionProductEdge {
+  mode: String
+  score: Float
+  resource: NutritionProduct
+}
+
+type NutritionProductCreateType {
+  NutritionProductCreate(resource: NutritionProductInput): NutritionProductCreation
+}
+
+type NutritionProductCreation {
+  location: String
+  resource: NutritionProduct
+  information: OperationOutcome
+}
+
+type NutritionProductUpdateType {
+  NutritionProductUpdate(id: ID, resource: NutritionProductInput): NutritionProductUpdate
+}
+
+type NutritionProductUpdate {
+  resource: NutritionProduct
+  information: OperationOutcome
+}
+
+type NutritionProductDeleteType {
+  NutritionProductDelete(id: ID): NutritionProductDelete
+}
+
+type NutritionProductDelete {
+  information: OperationOutcome
+}
+

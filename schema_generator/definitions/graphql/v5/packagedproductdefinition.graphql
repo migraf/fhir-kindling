@@ -1,0 +1,288 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IPackagedProductDefinition implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  name: String  _name: ElementBase
+  type: CodeableConcept
+  packageFor: [Reference]
+  status: CodeableConcept
+  statusDate: dateTime  _statusDate: ElementBase
+  containedItemQuantity: [Quantity]
+  description: markdown  _description: ElementBase
+  legalStatusOfSupply: [PackagedProductDefinitionLegalStatusOfSupply]
+  marketingStatus: [MarketingStatus]
+  copackagedIndicator: Boolean  _copackagedIndicator: ElementBase
+  manufacturer: [Reference]
+  attachedDocument: [Reference]
+  packaging: PackagedProductDefinitionPackaging
+  characteristic: [PackagedProductDefinitionPackagingProperty]
+}
+
+type PackagedProductDefinition implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  name: String  _name: ElementBase
+  type: CodeableConcept
+  packageFor: [Reference]
+  status: CodeableConcept
+  statusDate: dateTime  _statusDate: ElementBase
+  containedItemQuantity: [Quantity]
+  description: markdown  _description: ElementBase
+  legalStatusOfSupply: [PackagedProductDefinitionLegalStatusOfSupply]
+  marketingStatus: [MarketingStatus]
+  copackagedIndicator: Boolean  _copackagedIndicator: ElementBase
+  manufacturer: [Reference]
+  attachedDocument: [Reference]
+  packaging: PackagedProductDefinitionPackaging
+  characteristic: [PackagedProductDefinitionPackagingProperty]
+}
+
+type PackagedProductDefinitionLegalStatusOfSupply {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  code: CodeableConcept
+  jurisdiction: CodeableConcept
+}
+
+type PackagedProductDefinitionPackaging {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  type: CodeableConcept
+  componentPart: Boolean  _componentPart: ElementBase
+  quantity: Int  _quantity: ElementBase
+  material: [CodeableConcept]
+  alternateMaterial: [CodeableConcept]
+  shelfLifeStorage: [ProductShelfLife]
+  manufacturer: [Reference]
+  property: [PackagedProductDefinitionPackagingProperty]
+  containedItem: [PackagedProductDefinitionPackagingContainedItem]
+  packaging: [PackagedProductDefinitionPackaging]
+}
+
+type PackagedProductDefinitionPackagingProperty {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  type: CodeableConcept!
+  valueCodeableConcept: CodeableConcept
+  valueQuantity: Quantity
+  valueDate: date  _valueDate: ElementBase
+  valueBoolean: Boolean  _valueBoolean: ElementBase
+  valueAttachment: Attachment
+}
+
+type PackagedProductDefinitionPackagingContainedItem {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  item: CodeableReference!
+  amount: Quantity
+}
+
+input PackagedProductDefinitionInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: [IdentifierInput]
+  name: String  _name: ElementBaseInput
+  type: CodeableConceptInput
+  packageFor: [ReferenceInput]
+  status: CodeableConceptInput
+  statusDate: dateTime  _statusDate: ElementBaseInput
+  containedItemQuantity: [QuantityInput]
+  description: markdown  _description: ElementBaseInput
+  legalStatusOfSupply: [PackagedProductDefinitionLegalStatusOfSupplyInputInput]
+  marketingStatus: [MarketingStatusInput]
+  copackagedIndicator: Boolean  _copackagedIndicator: ElementBaseInput
+  manufacturer: [ReferenceInput]
+  attachedDocument: [ReferenceInput]
+  packaging: PackagedProductDefinitionPackagingInputInput
+  characteristic: [PackagedProductDefinitionPackagingInputPropertyInputInput]
+}
+
+input PackagedProductDefinitionLegalStatusOfSupplyInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  code: CodeableConceptInput
+  jurisdiction: CodeableConceptInput
+}
+
+input PackagedProductDefinitionPackagingInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: [IdentifierInput]
+  type: CodeableConceptInput
+  componentPart: Boolean  _componentPart: ElementBaseInput
+  quantity: Int  _quantity: ElementBaseInput
+  material: [CodeableConceptInput]
+  alternateMaterial: [CodeableConceptInput]
+  shelfLifeStorage: [ProductShelfLifeInput]
+  manufacturer: [ReferenceInput]
+  property: [PackagedProductDefinitionPackagingInputPropertyInputInput]
+  containedItem: [PackagedProductDefinitionPackagingInputContainedItemInputInput]
+  packaging: [PackagedProductDefinitionPackagingInputInput]
+}
+
+input PackagedProductDefinitionPackagingInputPropertyInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  type: CodeableConceptInput!
+  valueCodeableConcept: CodeableConceptInput
+  valueQuantity: QuantityInput
+  valueDate: date  _valueDate: ElementBaseInput
+  valueBoolean: Boolean  _valueBoolean: ElementBaseInput
+  valueAttachment: AttachmentInput
+}
+
+input PackagedProductDefinitionPackagingInputContainedItemInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  item: CodeableReferenceInput!
+  amount: QuantityInput
+}
+
+type PackagedProductDefinitionReadType {
+  PackagedProductDefinition(id: ID!): PackagedProductDefinition
+}
+
+type PackagedProductDefinitionListType {
+  PackagedProductDefinitionList(_filter: String
+    biological: [reference]
+    contained_item: [reference]
+    device: [reference]
+    identifier: [token]
+    manufactured_item: [reference]
+    medication: [reference]
+    name: [token]
+    nutrition: [reference]
+    package: [reference]
+    package_for: [reference]
+    status: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [PackagedProductDefinition]
+}
+
+type PackagedProductDefinitionConnectionType {
+  PackagedProductDefinitionConection(_filter: String
+    biological: [reference]
+    contained_item: [reference]
+    device: [reference]
+    identifier: [token]
+    manufactured_item: [reference]
+    medication: [reference]
+    name: [token]
+    nutrition: [reference]
+    package: [reference]
+    package_for: [reference]
+    status: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): PackagedProductDefinitionConnection
+}
+
+type PackagedProductDefinitionConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [PackagedProductDefinitionEdge]
+}
+
+type PackagedProductDefinitionEdge {
+  mode: String
+  score: Float
+  resource: PackagedProductDefinition
+}
+
+type PackagedProductDefinitionCreateType {
+  PackagedProductDefinitionCreate(resource: PackagedProductDefinitionInput): PackagedProductDefinitionCreation
+}
+
+type PackagedProductDefinitionCreation {
+  location: String
+  resource: PackagedProductDefinition
+  information: OperationOutcome
+}
+
+type PackagedProductDefinitionUpdateType {
+  PackagedProductDefinitionUpdate(id: ID, resource: PackagedProductDefinitionInput): PackagedProductDefinitionUpdate
+}
+
+type PackagedProductDefinitionUpdate {
+  resource: PackagedProductDefinition
+  information: OperationOutcome
+}
+
+type PackagedProductDefinitionDeleteType {
+  PackagedProductDefinitionDelete(id: ID): PackagedProductDefinitionDelete
+}
+
+type PackagedProductDefinitionDelete {
+  information: OperationOutcome
+}
+

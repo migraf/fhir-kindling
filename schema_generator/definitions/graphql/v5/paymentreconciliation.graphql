@@ -1,0 +1,296 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IPaymentReconciliation implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  type: CodeableConcept!
+  status: code  _status: ElementBase
+  kind: CodeableConcept
+  period: Period
+  created: dateTime  _created: ElementBase
+  enterer: Reference
+  issuerType: CodeableConcept
+  paymentIssuer: Reference
+  request: Reference
+  requestor: Reference
+  outcome: code  _outcome: ElementBase
+  disposition: String  _disposition: ElementBase
+  date: date  _date: ElementBase
+  location: Reference
+  method: CodeableConcept
+  cardBrand: String  _cardBrand: ElementBase
+  accountNumber: String  _accountNumber: ElementBase
+  expirationDate: date  _expirationDate: ElementBase
+  processor: String  _processor: ElementBase
+  referenceNumber: String  _referenceNumber: ElementBase
+  authorization: String  _authorization: ElementBase
+  tenderedAmount: Money
+  returnedAmount: Money
+  amount: Money!
+  paymentIdentifier: Identifier
+  allocation: [PaymentReconciliationAllocation]
+  formCode: CodeableConcept
+  processNote: [PaymentReconciliationProcessNote]
+}
+
+type PaymentReconciliation implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  type: CodeableConcept!
+  status: code  _status: ElementBase
+  kind: CodeableConcept
+  period: Period
+  created: dateTime  _created: ElementBase
+  enterer: Reference
+  issuerType: CodeableConcept
+  paymentIssuer: Reference
+  request: Reference
+  requestor: Reference
+  outcome: code  _outcome: ElementBase
+  disposition: String  _disposition: ElementBase
+  date: date  _date: ElementBase
+  location: Reference
+  method: CodeableConcept
+  cardBrand: String  _cardBrand: ElementBase
+  accountNumber: String  _accountNumber: ElementBase
+  expirationDate: date  _expirationDate: ElementBase
+  processor: String  _processor: ElementBase
+  referenceNumber: String  _referenceNumber: ElementBase
+  authorization: String  _authorization: ElementBase
+  tenderedAmount: Money
+  returnedAmount: Money
+  amount: Money!
+  paymentIdentifier: Identifier
+  allocation: [PaymentReconciliationAllocation]
+  formCode: CodeableConcept
+  processNote: [PaymentReconciliationProcessNote]
+}
+
+type PaymentReconciliationAllocation {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: Identifier
+  predecessor: Identifier
+  target: Reference
+  targetItemString: String  _targetItemString: ElementBase
+  targetItemIdentifier: Identifier
+  targetItemPositiveInt: positiveInt  _targetItemPositiveInt: ElementBase
+  encounter: Reference
+  account: Reference
+  type: CodeableConcept
+  submitter: Reference
+  response: Reference
+  date: date  _date: ElementBase
+  responsible: Reference
+  payee: Reference
+  amount: Money
+}
+
+type PaymentReconciliationProcessNote {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  type: code  _type: ElementBase
+  text: String  _text: ElementBase
+}
+
+input PaymentReconciliationInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: [IdentifierInput]
+  type: CodeableConceptInput!
+  status: code  _status: ElementBaseInput
+  kind: CodeableConceptInput
+  period: PeriodInput
+  created: dateTime  _created: ElementBaseInput
+  enterer: ReferenceInput
+  issuerType: CodeableConceptInput
+  paymentIssuer: ReferenceInput
+  request: ReferenceInput
+  requestor: ReferenceInput
+  outcome: code  _outcome: ElementBaseInput
+  disposition: String  _disposition: ElementBaseInput
+  date: date  _date: ElementBaseInput
+  location: ReferenceInput
+  method: CodeableConceptInput
+  cardBrand: String  _cardBrand: ElementBaseInput
+  accountNumber: String  _accountNumber: ElementBaseInput
+  expirationDate: date  _expirationDate: ElementBaseInput
+  processor: String  _processor: ElementBaseInput
+  referenceNumber: String  _referenceNumber: ElementBaseInput
+  authorization: String  _authorization: ElementBaseInput
+  tenderedAmount: MoneyInput
+  returnedAmount: MoneyInput
+  amount: MoneyInput!
+  paymentIdentifier: IdentifierInput
+  allocation: [PaymentReconciliationAllocationInputInput]
+  formCode: CodeableConceptInput
+  processNote: [PaymentReconciliationProcessNoteInputInput]
+}
+
+input PaymentReconciliationAllocationInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: IdentifierInput
+  predecessor: IdentifierInput
+  target: ReferenceInput
+  targetItemString: String  _targetItemString: ElementBaseInput
+  targetItemIdentifier: IdentifierInput
+  targetItemPositiveInt: positiveInt  _targetItemPositiveInt: ElementBaseInput
+  encounter: ReferenceInput
+  account: ReferenceInput
+  type: CodeableConceptInput
+  submitter: ReferenceInput
+  response: ReferenceInput
+  date: date  _date: ElementBaseInput
+  responsible: ReferenceInput
+  payee: ReferenceInput
+  amount: MoneyInput
+}
+
+input PaymentReconciliationProcessNoteInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  type: code  _type: ElementBaseInput
+  text: String  _text: ElementBaseInput
+}
+
+type PaymentReconciliationReadType {
+  PaymentReconciliation(id: ID!): PaymentReconciliation
+}
+
+type PaymentReconciliationListType {
+  PaymentReconciliationList(_filter: String
+    allocation_account: [reference]
+    allocation_encounter: [reference]
+    created: [date]
+    disposition: [String]
+    identifier: [token]
+    outcome: [token]
+    payment_issuer: [reference]
+    request: [reference]
+    requestor: [reference]
+    status: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [PaymentReconciliation]
+}
+
+type PaymentReconciliationConnectionType {
+  PaymentReconciliationConection(_filter: String
+    allocation_account: [reference]
+    allocation_encounter: [reference]
+    created: [date]
+    disposition: [String]
+    identifier: [token]
+    outcome: [token]
+    payment_issuer: [reference]
+    request: [reference]
+    requestor: [reference]
+    status: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): PaymentReconciliationConnection
+}
+
+type PaymentReconciliationConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [PaymentReconciliationEdge]
+}
+
+type PaymentReconciliationEdge {
+  mode: String
+  score: Float
+  resource: PaymentReconciliation
+}
+
+type PaymentReconciliationCreateType {
+  PaymentReconciliationCreate(resource: PaymentReconciliationInput): PaymentReconciliationCreation
+}
+
+type PaymentReconciliationCreation {
+  location: String
+  resource: PaymentReconciliation
+  information: OperationOutcome
+}
+
+type PaymentReconciliationUpdateType {
+  PaymentReconciliationUpdate(id: ID, resource: PaymentReconciliationInput): PaymentReconciliationUpdate
+}
+
+type PaymentReconciliationUpdate {
+  resource: PaymentReconciliation
+  information: OperationOutcome
+}
+
+type PaymentReconciliationDeleteType {
+  PaymentReconciliationDelete(id: ID): PaymentReconciliationDelete
+}
+
+type PaymentReconciliationDelete {
+  information: OperationOutcome
+}
+

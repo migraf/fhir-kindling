@@ -1,0 +1,295 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IRequirements implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  url: uri  _url: ElementBase
+  identifier: [Identifier]
+  version: String  _version: ElementBase
+  versionAlgorithmString: String  _versionAlgorithmString: ElementBase
+  versionAlgorithmCoding: Coding
+  name: String  _name: ElementBase
+  title: String  _title: ElementBase
+  status: code  _status: ElementBase
+  experimental: Boolean  _experimental: ElementBase
+  date: dateTime  _date: ElementBase
+  publisher: String  _publisher: ElementBase
+  contact: [ContactDetail]
+  description: markdown  _description: ElementBase
+  useContext: [UsageContext]
+  jurisdiction: [CodeableConcept]
+  purpose: markdown  _purpose: ElementBase
+  copyright: markdown  _copyright: ElementBase
+  copyrightLabel: String  _copyrightLabel: ElementBase
+  derivedFrom: [canonical]  _derivedFrom: [ElementBase]
+  reference: [url]  _reference: [ElementBase]
+  actor: [canonical]  _actor: [ElementBase]
+  statement: [RequirementsStatement]
+}
+
+type Requirements implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  url: uri  _url: ElementBase
+  identifier: [Identifier]
+  version: String  _version: ElementBase
+  versionAlgorithmString: String  _versionAlgorithmString: ElementBase
+  versionAlgorithmCoding: Coding
+  name: String  _name: ElementBase
+  title: String  _title: ElementBase
+  status: code  _status: ElementBase
+  experimental: Boolean  _experimental: ElementBase
+  date: dateTime  _date: ElementBase
+  publisher: String  _publisher: ElementBase
+  contact: [ContactDetail]
+  description: markdown  _description: ElementBase
+  useContext: [UsageContext]
+  jurisdiction: [CodeableConcept]
+  purpose: markdown  _purpose: ElementBase
+  copyright: markdown  _copyright: ElementBase
+  copyrightLabel: String  _copyrightLabel: ElementBase
+  derivedFrom: [canonical]  _derivedFrom: [ElementBase]
+  reference: [url]  _reference: [ElementBase]
+  actor: [canonical]  _actor: [ElementBase]
+  statement: [RequirementsStatement]
+}
+
+type RequirementsStatement {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  key: ID  _key: ElementBase
+  label: String  _label: ElementBase
+  conformance: [code]  _conformance: [ElementBase]
+  conditionality: Boolean  _conditionality: ElementBase
+  requirement: markdown  _requirement: ElementBase
+  derivedFrom: String  _derivedFrom: ElementBase
+  parent: String  _parent: ElementBase
+  satisfiedBy: [url]  _satisfiedBy: [ElementBase]
+  reference: [url]  _reference: [ElementBase]
+  source: [Reference]
+}
+
+input RequirementsInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  url: uri  _url: ElementBaseInput
+  identifier: [IdentifierInput]
+  version: String  _version: ElementBaseInput
+  versionAlgorithmString: String  _versionAlgorithmString: ElementBaseInput
+  versionAlgorithmCoding: CodingInput
+  name: String  _name: ElementBaseInput
+  title: String  _title: ElementBaseInput
+  status: code  _status: ElementBaseInput
+  experimental: Boolean  _experimental: ElementBaseInput
+  date: dateTime  _date: ElementBaseInput
+  publisher: String  _publisher: ElementBaseInput
+  contact: [ContactDetailInput]
+  description: markdown  _description: ElementBaseInput
+  useContext: [UsageContextInput]
+  jurisdiction: [CodeableConceptInput]
+  purpose: markdown  _purpose: ElementBaseInput
+  copyright: markdown  _copyright: ElementBaseInput
+  copyrightLabel: String  _copyrightLabel: ElementBaseInput
+  derivedFrom: [canonical]  _derivedFrom: [ElementBaseInput]
+  reference: [url]  _reference: [ElementBaseInput]
+  actor: [canonical]  _actor: [ElementBaseInput]
+  statement: [RequirementsStatementInputInput]
+}
+
+input RequirementsStatementInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  key: ID  _key: ElementBaseInput
+  label: String  _label: ElementBaseInput
+  conformance: [code]  _conformance: [ElementBaseInput]
+  conditionality: Boolean  _conditionality: ElementBaseInput
+  requirement: markdown  _requirement: ElementBaseInput
+  derivedFrom: String  _derivedFrom: ElementBaseInput
+  parent: String  _parent: ElementBaseInput
+  satisfiedBy: [url]  _satisfiedBy: [ElementBaseInput]
+  reference: [url]  _reference: [ElementBaseInput]
+  source: [ReferenceInput]
+}
+
+type RequirementsReadType {
+  Requirements(id: ID!): Requirements
+}
+
+type RequirementsListType {
+  RequirementsList(_filter: String
+    actor: [reference]
+    context: [token]
+    context_quantity: [quantity]
+    context_type: [token]
+    context_type_quantity: [composite]
+    context_type_value: [composite]
+    date: [date]
+    derived_from: [reference]
+    description: [String]
+    identifier: [token]
+    jurisdiction: [token]
+    name: [String]
+    publisher: [String]
+    status: [token]
+    title: [String]
+    url: [uri]
+    version: [token]
+    context: [token]
+    context_quantity: [quantity]
+    context_reference: [reference]
+    context_type: [token]
+    context_type_quantity: [composite]
+    context_type_value: [composite]
+    date: [date]
+    description: [String]
+    identifier: [token]
+    jurisdiction: [token]
+    name: [String]
+    publisher: [String]
+    status: [token]
+    title: [String]
+    url: [uri]
+    version: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [Requirements]
+}
+
+type RequirementsConnectionType {
+  RequirementsConection(_filter: String
+    actor: [reference]
+    context: [token]
+    context_quantity: [quantity]
+    context_type: [token]
+    context_type_quantity: [composite]
+    context_type_value: [composite]
+    date: [date]
+    derived_from: [reference]
+    description: [String]
+    identifier: [token]
+    jurisdiction: [token]
+    name: [String]
+    publisher: [String]
+    status: [token]
+    title: [String]
+    url: [uri]
+    version: [token]
+    context: [token]
+    context_quantity: [quantity]
+    context_reference: [reference]
+    context_type: [token]
+    context_type_quantity: [composite]
+    context_type_value: [composite]
+    date: [date]
+    description: [String]
+    identifier: [token]
+    jurisdiction: [token]
+    name: [String]
+    publisher: [String]
+    status: [token]
+    title: [String]
+    url: [uri]
+    version: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): RequirementsConnection
+}
+
+type RequirementsConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [RequirementsEdge]
+}
+
+type RequirementsEdge {
+  mode: String
+  score: Float
+  resource: Requirements
+}
+
+type RequirementsCreateType {
+  RequirementsCreate(resource: RequirementsInput): RequirementsCreation
+}
+
+type RequirementsCreation {
+  location: String
+  resource: Requirements
+  information: OperationOutcome
+}
+
+type RequirementsUpdateType {
+  RequirementsUpdate(id: ID, resource: RequirementsInput): RequirementsUpdate
+}
+
+type RequirementsUpdate {
+  resource: Requirements
+  information: OperationOutcome
+}
+
+type RequirementsDeleteType {
+  RequirementsDelete(id: ID): RequirementsDelete
+}
+
+type RequirementsDelete {
+  information: OperationOutcome
+}
+

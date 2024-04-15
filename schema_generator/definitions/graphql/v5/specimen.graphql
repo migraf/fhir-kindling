@@ -1,0 +1,293 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface ISpecimen implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  accessionIdentifier: Identifier
+  status: code  _status: ElementBase
+  type: CodeableConcept
+  subject: Reference
+  receivedTime: dateTime  _receivedTime: ElementBase
+  parent: [Reference]
+  request: [Reference]
+  combined: code  _combined: ElementBase
+  role: [CodeableConcept]
+  feature: [SpecimenFeature]
+  collection: SpecimenCollection
+  processing: [SpecimenProcessing]
+  container: [SpecimenContainer]
+  condition: [CodeableConcept]
+  note: [Annotation]
+}
+
+type Specimen implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  accessionIdentifier: Identifier
+  status: code  _status: ElementBase
+  type: CodeableConcept
+  subject: Reference
+  receivedTime: dateTime  _receivedTime: ElementBase
+  parent: [Reference]
+  request: [Reference]
+  combined: code  _combined: ElementBase
+  role: [CodeableConcept]
+  feature: [SpecimenFeature]
+  collection: SpecimenCollection
+  processing: [SpecimenProcessing]
+  container: [SpecimenContainer]
+  condition: [CodeableConcept]
+  note: [Annotation]
+}
+
+type SpecimenFeature {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  type: CodeableConcept!
+  description: String  _description: ElementBase
+}
+
+type SpecimenCollection {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  collector: Reference
+  collectedDateTime: dateTime  _collectedDateTime: ElementBase
+  collectedPeriod: Period
+  duration: Duration
+  quantity: Quantity
+  method: CodeableConcept
+  device: CodeableReference
+  procedure: Reference
+  bodySite: CodeableReference
+  fastingStatusCodeableConcept: CodeableConcept
+  fastingStatusDuration: Duration
+}
+
+type SpecimenProcessing {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  description: String  _description: ElementBase
+  method: CodeableConcept
+  additive: [Reference]
+  timeDateTime: dateTime  _timeDateTime: ElementBase
+  timePeriod: Period
+}
+
+type SpecimenContainer {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  device: Reference!
+  location: Reference
+  specimenQuantity: Quantity
+}
+
+input SpecimenInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: [IdentifierInput]
+  accessionIdentifier: IdentifierInput
+  status: code  _status: ElementBaseInput
+  type: CodeableConceptInput
+  subject: ReferenceInput
+  receivedTime: dateTime  _receivedTime: ElementBaseInput
+  parent: [ReferenceInput]
+  request: [ReferenceInput]
+  combined: code  _combined: ElementBaseInput
+  role: [CodeableConceptInput]
+  feature: [SpecimenFeatureInputInput]
+  collection: SpecimenCollectionInputInput
+  processing: [SpecimenProcessingInputInput]
+  container: [SpecimenContainerInputInput]
+  condition: [CodeableConceptInput]
+  note: [AnnotationInput]
+}
+
+input SpecimenFeatureInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  type: CodeableConceptInput!
+  description: String  _description: ElementBaseInput
+}
+
+input SpecimenCollectionInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  collector: ReferenceInput
+  collectedDateTime: dateTime  _collectedDateTime: ElementBaseInput
+  collectedPeriod: PeriodInput
+  duration: DurationInput
+  quantity: QuantityInput
+  method: CodeableConceptInput
+  device: CodeableReferenceInput
+  procedure: ReferenceInput
+  bodySite: CodeableReferenceInput
+  fastingStatusCodeableConcept: CodeableConceptInput
+  fastingStatusDuration: DurationInput
+}
+
+input SpecimenProcessingInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  description: String  _description: ElementBaseInput
+  method: CodeableConceptInput
+  additive: [ReferenceInput]
+  timeDateTime: dateTime  _timeDateTime: ElementBaseInput
+  timePeriod: PeriodInput
+}
+
+input SpecimenContainerInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  device: ReferenceInput!
+  location: ReferenceInput
+  specimenQuantity: QuantityInput
+}
+
+type SpecimenReadType {
+  Specimen(id: ID!): Specimen
+}
+
+type SpecimenListType {
+  SpecimenList(_filter: String
+    accession: [token]
+    bodysite: [reference]
+    collected: [date]
+    collector: [reference]
+    container_device: [reference]
+    identifier: [token]
+    parent: [reference]
+    patient: [reference]
+    procedure: [reference]
+    status: [token]
+    subject: [reference]
+    type: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [Specimen]
+}
+
+type SpecimenConnectionType {
+  SpecimenConection(_filter: String
+    accession: [token]
+    bodysite: [reference]
+    collected: [date]
+    collector: [reference]
+    container_device: [reference]
+    identifier: [token]
+    parent: [reference]
+    patient: [reference]
+    procedure: [reference]
+    status: [token]
+    subject: [reference]
+    type: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): SpecimenConnection
+}
+
+type SpecimenConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [SpecimenEdge]
+}
+
+type SpecimenEdge {
+  mode: String
+  score: Float
+  resource: Specimen
+}
+
+type SpecimenCreateType {
+  SpecimenCreate(resource: SpecimenInput): SpecimenCreation
+}
+
+type SpecimenCreation {
+  location: String
+  resource: Specimen
+  information: OperationOutcome
+}
+
+type SpecimenUpdateType {
+  SpecimenUpdate(id: ID, resource: SpecimenInput): SpecimenUpdate
+}
+
+type SpecimenUpdate {
+  resource: Specimen
+  information: OperationOutcome
+}
+
+type SpecimenDeleteType {
+  SpecimenDelete(id: ID): SpecimenDelete
+}
+
+type SpecimenDelete {
+  information: OperationOutcome
+}
+

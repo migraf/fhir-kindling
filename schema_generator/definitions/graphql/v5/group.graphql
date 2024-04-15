@@ -1,0 +1,234 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IGroup implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  active: Boolean  _active: ElementBase
+  type: code  _type: ElementBase
+  membership: code  _membership: ElementBase
+  code: CodeableConcept
+  name: String  _name: ElementBase
+  description: markdown  _description: ElementBase
+  quantity: unsignedInt  _quantity: ElementBase
+  managingEntity: Reference
+  characteristic: [GroupCharacteristic]
+  member: [GroupMember]
+}
+
+type Group implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  active: Boolean  _active: ElementBase
+  type: code  _type: ElementBase
+  membership: code  _membership: ElementBase
+  code: CodeableConcept
+  name: String  _name: ElementBase
+  description: markdown  _description: ElementBase
+  quantity: unsignedInt  _quantity: ElementBase
+  managingEntity: Reference
+  characteristic: [GroupCharacteristic]
+  member: [GroupMember]
+}
+
+type GroupCharacteristic {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  code: CodeableConcept!
+  valueCodeableConcept: CodeableConcept
+  valueBoolean: Boolean  _valueBoolean: ElementBase
+  valueQuantity: Quantity
+  valueRange: Range
+  valueReference: Reference
+  exclude: Boolean  _exclude: ElementBase
+  period: Period
+}
+
+type GroupMember {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  entity: Reference!
+  period: Period
+  inactive: Boolean  _inactive: ElementBase
+}
+
+input GroupInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: [IdentifierInput]
+  active: Boolean  _active: ElementBaseInput
+  type: code  _type: ElementBaseInput
+  membership: code  _membership: ElementBaseInput
+  code: CodeableConceptInput
+  name: String  _name: ElementBaseInput
+  description: markdown  _description: ElementBaseInput
+  quantity: unsignedInt  _quantity: ElementBaseInput
+  managingEntity: ReferenceInput
+  characteristic: [GroupCharacteristicInputInput]
+  member: [GroupMemberInputInput]
+}
+
+input GroupCharacteristicInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  code: CodeableConceptInput!
+  valueCodeableConcept: CodeableConceptInput
+  valueBoolean: Boolean  _valueBoolean: ElementBaseInput
+  valueQuantity: QuantityInput
+  valueRange: RangeInput
+  valueReference: ReferenceInput
+  exclude: Boolean  _exclude: ElementBaseInput
+  period: PeriodInput
+}
+
+input GroupMemberInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  entity: ReferenceInput!
+  period: PeriodInput
+  inactive: Boolean  _inactive: ElementBaseInput
+}
+
+type GroupReadType {
+  Group(id: ID!): Group
+}
+
+type GroupListType {
+  GroupList(_filter: String
+    characteristic: [token]
+    characteristic_reference: [reference]
+    characteristic_value: [composite]
+    code: [token]
+    exclude: [token]
+    identifier: [token]
+    managing_entity: [reference]
+    member: [reference]
+    membership: [token]
+    name: [String]
+    type: [token]
+    value: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [Group]
+}
+
+type GroupConnectionType {
+  GroupConection(_filter: String
+    characteristic: [token]
+    characteristic_reference: [reference]
+    characteristic_value: [composite]
+    code: [token]
+    exclude: [token]
+    identifier: [token]
+    managing_entity: [reference]
+    member: [reference]
+    membership: [token]
+    name: [String]
+    type: [token]
+    value: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): GroupConnection
+}
+
+type GroupConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [GroupEdge]
+}
+
+type GroupEdge {
+  mode: String
+  score: Float
+  resource: Group
+}
+
+type GroupCreateType {
+  GroupCreate(resource: GroupInput): GroupCreation
+}
+
+type GroupCreation {
+  location: String
+  resource: Group
+  information: OperationOutcome
+}
+
+type GroupUpdateType {
+  GroupUpdate(id: ID, resource: GroupInput): GroupUpdate
+}
+
+type GroupUpdate {
+  resource: Group
+  information: OperationOutcome
+}
+
+type GroupDeleteType {
+  GroupDelete(id: ID): GroupDelete
+}
+
+type GroupDelete {
+  information: OperationOutcome
+}
+

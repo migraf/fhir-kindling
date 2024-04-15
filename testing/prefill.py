@@ -4,7 +4,6 @@ import time
 import httpx
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
-
 from fhir_kindling import FhirServer
 from fhir_kindling.generators.dataset import DatasetGenerator
 from fhir_kindling.generators.resource_generator import (

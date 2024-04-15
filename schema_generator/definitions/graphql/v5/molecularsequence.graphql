@@ -1,0 +1,243 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IMolecularSequence implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  type: code  _type: ElementBase
+  subject: Reference
+  focus: [Reference]
+  specimen: Reference
+  device: Reference
+  performer: Reference
+  literal: String  _literal: ElementBase
+  formatted: [Attachment]
+  relative: [MolecularSequenceRelative]
+}
+
+type MolecularSequence implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  type: code  _type: ElementBase
+  subject: Reference
+  focus: [Reference]
+  specimen: Reference
+  device: Reference
+  performer: Reference
+  literal: String  _literal: ElementBase
+  formatted: [Attachment]
+  relative: [MolecularSequenceRelative]
+}
+
+type MolecularSequenceRelative {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  coordinateSystem: CodeableConcept!
+  ordinalPosition: Int  _ordinalPosition: ElementBase
+  sequenceRange: Range
+  startingSequence: MolecularSequenceRelativeStartingSequence
+  edit: [MolecularSequenceRelativeEdit]
+}
+
+type MolecularSequenceRelativeStartingSequence {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  genomeAssembly: CodeableConcept
+  chromosome: CodeableConcept
+  sequenceCodeableConcept: CodeableConcept
+  sequenceString: String  _sequenceString: ElementBase
+  sequenceReference: Reference
+  windowStart: Int  _windowStart: ElementBase
+  windowEnd: Int  _windowEnd: ElementBase
+  orientation: code  _orientation: ElementBase
+  strand: code  _strand: ElementBase
+}
+
+type MolecularSequenceRelativeEdit {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  start: Int  _start: ElementBase
+  end: Int  _end: ElementBase
+  replacementSequence: String  _replacementSequence: ElementBase
+  replacedSequence: String  _replacedSequence: ElementBase
+}
+
+input MolecularSequenceInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: [IdentifierInput]
+  type: code  _type: ElementBaseInput
+  subject: ReferenceInput
+  focus: [ReferenceInput]
+  specimen: ReferenceInput
+  device: ReferenceInput
+  performer: ReferenceInput
+  literal: String  _literal: ElementBaseInput
+  formatted: [AttachmentInput]
+  relative: [MolecularSequenceRelativeInputInput]
+}
+
+input MolecularSequenceRelativeInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  coordinateSystem: CodeableConceptInput!
+  ordinalPosition: Int  _ordinalPosition: ElementBaseInput
+  sequenceRange: RangeInput
+  startingSequence: MolecularSequenceRelativeInputStartingSequenceInputInput
+  edit: [MolecularSequenceRelativeInputEditInputInput]
+}
+
+input MolecularSequenceRelativeInputStartingSequenceInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  genomeAssembly: CodeableConceptInput
+  chromosome: CodeableConceptInput
+  sequenceCodeableConcept: CodeableConceptInput
+  sequenceString: String  _sequenceString: ElementBaseInput
+  sequenceReference: ReferenceInput
+  windowStart: Int  _windowStart: ElementBaseInput
+  windowEnd: Int  _windowEnd: ElementBaseInput
+  orientation: code  _orientation: ElementBaseInput
+  strand: code  _strand: ElementBaseInput
+}
+
+input MolecularSequenceRelativeInputEditInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  start: Int  _start: ElementBaseInput
+  end: Int  _end: ElementBaseInput
+  replacementSequence: String  _replacementSequence: ElementBaseInput
+  replacedSequence: String  _replacedSequence: ElementBaseInput
+}
+
+type MolecularSequenceReadType {
+  MolecularSequence(id: ID!): MolecularSequence
+}
+
+type MolecularSequenceListType {
+  MolecularSequenceList(_filter: String
+    focus: [reference]
+    identifier: [token]
+    patient: [reference]
+    subject: [reference]
+    type: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [MolecularSequence]
+}
+
+type MolecularSequenceConnectionType {
+  MolecularSequenceConection(_filter: String
+    focus: [reference]
+    identifier: [token]
+    patient: [reference]
+    subject: [reference]
+    type: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): MolecularSequenceConnection
+}
+
+type MolecularSequenceConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [MolecularSequenceEdge]
+}
+
+type MolecularSequenceEdge {
+  mode: String
+  score: Float
+  resource: MolecularSequence
+}
+
+type MolecularSequenceCreateType {
+  MolecularSequenceCreate(resource: MolecularSequenceInput): MolecularSequenceCreation
+}
+
+type MolecularSequenceCreation {
+  location: String
+  resource: MolecularSequence
+  information: OperationOutcome
+}
+
+type MolecularSequenceUpdateType {
+  MolecularSequenceUpdate(id: ID, resource: MolecularSequenceInput): MolecularSequenceUpdate
+}
+
+type MolecularSequenceUpdate {
+  resource: MolecularSequence
+  information: OperationOutcome
+}
+
+type MolecularSequenceDeleteType {
+  MolecularSequenceDelete(id: ID): MolecularSequenceDelete
+}
+
+type MolecularSequenceDelete {
+  information: OperationOutcome
+}
+

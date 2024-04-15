@@ -1,0 +1,302 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IGenomicStudy implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  status: code  _status: ElementBase
+  type: [CodeableConcept]
+  subject: Reference!
+  encounter: Reference
+  startDate: dateTime  _startDate: ElementBase
+  basedOn: [Reference]
+  referrer: Reference
+  interpreter: [Reference]
+  reason: [CodeableReference]
+  instantiatesCanonical: canonical  _instantiatesCanonical: ElementBase
+  instantiatesUri: uri  _instantiatesUri: ElementBase
+  note: [Annotation]
+  description: markdown  _description: ElementBase
+  analysis: [GenomicStudyAnalysis]
+}
+
+type GenomicStudy implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  status: code  _status: ElementBase
+  type: [CodeableConcept]
+  subject: Reference!
+  encounter: Reference
+  startDate: dateTime  _startDate: ElementBase
+  basedOn: [Reference]
+  referrer: Reference
+  interpreter: [Reference]
+  reason: [CodeableReference]
+  instantiatesCanonical: canonical  _instantiatesCanonical: ElementBase
+  instantiatesUri: uri  _instantiatesUri: ElementBase
+  note: [Annotation]
+  description: markdown  _description: ElementBase
+  analysis: [GenomicStudyAnalysis]
+}
+
+type GenomicStudyAnalysis {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  methodType: [CodeableConcept]
+  changeType: [CodeableConcept]
+  genomeBuild: CodeableConcept
+  instantiatesCanonical: canonical  _instantiatesCanonical: ElementBase
+  instantiatesUri: uri  _instantiatesUri: ElementBase
+  title: String  _title: ElementBase
+  focus: [Reference]
+  specimen: [Reference]
+  date: dateTime  _date: ElementBase
+  note: [Annotation]
+  protocolPerformed: Reference
+  regionsStudied: [Reference]
+  regionsCalled: [Reference]
+  input: [GenomicStudyAnalysisInput]
+  output: [GenomicStudyAnalysisOutput]
+  performer: [GenomicStudyAnalysisPerformer]
+  device: [GenomicStudyAnalysisDevice]
+}
+
+type GenomicStudyAnalysisInput {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  file: Reference
+  type: CodeableConcept
+  generatedByIdentifier: Identifier
+  generatedByReference: Reference
+}
+
+type GenomicStudyAnalysisOutput {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  file: Reference
+  type: CodeableConcept
+}
+
+type GenomicStudyAnalysisPerformer {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  actor: Reference
+  role: CodeableConcept
+}
+
+type GenomicStudyAnalysisDevice {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  device: Reference
+  function: CodeableConcept
+}
+
+input GenomicStudyInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: [IdentifierInput]
+  status: code  _status: ElementBaseInput
+  type: [CodeableConceptInput]
+  subject: ReferenceInput!
+  encounter: ReferenceInput
+  startDate: dateTime  _startDate: ElementBaseInput
+  basedOn: [ReferenceInput]
+  referrer: ReferenceInput
+  interpreter: [ReferenceInput]
+  reason: [CodeableReferenceInput]
+  instantiatesCanonical: canonical  _instantiatesCanonical: ElementBaseInput
+  instantiatesUri: uri  _instantiatesUri: ElementBaseInput
+  note: [AnnotationInput]
+  description: markdown  _description: ElementBaseInput
+  analysis: [GenomicStudyAnalysisInputInput]
+}
+
+input GenomicStudyAnalysisInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: [IdentifierInput]
+  methodType: [CodeableConceptInput]
+  changeType: [CodeableConceptInput]
+  genomeBuild: CodeableConceptInput
+  instantiatesCanonical: canonical  _instantiatesCanonical: ElementBaseInput
+  instantiatesUri: uri  _instantiatesUri: ElementBaseInput
+  title: String  _title: ElementBaseInput
+  focus: [ReferenceInput]
+  specimen: [ReferenceInput]
+  date: dateTime  _date: ElementBaseInput
+  note: [AnnotationInput]
+  protocolPerformed: ReferenceInput
+  regionsStudied: [ReferenceInput]
+  regionsCalled: [ReferenceInput]
+  input: [GenomicStudyAnalysisInputInputInputInput]
+  output: [GenomicStudyAnalysisInputOutputInputInput]
+  performer: [GenomicStudyAnalysisInputPerformerInputInput]
+  device: [GenomicStudyAnalysisInputDeviceInputInput]
+}
+
+input GenomicStudyAnalysisInputInputInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  file: ReferenceInput
+  type: CodeableConceptInput
+  generatedByIdentifier: IdentifierInput
+  generatedByReference: ReferenceInput
+}
+
+input GenomicStudyAnalysisInputOutputInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  file: ReferenceInput
+  type: CodeableConceptInput
+}
+
+input GenomicStudyAnalysisInputPerformerInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  actor: ReferenceInput
+  role: CodeableConceptInput
+}
+
+input GenomicStudyAnalysisInputDeviceInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  device: ReferenceInput
+  function: CodeableConceptInput
+}
+
+type GenomicStudyReadType {
+  GenomicStudy(id: ID!): GenomicStudy
+}
+
+type GenomicStudyListType {
+  GenomicStudyList(_filter: String
+    focus: [reference]
+    identifier: [token]
+    patient: [reference]
+    status: [token]
+    subject: [reference]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [GenomicStudy]
+}
+
+type GenomicStudyConnectionType {
+  GenomicStudyConection(_filter: String
+    focus: [reference]
+    identifier: [token]
+    patient: [reference]
+    status: [token]
+    subject: [reference]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): GenomicStudyConnection
+}
+
+type GenomicStudyConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [GenomicStudyEdge]
+}
+
+type GenomicStudyEdge {
+  mode: String
+  score: Float
+  resource: GenomicStudy
+}
+
+type GenomicStudyCreateType {
+  GenomicStudyCreate(resource: GenomicStudyInput): GenomicStudyCreation
+}
+
+type GenomicStudyCreation {
+  location: String
+  resource: GenomicStudy
+  information: OperationOutcome
+}
+
+type GenomicStudyUpdateType {
+  GenomicStudyUpdate(id: ID, resource: GenomicStudyInput): GenomicStudyUpdate
+}
+
+type GenomicStudyUpdate {
+  resource: GenomicStudy
+  information: OperationOutcome
+}
+
+type GenomicStudyDeleteType {
+  GenomicStudyDelete(id: ID): GenomicStudyDelete
+}
+
+type GenomicStudyDelete {
+  information: OperationOutcome
+}
+

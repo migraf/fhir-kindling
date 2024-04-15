@@ -5,7 +5,6 @@ from dotenv import find_dotenv, load_dotenv
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
 from fhir.resources.condition import Condition
-
 from fhir_kindling import FhirServer
 from fhir_kindling.generators import PatientGenerator
 

@@ -1,0 +1,336 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IDocumentReference implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  version: String  _version: ElementBase
+  basedOn: [Reference]
+  status: code  _status: ElementBase
+  docStatus: code  _docStatus: ElementBase
+  modality: [CodeableConcept]
+  type: CodeableConcept
+  category: [CodeableConcept]
+  subject: Reference
+  context: [Reference]
+  event: [CodeableReference]
+  bodySite: [CodeableReference]
+  facilityType: CodeableConcept
+  practiceSetting: CodeableConcept
+  period: Period
+  date: instant  _date: ElementBase
+  author: [Reference]
+  attester: [DocumentReferenceAttester]
+  custodian: Reference
+  relatesTo: [DocumentReferenceRelatesTo]
+  description: markdown  _description: ElementBase
+  securityLabel: [CodeableConcept]
+  content: [DocumentReferenceContent]!
+}
+
+type DocumentReference implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  version: String  _version: ElementBase
+  basedOn: [Reference]
+  status: code  _status: ElementBase
+  docStatus: code  _docStatus: ElementBase
+  modality: [CodeableConcept]
+  type: CodeableConcept
+  category: [CodeableConcept]
+  subject: Reference
+  context: [Reference]
+  event: [CodeableReference]
+  bodySite: [CodeableReference]
+  facilityType: CodeableConcept
+  practiceSetting: CodeableConcept
+  period: Period
+  date: instant  _date: ElementBase
+  author: [Reference]
+  attester: [DocumentReferenceAttester]
+  custodian: Reference
+  relatesTo: [DocumentReferenceRelatesTo]
+  description: markdown  _description: ElementBase
+  securityLabel: [CodeableConcept]
+  content: [DocumentReferenceContent]!
+}
+
+type DocumentReferenceAttester {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  mode: CodeableConcept!
+  time: dateTime  _time: ElementBase
+  party: Reference
+}
+
+type DocumentReferenceRelatesTo {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  code: CodeableConcept!
+  target: Reference!
+}
+
+type DocumentReferenceContent {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  attachment: Attachment!
+  profile: [DocumentReferenceContentProfile]
+}
+
+type DocumentReferenceContentProfile {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  valueCoding: Coding
+  valueUri: uri  _valueUri: ElementBase
+  valueCanonical: canonical  _valueCanonical: ElementBase
+}
+
+input DocumentReferenceInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: [IdentifierInput]
+  version: String  _version: ElementBaseInput
+  basedOn: [ReferenceInput]
+  status: code  _status: ElementBaseInput
+  docStatus: code  _docStatus: ElementBaseInput
+  modality: [CodeableConceptInput]
+  type: CodeableConceptInput
+  category: [CodeableConceptInput]
+  subject: ReferenceInput
+  context: [ReferenceInput]
+  event: [CodeableReferenceInput]
+  bodySite: [CodeableReferenceInput]
+  facilityType: CodeableConceptInput
+  practiceSetting: CodeableConceptInput
+  period: PeriodInput
+  date: instant  _date: ElementBaseInput
+  author: [ReferenceInput]
+  attester: [DocumentReferenceAttesterInputInput]
+  custodian: ReferenceInput
+  relatesTo: [DocumentReferenceRelatesToInputInput]
+  description: markdown  _description: ElementBaseInput
+  securityLabel: [CodeableConceptInput]
+  content: [DocumentReferenceContentInputInput]!
+}
+
+input DocumentReferenceAttesterInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  mode: CodeableConceptInput!
+  time: dateTime  _time: ElementBaseInput
+  party: ReferenceInput
+}
+
+input DocumentReferenceRelatesToInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  code: CodeableConceptInput!
+  target: ReferenceInput!
+}
+
+input DocumentReferenceContentInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  attachment: AttachmentInput!
+  profile: [DocumentReferenceContentInputProfileInputInput]
+}
+
+input DocumentReferenceContentInputProfileInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  valueCoding: CodingInput
+  valueUri: uri  _valueUri: ElementBaseInput
+  valueCanonical: canonical  _valueCanonical: ElementBaseInput
+}
+
+type DocumentReferenceReadType {
+  DocumentReference(id: ID!): DocumentReference
+}
+
+type DocumentReferenceListType {
+  DocumentReferenceList(_filter: String
+    attester: [reference]
+    author: [reference]
+    based_on: [reference]
+    bodysite: [token]
+    bodysite_reference: [reference]
+    category: [token]
+    contenttype: [token]
+    context: [reference]
+    creation: [date]
+    custodian: [reference]
+    date: [date]
+    description: [String]
+    doc_status: [token]
+    event_code: [token]
+    event_reference: [reference]
+    facility: [token]
+    format_canonical: [reference]
+    format_code: [token]
+    format_uri: [uri]
+    identifier: [token]
+    language: [token]
+    location: [uri]
+    modality: [token]
+    patient: [reference]
+    period: [date]
+    relatesto: [reference]
+    relation: [token]
+    relationship: [composite]
+    security_label: [token]
+    setting: [token]
+    status: [token]
+    subject: [reference]
+    type: [token]
+    version: [String]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [DocumentReference]
+}
+
+type DocumentReferenceConnectionType {
+  DocumentReferenceConection(_filter: String
+    attester: [reference]
+    author: [reference]
+    based_on: [reference]
+    bodysite: [token]
+    bodysite_reference: [reference]
+    category: [token]
+    contenttype: [token]
+    context: [reference]
+    creation: [date]
+    custodian: [reference]
+    date: [date]
+    description: [String]
+    doc_status: [token]
+    event_code: [token]
+    event_reference: [reference]
+    facility: [token]
+    format_canonical: [reference]
+    format_code: [token]
+    format_uri: [uri]
+    identifier: [token]
+    language: [token]
+    location: [uri]
+    modality: [token]
+    patient: [reference]
+    period: [date]
+    relatesto: [reference]
+    relation: [token]
+    relationship: [composite]
+    security_label: [token]
+    setting: [token]
+    status: [token]
+    subject: [reference]
+    type: [token]
+    version: [String]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): DocumentReferenceConnection
+}
+
+type DocumentReferenceConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [DocumentReferenceEdge]
+}
+
+type DocumentReferenceEdge {
+  mode: String
+  score: Float
+  resource: DocumentReference
+}
+
+type DocumentReferenceCreateType {
+  DocumentReferenceCreate(resource: DocumentReferenceInput): DocumentReferenceCreation
+}
+
+type DocumentReferenceCreation {
+  location: String
+  resource: DocumentReference
+  information: OperationOutcome
+}
+
+type DocumentReferenceUpdateType {
+  DocumentReferenceUpdate(id: ID, resource: DocumentReferenceInput): DocumentReferenceUpdate
+}
+
+type DocumentReferenceUpdate {
+  resource: DocumentReference
+  information: OperationOutcome
+}
+
+type DocumentReferenceDeleteType {
+  DocumentReferenceDelete(id: ID): DocumentReferenceDelete
+}
+
+type DocumentReferenceDelete {
+  information: OperationOutcome
+}
+

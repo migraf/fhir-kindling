@@ -1,0 +1,351 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IServiceRequest implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  instantiatesCanonical: [canonical]  _instantiatesCanonical: [ElementBase]
+  instantiatesUri: [uri]  _instantiatesUri: [ElementBase]
+  basedOn: [Reference]
+  replaces: [Reference]
+  requisition: Identifier
+  status: code  _status: ElementBase
+  intent: code  _intent: ElementBase
+  category: [CodeableConcept]
+  priority: code  _priority: ElementBase
+  doNotPerform: Boolean  _doNotPerform: ElementBase
+  code: CodeableReference
+  orderDetail: [ServiceRequestOrderDetail]
+  quantityQuantity: Quantity
+  quantityRatio: Ratio
+  quantityRange: Range
+  subject: Reference!
+  focus: [Reference]
+  encounter: Reference
+  occurrenceDateTime: dateTime  _occurrenceDateTime: ElementBase
+  occurrencePeriod: Period
+  occurrenceTiming: Timing
+  asNeededBoolean: Boolean  _asNeededBoolean: ElementBase
+  asNeededCodeableConcept: CodeableConcept
+  authoredOn: dateTime  _authoredOn: ElementBase
+  requester: Reference
+  performerType: CodeableConcept
+  performer: [Reference]
+  location: [CodeableReference]
+  reason: [CodeableReference]
+  insurance: [Reference]
+  supportingInfo: [CodeableReference]
+  specimen: [Reference]
+  bodySite: [CodeableConcept]
+  bodyStructure: Reference
+  note: [Annotation]
+  patientInstruction: [ServiceRequestPatientInstruction]
+  relevantHistory: [Reference]
+}
+
+type ServiceRequest implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  identifier: [Identifier]
+  instantiatesCanonical: [canonical]  _instantiatesCanonical: [ElementBase]
+  instantiatesUri: [uri]  _instantiatesUri: [ElementBase]
+  basedOn: [Reference]
+  replaces: [Reference]
+  requisition: Identifier
+  status: code  _status: ElementBase
+  intent: code  _intent: ElementBase
+  category: [CodeableConcept]
+  priority: code  _priority: ElementBase
+  doNotPerform: Boolean  _doNotPerform: ElementBase
+  code: CodeableReference
+  orderDetail: [ServiceRequestOrderDetail]
+  quantityQuantity: Quantity
+  quantityRatio: Ratio
+  quantityRange: Range
+  subject: Reference!
+  focus: [Reference]
+  encounter: Reference
+  occurrenceDateTime: dateTime  _occurrenceDateTime: ElementBase
+  occurrencePeriod: Period
+  occurrenceTiming: Timing
+  asNeededBoolean: Boolean  _asNeededBoolean: ElementBase
+  asNeededCodeableConcept: CodeableConcept
+  authoredOn: dateTime  _authoredOn: ElementBase
+  requester: Reference
+  performerType: CodeableConcept
+  performer: [Reference]
+  location: [CodeableReference]
+  reason: [CodeableReference]
+  insurance: [Reference]
+  supportingInfo: [CodeableReference]
+  specimen: [Reference]
+  bodySite: [CodeableConcept]
+  bodyStructure: Reference
+  note: [Annotation]
+  patientInstruction: [ServiceRequestPatientInstruction]
+  relevantHistory: [Reference]
+}
+
+type ServiceRequestOrderDetail {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  parameterFocus: CodeableReference
+  parameter: [ServiceRequestOrderDetailParameter]!
+}
+
+type ServiceRequestOrderDetailParameter {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  code: CodeableConcept!
+  valueQuantity: Quantity
+  valueRatio: Ratio
+  valueRange: Range
+  valueBoolean: Boolean  _valueBoolean: ElementBase
+  valueCodeableConcept: CodeableConcept
+  valueString: String  _valueString: ElementBase
+  valuePeriod: Period
+}
+
+type ServiceRequestPatientInstruction {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  instructionMarkdown: markdown  _instructionMarkdown: ElementBase
+  instructionReference: Reference
+}
+
+input ServiceRequestInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  identifier: [IdentifierInput]
+  instantiatesCanonical: [canonical]  _instantiatesCanonical: [ElementBaseInput]
+  instantiatesUri: [uri]  _instantiatesUri: [ElementBaseInput]
+  basedOn: [ReferenceInput]
+  replaces: [ReferenceInput]
+  requisition: IdentifierInput
+  status: code  _status: ElementBaseInput
+  intent: code  _intent: ElementBaseInput
+  category: [CodeableConceptInput]
+  priority: code  _priority: ElementBaseInput
+  doNotPerform: Boolean  _doNotPerform: ElementBaseInput
+  code: CodeableReferenceInput
+  orderDetail: [ServiceRequestOrderDetailInputInput]
+  quantityQuantity: QuantityInput
+  quantityRatio: RatioInput
+  quantityRange: RangeInput
+  subject: ReferenceInput!
+  focus: [ReferenceInput]
+  encounter: ReferenceInput
+  occurrenceDateTime: dateTime  _occurrenceDateTime: ElementBaseInput
+  occurrencePeriod: PeriodInput
+  occurrenceTiming: TimingInput
+  asNeededBoolean: Boolean  _asNeededBoolean: ElementBaseInput
+  asNeededCodeableConcept: CodeableConceptInput
+  authoredOn: dateTime  _authoredOn: ElementBaseInput
+  requester: ReferenceInput
+  performerType: CodeableConceptInput
+  performer: [ReferenceInput]
+  location: [CodeableReferenceInput]
+  reason: [CodeableReferenceInput]
+  insurance: [ReferenceInput]
+  supportingInfo: [CodeableReferenceInput]
+  specimen: [ReferenceInput]
+  bodySite: [CodeableConceptInput]
+  bodyStructure: ReferenceInput
+  note: [AnnotationInput]
+  patientInstruction: [ServiceRequestPatientInstructionInputInput]
+  relevantHistory: [ReferenceInput]
+}
+
+input ServiceRequestOrderDetailInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  parameterFocus: CodeableReferenceInput
+  parameter: [ServiceRequestOrderDetailInputParameterInputInput]!
+}
+
+input ServiceRequestOrderDetailInputParameterInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  code: CodeableConceptInput!
+  valueQuantity: QuantityInput
+  valueRatio: RatioInput
+  valueRange: RangeInput
+  valueBoolean: Boolean  _valueBoolean: ElementBaseInput
+  valueCodeableConcept: CodeableConceptInput
+  valueString: String  _valueString: ElementBaseInput
+  valuePeriod: PeriodInput
+}
+
+input ServiceRequestPatientInstructionInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  instructionMarkdown: markdown  _instructionMarkdown: ElementBaseInput
+  instructionReference: ReferenceInput
+}
+
+type ServiceRequestReadType {
+  ServiceRequest(id: ID!): ServiceRequest
+}
+
+type ServiceRequestListType {
+  ServiceRequestList(_filter: String
+    authored: [date]
+    based_on: [reference]
+    body_site: [token]
+    body_structure: [reference]
+    category: [token]
+    code_concept: [token]
+    code_reference: [reference]
+    encounter: [reference]
+    identifier: [token]
+    instantiates_canonical: [reference]
+    instantiates_uri: [uri]
+    intent: [token]
+    occurrence: [date]
+    patient: [reference]
+    performer: [reference]
+    performer_type: [token]
+    priority: [token]
+    replaces: [reference]
+    requester: [reference]
+    requisition: [token]
+    specimen: [reference]
+    status: [token]
+    subject: [reference]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [ServiceRequest]
+}
+
+type ServiceRequestConnectionType {
+  ServiceRequestConection(_filter: String
+    authored: [date]
+    based_on: [reference]
+    body_site: [token]
+    body_structure: [reference]
+    category: [token]
+    code_concept: [token]
+    code_reference: [reference]
+    encounter: [reference]
+    identifier: [token]
+    instantiates_canonical: [reference]
+    instantiates_uri: [uri]
+    intent: [token]
+    occurrence: [date]
+    patient: [reference]
+    performer: [reference]
+    performer_type: [token]
+    priority: [token]
+    replaces: [reference]
+    requester: [reference]
+    requisition: [token]
+    specimen: [reference]
+    status: [token]
+    subject: [reference]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): ServiceRequestConnection
+}
+
+type ServiceRequestConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [ServiceRequestEdge]
+}
+
+type ServiceRequestEdge {
+  mode: String
+  score: Float
+  resource: ServiceRequest
+}
+
+type ServiceRequestCreateType {
+  ServiceRequestCreate(resource: ServiceRequestInput): ServiceRequestCreation
+}
+
+type ServiceRequestCreation {
+  location: String
+  resource: ServiceRequest
+  information: OperationOutcome
+}
+
+type ServiceRequestUpdateType {
+  ServiceRequestUpdate(id: ID, resource: ServiceRequestInput): ServiceRequestUpdate
+}
+
+type ServiceRequestUpdate {
+  resource: ServiceRequest
+  information: OperationOutcome
+}
+
+type ServiceRequestDeleteType {
+  ServiceRequestDelete(id: ID): ServiceRequestDelete
+}
+
+type ServiceRequestDelete {
+  information: OperationOutcome
+}
+

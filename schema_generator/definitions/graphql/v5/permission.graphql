@@ -1,0 +1,244 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IPermission implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  status: code  _status: ElementBase
+  asserter: Reference
+  date: [dateTime]  _date: [ElementBase]
+  validity: Period
+  justification: PermissionJustification
+  combining: code  _combining: ElementBase
+  rule: [PermissionRule]
+}
+
+type Permission implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  status: code  _status: ElementBase
+  asserter: Reference
+  date: [dateTime]  _date: [ElementBase]
+  validity: Period
+  justification: PermissionJustification
+  combining: code  _combining: ElementBase
+  rule: [PermissionRule]
+}
+
+type PermissionJustification {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  basis: [CodeableConcept]
+  evidence: [Reference]
+}
+
+type PermissionRule {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  type: code  _type: ElementBase
+  data: [PermissionRuleData]
+  activity: [PermissionRuleActivity]
+  limit: [CodeableConcept]
+}
+
+type PermissionRuleData {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  resource: [PermissionRuleDataResource]
+  security: [Coding]
+  period: [Period]
+  expression: Expression
+}
+
+type PermissionRuleDataResource {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  meaning: code  _meaning: ElementBase
+  reference: Reference!
+}
+
+type PermissionRuleActivity {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  actor: [Reference]
+  action: [CodeableConcept]
+  purpose: [CodeableConcept]
+}
+
+input PermissionInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  status: code  _status: ElementBaseInput
+  asserter: ReferenceInput
+  date: [dateTime]  _date: [ElementBaseInput]
+  validity: PeriodInput
+  justification: PermissionJustificationInputInput
+  combining: code  _combining: ElementBaseInput
+  rule: [PermissionRuleInputInput]
+}
+
+input PermissionJustificationInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  basis: [CodeableConceptInput]
+  evidence: [ReferenceInput]
+}
+
+input PermissionRuleInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  type: code  _type: ElementBaseInput
+  data: [PermissionRuleInputDataInputInput]
+  activity: [PermissionRuleInputActivityInputInput]
+  limit: [CodeableConceptInput]
+}
+
+input PermissionRuleInputDataInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  resource: [PermissionRuleInputDataInputResourceInputInput]
+  security: [CodingInput]
+  period: [PeriodInput]
+  expression: ExpressionInput
+}
+
+input PermissionRuleInputDataInputResourceInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  meaning: code  _meaning: ElementBaseInput
+  reference: ReferenceInput!
+}
+
+input PermissionRuleInputActivityInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  actor: [ReferenceInput]
+  action: [CodeableConceptInput]
+  purpose: [CodeableConceptInput]
+}
+
+type PermissionReadType {
+  Permission(id: ID!): Permission
+}
+
+type PermissionListType {
+  PermissionList(_filter: String
+    status: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [Permission]
+}
+
+type PermissionConnectionType {
+  PermissionConection(_filter: String
+    status: [token]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): PermissionConnection
+}
+
+type PermissionConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [PermissionEdge]
+}
+
+type PermissionEdge {
+  mode: String
+  score: Float
+  resource: Permission
+}
+
+type PermissionCreateType {
+  PermissionCreate(resource: PermissionInput): PermissionCreation
+}
+
+type PermissionCreation {
+  location: String
+  resource: Permission
+  information: OperationOutcome
+}
+
+type PermissionUpdateType {
+  PermissionUpdate(id: ID, resource: PermissionInput): PermissionUpdate
+}
+
+type PermissionUpdate {
+  resource: Permission
+  information: OperationOutcome
+}
+
+type PermissionDeleteType {
+  PermissionDelete(id: ID): PermissionDelete
+}
+
+type PermissionDelete {
+  information: OperationOutcome
+}
+

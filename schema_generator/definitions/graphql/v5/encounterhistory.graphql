@@ -1,0 +1,196 @@
+# FHIR GraphQL Schema. Version 5.0.0
+
+# import * from 'types.graphql'
+
+interface IEncounterHistory implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  encounter: Reference
+  identifier: [Identifier]
+  status: code  _status: ElementBase
+  class: CodeableConcept!
+  type: [CodeableConcept]
+  serviceType: [CodeableReference]
+  subject: Reference
+  subjectStatus: CodeableConcept
+  actualPeriod: Period
+  plannedStartDate: dateTime  _plannedStartDate: ElementBase
+  plannedEndDate: dateTime  _plannedEndDate: ElementBase
+  length: Duration
+  location: [EncounterHistoryLocation]
+}
+
+type EncounterHistory implements IDomainResource & IResource & IBase {
+  id: ID
+  meta: Meta
+  implicitRules: uri  _implicitRules: ElementBase
+  language: code  _language: ElementBase
+  text: Narrative
+  contained: [Resource]
+  extension: [Extension]
+  modifierExtension: [Extension]
+  encounter: Reference
+  identifier: [Identifier]
+  status: code  _status: ElementBase
+  class: CodeableConcept!
+  type: [CodeableConcept]
+  serviceType: [CodeableReference]
+  subject: Reference
+  subjectStatus: CodeableConcept
+  actualPeriod: Period
+  plannedStartDate: dateTime  _plannedStartDate: ElementBase
+  plannedEndDate: dateTime  _plannedEndDate: ElementBase
+  length: Duration
+  location: [EncounterHistoryLocation]
+}
+
+type EncounterHistoryLocation {
+  id: String
+  extension: [Extension]
+  modifierExtension: [Extension]
+  location: Reference!
+  form: CodeableConcept
+}
+
+input EncounterHistoryInput {
+  id: ID
+  meta: MetaInput
+  implicitRules: uri  _implicitRules: ElementBaseInput
+  language: code  _language: ElementBaseInput
+  text: NarrativeInput
+  contained: [ResourceInput]
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  encounter: ReferenceInput
+  identifier: [IdentifierInput]
+  status: code  _status: ElementBaseInput
+  class: CodeableConceptInput!
+  type: [CodeableConceptInput]
+  serviceType: [CodeableReferenceInput]
+  subject: ReferenceInput
+  subjectStatus: CodeableConceptInput
+  actualPeriod: PeriodInput
+  plannedStartDate: dateTime  _plannedStartDate: ElementBaseInput
+  plannedEndDate: dateTime  _plannedEndDate: ElementBaseInput
+  length: DurationInput
+  location: [EncounterHistoryLocationInputInput]
+}
+
+input EncounterHistoryLocationInputInput {
+  id: String
+  extension: [ExtensionInput]
+  modifierExtension: [ExtensionInput]
+  location: ReferenceInput!
+  form: CodeableConceptInput
+}
+
+type EncounterHistoryReadType {
+  EncounterHistory(id: ID!): EncounterHistory
+}
+
+type EncounterHistoryListType {
+  EncounterHistoryList(_filter: String
+    encounter: [reference]
+    identifier: [token]
+    patient: [reference]
+    status: [token]
+    subject: [reference]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): [EncounterHistory]
+}
+
+type EncounterHistoryConnectionType {
+  EncounterHistoryConection(_filter: String
+    encounter: [reference]
+    identifier: [token]
+    patient: [reference]
+    status: [token]
+    subject: [reference]
+    _text: [special]
+    _content: [special]
+    _filter: [special]
+    _has: [special]
+    _id: [token]
+    _in: [reference]
+    _language: [token]
+    _lastUpdated: [date]
+    _list: [special]
+    _profile: [reference]
+    _query: [special]
+    _security: [token]
+    _source: [uri]
+    _tag: [token]
+    _text: [String]
+    _type: [special]
+    _sort: String
+    _count: Int
+    _cursor: String): EncounterHistoryConnection
+}
+
+type EncounterHistoryConnection {
+  count: Int
+  offset: Int
+  pagesize: Int
+  first: ID
+  previous: ID
+  next: ID
+  last: ID
+  edges: [EncounterHistoryEdge]
+}
+
+type EncounterHistoryEdge {
+  mode: String
+  score: Float
+  resource: EncounterHistory
+}
+
+type EncounterHistoryCreateType {
+  EncounterHistoryCreate(resource: EncounterHistoryInput): EncounterHistoryCreation
+}
+
+type EncounterHistoryCreation {
+  location: String
+  resource: EncounterHistory
+  information: OperationOutcome
+}
+
+type EncounterHistoryUpdateType {
+  EncounterHistoryUpdate(id: ID, resource: EncounterHistoryInput): EncounterHistoryUpdate
+}
+
+type EncounterHistoryUpdate {
+  resource: EncounterHistory
+  information: OperationOutcome
+}
+
+type EncounterHistoryDeleteType {
+  EncounterHistoryDelete(id: ID): EncounterHistoryDelete
+}
+
+type EncounterHistoryDelete {
+  information: OperationOutcome
+}
+
